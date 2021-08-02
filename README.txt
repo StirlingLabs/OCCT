@@ -87,3 +87,5 @@ Development
 For information regarding OCCT code development please consult the official 
 OCCT Collaborative Development Portal:
 http://dev.opencascade.org
+
+Codacy Badge
