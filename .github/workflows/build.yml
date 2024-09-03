@@ -206,17 +206,17 @@ jobs:
     if: startsWith(github.ref, 'refs/tags/')
     steps:
       - name: Download occt windows
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4.1.7
         with:
           name: occt-win
           path: win64
       - name: Download occt linux
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4.1.7
         with:
           name: occt-linux
           path: linux
       - name: Download occt osx
-        uses: actions/download-artifact@v2
+        uses: actions/download-artifact@v4.1.7
         with:
           name: occt-osx
           path: osx
