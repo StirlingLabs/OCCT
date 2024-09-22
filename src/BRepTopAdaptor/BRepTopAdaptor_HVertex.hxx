@@ -17,18 +17,14 @@
 #ifndef _BRepTopAdaptor_HVertex_HeaderFile
 #define _BRepTopAdaptor_HVertex_HeaderFile
 
+#include <Adaptor3d_HVertex.hxx>
+#include <BRepAdaptor_Curve2d.hxx>
 #include <Standard.hxx>
 #include <Standard_Type.hxx>
-
-#include <TopoDS_Vertex.hxx>
-#include <Adaptor3d_HVertex.hxx>
-#include <Standard_Real.hxx>
 #include <TopAbs_Orientation.hxx>
-#include <Standard_Boolean.hxx>
+#include <TopoDS_Vertex.hxx>
 
-class TopoDS_Vertex;
 class gp_Pnt2d;
-class Adaptor3d_HVertex;
 
 
 class BRepTopAdaptor_HVertex;

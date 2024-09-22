@@ -33,14 +33,6 @@ class Geom_BSplineCurve;
 class Geom_BSplineSurface;
 class Geom_Curve;
 class Geom_Surface;
-class GeomConvert_BSplineCurveKnotSplitting;
-class GeomConvert_BSplineSurfaceKnotSplitting;
-class GeomConvert_BSplineCurveToBezierCurve;
-class GeomConvert_CompCurveToBSplineCurve;
-class GeomConvert_BSplineSurfaceToBezierSurface;
-class GeomConvert_CompBezierSurfacesToBSplineSurface;
-class GeomConvert_ApproxSurface;
-class GeomConvert_ApproxCurve;
 
 
 //! The GeomConvert package provides some global functions as follows
@@ -379,35 +371,6 @@ public:
                                                                 const Standard_Real AngularTolerance,
                                                                 const Standard_Real tolerance);
 
-
-
-
-protected:
-
-
-
-
-
-private:
-
-
-
-
-friend class GeomConvert_BSplineCurveKnotSplitting;
-friend class GeomConvert_BSplineSurfaceKnotSplitting;
-friend class GeomConvert_BSplineCurveToBezierCurve;
-friend class GeomConvert_CompCurveToBSplineCurve;
-friend class GeomConvert_BSplineSurfaceToBezierSurface;
-friend class GeomConvert_CompBezierSurfacesToBSplineSurface;
-friend class GeomConvert_ApproxSurface;
-friend class GeomConvert_ApproxCurve;
-
 };
-
-
-
-
-
-
 
 #endif // _GeomConvert_HeaderFile

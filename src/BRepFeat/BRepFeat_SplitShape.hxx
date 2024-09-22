@@ -23,14 +23,10 @@
 
 #include <LocOpe_Spliter.hxx>
 #include <BRepBuilderAPI_MakeShape.hxx>
-#include <Standard_Boolean.hxx>
 #include <TopTools_ListOfShape.hxx>
 #include <TopTools_SequenceOfShape.hxx>
 
 class LocOpe_WiresOnShape;
-class StdFail_NotDone;
-class Standard_ConstructionError;
-class Standard_NoSuchObject;
 class TopoDS_Shape;
 class TopoDS_Wire;
 class TopoDS_Face;
@@ -109,7 +105,7 @@ public:
   Standard_EXPORT const TopTools_ListOfShape& Right() const;
   
   //! Builds the cut and the resulting faces and edges as well.
-  Standard_EXPORT void Build() Standard_OVERRIDE;
+  Standard_EXPORT void Build(const Message_ProgressRange& theRange = Message_ProgressRange()) Standard_OVERRIDE;
   
   //! Returns true if the shape has been deleted.
   Standard_EXPORT virtual Standard_Boolean IsDeleted (const TopoDS_Shape& S) Standard_OVERRIDE;

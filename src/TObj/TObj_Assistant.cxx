@@ -17,7 +17,6 @@
 
 #include <TObj_Assistant.hxx>
 
-#include <TObj_Common.hxx>
 #include <TObj_Model.hxx>
 #include <TColStd_SequenceOfTransient.hxx>
 #include <TColStd_SequenceOfAsciiString.hxx>
@@ -96,7 +95,7 @@ Handle(TObj_Model) TObj_Assistant::FindModel
 //purpose  : 
 //=======================================================================
 
-void TObj_Assistant::BindModel (const Handle(TObj_Model) theModel)
+void TObj_Assistant::BindModel (const Handle(TObj_Model)& theModel)
 {
   getModels().Append(theModel);
 }

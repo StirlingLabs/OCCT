@@ -31,18 +31,13 @@
 #include <BVH_BoxSet.hxx>
 #include <BVH_LinearBuilder.hxx>
 #include <BVH_Traverse.hxx>
-#include <gp.hxx>
 #include <gp_Pnt.hxx>
-#include <IntPolyh_ListOfCouples.hxx>
-#include <IntPolyh_Couple.hxx>
-#include <IntPolyh_Edge.hxx>
 #include <IntPolyh_MaillageAffinage.hxx>
 #include <IntPolyh_Point.hxx>
 #include <IntPolyh_SectionLine.hxx>
 #include <IntPolyh_StartPoint.hxx>
 #include <IntPolyh_Tools.hxx>
 #include <IntPolyh_Triangle.hxx>
-#include <Precision.hxx>
 #include <TColStd_Array1OfInteger.hxx>
 #include <TColStd_MapOfInteger.hxx>
 #include <TColStd_ListIteratorOfListOfInteger.hxx>
@@ -52,8 +47,7 @@
 typedef NCollection_Array1<Standard_Integer> IntPolyh_ArrayOfInteger;
 typedef NCollection_IndexedDataMap
   <Standard_Integer,
-   TColStd_ListOfInteger,
-   TColStd_MapIntegerHasher> IntPolyh_IndexedDataMapOfIntegerListOfInteger;
+   TColStd_ListOfInteger> IntPolyh_IndexedDataMapOfIntegerListOfInteger;
 
 
 static Standard_Real MyTolerance=10.0e-7;

@@ -24,7 +24,7 @@
 #include <OSD_Path.hxx>
 #include <OSD_ThreadPool.hxx>
 #include <Precision.hxx>
-#include <FSD_Base64Decoder.hxx>
+#include <FSD_Base64.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Iterator.hxx>
@@ -35,8 +35,9 @@
 namespace
 {
   //! Material extension.
-  const char THE_KHR_materials_common[] = "KHR_materials_common";
-  const char THE_KHR_binary_glTF[]      = "KHR_binary_glTF";
+  static const char THE_KHR_materials_common[] = "KHR_materials_common";
+  static const char THE_KHR_binary_glTF[]      = "KHR_binary_glTF";
+  static const char THE_KHR_draco_mesh_compression[] = "KHR_draco_mesh_compression";
 
   //! Data buffer referring to a portion of another buffer.
   class RWGltf_SubBuffer : public NCollection_Buffer
@@ -185,8 +186,10 @@ RWGltf_GltfJsonParser::RWGltf_GltfJsonParser (TopTools_SequenceOfShape& theRootS
   myIsBinary (false),
   myIsGltf1 (false),
   myToSkipEmptyNodes (true),
+  myToLoadAllScenes (false),
   myUseMeshNameAsFallback (true),
-  myToProbeHeader (false)
+  myToProbeHeader (false),
+  myToReadAssetExtras (true)
 {
   myCSTrsf.SetInputLengthUnit (1.0); // meters
   myCSTrsf.SetInputCoordinateSystem (RWMesh_CoordinateSystem_glTF);
@@ -235,7 +238,8 @@ bool RWGltf_GltfJsonParser::gltfParseRoots()
 
   for (int aRootNameIter = 0; aRootNameIter < RWGltf_GltfRootElement_NB_MANDATORY; ++aRootNameIter)
   {
-    if (myGltfRoots[aRootNameIter].IsNull())
+    if (myGltfRoots[aRootNameIter].IsNull()
+     && aRootNameIter != RWGltf_GltfRootElement_Scene)
     {
       reportGltfError ("Member '" + RWGltf_GltfRootElementName ((RWGltf_GltfRootElement )aRootNameIter) + "' is not found.");
       return false;
@@ -282,6 +286,27 @@ void RWGltf_GltfJsonParser::gltfParseAsset()
     if (aCopyRight->IsString())
     {
       myMetadata->Add ("copyright", aCopyRight->GetString());
+    }
+  }
+
+  if (const RWGltf_JsonValue* anExtras = myToReadAssetExtras ? findObjectMember (*anAsset, "extras") : nullptr)
+  {
+    for (ConstMemberIterator aChildIter = anExtras->MemberBegin(); aChildIter != anExtras->MemberEnd(); ++aChildIter)
+    {
+      if (!aChildIter->name.IsString())
+      {
+        continue;
+      }
+
+      const TCollection_AsciiString aKey (aChildIter->name.GetString());
+      if (aChildIter->value.IsString())
+      {
+        myMetadata->Add (aKey, aChildIter->value.GetString());
+      }
+      if (aChildIter->value.IsNumber())
+      {
+        myMetadata->Add (aKey, aChildIter->value.GetDouble());
+      }
     }
   }
 }
@@ -807,7 +832,11 @@ bool RWGltf_GltfJsonParser::gltfParseTexture (Handle(Image_Texture)& theTexture,
         const char* aBase64Data = aDataIter + 8;
         const size_t aBase64Len = size_t(aBase64End - aBase64Data);
         //const TCollection_AsciiString aMime (aDataStart, aDataIter - aDataStart);
-        Handle(NCollection_Buffer) aData = FSD_Base64Decoder::Decode ((const Standard_Byte* )aBase64Data, aBase64Len);
+        Handle(NCollection_Buffer) aData = FSD_Base64::Decode (aBase64Data, aBase64Len);
+        if (aData.IsNull())
+        {
+          Message::SendFail ("Fail to allocate memory.");
+        }
         theTexture = new Image_Texture (aData, myFilePath + "@" + getKeyString (*aSrcVal));
         return true;
       }
@@ -932,7 +961,11 @@ bool RWGltf_GltfJsonParser::gltfParseTextureInBufferView (Handle(Image_Texture)&
     Handle(NCollection_Buffer) aBaseBuffer;
     if (!myDecodedBuffers.Find (aBufferId, aBaseBuffer))
     {
-      aBaseBuffer = FSD_Base64Decoder::Decode ((const Standard_Byte* )anUriData + 37, anUriVal->GetStringLength() - 37);
+      aBaseBuffer = FSD_Base64::Decode (anUriData + 37, anUriVal->GetStringLength() - 37);
+      if (aBaseBuffer.IsNull())
+      {
+        Message::SendFail ("Fail to allocate memory.");
+      }
       myDecodedBuffers.Bind (aBufferId, aBaseBuffer);
     }
 
@@ -975,8 +1008,49 @@ bool RWGltf_GltfJsonParser::gltfParseTextureInBufferView (Handle(Image_Texture)&
 // =======================================================================
 bool RWGltf_GltfJsonParser::gltfParseScene (const Message_ProgressRange& theProgress)
 {
+  const RWGltf_JsonValue* aScenes = myGltfRoots[RWGltf_GltfRootElement_Scenes].Root();
+  if (myToLoadAllScenes
+  && !myIsGltf1
+  &&  aScenes->IsArray()
+  &&  aScenes->Size() > 1)
+  {
+    Message_ProgressScope aPS (theProgress, "Parsing scenes", aScenes->Size());
+    for (rapidjson::Value::ConstValueIterator aSceneIter = aScenes->Begin(); aSceneIter != aScenes->End(); ++aSceneIter)
+    {
+      if (!aPS.More())
+      {
+        return false;
+      }
+      Message_ProgressRange aRange = aPS.Next();
+      const RWGltf_JsonValue* aSceneNodes = findObjectMember (*aSceneIter, "nodes");
+      if (aSceneNodes == NULL
+      || !aSceneNodes->IsArray())
+      {
+        reportGltfWarning ("Empty scene '" + getKeyString (*aSceneIter) + "'.");
+      }
+      if (!gltfParseSceneNodes (*myRootShapes, *aSceneNodes, aRange))
+      {
+        return false;
+      }
+    }
+    return true;
+  }
+
   // search default scene
-  const RWGltf_JsonValue* aDefScene = myGltfRoots[RWGltf_GltfRootElement_Scenes].FindChild (*myGltfRoots[RWGltf_GltfRootElement_Scene].Root());
+  const RWGltf_JsonValue* aDefScene = NULL;
+  if (!myGltfRoots[RWGltf_GltfRootElement_Scene].IsNull())
+  {
+    aDefScene = myGltfRoots[RWGltf_GltfRootElement_Scenes].FindChild (*myGltfRoots[RWGltf_GltfRootElement_Scene].Root());
+  }
+  else if (!myIsGltf1)
+  {
+    rapidjson::Value::ConstValueIterator aSceneIter = aScenes->Begin();
+    if (aSceneIter != aScenes->End())
+    {
+      aDefScene = aSceneIter;
+      reportGltfWarning ("Default scene is undefined, the first one will be loaded.");
+    }
+  }
   if (aDefScene == NULL)
   {
     reportGltfError ("Default scene is not found.");
@@ -1297,7 +1371,8 @@ bool RWGltf_GltfJsonParser::gltfParseSceneNode (TopoDS_Shape& theNodeShape,
     }
   }
 
-  if (aNbSubShapes == 1)
+  if (aChildShapes.IsEmpty()
+   && aNbSubShapes == 1)
   {
     theNodeShape = TopoDS_Iterator (aNodeShape).Value();
   }
@@ -1331,51 +1406,27 @@ bool RWGltf_GltfJsonParser::gltfParseMesh (TopoDS_Shape& theMeshShape,
     return true;
   }
 
+  const TCollection_AsciiString aUserName ((aName != NULL && aName->IsString()) ? aName->GetString() : "");
+
   BRep_Builder aBuilder;
   TopoDS_Compound aMeshShape;
   int aNbFaces = 0;
   for (rapidjson::Value::ConstValueIterator aPrimArrIter = aPrims->Begin();
        aPrimArrIter != aPrims->End(); ++aPrimArrIter)
   {
-    TCollection_AsciiString aUserName;
-    if (aName != NULL
-     && aName->IsString())
-    {
-      aUserName = aName->GetString();
-    }
-
-    Handle(RWGltf_GltfLatePrimitiveArray) aMeshData = new RWGltf_GltfLatePrimitiveArray (theMeshId, aUserName);
-    if (!gltfParsePrimArray (aMeshData, theMeshId, *aPrimArrIter))
+    TopoDS_Shape aFace;
+    if (!gltfParsePrimArray (aFace, theMeshId, aUserName, *aPrimArrIter))
     {
       return false;
     }
 
-    if (!aMeshData->Data().IsEmpty())
+    if (!aFace.IsNull())
     {
       if (aMeshShape.IsNull())
       {
         aBuilder.MakeCompound (aMeshShape);
       }
-
-      TopoDS_Face aFace;
-      aBuilder.MakeFace (aFace, aMeshData);
       aBuilder.Add (aMeshShape, aFace);
-      if (myAttribMap != NULL
-       && aMeshData->HasStyle())
-      {
-        RWMesh_NodeAttributes aShapeAttribs;
-        aShapeAttribs.RawName = aUserName;
-
-        // assign material and not color
-        //aShapeAttribs.Style.SetColorSurf (aMeshData->BaseColor());
-
-        Handle(XCAFDoc_VisMaterial) aMat;
-        myMaterials.Find (!aMeshData->MaterialPbr().IsNull() ? aMeshData->MaterialPbr()->Id : aMeshData->MaterialCommon()->Id, aMat);
-        aShapeAttribs.Style.SetMaterial (aMat);
-
-        myAttribMap->Bind (aFace, aShapeAttribs);
-      }
-      myFaceList.Append (aFace);
       ++aNbFaces;
     }
   }
@@ -1396,14 +1447,23 @@ bool RWGltf_GltfJsonParser::gltfParseMesh (TopoDS_Shape& theMeshShape,
 // function : gltfParsePrimArray
 // purpose  :
 // =======================================================================
-bool RWGltf_GltfJsonParser::gltfParsePrimArray (const Handle(RWGltf_GltfLatePrimitiveArray)& theMeshData,
+bool RWGltf_GltfJsonParser::gltfParsePrimArray (TopoDS_Shape& thePrimArrayShape,
                                                 const TCollection_AsciiString& theMeshId,
+                                                const TCollection_AsciiString& theMeshName,
                                                 const RWGltf_JsonValue& thePrimArray)
 {
   const RWGltf_JsonValue* anAttribs = findObjectMember (thePrimArray, "attributes");
   const RWGltf_JsonValue* anIndices = findObjectMember (thePrimArray, "indices");
   const RWGltf_JsonValue* aMaterial = findObjectMember (thePrimArray, "material");
   const RWGltf_JsonValue* aModeVal  = findObjectMember (thePrimArray, "mode");
+  const RWGltf_JsonValue* anExtVal  = findObjectMember (thePrimArray, "extensions");
+  const RWGltf_JsonValue* aDracoVal = anExtVal != NULL
+                                    ? findObjectMember (*anExtVal, THE_KHR_draco_mesh_compression)
+                                    : NULL;
+  const RWGltf_JsonValue* aDracoBuf = aDracoVal != NULL
+                                    ? findObjectMember (*aDracoVal, "bufferView")
+                                    : NULL;
+
   RWGltf_GltfPrimitiveMode aMode = RWGltf_GltfPrimitiveMode_Triangles;
   if (anAttribs == NULL
   || !anAttribs->IsObject())
@@ -1430,22 +1490,69 @@ bool RWGltf_GltfJsonParser::gltfParsePrimArray (const Handle(RWGltf_GltfLatePrim
     Message::SendWarning (TCollection_AsciiString() + "Primitive array within Mesh '" + theMeshId + "' skipped due to unsupported mode");
     return true;
   }
-  theMeshData->SetPrimitiveMode (aMode);
 
-  // assign material
+  const TCollection_AsciiString aMatId      = aMaterial != NULL ? getKeyString (*aMaterial) : TCollection_AsciiString();
+  const TCollection_AsciiString anIndicesId = anIndices != NULL ? getKeyString (*anIndices) : TCollection_AsciiString();
+  Handle(RWGltf_MaterialMetallicRoughness) aMatPbr;
+  Handle(RWGltf_MaterialCommon) aMatCommon;
+  Handle(XCAFDoc_VisMaterial) aMat;
   if (aMaterial != NULL)
   {
-    Handle(RWGltf_MaterialMetallicRoughness) aMatPbr;
-    if (myMaterialsPbr.Find (getKeyString (*aMaterial), aMatPbr))
+    if (myMaterialsPbr.Find (aMatId, aMatPbr))
     {
-      theMeshData->SetMaterialPbr (aMatPbr);
+      myMaterials.Find (aMatPbr->Id, aMat);
     }
+    if (myMaterialsCommon.Find (aMatId, aMatCommon))
+    {
+      if (aMat.IsNull())
+      {
+        myMaterials.Find (aMatCommon->Id, aMat);
+      }
+    }
+  }
 
-    Handle(RWGltf_MaterialCommon) aMatCommon;
-    if (myMaterialsCommon.Find (getKeyString (*aMaterial), aMatCommon))
+  // try reusing already loaded primitive array - generate a unique id
+  TCollection_AsciiString aPrimArrayId, aPrimArrayIdWithMat;
+  aPrimArrayId += TCollection_AsciiString (aMode);
+  aPrimArrayId += TCollection_AsciiString (":") + anIndicesId;
+  for (rapidjson::Value::ConstMemberIterator anAttribIter = anAttribs->MemberBegin();
+       anAttribIter != anAttribs->MemberEnd(); ++anAttribIter)
+  {
+    const TCollection_AsciiString anAttribId = getKeyString (anAttribIter->value);
+    aPrimArrayId += TCollection_AsciiString (":") + anAttribId;
+  }
+  aPrimArrayIdWithMat = aPrimArrayId + TCollection_AsciiString ("::") + aMatId;
+  if (myShapeMap[ShapeMapGroup_PrimArray].Find (aPrimArrayIdWithMat, thePrimArrayShape))
+  {
+    return true;
+  }
+  else if (myShapeMap[ShapeMapGroup_PrimArray].Find (aPrimArrayId, thePrimArrayShape))
+  {
+    if (myAttribMap != NULL)
     {
-      theMeshData->SetMaterialCommon (aMatCommon);
+      // sharing just triangulation is not much useful
+      //Handle(RWGltf_GltfLatePrimitiveArray) aLateData = Handle(RWGltf_GltfLatePrimitiveArray)::DownCast (BRep_Tool::Triangulation (TopoDS::Face (thePrimArrayShape), aDummy));
+      //TopoDS_Face aFaceCopy; BRep_Builder().MakeFace (aFaceCopy, aLateData);
+
+      // make a located Face copy
+      TopoDS_Shape aFaceCopy = thePrimArrayShape;
+      aFaceCopy.Location (TopLoc_Location (gp_Trsf()));
+      RWMesh_NodeAttributes aShapeAttribs;
+      aShapeAttribs.RawName = theMeshName;
+      aShapeAttribs.Style.SetMaterial (aMat);
+      myAttribMap->Bind (aFaceCopy, aShapeAttribs);
+      myShapeMap[ShapeMapGroup_PrimArray].Bind (aPrimArrayIdWithMat, aFaceCopy);
+      thePrimArrayShape = aFaceCopy;
     }
+    return true;
+  }
+
+  Handle(RWGltf_GltfLatePrimitiveArray) aMeshData = new RWGltf_GltfLatePrimitiveArray (theMeshId, theMeshName);
+  aMeshData->SetPrimitiveMode (aMode);
+  if (aMaterial != NULL)
+  {
+    aMeshData->SetMaterialPbr (aMatPbr);
+    aMeshData->SetMaterialCommon (aMatCommon);
   }
 
   bool hasPositions = false;
@@ -1473,7 +1580,7 @@ bool RWGltf_GltfJsonParser::gltfParsePrimArray (const Handle(RWGltf_GltfLatePrim
       reportGltfError ("Primitive array attribute accessor key '" + anAttribId + "' points to non-existing object.");
       return false;
     }
-    else if (!gltfParseAccessor (theMeshData, anAttribId, *anAccessor, aType))
+    else if (!gltfParseAccessor (aMeshData, anAttribId, *anAccessor, aType, aDracoBuf))
     {
       return false;
     }
@@ -1490,7 +1597,6 @@ bool RWGltf_GltfJsonParser::gltfParsePrimArray (const Handle(RWGltf_GltfLatePrim
 
   if (anIndices != NULL)
   {
-    const TCollection_AsciiString anIndicesId = getKeyString (*anIndices);
     const RWGltf_JsonValue* anAccessor = myGltfRoots[RWGltf_GltfRootElement_Accessors].FindChild (*anIndices);
     if (anAccessor == NULL
     || !anAccessor->IsObject())
@@ -1498,16 +1604,38 @@ bool RWGltf_GltfJsonParser::gltfParsePrimArray (const Handle(RWGltf_GltfLatePrim
       reportGltfError ("Primitive array indices accessor key '" + anIndicesId + "' points to non-existing object.");
       return false;
     }
-    else if (!gltfParseAccessor (theMeshData, anIndicesId, *anAccessor, RWGltf_GltfArrayType_Indices))
+    else if (!gltfParseAccessor (aMeshData, anIndicesId, *anAccessor, RWGltf_GltfArrayType_Indices, aDracoBuf))
     {
       return false;
     }
   }
   else
   {
-    theMeshData->SetNbDeferredTriangles (theMeshData->NbDeferredNodes() / 3);
+    aMeshData->SetNbDeferredTriangles (aMeshData->NbDeferredNodes() / 3);
   }
 
+  if (!aMeshData->Data().IsEmpty())
+  {
+    TopoDS_Face aFace;
+    BRep_Builder aBuilder;
+    aBuilder.MakeFace (aFace, aMeshData);
+    if (myAttribMap != NULL
+     && aMeshData->HasStyle())
+    {
+      RWMesh_NodeAttributes aShapeAttribs;
+      aShapeAttribs.RawName = theMeshName;
+
+      // assign material and not color
+      //aShapeAttribs.Style.SetColorSurf (aMeshData->BaseColor());
+      aShapeAttribs.Style.SetMaterial (aMat);
+
+      myAttribMap->Bind (aFace, aShapeAttribs);
+    }
+    myFaceList.Append (aFace);
+    myShapeMap[ShapeMapGroup_PrimArray].Bind (aPrimArrayId, aFace);
+    myShapeMap[ShapeMapGroup_PrimArray].Bind (aPrimArrayIdWithMat, aFace);
+    thePrimArrayShape = aFace;
+  }
   return true;
 }
 
@@ -1518,12 +1646,17 @@ bool RWGltf_GltfJsonParser::gltfParsePrimArray (const Handle(RWGltf_GltfLatePrim
 bool RWGltf_GltfJsonParser::gltfParseAccessor (const Handle(RWGltf_GltfLatePrimitiveArray)& theMeshData,
                                                const TCollection_AsciiString& theName,
                                                const RWGltf_JsonValue& theAccessor,
-                                               const RWGltf_GltfArrayType theType)
+                                               const RWGltf_GltfArrayType theType,
+                                               const RWGltf_JsonValue* theCompBuffView)
 {
   RWGltf_GltfAccessor aStruct;
   const RWGltf_JsonValue* aTypeStr        = findObjectMember (theAccessor, "type");
-  const RWGltf_JsonValue* aBufferViewName = findObjectMember (theAccessor, "bufferView");
-  const RWGltf_JsonValue* aByteOffset     = findObjectMember (theAccessor, "byteOffset");
+  const RWGltf_JsonValue* aBufferViewName = theCompBuffView == NULL
+                                          ? findObjectMember (theAccessor, "bufferView")
+                                          : theCompBuffView;
+  const RWGltf_JsonValue* aByteOffset     = theCompBuffView == NULL
+                                          ? findObjectMember (theAccessor, "byteOffset")
+                                          : 0;
   const RWGltf_JsonValue* aByteStride     = findObjectMember (theAccessor, "byteStride"); // byteStride was part of bufferView in glTF 1.0
   const RWGltf_JsonValue* aCompType       = findObjectMember (theAccessor, "componentType");
   const RWGltf_JsonValue* aCount          = findObjectMember (theAccessor, "count");
@@ -1534,6 +1667,7 @@ bool RWGltf_GltfJsonParser::gltfParseAccessor (const Handle(RWGltf_GltfLatePrimi
     return false;
   }
   aStruct.Type = RWGltf_GltfParseAccessorType (aTypeStr->GetString());
+  aStruct.IsCompressed = theCompBuffView != NULL;
   if (aStruct.Type == RWGltf_GltfAccessorLayout_UNKNOWN)
   {
     reportGltfError ("Accessor '" + theName + "' has invalid type.");
@@ -1767,6 +1901,7 @@ bool RWGltf_GltfJsonParser::gltfParseBuffer (const Handle(RWGltf_GltfLatePrimiti
     aData.Accessor = theAccessor;
     aData.Accessor.ByteStride = aByteStride;
     aData.StreamOffset = anOffset;
+    aData.StreamLength = theView.ByteLength;
     aData.StreamUri = myFilePath;
     return true;
   }
@@ -1785,10 +1920,15 @@ bool RWGltf_GltfJsonParser::gltfParseBuffer (const Handle(RWGltf_GltfLatePrimiti
     aData.Accessor = theAccessor;
     aData.Accessor.ByteStride = aByteStride;
     aData.StreamOffset = anOffset;
+    aData.StreamLength = 0;
     if (!myDecodedBuffers.Find (theName, aData.StreamData))
     {
       // it is better decoding in multiple threads
-      aData.StreamData = FSD_Base64Decoder::Decode ((const Standard_Byte* )anUriData + 37, anUriVal->GetStringLength() - 37);
+      aData.StreamData = FSD_Base64::Decode (anUriData + 37, anUriVal->GetStringLength() - 37);
+      if (aData.StreamData.IsNull())
+      {
+        Message::SendFail ("Fail to allocate memory.");
+      }
       myDecodedBuffers.Bind (theName, aData.StreamData);
     }
     return true;
@@ -1819,6 +1959,7 @@ bool RWGltf_GltfJsonParser::gltfParseBuffer (const Handle(RWGltf_GltfLatePrimiti
     aData.Accessor = theAccessor;
     aData.Accessor.ByteStride = aByteStride;
     aData.StreamOffset = anOffset;
+    aData.StreamLength = theView.ByteLength;
     aData.StreamUri = myFolder + anUri;
     if (myExternalFiles != NULL)
     {
@@ -1843,15 +1984,16 @@ void RWGltf_GltfJsonParser::bindNamedShape (TopoDS_Shape& theShape,
     return;
   }
 
+  TopoDS_Shape aShape = theShape;
   if (!theLoc.IsIdentity())
   {
     if (!theShape.Location().IsIdentity())
     {
-      theShape.Location (theLoc * theShape.Location());
+      theShape.Location (theLoc * theShape.Location(), Standard_False);
     }
     else
     {
-      theShape.Location (theLoc);
+      theShape.Location (theLoc, Standard_False);
     }
   }
 
@@ -1866,31 +2008,32 @@ void RWGltf_GltfJsonParser::bindNamedShape (TopoDS_Shape& theShape,
     aUserName = theId;
   }
 
-  myShapeMap[theGroup].Bind (theId, theShape);
   if (myAttribMap != NULL)
   {
     RWMesh_NodeAttributes aShapeAttribs;
-    aShapeAttribs.Name    = aUserName;
-    aShapeAttribs.RawName = theId;
+    aShapeAttribs.Name = aUserName;
+    if (myIsGltf1)
+    {
+      aShapeAttribs.RawName = theId;
+    }
     if (theShape.ShapeType() == TopAbs_FACE)
     {
-      TopLoc_Location aDummy;
-      if (Handle(RWGltf_GltfLatePrimitiveArray) aLateData = Handle(RWGltf_GltfLatePrimitiveArray)::DownCast (BRep_Tool::Triangulation (TopoDS::Face (theShape), aDummy)))
+      RWMesh_NodeAttributes aFaceAttribs;
+      if (myAttribMap->Find (aShape, aFaceAttribs))
       {
-        if (aLateData->HasStyle())
-        {
-          // assign material and not color
-          //aShapeAttribs.Style.SetColorSurf (aLateData->BaseColor());
-
-          Handle(XCAFDoc_VisMaterial) aMat;
-          myMaterials.Find (!aLateData->MaterialPbr().IsNull() ? aLateData->MaterialPbr()->Id : aLateData->MaterialCommon()->Id, aMat);
-          aShapeAttribs.Style.SetMaterial (aMat);
-        }
+        aShapeAttribs.Style.SetMaterial (aFaceAttribs.Style.Material());
         if (aShapeAttribs.Name.IsEmpty()
          && myUseMeshNameAsFallback)
         {
           // fallback using Mesh name
-          aShapeAttribs.Name = aLateData->Name();
+          aShapeAttribs.Name = aFaceAttribs.RawName;
+        }
+        else if (!aFaceAttribs.Name.IsEmpty()
+               && theLoc.IsIdentity()
+               && theGroup == ShapeMapGroup_Nodes)
+        {
+          // keep Product name (from Mesh) separated from Instance name (from Node)
+          theShape.Location (TopLoc_Location (gp_Trsf()) * theShape.Location(), Standard_False);
         }
       }
     }
@@ -1925,8 +2068,20 @@ void RWGltf_GltfJsonParser::bindNamedShape (TopoDS_Shape& theShape,
         aShapeAttribs.Name = aMeshName;
       }
     }
+    else if (!aShapeAttribs.Name.IsEmpty()
+           && theGroup == ShapeMapGroup_Nodes)
+    {
+      RWMesh_NodeAttributes anOldAttribs;
+      if (myAttribMap->Find (aShape, anOldAttribs)
+      && !anOldAttribs.Name.IsEmpty())
+      {
+        // keep Product name (from Mesh) separated from Instance name (from Node)
+        theShape.Location (TopLoc_Location (gp_Trsf()) * theShape.Location(), Standard_False);
+      }
+    }
     myAttribMap->Bind (theShape, aShapeAttribs);
   }
+  myShapeMap[theGroup].Bind (theId, theShape);
 }
 #endif
 

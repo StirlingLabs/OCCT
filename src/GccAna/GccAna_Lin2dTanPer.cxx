@@ -25,11 +25,9 @@
 #include <gp_Dir2d.hxx>
 #include <gp_Lin2d.hxx>
 #include <gp_Pnt2d.hxx>
-#include <gp_Vec2d.hxx>
 #include <gp_XY.hxx>
 #include <IntAna2d_AnaIntersection.hxx>
 #include <IntAna2d_IntPoint.hxx>
-#include <Standard_ConstructionError.hxx>
 #include <Standard_OutOfRange.hxx>
 #include <StdFail_NotDone.hxx>
 
@@ -101,7 +99,7 @@ GccAna_Lin2dTanPer::
    IntAna2d_AnaIntersection Intp(linsol(1),TheCircle);
    if (Intp.IsDone()) {
      if (!Intp.IsEmpty()) {
-       Standard_Real maxdist = RealLast();
+       constexpr Standard_Real maxdist = RealLast();
        for (Standard_Integer i = 1 ; i <= Intp.NbPoints() ; i++) {
 	 if (Intp.Point(i).Value().Distance(ThePnt) < maxdist) {
 	   pntint2sol(1) = Intp.Point(i).Value();
@@ -246,7 +244,7 @@ GccAna_Lin2dTanPer::
      IntAna2d_AnaIntersection Intp(linsol(NbrSol),TheCircle);
      if (Intp.IsDone()) {
        if (!Intp.IsEmpty()) {
-	 Standard_Real maxdist = RealLast();
+	 constexpr Standard_Real maxdist = RealLast();
 	 for (Standard_Integer i = 1 ; i <= Intp.NbPoints() ; i++) {
 	   if (Intp.Point(i).Value().Distance(pnttg1sol(NbrSol)) < maxdist) {
 	     pntint2sol(NbrSol) = Intp.Point(i).Value();

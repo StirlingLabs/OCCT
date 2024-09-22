@@ -19,11 +19,8 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
-#include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
-#include <Standard_Real.hxx>
 #include <Extrema_POnCurv2d.hxx>
 
 class gp_Lin2d;
@@ -31,7 +28,6 @@ class gp_Circ2d;
 class gp_Elips2d;
 class gp_Hypr2d;
 class gp_Parab2d;
-class Extrema_POnCurv2d;
 
 
 //! It calculates all the distance between two elementary

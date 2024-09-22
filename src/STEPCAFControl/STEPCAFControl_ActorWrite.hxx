@@ -17,7 +17,6 @@
 #define _STEPCAFControl_ActorWrite_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <Standard_Boolean.hxx>
 #include <TopTools_MapOfShape.hxx>
@@ -40,7 +39,8 @@ public:
   
   //! Check whether shape S is assembly
   //! Returns True if shape is registered in assemblies map
-  Standard_EXPORT virtual Standard_Boolean IsAssembly (TopoDS_Shape& S) const Standard_OVERRIDE;
+  Standard_EXPORT virtual Standard_Boolean IsAssembly (const Handle(StepData_StepModel)& theModel,
+                                                       TopoDS_Shape& S) const Standard_OVERRIDE;
   
   //! Set standard mode of work
   //! In standard mode Actor (default) behaves exactly as its

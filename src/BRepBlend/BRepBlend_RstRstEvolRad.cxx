@@ -23,7 +23,6 @@
 #include <BlendFunc.hxx>
 #include <ElCLib.hxx>
 #include <GeomFill.hxx>
-#include <gp.hxx>
 #include <gp_Circ.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_Pnt2d.hxx>
@@ -71,7 +70,7 @@ static void FusionneIntervalles(const TColStd_Array1OfReal& I1,
 
 
 //--- TABSOR is filled by parsing TABLE1 and TABLE2 simultaneously ---
-//------------------ and removing multiple occurrencies ------------
+//------------------ and removing multiple occurrences ------------
 
  while ((ind1<=I1.Upper()) && (ind2<=I2.Upper())) {
       v1 = I1(ind1);

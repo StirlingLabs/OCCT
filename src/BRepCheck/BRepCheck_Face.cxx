@@ -23,7 +23,6 @@
 #include <BRepAdaptor_Surface.hxx>
 #include <BRepCheck.hxx>
 #include <BRepCheck_Face.hxx>
-#include <BRepCheck_ListIteratorOfListOfStatus.hxx>
 #include <BRepCheck_ListOfStatus.hxx>
 #include <BRepClass_FaceClassifier.hxx>
 #include <BRepTopAdaptor_FClass2d.hxx>
@@ -48,19 +47,16 @@
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Vertex.hxx>
 #include <TopoDS_Wire.hxx>
-#include <TopTools_DataMapIteratorOfDataMapOfShapeListOfShape.hxx>
 #include <TopTools_DataMapOfShapeListOfShape.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopTools_ListOfShape.hxx>
 #include <TopTools_MapOfShape.hxx>
-#include <TopTools_OrientedShapeMapHasher.hxx>
 #include <TopTools_SequenceOfShape.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(BRepCheck_Face,BRepCheck_Result)
 
 //#include <BRepAdaptor_Curve2d.hxx>
 //#include <Geom2dInt_GInter.hxx>
-typedef NCollection_DataMap<TopoDS_Shape, Bnd_Box2d, TopTools_OrientedShapeMapHasher> DataMapOfShapeBox2d;
+typedef NCollection_DataMap<TopoDS_Shape, Bnd_Box2d> DataMapOfShapeBox2d;
 
 static Standard_Boolean Intersect(const TopoDS_Wire&,
 				  const TopoDS_Wire&,
@@ -628,7 +624,7 @@ static Standard_Boolean Intersect(const TopoDS_Wire& wir1,
     MapW1.Add( exp1.Current() );
   for (exp2.Init( wir2, TopAbs_VERTEX ); exp2.More(); exp2.Next())
     {
-      TopoDS_Shape V = exp2.Current();
+      const TopoDS_Shape& V = exp2.Current();
       if (MapW1.Contains( V ))
 	CommonVertices.Append( V );
     }

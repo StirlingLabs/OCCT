@@ -12,21 +12,20 @@
 // commercial license or contractual agreement.
 
 
-#include <MoniTool_AttrList.hxx>
 #include <MoniTool_Element.hxx>
 #include <Standard_Type.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(MoniTool_Element,Standard_Transient)
 
 MoniTool_Element::MoniTool_Element()
-: thecode(-1)
+: thecode(0)
 {
 }
 
-void  MoniTool_Element::SetHashCode (const Standard_Integer code)
+void  MoniTool_Element::SetHashCode (const size_t code)
       {  thecode = code;  }
 
-    Standard_Integer  MoniTool_Element::GetHashCode () const
+    size_t  MoniTool_Element::GetHashCode () const
       {  return thecode;  }
 
     Handle(Standard_Type)  MoniTool_Element::ValueType () const

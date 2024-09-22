@@ -386,10 +386,33 @@ static const Standard_Integer aMinNbBadDistr = 15;
 static const Standard_Integer aNbSingleBezier = 30;
 
 //=========================================================================
+// function : IsSurfPlaneLike
+// purpose  : Define is surface plane like or not.
+//            Static subfunction in DeleteByTube.
+//=========================================================================
+static Standard_Boolean IsSurfPlaneLike(const Handle(Adaptor3d_Surface)   &theS)
+{
+  if (theS->GetType() == GeomAbs_Plane)
+  {
+    return Standard_True;
+  }
+
+  if (theS->GetType() == GeomAbs_BSplineSurface)
+  {
+    if (theS->UDegree() == 1 && theS->VDegree() == 1)
+    {
+      return Standard_True;
+    }
+  }
+
+  return Standard_False;
+}
+//=========================================================================
 // function : DeleteByTube
 // purpose  : Check and delete points using tube criteria.
 //            Static subfunction in ComputePurgedWLine.
 //=========================================================================
+
 static Handle(IntPatch_WLine)
   DeleteByTube(const Handle(IntPatch_WLine)       &theWLine,
                const Handle(Adaptor3d_Surface)   &theS1,
@@ -419,9 +442,10 @@ static Handle(IntPatch_WLine)
   gp_Vec2d aBase2dVec2(UonS2[1] - UonS2[0], VonS2[1] - VonS2[0]);
   gp_Pnt   aBase3dPnt = theWLine->Point(1).Value();
   gp_Vec   aBase3dVec(theWLine->Point(1).Value(), theWLine->Point(2).Value());
+  Standard_Real aPrevStep = aBase3dVec.SquareMagnitude();
 
   // Choose base tolerance and scale it to pipe algorithm.
-  const Standard_Real aBaseTolerance = Precision::Approximation();
+  constexpr Standard_Real aBaseTolerance = Precision::Approximation();
   Standard_Real aResS1Tol = Min(theS1->UResolution(aBaseTolerance),
                                 theS1->VResolution(aBaseTolerance));
   Standard_Real aResS2Tol = Min(theS2->UResolution(aBaseTolerance),
@@ -431,6 +455,8 @@ static Handle(IntPatch_WLine)
   Standard_Real aTol3d = aBaseTolerance * aBaseTolerance;
 
   const Standard_Real aLimitCoeff = 0.99 * 0.99;
+  const Standard_Real aMaxSqrRatio = 15. * 15.;
+  Standard_Boolean isPlanePlane = IsSurfPlaneLike(theS1) && IsSurfPlaneLike(theS2);
   for(i = 3; i <= theWLine->NbPnts(); i++)
   {
     Standard_Boolean isDeleteState = Standard_False;
@@ -466,14 +492,27 @@ static Handle(IntPatch_WLine)
       if (Min(aStepOnS1, aStepOnS2) >= aLimitCoeff * Max(aStepOnS1, aStepOnS2))
       {
         // Set hash flag to "Delete" state.
-        isDeleteState = Standard_True;
-        aNewPointsHash.SetValue(i - 1, 1);
+        Standard_Real aCurrStep = aBase3dPnt.SquareDistance(aPnt3d);
+        Standard_Real aSqrRatio = 0.;
+        if (!isPlanePlane)
+        {
+          aSqrRatio = aPrevStep / aCurrStep;
+          if (aSqrRatio < 1.)
+          {
+            aSqrRatio = 1. / aSqrRatio;
+          }        
+        }
+        if (aSqrRatio < aMaxSqrRatio)
+        {
+          isDeleteState = Standard_True;
+          aNewPointsHash.SetValue(i - 1, 1);
 
-        // Change middle point.
-        UonS1[1] = UonS1[2];
-        UonS2[1] = UonS2[2];
-        VonS1[1] = VonS1[2];
-        VonS2[1] = VonS2[2];
+          // Change middle point.
+          UonS1[1] = UonS1[2];
+          UonS2[1] = UonS2[2];
+          VonS1[1] = VonS1[2];
+          VonS2[1] = VonS2[2];
+        }
       }
     }
 
@@ -496,6 +535,8 @@ static Handle(IntPatch_WLine)
       aBase2dVec2.SetCoord(UonS2[1] - UonS2[0], VonS2[1] - VonS2[0]);
       aBase3dPnt = theWLine->Point(i - 1).Value();
       aBase3dVec = gp_Vec(theWLine->Point(i - 1).Value(), theWLine->Point(i).Value());
+
+      aPrevStep = aBase3dVec.SquareMagnitude();
 
       aNbPnt++;
     }
@@ -1503,7 +1544,7 @@ void IntPatch_WLineTool::JoinWLines(IntPatch_SequenceOfLine& theSlin,
       }
     }
 
-    anAlloc->Reset();
+    anAlloc->Reset(false);
     NCollection_List<Standard_Integer> aListFC(anAlloc),
                                        aListLC(anAlloc);
     
@@ -1677,6 +1718,36 @@ void IntPatch_WLineTool::JoinWLines(IntPatch_SequenceOfLine& theSlin,
 }
 
 //=======================================================================
+//function : IsNeedSkipWL
+//purpose  : Detect is WLine need to skip.
+//=======================================================================
+static Standard_Boolean IsNeedSkipWL(const Handle(IntPatch_WLine)& theWL,
+                                     const Bnd_Box2d& theBoxS1,
+                                     const Bnd_Box2d& theBoxS2,
+                                     const Standard_Real* const theArrPeriods)
+{
+  Standard_Real aFirstp, aLastp;
+  Standard_Integer aNbVtx = theWL->NbVertex();
+
+  for (Standard_Integer i = 1; i < aNbVtx; i++) {
+    aFirstp = theWL->Vertex (i).ParameterOnLine();
+    aLastp  = theWL->Vertex (i + 1).ParameterOnLine();
+
+    Standard_Real aU1, aV1, aU2, aV2;
+    const Standard_Integer pmid = (Standard_Integer)((aFirstp + aLastp) / 2);
+    const IntSurf_PntOn2S& aPmid = theWL->Point (pmid);
+    aPmid.Parameters (aU1, aV1, aU2, aV2);
+
+    if (IsOutOfDomain (theBoxS1, theBoxS2, aPmid, theArrPeriods))
+    {
+      return Standard_True;
+    }
+  }
+
+  return Standard_False;
+}
+
+//=======================================================================
 //function : ExtendTwoWLines
 //purpose  : Performs extending theWLine1 and theWLine2 through their
 //            respecting end point.
@@ -1696,8 +1767,17 @@ void IntPatch_WLineTool::
 
   gp_Vec aVec1, aVec2, aVec3;
 
+  unsigned int hasBeenJoinedCounter = 0;
+
   for(Standard_Integer aNumOfLine1 = 1; aNumOfLine1 <= theSlin.Length(); aNumOfLine1++)
   {
+    if (hasBeenJoinedCounter > 0)
+    {
+      aNumOfLine1--;
+    }
+
+    hasBeenJoinedCounter = 0;
+
     Handle(IntPatch_WLine) aWLine1 (Handle(IntPatch_WLine)::
                                     DownCast(theSlin.Value(aNumOfLine1)));
 
@@ -1720,6 +1800,11 @@ void IntPatch_WLineTool::
     const IntSurf_PntOn2S& aPntLWL1 = aWLine1->Point(aNbPntsWL1);
     const IntSurf_PntOn2S& aPntLm1WL1 = aWLine1->Point(aNbPntsWL1-1);
 
+    if (IsNeedSkipWL(aWLine1, theBoxS1, theBoxS2, theArrPeriods))
+    {
+      continue;
+    }
+
     //Enable/Disable of some ckeck. Bit-mask is used for it.
     //E.g. if 1st point of aWLine1 matches with
     //1st point of aWLine2 then we do not need in check
@@ -1740,16 +1825,24 @@ void IntPatch_WLineTool::
       const IntSurf_PntOn2S& aPntFWL2 = aWLine2->Point(1);
       const IntSurf_PntOn2S& aPntLWL2 = aWLine2->Point(aWLine2->NbPnts());
 
-      if( aPntFWL1.IsSame(aPntFWL2, theToler3D) ||
-          aPntFWL1.IsSame(aPntLWL2, theToler3D) )
+      if (!(aPntFWL1.IsSame(aPntFWL2, theToler3D, Precision::PConfusion())) &&
+          !(aPntFWL1.IsSame(aPntLWL2, theToler3D, Precision::PConfusion())))
       {
-        aCheckResult |= IntPatchWT_DisFirstFirst | IntPatchWT_DisFirstLast;
+        if (aPntFWL1.IsSame(aPntFWL2, theToler3D) ||
+            aPntFWL1.IsSame(aPntLWL2, theToler3D))
+        {
+          aCheckResult |= IntPatchWT_DisFirstFirst | IntPatchWT_DisFirstLast;
+        }
       }
 
-      if( aPntLWL1.IsSame(aPntFWL2, theToler3D) ||
-          aPntLWL1.IsSame(aPntFWL2, theToler3D))
+      if (!(aPntLWL1.IsSame(aPntFWL2, theToler3D, Precision::PConfusion())) &&
+          !(aPntLWL1.IsSame(aPntLWL2, theToler3D, Precision::PConfusion())))
       {
-        aCheckResult |= IntPatchWT_DisLastFirst | IntPatchWT_DisLastLast;
+        if (aPntLWL1.IsSame(aPntFWL2, theToler3D) ||
+            aPntLWL1.IsSame(aPntLWL2, theToler3D))
+        {
+          aCheckResult |= IntPatchWT_DisLastFirst | IntPatchWT_DisLastLast;
+        }
       }
 
       if (!theListOfCriticalPoints.IsEmpty())
@@ -1821,8 +1914,13 @@ void IntPatch_WLineTool::
 
       const IntSurf_PntOn2S& aPntLWL2 = aWLine2->Point(aNbPntsWL2);
       const IntSurf_PntOn2S& aPntLm1WL2 = aWLine2->Point(aNbPntsWL2-1);
-      
-      //if(!(aCheckResult & IntPatchWT_DisFirstFirst))
+
+      if (IsNeedSkipWL(aWLine2, theBoxS1, theBoxS2, theArrPeriods))
+      {
+        continue;
+      }
+
+      if(!(aCheckResult & IntPatchWT_DisFirstFirst))
       {// First/First
         aVec1.SetXYZ(aPntFp1WL1.Value().XYZ() - aPntFWL1.Value().XYZ());
         aVec2.SetXYZ(aPntFWL2.Value().XYZ() - aPntFp1WL2.Value().XYZ());
@@ -1868,6 +1966,7 @@ void IntPatch_WLineTool::
 
       if(hasBeenJoined)
       {
+        hasBeenJoinedCounter++;
         theSlin.Remove(aNumOfLine2);
         aNumOfLine2--;
       }

@@ -18,12 +18,9 @@
 #define _IGESDimen_CurveDimension_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <IGESData_IGESEntity.hxx>
-#include <Standard_Boolean.hxx>
 class IGESDimen_GeneralNote;
-class IGESData_IGESEntity;
 class IGESDimen_LeaderArrow;
 class IGESDimen_WitnessLine;
 

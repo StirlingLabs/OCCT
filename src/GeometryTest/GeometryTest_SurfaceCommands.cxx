@@ -26,27 +26,15 @@
 #include <Draw_Appli.hxx>
 #include <Draw_Display.hxx>
 
-#include <GeomAbs_SurfaceType.hxx>
-#include <GeomAbs_IsoType.hxx>
 #include <GeomAbs_Shape.hxx>
 
 #include <Geom_BSplineSurface.hxx>
-#include <Geom_BSplineCurve.hxx>
 #include <GeomConvert.hxx>
 
 
 #include <GeomAdaptor_Surface.hxx>
 #include <GeomAdaptor_Curve.hxx>
 #include <Geom2dAdaptor_Curve.hxx>
-
-#include <TColgp_Array1OfPnt.hxx>
-#include <TColgp_Array2OfPnt.hxx>
-#include <TColStd_Array1OfReal.hxx>
-#include <TColStd_Array2OfReal.hxx>
-#include <TColStd_Array1OfInteger.hxx>
-#include <TColStd_HArray1OfReal.hxx>
-#include <TColStd_HArray2OfReal.hxx>
-#include <TColGeom_SequenceOfCurve.hxx>
 
 #include <Precision.hxx>
 
@@ -58,12 +46,8 @@
 #include <GeomFill_AppSurf.hxx>
 
 
-#include <DrawTrSurf_BezierSurface.hxx>
-#include <DrawTrSurf_BSplineSurface.hxx>
-
 #ifdef _MSC_VER
 #include <stdio.h>
-//#define strcasecmp strcmp Already defined
 #endif
 
 #ifdef _WIN32
@@ -207,6 +191,20 @@ static Standard_Integer tuyau (Draw_Interpretor& di,
 	Pipe.Init(path, firstS, lastS); 
       }
       else { 
+        if (narg == 6 && !Option_NS && Draw::Atof(a[5]) != 0)
+        {
+          Handle(Geom_Curve) lastS = DrawTrSurf::GetCurve(a[isect + 1]);
+          Cont = GeomAbs_C2;
+          Pipe = GeomFill_Pipe(path, firstS, lastS, Draw::Atof(a[5]));
+          Pipe.Perform(Standard_True);
+          Handle(Geom_Surface) aSurface;
+          if (Pipe.IsDone())
+          {
+            aSurface = Pipe.Surface();
+          }
+          DrawTrSurf::Set(a[1], aSurface);
+          return 0;
+        }
 	// tuyau a N sections, N>=2
 	TColGeom_SequenceOfCurve Seq;
 	Seq.Clear();
@@ -223,8 +221,8 @@ static Standard_Integer tuyau (Draw_Interpretor& di,
 
   Pipe.Perform(1.e-4, Standard_False,  Cont);
   if (!Pipe.IsDone()) {
-    di << "GeomFill_Pipe cannot make a surface\n";
-    return 1;
+    di << "Error: GeomFill_Pipe cannot make a surface\n";
+    return 0;
   }
 
   Standard_Real Accuracy = Pipe.ErrorOnSurf();
@@ -399,12 +397,12 @@ void  GeometryTest::SurfaceCommands(Draw_Interpretor& theCommands)
 
 
   theCommands.Add("tuyau",
-		  "tuyau [-NS] result Path Curve/Radius [Curve2] [Curve3] ... \n the option -NS is used only with 2 sections.\n With it, <result> is going from the first section to the last section \n Without, <result> is a pipe by evolutive section ",
+		  "tuyau [-NS] result Path Curve/Radius [Curve2] [Curve3] ... [Radius]\n the option -NS is used only with 2 sections.\n With it, <result> is going from the first section to the last section \n Without, <result> is a pipe by evolutive section ",
 		  __FILE__,
 		  tuyau,g);
 
   theCommands.Add("partuyau",
-		  "tuyau result Path Curve/Radius [Curve2]\n the parametrization of the surface in the V direction will be as the Path",
+		  "tuyau result Path Curve/Radius [Curve2] [Radius]\n the parametrization of the surface in the V direction will be as the Path",
 		  __FILE__,
 		  tuyau,g);
 

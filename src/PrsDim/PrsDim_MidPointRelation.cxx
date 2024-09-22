@@ -18,16 +18,13 @@
 #include <PrsDim.hxx>
 #include <BRep_Tool.hxx>
 #include <BRepAdaptor_Curve.hxx>
-#include <BRepAdaptor_Surface.hxx>
 #include <DsgPrs_MidPointPresentation.hxx>
 #include <ElCLib.hxx>
-#include <gce_MakeLin.hxx>
 #include <Geom_Circle.hxx>
 #include <Geom_Ellipse.hxx>
 #include <Geom_Line.hxx>
 #include <Geom_Plane.hxx>
 #include <Geom_TrimmedCurve.hxx>
-#include <gp_Ax1.hxx>
 #include <gp_Ax2.hxx>
 #include <gp_Circ.hxx>
 #include <gp_Dir.hxx>
@@ -36,16 +33,11 @@
 #include <gp_Pln.hxx>
 #include <gp_Pnt.hxx>
 #include <Precision.hxx>
-#include <Prs3d_ArrowAspect.hxx>
-#include <Prs3d_DimensionAspect.hxx>
-#include <Prs3d_Drawer.hxx>
 #include <Prs3d_Presentation.hxx>
 #include <Select3D_SensitiveCurve.hxx>
 #include <Select3D_SensitiveSegment.hxx>
 #include <SelectMgr_EntityOwner.hxx>
 #include <SelectMgr_Selection.hxx>
-#include <Standard_NotImplemented.hxx>
-#include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Vertex.hxx>
@@ -450,7 +442,7 @@ void PrsDim_MidPointRelation::ComputePointsOnCirc(const gp_Circ& aCirc,
 
   // Case of confusion between the current position and the center 
   // of the circle -> we move the current position
-  Standard_Real confusion (Precision::Confusion());
+  constexpr Standard_Real confusion (Precision::Confusion());
   gp_Pnt aCenter = aCirc.Location();
   if ( aCenter.Distance(curpos) <= confusion )
     {
@@ -577,7 +569,7 @@ void PrsDim_MidPointRelation::ComputePointsOnElips(const gp_Elips& anEll,
 
   // Case of confusion between the current position and the center 
   // of the circle -> we move the current position
-  Standard_Real confusion (Precision::Confusion());
+  constexpr Standard_Real confusion (Precision::Confusion());
   gp_Pnt aCenter = anEll.Location();
   if ( aCenter.Distance(curpos) <= confusion )
     {

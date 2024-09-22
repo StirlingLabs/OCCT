@@ -17,6 +17,7 @@
 #define _Graphic3d_RenderingParams_HeaderFile
 
 #include <Font_Hinting.hxx>
+#include <Font_NameOfFont.hxx>
 #include <Graphic3d_AspectText3d.hxx>
 #include <Graphic3d_TransformPers.hxx>
 #include <Graphic3d_RenderTransparentMethod.hxx>
@@ -96,7 +97,7 @@ public:
   //! Creates default rendering parameters.
   Graphic3d_RenderingParams()
   : Method                      (Graphic3d_RM_RASTERIZATION),
-    ShadingModel                (Graphic3d_TOSM_FRAGMENT),
+    ShadingModel                (Graphic3d_TypeOfShadingModel_Phong),
     TransparencyMethod          (Graphic3d_RTM_BLEND_UNORDERED),
     Resolution                  (THE_DEFAULT_RESOLUTION),
     FontHinting                 (Font_Hinting_Off),
@@ -146,6 +147,7 @@ public:
     HmdFov2d (30.0f),
     AnaglyphFilter (Anaglyph_RedCyan_Optimized),
     ToReverseStereo (Standard_False),
+    ToSmoothInterlacing (Standard_True),
     ToMirrorComposer (Standard_True),
     //
     StatsPosition (new Graphic3d_TransformPers (Graphic3d_TMF_2d, Aspect_TOTP_LEFT_UPPER,  Graphic3d_Vec2i (20, 20))),
@@ -189,7 +191,7 @@ public:
 public: //! @name general parameters
 
   Graphic3d_RenderingMode           Method;                      //!< specifies rendering mode, Graphic3d_RM_RASTERIZATION by default
-  Graphic3d_TypeOfShadingModel      ShadingModel;                //!< specified default shading model, Graphic3d_TOSM_FRAGMENT by default
+  Graphic3d_TypeOfShadingModel      ShadingModel;                //!< specified default shading model, Graphic3d_TypeOfShadingModel_Phong by default
   Graphic3d_RenderTransparentMethod TransparencyMethod;          //!< specifies rendering method for transparent graphics
   unsigned int                      Resolution;                  //!< Pixels density (PPI), defines scaling factor for parameters like text size
                                                                  //!  (when defined in screen-space units rather than in 3D) to be properly displayed
@@ -260,6 +262,7 @@ public: //! @name VR / stereoscopic parameters
   Graphic3d_Mat4                    AnaglyphLeft;                //!< left  anaglyph filter (in normalized colorspace), Color = AnaglyphRight * theColorRight + AnaglyphLeft * theColorLeft;
   Graphic3d_Mat4                    AnaglyphRight;               //!< right anaglyph filter (in normalized colorspace), Color = AnaglyphRight * theColorRight + AnaglyphLeft * theColorLeft;
   Standard_Boolean                  ToReverseStereo;             //!< flag to reverse stereo pair, FALSE by default
+  Standard_Boolean                  ToSmoothInterlacing;         //!< flag to smooth output on interlaced displays (improves text readability / reduces line aliasing), TRUE by default
   Standard_Boolean                  ToMirrorComposer;            //!< if output device is an external composer - mirror rendering results in window in addition to sending frame to composer, TRUE by default
 
 public: //! @name on-screen display parameters

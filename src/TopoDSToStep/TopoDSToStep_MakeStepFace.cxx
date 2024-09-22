@@ -22,29 +22,24 @@
 // abv 30.11.99: fix %30 pdn changed to produce SurfaceOfRevolution instead of DegenerateToroidalSurface
 
 #include <Bnd_Box2d.hxx>
-#include <BndLib_Add2dCurve.hxx>
 #include <BRep_Tool.hxx>
 #include <BRepTools.hxx>
 #include <Geom2d_BezierCurve.hxx>
 #include <Geom2d_Curve.hxx>
 #include <Geom2d_Hyperbola.hxx>
-#include <Geom2d_Line.hxx>
 #include <Geom2d_Parabola.hxx>
 #include <Geom2d_TrimmedCurve.hxx>
-#include <Geom2dAdaptor_Curve.hxx>
 #include <Geom2dConvert.hxx>
 #include <Geom_BSplineCurve.hxx>
 #include <Geom_Circle.hxx>
 #include <Geom_ConicalSurface.hxx>
 #include <Geom_CylindricalSurface.hxx>
 #include <Geom_ElementarySurface.hxx>
-#include <Geom_Plane.hxx>
 #include <Geom_RectangularTrimmedSurface.hxx>
 #include <Geom_SphericalSurface.hxx>
 #include <Geom_Surface.hxx>
 #include <Geom_SurfaceOfRevolution.hxx>
 #include <Geom_ToroidalSurface.hxx>
-#include <Geom_TrimmedCurve.hxx>
 #include <GeomToStep_MakeCurve.hxx>
 #include <GeomToStep_MakeSurface.hxx>
 #include <Interface_Static.hxx>
@@ -52,30 +47,24 @@
 #include <ShapeAlgo.hxx>
 #include <ShapeAlgo_AlgoContainer.hxx>
 #include <StdFail_NotDone.hxx>
-#include <StepGeom_Curve.hxx>
-#include <StepGeom_DegenerateToroidalSurface.hxx>
+#include <StepData_StepModel.hxx>
 #include <StepGeom_GeometricRepresentationContextAndParametricRepresentationContext.hxx>
-#include <StepGeom_HArray1OfPcurveOrSurface.hxx>
 #include <StepGeom_Pcurve.hxx>
-#include <StepGeom_PcurveOrSurface.hxx>
 #include <StepGeom_SeamCurve.hxx>
-#include <StepGeom_Surface.hxx>
 #include <StepGeom_SurfaceCurve.hxx>
 #include <StepGeom_ToroidalSurface.hxx>
+#include <Geom_OffsetSurface.hxx>
 #include <StepRepr_DefinitionalRepresentation.hxx>
 #include <StepRepr_HArray1OfRepresentationItem.hxx>
 #include <StepShape_AdvancedFace.hxx>
 #include <StepShape_EdgeCurve.hxx>
 #include <StepShape_FaceBound.hxx>
-#include <StepShape_FaceOuterBound.hxx>
 #include <StepShape_HArray1OfFaceBound.hxx>
 #include <StepShape_Loop.hxx>
 #include <StepShape_TopologicalRepresentationItem.hxx>
 #include <TCollection_HAsciiString.hxx>
-#include <TColStd_SequenceOfTransient.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
-#include <TopoDS_Face.hxx>
 #include <TopoDSToStep.hxx>
 #include <TopoDSToStep_MakeStepFace.hxx>
 #include <TopoDSToStep_MakeStepWire.hxx>
@@ -83,7 +72,7 @@
 #include <Transfer_FinderProcess.hxx>
 #include <TransferBRep.hxx>
 #include <TransferBRep_ShapeMapper.hxx>
-#include <UnitsMethods.hxx>
+#include <GeomConvert_Units.hxx>
 
 // Processing of non-manifold topology (ssv; 10.11.2010)
 // ----------------------------------------------------------------------------
@@ -98,10 +87,11 @@ TopoDSToStep_MakeStepFace::TopoDSToStep_MakeStepFace()
 TopoDSToStep_MakeStepFace::TopoDSToStep_MakeStepFace
 (const TopoDS_Face& F,
  TopoDSToStep_Tool& T,
- const Handle(Transfer_FinderProcess)& FP)
+ const Handle(Transfer_FinderProcess)& FP,
+ const StepData_Factors& theLocalFactors)
 {
   done = Standard_False;
-  Init(F, T, FP);
+  Init(F, T, FP, theLocalFactors);
 }
 
 // ----------------------------------------------------------------------------
@@ -109,9 +99,10 @@ TopoDSToStep_MakeStepFace::TopoDSToStep_MakeStepFace
 // Purpose :
 // ----------------------------------------------------------------------------
 
-void TopoDSToStep_MakeStepFace::Init(const TopoDS_Face& aFace, 
-				     TopoDSToStep_Tool& aTool,
-				     const Handle(Transfer_FinderProcess)& FP)
+void TopoDSToStep_MakeStepFace::Init(const TopoDS_Face& aFace,
+                                     TopoDSToStep_Tool& aTool,
+                                     const Handle(Transfer_FinderProcess)& FP,
+                                     const StepData_Factors& theLocalFactors)
 {
   // --------------------------------------------------------------
   // the face is given with its relative orientation (in the Shell)
@@ -125,7 +116,8 @@ void TopoDSToStep_MakeStepFace::Init(const TopoDS_Face& aFace,
     new TransferBRep_ShapeMapper(aFace);  // on ne sait jamais
 
   // [BEGIN] Processing non-manifold topology (another approach) (ssv; 10.11.2010)
-  Standard_Boolean isNMMode = Interface_Static::IVal("write.step.nonmanifold") != 0;
+  Standard_Boolean isNMMode =
+    Handle(StepData_StepModel)::DownCast(FP->Model())->InternalParameters.WriteNonmanifold != 0;
   if (isNMMode) {
     Handle(StepShape_AdvancedFace) anAF;
     Handle(TransferBRep_ShapeMapper) aSTEPMapper = TransferBRep::ShapeMapper(FP, aFace);
@@ -187,6 +179,18 @@ void TopoDSToStep_MakeStepFace::Init(const TopoDS_Face& aFace,
   // -----------------
   
   Handle(Geom_Surface) Su = BRep_Tool::Surface(ForwardFace);
+
+  if (Su.IsNull()) 
+  {
+#ifdef OCCT_DEBUG
+    std::cout << "Warning : Face without geometry not mapped";
+#endif
+    FP->AddWarning(errShape, " Face without geometry not mapped");
+    myError = TopoDSToStep_FaceOther;
+    done = Standard_False;
+    return;
+  }
+
 //  CKY  23 SEP 1996 : une FACE de Step n a pas droit a RECTANGULAR_TRIMMED...
 //  Il faut donc d abord "demonter" la RectangularTrimmedSurface pour
 //  passer la Surface de base
@@ -204,46 +208,69 @@ void TopoDSToStep_MakeStepFace::Init(const TopoDS_Face& aFace,
   //Standard_Boolean ReverseSurfaceOrientation = Standard_False; //szv#4:S4163:12Mar99 unused
   aTool.SetSurfaceReversed(Standard_False);
 
-  GeomToStep_MakeSurface MkSurface(Su);
+  GeomToStep_MakeSurface MkSurface(Su, theLocalFactors);
   Handle(StepGeom_Surface) Spms =  MkSurface.Value();
 
   //%pdn 30 Nov 98: TestRally 9 issue on r1001_ec.stp: 
   // toruses with major_radius < minor are re-coded as degenerate
   // rln 19.01.99: uncomment %30 pdn for integration into K4L
-  if(Spms->IsKind(STANDARD_TYPE(StepGeom_ToroidalSurface))) {
-    Handle(StepGeom_ToroidalSurface) trsf = Handle(StepGeom_ToroidalSurface)::DownCast(Spms);
-    Standard_Real R = trsf->MajorRadius();
-    Standard_Real r = trsf->MinorRadius();
-    if ( R < r ) { // if torus is degenerate, make revolution instead
-      Handle(Geom_ToroidalSurface) TS = Handle(Geom_ToroidalSurface)::DownCast(Su);
+{
+  // If the surface is Offset it is necessary to check the base surface 
+  Standard_Boolean aSurfaceIsOffset = Standard_False;
+  Handle(Geom_OffsetSurface) anOffsetSu;
+  if (Su->IsKind(STANDARD_TYPE(Geom_OffsetSurface)))
+  {
+    aSurfaceIsOffset = Standard_True;
+    anOffsetSu = Handle(Geom_OffsetSurface)::DownCast(Su);
+  }
+  if ((Spms->IsKind(STANDARD_TYPE(StepGeom_ToroidalSurface))) ||
+     ((aSurfaceIsOffset) && anOffsetSu->BasisSurface()->IsKind(STANDARD_TYPE(Geom_ToroidalSurface))))
+  {
+    Handle(Geom_ToroidalSurface) TS;
+    if (aSurfaceIsOffset)
+      TS = Handle(Geom_ToroidalSurface)::DownCast(anOffsetSu->BasisSurface());
+    else
+      TS = Handle(Geom_ToroidalSurface)::DownCast(Su);
+    Standard_Real R = TS->MajorRadius();
+    Standard_Real r = TS->MinorRadius();
+    if (R < r) // if torus is degenerate or base surface is degenerate, make revolution instead
+    { 
       gp_Ax3 Ax3 = TS->Position();
       gp_Pnt pos = Ax3.Location();
       gp_Dir dir = Ax3.Direction();
-      gp_Dir X   = Ax3.XDirection();
-      
+      gp_Dir X = Ax3.XDirection();
       // create basis curve
       Standard_Real UF, VF, UL, VL;
-      ShapeAlgo::AlgoContainer()->GetFaceUVBounds ( aFace, UF, UL, VF, VL );
-      gp_Ax2 Ax2 ( pos.XYZ() + X.XYZ() * TS->MajorRadius(), X ^ dir, X );
-      Handle(Geom_Curve) BasisCurve = new Geom_Circle ( Ax2, TS->MinorRadius() );
-      
+      ShapeAlgo::AlgoContainer()->GetFaceUVBounds(aFace, UF, UL, VF, VL);
+      gp_Ax2 Ax2(pos.XYZ() + X.XYZ() * TS->MajorRadius(), X ^ dir, X);
+      Handle(Geom_Curve) BasisCurve = new Geom_Circle(Ax2, TS->MinorRadius());
       // convert basis curve to bspline in order to avoid self-intersecting
       // surface of revolution (necessary e.g. for CATIA)
-      if ( VL - VF - 2 * M_PI < -Precision::PConfusion() ) 
-	BasisCurve = ShapeAlgo::AlgoContainer()->ConvertCurveToBSpline (BasisCurve, VF, VL, Precision::Approximation(),
-									GeomAbs_C1, 100, 9);
-//	BasisCurve = new Geom_TrimmedCurve ( BasisCurve, VF, VL );
+      if (VL - VF - 2 * M_PI < -Precision::PConfusion())
+        BasisCurve = ShapeAlgo::AlgoContainer()->ConvertCurveToBSpline(BasisCurve, VF, VL, Precision::Approximation(),
+                                                                       GeomAbs_C1, 100, 9);
+      //BasisCurve = new Geom_TrimmedCurve ( BasisCurve, VF, VL );
 
       // create surface of revolution
       gp_Ax1 Axis = Ax3.Axis();
-      if ( ! Ax3.Direct() ) Axis.Reverse();
-      Handle(Geom_SurfaceOfRevolution) Rev = new Geom_SurfaceOfRevolution ( BasisCurve, Axis );
-      
+      if (!Ax3.Direct()) Axis.Reverse();
+      Handle(Geom_SurfaceOfRevolution) Rev = new Geom_SurfaceOfRevolution(BasisCurve, Axis);
+
       // and translate it
-      GeomToStep_MakeSurface MkRev(Rev);
-      Spms = MkRev.Value();
+      if (aSurfaceIsOffset)
+      {
+        anOffsetSu->SetBasisSurface(Rev);
+        GeomToStep_MakeSurface MkRev(anOffsetSu, theLocalFactors);
+        Spms = MkRev.Value();
+      }
+      else
+      {
+        GeomToStep_MakeSurface MkRev(Rev, theLocalFactors);
+        Spms = MkRev.Value();
+      }
     }
   }
+}
 
   // ----------------
   // Translates Wires
@@ -268,7 +295,7 @@ void TopoDSToStep_MakeStepFace::Init(const TopoDS_Face& aFace,
       //const TopoDS_Wire ForwardWire = TopoDS::Wire(ssh);
 
       //MkWire.Init(ForwardWire, aTool, FP);
-      MkWire.Init(CurrentWire, aTool, FP);
+      MkWire.Init(CurrentWire, aTool, FP, theLocalFactors);
       if (MkWire.IsDone()) Loop = Handle(StepShape_Loop)::DownCast(MkWire.Value());
       else {
 #ifdef OCCT_DEBUG
@@ -377,14 +404,16 @@ void TopoDSToStep_MakeStepFace::Init(const TopoDS_Face& aFace,
 	if (Su->IsKind(STANDARD_TYPE(Geom_RectangularTrimmedSurface))) {
 	  Handle(Geom_RectangularTrimmedSurface) alocalRTS =
 	    Handle(Geom_RectangularTrimmedSurface)::DownCast(Su);
-	  C2dMapped = UnitsMethods::RadianToDegree(C2d, alocalRTS->BasisSurface());
+	  C2dMapped = GeomConvert_Units::RadianToDegree(C2d, alocalRTS->BasisSurface(),
+      theLocalFactors.LengthFactor(), theLocalFactors.FactorRadianDegree());
 	}
 	else {
-	  C2dMapped = UnitsMethods::RadianToDegree(C2d, Su);
+	  C2dMapped = GeomConvert_Units::RadianToDegree(C2d, Su,
+      theLocalFactors.LengthFactor(), theLocalFactors.FactorRadianDegree());
 	}
 //
 //	C2dMapped = C2d;  // cky : en remplacement de ce qui precede
-	GeomToStep_MakeCurve MkCurve(C2dMapped);
+	GeomToStep_MakeCurve MkCurve(C2dMapped, theLocalFactors);
 	
 	// --------------------
 	// Translate the Pcurve

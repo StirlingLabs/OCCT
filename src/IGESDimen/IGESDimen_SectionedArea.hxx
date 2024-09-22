@@ -22,13 +22,8 @@
 
 #include <Standard_Integer.hxx>
 #include <gp_XYZ.hxx>
-#include <Standard_Real.hxx>
 #include <IGESData_HArray1OfIGESEntity.hxx>
 #include <IGESData_IGESEntity.hxx>
-#include <Standard_Boolean.hxx>
-class IGESData_IGESEntity;
-class Standard_OutOfRange;
-class gp_XYZ;
 class gp_Pnt;
 
 

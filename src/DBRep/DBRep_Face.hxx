@@ -18,7 +18,6 @@
 #define _DBRep_Face_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <TopoDS_Face.hxx>
 #include <Draw_Color.hxx>
@@ -28,8 +27,6 @@
 #include <Standard_Integer.hxx>
 #include <GeomAbs_IsoType.hxx>
 #include <Standard_Real.hxx>
-class TopoDS_Face;
-class Draw_Color;
 
 
 class DBRep_Face;

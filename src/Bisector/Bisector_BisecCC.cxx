@@ -18,20 +18,14 @@
 #include <Bisector.hxx>
 #include <Bisector_BisecCC.hxx>
 #include <Bisector_BisecPC.hxx>
-#include <Bisector_Curve.hxx>
 #include <Bisector_FunctionH.hxx>
 #include <Bisector_PointOnBis.hxx>
 #include <Bisector_PolyBis.hxx>
-#include <Geom2d_Circle.hxx>
 #include <Geom2d_Curve.hxx>
 #include <Geom2d_Geometry.hxx>
 #include <Geom2d_Line.hxx>
-#include <Geom2d_TrimmedCurve.hxx>
-#include <Geom2dAdaptor_Curve.hxx>
 #include <Geom2dAPI_ProjectPointOnCurve.hxx>
-#include <Geom2dGcc.hxx>
 #include <Geom2dGcc_Circ2d2TanRad.hxx>
-#include <Geom2dGcc_QualifiedCurve.hxx>
 #include <Geom2dInt_GInter.hxx>
 #include <Geom2dLProp_CLProps2d.hxx>
 #include <gp.hxx>
@@ -43,11 +37,8 @@
 #include <math_FunctionRoot.hxx>
 #include <math_FunctionRoots.hxx>
 #include <Precision.hxx>
-#include <Standard_DivideByZero.hxx>
-#include <Standard_DomainError.hxx>
 #include <Standard_NotImplemented.hxx>
 #include <Standard_OutOfRange.hxx>
-#include <Standard_RangeError.hxx>
 #include <Standard_Type.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(Bisector_BisecCC,Bisector_Curve)
@@ -130,7 +121,7 @@ void  Bisector_BisecCC::Perform(const Handle(Geom2d_Curve)& Cu1,
   Standard_Real    U,UC1,UC2,Dist,dU,USol;  
   gp_Pnt2d         P;
   Standard_Integer NbPnts    = 21;
-  Standard_Real    EpsMin    = 10*Precision::Confusion();
+  constexpr  Standard_Real EpsMin = 10*Precision::Confusion();
   Standard_Boolean YaPoly    = Standard_True;
   Standard_Boolean OriInPoly = Standard_False;
   //---------------------------------------------
@@ -1635,8 +1626,8 @@ Standard_Real Bisector_BisecCC::SearchBound (const Standard_Real U1,
   Standard_Real UMid,Dist1,Dist2,DistMid,U11,U22;
   Standard_Real UC1,UC2;
   gp_Pnt2d PBis,PBisPrec;
-  Standard_Real TolPnt   = Precision::Confusion();
-  Standard_Real TolPar   = Precision::PConfusion();
+  constexpr Standard_Real TolPnt = Precision::Confusion();
+  constexpr Standard_Real TolPar = Precision::PConfusion();
   U11 = U1; U22 = U2;
   PBisPrec = ValueByInt(U11,UC1,UC2,Dist1);
   PBis     = ValueByInt(U22,UC1,UC2,Dist2);

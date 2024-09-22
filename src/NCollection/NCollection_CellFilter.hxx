@@ -16,16 +16,13 @@
 #ifndef NCollection_CellFilter_HeaderFile
 #define NCollection_CellFilter_HeaderFile
 
-#include <Standard_Real.hxx>
 #include <NCollection_LocalArray.hxx>
 #include <NCollection_Array1.hxx>
-#include <NCollection_List.hxx>
+#include <Standard_HashUtils.hxx>
 #include <NCollection_Map.hxx>
-#include <NCollection_DataMap.hxx>
 #include <NCollection_IncAllocator.hxx>
-#include <NCollection_TypeDef.hxx>
 
-//! Auxiliary enumeration serving as responce from method Inspect
+//! Auxiliary enumeration serving as response from method Inspect
 enum NCollection_CellFilter_Action 
 {
   CellFilter_Keep  = 0, //!< Target is needed and should be kept
@@ -115,8 +112,8 @@ enum NCollection_CellFilter_Action
 template <class Inspector> class NCollection_CellFilter
 {
 public:
-  typedef TYPENAME Inspector::Target Target;
-  typedef TYPENAME Inspector::Point  Point;
+  typedef typename Inspector::Target Target;
+  typedef typename Inspector::Point  Point;
 
 public:
 
@@ -139,7 +136,7 @@ public:
     Reset (theCellSize, theAlloc);
   }
 
-  //! Constructor when dimenstion count is known at compilation time.
+  //! Constructor when dimension count is known at compilation time.
   NCollection_CellFilter (const Standard_Real theCellSize = 0,
                           const Handle(NCollection_IncAllocator)& theAlloc = 0)
   : myCellSize(0, Inspector::Dimension - 1)
@@ -253,6 +250,9 @@ protected:
     ListNode *Next;
   };
 
+  //! Cell index type.
+  typedef Standard_Integer Cell_IndexType;
+
   /**
    * Auxiliary structure representing a cell in the space.
    * Cells are stored in the map, each cell contains list of objects 
@@ -270,14 +270,14 @@ protected:
     {
       for (int i = 0; i < theCellSize.Size(); i++)
       {
-          Standard_Real val = (Standard_Real)(Inspector::Coord(i, thePnt) / theCellSize(theCellSize.Lower() + i));
+          Standard_Real aVal = (Standard_Real)(Inspector::Coord(i, thePnt) / theCellSize(theCellSize.Lower() + i));
           //If the value of index is greater than
           //INT_MAX it is decreased correspondingly for the value of INT_MAX. If the value
           //of index is less than INT_MIN it is increased correspondingly for the absolute
           //value of INT_MIN.
-          index[i] = long((val > INT_MAX - 1) ? fmod(val, (Standard_Real) INT_MAX) 
-                                               : (val < INT_MIN + 1) ? fmod(val, (Standard_Real) INT_MIN)
-                                                                     : val);
+          index[i] = Cell_IndexType((aVal > INT_MAX - 1) ? fmod(aVal, (Standard_Real) INT_MAX)
+                                                         : (aVal < INT_MIN + 1) ? fmod(aVal, (Standard_Real) INT_MIN)
+                                                                                : aVal);
       }
     }
 
@@ -317,40 +317,33 @@ protected:
       return Standard_True;
     }
 
-    //! Returns hash code for this cell, in the range [1, theUpperBound]
-    //! @param theUpperBound the upper bound of the range a computing hash code must be within
-    //! @return a computed hash code, in the range [1, theUpperBound]
-    Standard_Integer HashCode (const Standard_Integer theUpperBound) const
+    bool operator==(const Cell& theOther) const
     {
-      // number of bits per each dimension in the hash code
-      const std::size_t aDim       = index.Size();
-      const std::size_t aShiftBits = (BITS (long) - 1) / aDim;
-      unsigned int      aCode      = 0;
-
-      for (std::size_t i = 0; i < aDim; ++i)
-      {
-        aCode = (aCode << aShiftBits) ^ index[i];
-      }
-
-      return ::HashCode(aCode, theUpperBound);
+      return IsEqual(theOther);
     }
 
   public:
-    NCollection_LocalArray<long, 10> index;
+    NCollection_LocalArray<Cell_IndexType, 10> index;
     ListNode *Objects;
   };
-  
-  //! Returns hash code for the given cell, in the range [1, theUpperBound]
-  //! @param theCell the cell object which hash code is to be computed
-  //! @param theUpperBound the upper bound of the range a computing hash code must be within
-  //! @return a computed hash code, in the range [1, theUpperBound]
-  friend Standard_Integer HashCode (const Cell& theCell, const Standard_Integer theUpperBound)
-  {
-    return theCell.HashCode (theUpperBound);
-  }
 
-  friend Standard_Boolean IsEqual (const Cell &aCell1, const Cell &aCell2)
-  { return aCell1.IsEqual(aCell2); }
+  struct CellHasher
+  {
+    size_t operator()(const Cell& theCell) const noexcept
+    {
+      // number of bits per each dimension in the hash code
+      const std::size_t aDim = theCell.index.Size();
+      return opencascade::hashBytes(&theCell.index[0], static_cast<int>(aDim * sizeof(Cell_IndexType)));
+    }
+
+    bool operator()(const Cell& theCell1,
+                    const Cell& theCell2) const noexcept
+    {
+      return theCell1 == theCell2;
+    }
+  };
+  
+  typedef NCollection_Map<Cell, CellHasher> CellMap;
 
 protected:
 
@@ -383,14 +376,19 @@ protected:
 		   const Cell& theCellMin, const Cell& theCellMax, 
                    const Target& theTarget)
   {
-    int start = theCellMin.index[idim];
-    int end   = theCellMax.index[idim];
-    for (int i=start; i <= end; i++) {
+    const Cell_IndexType aStart = theCellMin.index[idim];
+    const Cell_IndexType anEnd  = theCellMax.index[idim];
+    for (Cell_IndexType i = aStart; i <= anEnd; ++i)
+    {
       theCell.index[idim] = i;
       if ( idim ) // recurse
+      {
         iterateAdd (idim-1, theCell, theCellMin, theCellMax, theTarget);
+      }
       else // add to this cell
+      {
         add (theCell, theTarget);
+      }
     }
   }
   
@@ -426,14 +424,19 @@ protected:
                       const Cell& theCellMin, const Cell& theCellMax, 
                       const Target& theTarget)
   {
-    int start = theCellMin.index[idim];
-    int end   = theCellMax.index[idim];
-    for (int i=start; i <= end; i++) {
+    const Cell_IndexType aStart = theCellMin.index[idim];
+    const Cell_IndexType anEnd  = theCellMax.index[idim];
+    for (Cell_IndexType i = aStart; i <= anEnd; ++i)
+    {
       theCell.index[idim] = i;
       if ( idim ) // recurse
+      {
         iterateRemove (idim-1, theCell, theCellMin, theCellMax, theTarget);
+      }
       else // remove from this cell
+      {
         remove (theCell, theTarget);
+      }
     }
   }
 
@@ -469,21 +472,26 @@ protected:
 	               const Cell& theCellMin, const Cell& theCellMax, 
                        Inspector& theInspector) 
   {
-    int start = theCellMin.index[idim];
-    int end   = theCellMax.index[idim];
-    for (int i=start; i <= end; i++) {
+    const Cell_IndexType aStart = theCellMin.index[idim];
+    const Cell_IndexType anEnd  = theCellMax.index[idim];
+    for (Cell_IndexType i = aStart; i <= anEnd; ++i)
+    {
       theCell.index[idim] = i;
       if ( idim ) // recurse
+      {
         iterateInspect (idim-1, theCell, theCellMin, theCellMax, theInspector);
+      }
       else // inspect this cell
+      {
         inspect (theCell, theInspector);
+      }
     }
   }
 
 protected:
   Standard_Integer myDim;
   Handle(NCollection_BaseAllocator) myAllocator;
-  NCollection_Map<Cell>             myCells;
+  CellMap                           myCells;
   NCollection_Array1<Standard_Real> myCellSize;
 };
 

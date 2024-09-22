@@ -1,5 +1,14 @@
-MFC samples {#samples_mfc_standard}
+MFC: OCCT Samples (C++|MFC) {#samples_mfc_standard}
 ==========
+
+Visual C++ programming samples for Windows platform containing illustrating how to use a particular module or functionality, including the following MFC samples:
+
+  * Geometry
+  * Modeling
+  * ImportExport
+  * HLR
+
+@figure{samples_mvc.png}
 
 1. Contents 
 -----------------------
@@ -24,10 +33,10 @@ To run the Open CASCADE Technology samples, use command:
 execute run.bat [vc10|vc11|vc12|vc14] [win32|win64] [Release|Debug] [SampleName]
 ~~~~
 
-To run the **Animation** sample, use command:
+To run the **Geometry** sample, use command:
 
 ~~~~
-execute run.bat vc10 win64 Debug Animation
+execute run.bat vc10 win64 Debug Geometry
 ~~~~
 
 

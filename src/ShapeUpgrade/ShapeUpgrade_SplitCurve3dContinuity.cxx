@@ -26,7 +26,6 @@
 #include <Standard_ErrorHandler.hxx>
 #include <Standard_Failure.hxx>
 #include <Standard_Type.hxx>
-#include <TColGeom_HArray1OfCurve.hxx>
 #include <TColStd_HSequenceOfReal.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(ShapeUpgrade_SplitCurve3dContinuity,ShapeUpgrade_SplitCurve3d)
@@ -78,7 +77,7 @@ void ShapeUpgrade_SplitCurve3dContinuity::Compute()
 {  
   Standard_Real First =  mySplitValues->Value(1);
   Standard_Real Last =  mySplitValues->Value(mySplitValues->Length());
-  Standard_Real precision = Precision::PConfusion();
+  constexpr Standard_Real precision = Precision::PConfusion();
   if(myCurve->Continuity() < myCriterion) 
     myStatus = ShapeExtend::EncodeStatus (ShapeExtend_DONE2);
   if (mySplitValues->Length() > 2)

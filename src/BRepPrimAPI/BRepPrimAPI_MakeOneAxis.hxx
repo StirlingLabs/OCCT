@@ -19,11 +19,8 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
 #include <BRepBuilderAPI_MakeShape.hxx>
-#include <Standard_Address.hxx>
-class StdFail_NotDone;
 class TopoDS_Face;
 class TopoDS_Shell;
 class TopoDS_Solid;
@@ -43,7 +40,7 @@ public:
   Standard_EXPORT virtual Standard_Address OneAxis() = 0;
   
   //! Stores the solid in myShape.
-  Standard_EXPORT virtual void Build() Standard_OVERRIDE;
+  Standard_EXPORT virtual void Build(const Message_ProgressRange& theRange = Message_ProgressRange()) Standard_OVERRIDE;
   
   //! Returns the lateral face of the rotational primitive.
   Standard_EXPORT const TopoDS_Face& Face();

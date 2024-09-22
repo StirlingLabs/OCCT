@@ -17,8 +17,6 @@
 //   svv  10.01.00 porting on DEC
 
 #include <Geom_BezierCurve.hxx>
-#include <Geom_BezierSurface.hxx>
-#include <Geom_BSplineSurface.hxx>
 #include <Geom_Curve.hxx>
 #include <Geom_OffsetCurve.hxx>
 #include <Geom_OffsetSurface.hxx>
@@ -74,7 +72,7 @@ void ShapeUpgrade_ConvertSurfaceToBezierBasis::Compute(const Standard_Boolean Se
   Standard_Real ULast  = myUSplitValues->Value(myUSplitValues->Length());
   Standard_Real VFirst = myVSplitValues->Value(1);
   Standard_Real VLast  = myVSplitValues->Value(myVSplitValues->Length());
-  Standard_Real precision = Precision::PConfusion();
+  constexpr Standard_Real precision = Precision::PConfusion();
   
   if (mySurface->IsKind(STANDARD_TYPE(Geom_RectangularTrimmedSurface))) {
     Handle(Geom_RectangularTrimmedSurface) Surface = Handle(Geom_RectangularTrimmedSurface)::DownCast(mySurface);
@@ -408,7 +406,7 @@ void ShapeUpgrade_ConvertSurfaceToBezierBasis::Compute(const Standard_Boolean Se
 //purpose  : 
 //=======================================================================
 
-static Handle(Geom_Surface) GetSegment(const Handle(Geom_Surface) surf,
+static Handle(Geom_Surface) GetSegment(const Handle(Geom_Surface)& surf,
 				       const Standard_Real U1,
 				       const Standard_Real U2,
 				       const Standard_Real V1,
@@ -416,7 +414,7 @@ static Handle(Geom_Surface) GetSegment(const Handle(Geom_Surface) surf,
 {
   if(surf->IsKind(STANDARD_TYPE(Geom_BezierSurface))) {
     Handle(Geom_BezierSurface) bezier = Handle(Geom_BezierSurface)::DownCast(surf->Copy());
-    Standard_Real prec = Precision::PConfusion();
+    constexpr Standard_Real prec = Precision::PConfusion();
     if(U1 < prec && U2 > 1-prec && V1 < prec && V2 > 1-prec)
       return bezier;
     //pdn K4L+ (work around)
@@ -501,7 +499,7 @@ void ShapeUpgrade_ConvertSurfaceToBezierBasis::Build(const Standard_Boolean /*Se
     offsetValue = offSur->Offset();
   }
 
-  Standard_Real prec = Precision::PConfusion();
+  constexpr Standard_Real prec = Precision::PConfusion();
   Handle(TColStd_HArray1OfReal) myUSplitParams = mySegments->UJointValues();
   Handle(TColStd_HArray1OfReal) myVSplitParams = mySegments->VJointValues();
   Standard_Integer nbU = myUSplitValues->Length();

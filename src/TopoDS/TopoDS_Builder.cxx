@@ -17,18 +17,12 @@
 
 #include <Standard_NullObject.hxx>
 #include <TopoDS_Builder.hxx>
-#include <TopoDS_Compound.hxx>
-#include <TopoDS_CompSolid.hxx>
 #include <TopoDS_FrozenShape.hxx>
 #include <TopoDS_ListIteratorOfListOfShape.hxx>
 #include <TopoDS_Shape.hxx>
-#include <TopoDS_Shell.hxx>
-#include <TopoDS_Solid.hxx>
-#include <TopoDS_TCompound.hxx>
 #include <TopoDS_TShape.hxx>
 #include <TopoDS_TWire.hxx>
 #include <TopoDS_UnCompatibleShapes.hxx>
-#include <TopoDS_Wire.hxx>
 
 //=======================================================================
 //function : MakeShape
@@ -105,7 +99,7 @@ void TopoDS_Builder::Add (TopoDS_Shape& aShape,
       // and the Relative Location
       const TopLoc_Location& aLoc=aShape.Location();
       if (!aLoc.IsIdentity())
-        S.Move(aLoc.Inverted());
+        S.Move(aLoc.Inverted(), Standard_False);
       //
       // Set the TShape as modified.
       aShape.TShape()->Modified(Standard_True);
@@ -135,7 +129,7 @@ void TopoDS_Builder::Remove (TopoDS_Shape& aShape,
   TopoDS_Shape S = aComponent;
   if (aShape.Orientation() == TopAbs_REVERSED)
     S.Reverse();
-  S.Location(S.Location().Predivided(aShape.Location()));
+  S.Location(S.Location().Predivided(aShape.Location()), Standard_False);
 
   TopoDS_ListOfShape& L = aShape.TShape()->myShapes;
   TopoDS_ListIteratorOfListOfShape It(L);

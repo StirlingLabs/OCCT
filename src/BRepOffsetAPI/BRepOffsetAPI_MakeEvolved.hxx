@@ -19,18 +19,13 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
 #include <BRepFill_Evolved.hxx>
 #include <BRepFill_AdvancedEvolved.hxx>
 #include <BRepBuilderAPI_MakeShape.hxx>
 #include <GeomAbs_JoinType.hxx>
-#include <Standard_Boolean.hxx>
-#include <Standard_Real.hxx>
 #include <TopTools_ListOfShape.hxx>
 class TopoDS_Wire;
-class TopoDS_Face;
-class BRepFill_Evolved;
 class TopoDS_Shape;
 
 
@@ -106,7 +101,7 @@ public:
   Standard_EXPORT const BRepFill_Evolved& Evolved() const;
   
   //! Builds the resulting shape (redefined from MakeShape).
-  Standard_EXPORT virtual void Build() Standard_OVERRIDE;
+  Standard_EXPORT virtual void Build(const Message_ProgressRange& theRange = Message_ProgressRange()) Standard_OVERRIDE;
   
   //! Returns   the  shapes  created  from   a  subshape
   //! <SpineShape>  of     the  spine   and   a subshape

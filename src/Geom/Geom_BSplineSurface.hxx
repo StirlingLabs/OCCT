@@ -21,7 +21,6 @@
 #include <Standard_Type.hxx>
 
 #include <Precision.hxx>
-#include <Standard_Boolean.hxx>
 #include <GeomAbs_BSplKnotDistribution.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <Standard_Integer.hxx>
@@ -29,20 +28,12 @@
 #include <TColStd_HArray2OfReal.hxx>
 #include <TColStd_HArray1OfReal.hxx>
 #include <TColStd_HArray1OfInteger.hxx>
-#include <Standard_Real.hxx>
 #include <Geom_BoundedSurface.hxx>
 #include <TColgp_Array2OfPnt.hxx>
 #include <TColStd_Array1OfReal.hxx>
 #include <TColStd_Array1OfInteger.hxx>
 #include <TColStd_Array2OfReal.hxx>
 #include <TColgp_Array1OfPnt.hxx>
-class Standard_ConstructionError;
-class Standard_DimensionError;
-class Standard_DomainError;
-class Standard_OutOfRange;
-class Standard_NoSuchObject;
-class Standard_RangeError;
-class Geom_UndefinedDerivative;
 class gp_Pnt;
 class gp_Vec;
 class Geom_Curve;

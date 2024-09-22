@@ -19,19 +19,14 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
 #include <Standard_Real.hxx>
-#include <gp_Ax2d.hxx>
 #include <Adaptor2d_Curve2d.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <Standard_Integer.hxx>
 #include <TColStd_Array1OfReal.hxx>
 #include <Standard_Boolean.hxx>
 #include <GeomAbs_CurveType.hxx>
-class Standard_OutOfRange;
-class Standard_NoSuchObject;
-class Standard_DomainError;
 class gp_Pnt2d;
 class gp_Dir2d;
 class gp_Lin2d;
@@ -53,7 +48,10 @@ public:
   Standard_EXPORT Adaptor2d_Line2d();
   
   Standard_EXPORT Adaptor2d_Line2d(const gp_Pnt2d& P, const gp_Dir2d& D, const Standard_Real UFirst, const Standard_Real ULast);
-  
+ 
+  //! Shallow copy of adaptor
+  Standard_EXPORT virtual Handle(Adaptor2d_Curve2d) ShallowCopy() const Standard_OVERRIDE;
+
   Standard_EXPORT void Load (const gp_Lin2d& L);
   
   Standard_EXPORT void Load (const gp_Lin2d& L, const Standard_Real UFirst, const Standard_Real ULast);

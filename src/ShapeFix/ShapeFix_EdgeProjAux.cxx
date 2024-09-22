@@ -20,15 +20,12 @@
 #include <BRep_Tool.hxx>
 #include <ElCLib.hxx>
 #include <Extrema_ExtPC.hxx>
-#include <Geom2d_BoundedCurve.hxx>
 #include <Geom2d_BSplineCurve.hxx>
 #include <Geom2d_Curve.hxx>
 #include <Geom2d_Line.hxx>
 #include <Geom2dAdaptor_Curve.hxx>
 #include <Geom_Curve.hxx>
-#include <Geom_SphericalSurface.hxx>
 #include <Geom_Surface.hxx>
-#include <GeomAdaptor_Surface.hxx>
 #include <gp_Pnt.hxx>
 #include <Precision.hxx>
 #include <ShapeAnalysis.hxx>
@@ -577,7 +574,7 @@ void ShapeFix_EdgeProjAux::UpdateParam2d (const Handle(Geom2d_Curve)& theCurve2d
   Standard_Real cf = theCurve2d->FirstParameter();
   Standard_Real cl = theCurve2d->LastParameter();
 //:S4136  Standard_Real preci = BRepAPI::Precision();
-  Standard_Real preci2d = Precision::PConfusion(); //:S4136: Parametric(preci, 0.01);
+  constexpr Standard_Real preci2d = Precision::PConfusion(); //:S4136: Parametric(preci, 0.01);
 
   // 15.11.2002 PTV OCC966
   if (ShapeAnalysis_Curve::IsPeriodic(theCurve2d)) {

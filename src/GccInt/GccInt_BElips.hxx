@@ -18,12 +18,10 @@
 #define _GccInt_BElips_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <gp_Elips2d.hxx>
 #include <GccInt_Bisec.hxx>
 #include <GccInt_IType.hxx>
-class gp_Elips2d;
 
 
 class GccInt_BElips;

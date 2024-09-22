@@ -14,7 +14,6 @@
 #ifndef _XCAFDoc_VisMaterialPBR_HeaderFile
 #define _XCAFDoc_VisMaterialPBR_HeaderFile
 
-#include <Graphic3d_AlphaMode.hxx>
 #include <Graphic3d_Vec.hxx>
 #include <Image_Texture.hxx>
 #include <Quantity_ColorRGBA.hxx>
@@ -33,7 +32,7 @@ struct XCAFDoc_VisMaterialPBR
   Standard_ShortReal      Metallic;                 //!< metalness  (or scale factor to the texture) within range [0.0, 1.0]; 1.0 by default
   Standard_ShortReal      Roughness;                //!< roughness  (or scale factor to the texture) within range [0.0, 1.0]; 1.0 by default
   Standard_ShortReal      RefractionIndex;          //!< IOR (index of refraction) within range [1.0, 3.0]; 1.5 by default
-  Standard_Boolean        IsDefined;                //!< defined flag; FALSE by default
+  Standard_Boolean        IsDefined;                //!< defined flag; TRUE by default
 
   //! Empty constructor.
   XCAFDoc_VisMaterialPBR()
@@ -42,7 +41,7 @@ struct XCAFDoc_VisMaterialPBR
     Metallic  (1.0f),
     Roughness (1.0f),
     RefractionIndex (1.5f),
-    IsDefined (Standard_False) {}
+    IsDefined (Standard_True) {}
 
   //! Compare two materials.
   Standard_Boolean IsEqual (const XCAFDoc_VisMaterialPBR& theOther) const

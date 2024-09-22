@@ -15,10 +15,12 @@
 ;# Liste des toolkits WOK sous forme de full path
 ;# 
 proc DataExchange:toolkits { } {
-    return [list TKXSBase TKSTEPBase TKSTEPAttr TKSTEP209 TKSTEP TKIGES \
-		TKXCAF TKXDEIGES TKXDESTEP \
-		TKSTL TKVRML TKXmlXCAF TKBinXCAF TKRWMesh]
+  return [list TKXSBase TKXCAF TKDEIGES TKDESTEP \
+               TKDE TKDECascade TKDESTL TKDEVRML \
+               TKXmlXCAF TKBinXCAF TKRWMesh \
+               TKDEGLTF TKDEOBJ TKDEPLY]
 }
+
 ;#
 ;# Autres UDs a prendre.
 ;#

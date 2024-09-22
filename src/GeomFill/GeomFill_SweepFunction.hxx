@@ -20,11 +20,9 @@
 #include <Standard.hxx>
 #include <Standard_Type.hxx>
 
-#include <Standard_Real.hxx>
 #include <gp_Mat.hxx>
 #include <gp_Vec.hxx>
 #include <Approx_SweepFunction.hxx>
-#include <Standard_Boolean.hxx>
 #include <TColgp_Array1OfPnt.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
 #include <TColStd_Array1OfReal.hxx>
@@ -35,7 +33,6 @@
 #include <GeomAbs_Shape.hxx>
 class GeomFill_LocationLaw;
 class GeomFill_SectionLaw;
-class Standard_OutOfRange;
 class gp_Pnt;
 
 
@@ -102,7 +99,7 @@ public:
   Standard_EXPORT virtual void Resolution (const Standard_Integer Index, const Standard_Real Tol, Standard_Real& TolU, Standard_Real& TolV) const Standard_OVERRIDE;
 
   //! Returns the tolerance to reach in approximation
-  //! to respecte
+  //! to respect
   //! BoundTol error at the Boundary
   //! AngleTol tangent error at the Boundary (in radian)
   //! SurfTol error inside the surface.

@@ -68,6 +68,28 @@ SelectMgr_SelectingVolumeManager SelectMgr_SelectingVolumeManager::ScaleAndTrans
 }
 
 //=======================================================================
+// function : CopyWithBuilder
+// purpose  : Returns a copy of the selecting volume manager and its active frustum re-constructed using the passed builder.
+//            Builder is an argument that represents corresponding settings for re-constructing transformed
+//            frustum from scratch.
+//=======================================================================
+SelectMgr_SelectingVolumeManager SelectMgr_SelectingVolumeManager::CopyWithBuilder (const Handle(SelectMgr_FrustumBuilder)& theBuilder) const
+{
+  SelectMgr_SelectingVolumeManager aMgr;
+  aMgr.myToAllowOverlap = myToAllowOverlap;
+  aMgr.myViewClipPlanes = myViewClipPlanes;
+  aMgr.myObjectClipPlanes = myObjectClipPlanes;
+  aMgr.myViewClipRange = myViewClipRange;
+  if (!myActiveSelectingVolume.IsNull())
+  {
+    aMgr.myActiveSelectingVolume = myActiveSelectingVolume->CopyWithBuilder (theBuilder);
+    aMgr.BuildSelectingVolume();
+  }
+
+  return aMgr;
+}
+
+//=======================================================================
 // function : GetActiveSelectionType
 // purpose  :
 //=======================================================================
@@ -98,7 +120,7 @@ const Handle(Graphic3d_Camera)& SelectMgr_SelectingVolumeManager::Camera() const
 // function : SetCamera
 // purpose  :
 //=======================================================================
-void SelectMgr_SelectingVolumeManager::SetCamera (const Handle(Graphic3d_Camera) theCamera)
+void SelectMgr_SelectingVolumeManager::SetCamera (const Handle(Graphic3d_Camera)& theCamera)
 {
   Standard_ASSERT_RAISE(!myActiveSelectingVolume.IsNull(),
     "SelectMgr_SelectingVolumeManager::SetCamera() should be called after initialization of selection volume ");
@@ -416,6 +438,76 @@ Standard_Boolean SelectMgr_SelectingVolumeManager::OverlapsSphere (const gp_Pnt&
     return Standard_False;
   }
   return myActiveSelectingVolume->OverlapsSphere (theCenter, theRadius, theInside);
+}
+
+//=======================================================================
+// function : OverlapsCylinder
+// purpose  :
+//=======================================================================
+Standard_Boolean SelectMgr_SelectingVolumeManager::OverlapsCylinder (const Standard_Real theBottomRad,
+                                                                     const Standard_Real theTopRad,
+                                                                     const Standard_Real theHeight,
+                                                                     const gp_Trsf& theTrsf,
+                                                                     const Standard_Boolean theIsHollow,
+                                                                     SelectBasics_PickResult& thePickResult) const
+{
+  if (myActiveSelectingVolume.IsNull())
+  {
+    return false;
+  }
+  return myActiveSelectingVolume->OverlapsCylinder (theBottomRad, theTopRad, theHeight, theTrsf,
+                                                    theIsHollow, myViewClipRange, thePickResult);
+}
+
+//=======================================================================
+// function : OverlapsCylinder
+// purpose  :
+//=======================================================================
+Standard_Boolean SelectMgr_SelectingVolumeManager::OverlapsCylinder (const Standard_Real theBottomRad,
+                                                                     const Standard_Real theTopRad,
+                                                                     const Standard_Real theHeight,
+                                                                     const gp_Trsf& theTrsf,
+                                                                     const Standard_Boolean theIsHollow,
+                                                                     Standard_Boolean* theInside) const
+{
+  if (myActiveSelectingVolume.IsNull())
+  {
+    return false;
+  }
+  return myActiveSelectingVolume->OverlapsCylinder (theBottomRad, theTopRad, theHeight,
+                                                    theTrsf, theIsHollow, theInside);
+}
+
+//=======================================================================
+// function : OverlapsCircle
+// purpose  :
+//=======================================================================
+Standard_Boolean SelectMgr_SelectingVolumeManager::OverlapsCircle (const Standard_Real theRadius,
+                                                                   const gp_Trsf& theTrsf,
+                                                                   const Standard_Boolean theIsFilled,
+                                                                   SelectBasics_PickResult& thePickResult) const
+{
+  if (myActiveSelectingVolume.IsNull())
+  {
+    return false;
+  }
+  return myActiveSelectingVolume->OverlapsCircle (theRadius, theTrsf, theIsFilled, myViewClipRange, thePickResult);
+}
+
+//=======================================================================
+// function : OverlapsCircle
+// purpose  :
+//=======================================================================
+Standard_Boolean SelectMgr_SelectingVolumeManager::OverlapsCircle (const Standard_Real theRadius,
+                                                                   const gp_Trsf& theTrsf,
+                                                                   const Standard_Boolean theIsFilled,
+                                                                   Standard_Boolean* theInside) const
+{
+  if (myActiveSelectingVolume.IsNull())
+  {
+    return false;
+  }
+  return myActiveSelectingVolume->OverlapsCircle (theRadius, theTrsf, theIsFilled, theInside);
 }
 
 //=======================================================================

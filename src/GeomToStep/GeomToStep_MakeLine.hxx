@@ -23,7 +23,6 @@
 
 #include <GeomToStep_Root.hxx>
 class StepGeom_Line;
-class StdFail_NotDone;
 class gp_Lin;
 class gp_Lin2d;
 class Geom_Line;
@@ -41,13 +40,17 @@ public:
   DEFINE_STANDARD_ALLOC
 
   
-  Standard_EXPORT GeomToStep_MakeLine(const gp_Lin& L);
+  Standard_EXPORT GeomToStep_MakeLine(const gp_Lin& L,
+                                      const StepData_Factors& theLocalFactors = StepData_Factors());
   
-  Standard_EXPORT GeomToStep_MakeLine(const gp_Lin2d& L);
+  Standard_EXPORT GeomToStep_MakeLine(const gp_Lin2d& L,
+                                      const StepData_Factors& theLocalFactors = StepData_Factors());
   
-  Standard_EXPORT GeomToStep_MakeLine(const Handle(Geom_Line)& C);
+  Standard_EXPORT GeomToStep_MakeLine(const Handle(Geom_Line)& C,
+                                      const StepData_Factors& theLocalFactors = StepData_Factors());
   
-  Standard_EXPORT GeomToStep_MakeLine(const Handle(Geom2d_Line)& C);
+  Standard_EXPORT GeomToStep_MakeLine(const Handle(Geom2d_Line)& C,
+                                      const StepData_Factors& theLocalFactors = StepData_Factors());
   
   Standard_EXPORT const Handle(StepGeom_Line)& Value() const;
 

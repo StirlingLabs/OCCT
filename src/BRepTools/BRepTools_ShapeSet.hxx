@@ -26,13 +26,11 @@
 #include <GeomTools_CurveSet.hxx>
 #include <GeomTools_Curve2dSet.hxx>
 #include <TColStd_IndexedMapOfTransient.hxx>
-#include <Standard_Boolean.hxx>
 #include <TopTools_ShapeSet.hxx>
 #include <Standard_OStream.hxx>
 #include <Standard_IStream.hxx>
 #include <TopAbs_ShapeEnum.hxx>
 
-class BRep_Builder;
 class TopoDS_Shape;
 
 
@@ -74,7 +72,7 @@ public:
   //! Clears the content of the set.
   Standard_EXPORT virtual void Clear() Standard_OVERRIDE;
   
-  //! Stores the goemetry of <S>.
+  //! Stores the geometry of <S>.
   Standard_EXPORT virtual void AddGeometry (const TopoDS_Shape& S) Standard_OVERRIDE;
   
   //! Dumps the geometry of me on the stream <OS>.

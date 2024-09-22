@@ -18,11 +18,9 @@
 #define _IGESGeom_CurveOnSurface_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <Standard_Integer.hxx>
 #include <IGESData_IGESEntity.hxx>
-class IGESData_IGESEntity;
 
 
 class IGESGeom_CurveOnSurface;

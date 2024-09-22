@@ -14,10 +14,10 @@
 #ifndef _Standard_Handle_HeaderFile
 #define _Standard_Handle_HeaderFile
 
-#include <Standard_Address.hxx>
 #include <Standard_Std.hxx>
 #include <Standard_Stream.hxx>
 #include <Standard_Transient.hxx>
+#include <Standard_Macro.hxx>
 
 class Standard_Transient;
 
@@ -70,13 +70,11 @@ namespace opencascade {
       BeginScope();
     }
 
-#ifndef OCCT_NO_RVALUE_REFERENCE
     //! Move constructor
-    handle (handle&& theHandle) : entity(theHandle.entity)
+    handle (handle&& theHandle) Standard_Noexcept : entity(theHandle.entity)
     {
       theHandle.entity = 0;
     }
-#endif
 
     //! Destructor
     ~handle ()
@@ -113,14 +111,12 @@ namespace opencascade {
       return *this;
     }
 
-#ifndef OCCT_NO_RVALUE_REFERENCE
     //! Move operator
-    handle& operator= (handle&& theHandle)
+    handle& operator= (handle&& theHandle) Standard_Noexcept
     {
       std::swap (this->entity, theHandle.entity);
       return *this;
     }
-#endif
 
     //! STL-like cast to pointer to referred object (note non-const).
     //! @sa std::shared_ptr::get()
@@ -307,7 +303,6 @@ namespace opencascade {
       BeginScope();
     }
 
-#ifndef OCCT_NO_RVALUE_REFERENCE
     //! Generalized move constructor
     template <class T2>
     handle (handle<T2>&& theHandle, typename std::enable_if <is_base_but_not_same <T, T2>::value>::type* = nullptr)
@@ -315,7 +310,6 @@ namespace opencascade {
     {
       theHandle.entity = 0;
     }
-#endif
 
     //! Generalized assignment operator.
     template <class T2>
@@ -327,7 +321,6 @@ namespace opencascade {
       return *this;
     }
 
-#ifndef OCCT_NO_RVALUE_REFERENCE
     //! Generalized move operator
     template <class T2>
     handle& operator= (handle<T2>&& theHandle)
@@ -337,7 +330,6 @@ namespace opencascade {
       std::swap (this->entity, theHandle.entity);
       return *this;
     }
-#endif
 
 #else
 
@@ -406,14 +398,18 @@ namespace opencascade {
 //! Define Handle() macro
 #define Handle(Class) opencascade::handle<Class>
 
-//! Computes a hash code for the standard handle, in the range [1, theUpperBound]
-//! @param theHandle the handle which hash code is to be computed
-//! @param theUpperBound the upper bound of the range a computing hash code must be within
-//! @return a computed hash code, in the range [1, theUpperBound]
-template <class TheTransientType>
-Standard_Integer HashCode (const Handle (TheTransientType) & theHandle, const Standard_Integer theUpperBound)
+#include <Standard_HashUtils.hxx>
+
+namespace std
 {
-  return ::HashCode (theHandle.get(), theUpperBound);
+  template <class TheTransientType>
+  struct hash<Handle(TheTransientType)>
+  {
+    size_t operator()(const Handle(TheTransientType)& theHandle) const noexcept
+    {
+      return static_cast<size_t>(reinterpret_cast<std::uintptr_t>(theHandle.get()));
+    }
+  };
 }
 
 //! For compatibility with previous versions of OCCT, define Handle_Class alias for opencascade::handle<Class>.

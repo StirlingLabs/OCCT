@@ -17,7 +17,6 @@
 
 #include <BRep_Builder.hxx>
 #include <BRep_GCurve.hxx>
-#include <BRep_ListIteratorOfListOfCurveRepresentation.hxx>
 #include <BRep_TEdge.hxx>
 #include <BRep_Tool.hxx>
 #include <gp_Pnt.hxx>
@@ -33,7 +32,6 @@
 #include <TopoDS_Vertex.hxx>
 #include <TopoDS_Wire.hxx>
 #include <TopTools_DataMapIteratorOfDataMapOfShapeListOfShape.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopTools_ListOfShape.hxx>
 
 //#define POSITION_USES_MEAN_POINT
@@ -167,9 +165,9 @@ void ShapeFix_EdgeConnect::Build ()
     for ( theLIterator.Initialize( theList );
 	  theLIterator.More();
 	  theLIterator.Next() ) {
-      TopoDS_Vertex& theVertex = TopoDS::Vertex( theLIterator.Value() );
+      const TopoDS_Vertex& theVertex = TopoDS::Vertex( theLIterator.Value() );
       theLIterator.Next();
-      TopoDS_Edge& theEdge = TopoDS::Edge( theLIterator.Value() );
+      TopoDS_Edge& theEdge = TopoDS::Edge( theLIterator.ChangeValue() );
 
       // Determine usage of curve bound points
       TopoDS_Vertex theStart, theEnd;
@@ -242,9 +240,9 @@ void ShapeFix_EdgeConnect::Build ()
     for ( theLIterator.Initialize( theList );
 	  theLIterator.More();
 	  theLIterator.Next() ) {
-      TopoDS_Vertex& theVertex = TopoDS::Vertex( theLIterator.Value() );
+      const TopoDS_Vertex& theVertex = TopoDS::Vertex( theLIterator.Value() );
       theLIterator.Next();
-      TopoDS_Edge& theEdge = TopoDS::Edge( theLIterator.Value() );
+      TopoDS_Edge& theEdge = TopoDS::Edge( theLIterator.ChangeValue() );
 
       // Determine usage of old vertices
       TopoDS_Vertex theStart, theEnd;

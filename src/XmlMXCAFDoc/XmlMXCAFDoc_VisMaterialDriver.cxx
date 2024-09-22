@@ -13,9 +13,11 @@
 
 #include <XmlMXCAFDoc_VisMaterialDriver.hxx>
 
+#include <Message.hxx>
 #include <Message_Messenger.hxx>
 #include <XCAFDoc_VisMaterial.hxx>
 #include <XmlObjMgt.hxx>
+#include <XmlObjMgt_Document.hxx>
 #include <XmlObjMgt_Persistent.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(XmlMXCAFDoc_VisMaterialDriver, XmlMDF_ADriver)
@@ -42,6 +44,10 @@ IMPLEMENT_DOMSTRING(EmissiveColor,     "emissive_color")
 IMPLEMENT_DOMSTRING(Shininess,         "shininess")
 IMPLEMENT_DOMSTRING(Transparency,      "transparency")
 IMPLEMENT_DOMSTRING(DiffuseTexture,    "diffuse_texture")
+IMPLEMENT_DOMSTRING(FilePath,          "file_path")
+IMPLEMENT_DOMSTRING(TextureId,         "texture_id")
+IMPLEMENT_DOMSTRING(Offset,            "offset")
+IMPLEMENT_DOMSTRING(Length,            "length")
 
 //! Encode alpha mode into character.
 static const char* alphaModeToString (Graphic3d_AlphaMode theMode)
@@ -202,11 +208,26 @@ static void writeTexture (XmlObjMgt_Persistent& theTarget,
                           const XmlObjMgt_DOMString& theName,
                           const Handle(Image_Texture)& theImage)
 {
-  if (!theImage.IsNull()
-   && !theImage->FilePath().IsEmpty()
-   &&  theImage->FileOffset() == -1)
+  if (theImage.IsNull())
   {
-    theTarget.Element().setAttribute (theName, theImage->FilePath().ToCString());
+    return;
+  }
+  XmlObjMgt_Document aDoc(theTarget.Element().getOwnerDocument());
+  XmlObjMgt_Element aCurTarget = aDoc.createElement(theName);
+  theTarget.Element().appendChild(aCurTarget);
+  if (theImage->DataBuffer().IsNull())
+  {
+    aCurTarget.setAttribute(::FilePath(), theImage->FilePath().ToCString());
+    if (theImage->FileOffset() == -1 || theImage->FileLength() == -1)
+    {
+      return;
+    }
+    aCurTarget.setAttribute(::Offset(), static_cast<int>(theImage->FileOffset()));
+    aCurTarget.setAttribute(::Length(), static_cast<int>(theImage->FileLength()));
+  }
+  else
+  {
+    Message::SendWarning() << "Warning: XmlMXCAFDoc_VisMaterialDriver : Can't write a texture to buffer.";
   }
 }
 
@@ -215,10 +236,34 @@ static void readTexture (const XmlObjMgt_Element& theElement,
                          const XmlObjMgt_DOMString& theName,
                          Handle(Image_Texture)& theImage)
 {
-  TCollection_AsciiString aPath (theElement.getAttribute (theName).GetString());
-  if (!aPath.IsEmpty())
+  TCollection_AsciiString aStr(theElement.getAttribute(theName).GetString());
+  if (!aStr.IsEmpty())
   {
-    theImage = new Image_Texture (aPath);
+    theImage = new Image_Texture(aStr);
+    return;
+  }
+  LDOM_Element anElement = theElement.GetChildByTagName(theName);
+  if (anElement.isNull())
+  {
+    return;
+  }
+  TCollection_AsciiString aFilePath(anElement.getAttribute(::FilePath()).GetString());
+  TCollection_AsciiString anId(anElement.getAttribute(::TextureId()).GetString());
+  Standard_Integer anOffset = -1, aLength = -1;
+  if (!aFilePath.IsEmpty())
+  {
+    anElement.getAttribute(::Offset()).GetInteger(anOffset);
+    anElement.getAttribute(::Length()).GetInteger(aLength);
+    if (anOffset == -1 || aLength == -1)
+    {
+      theImage = new Image_Texture(aFilePath);
+      return;
+    }
+    theImage = new Image_Texture(aFilePath, anOffset, aLength);
+  }
+  else if (!anId.IsEmpty())
+  {
+    Message::SendWarning() << "Warning: XmlMXCAFDoc_VisMaterialDriver : Can't write a texture to buffer.";
   }
 }
 
@@ -256,11 +301,14 @@ Standard_Boolean XmlMXCAFDoc_VisMaterialDriver::Paste (const XmlObjMgt_Persisten
   aDoubleSidedStr.GetInteger (aDoubleSidedInt);
   Standard_ShortReal anAlphaCutOff = 0.5f;
   readReal (theSource, ::AlphaCutOff(), anAlphaCutOff);
-  aMat->SetFaceCulling (aDoubleSidedInt == 1
-                      ? Graphic3d_TypeOfBackfacingModel_DoubleSided
-                      : (aDoubleSidedInt == 2
-                       ? Graphic3d_TypeOfBackfacingModel_BackCulled
-                       : Graphic3d_TypeOfBackfacingModel_Auto));
+  switch (aDoubleSidedInt)
+  {
+    case 1:  aMat->SetFaceCulling (Graphic3d_TypeOfBackfacingModel_DoubleSided); break;
+    case 2:  aMat->SetFaceCulling (Graphic3d_TypeOfBackfacingModel_BackCulled);  break;
+    case 3:  aMat->SetFaceCulling (Graphic3d_TypeOfBackfacingModel_FrontCulled); break;
+    case 0:
+    default: aMat->SetFaceCulling (Graphic3d_TypeOfBackfacingModel_Auto); break;
+  }
   aMat->SetAlphaMode (alphaModeFromString (theSource.Element().getAttribute (::AlphaMode()).GetString()), anAlphaCutOff);
 
   Quantity_ColorRGBA aBaseColor;
@@ -307,11 +355,14 @@ void XmlMXCAFDoc_VisMaterialDriver::Paste (const Handle(TDF_Attribute)& theSourc
                                            XmlObjMgt_SRelocationTable&  ) const
 {
   Handle(XCAFDoc_VisMaterial) aMat = Handle(XCAFDoc_VisMaterial)::DownCast(theSource);
-  Standard_Integer aDoubleSidedInt = aMat->FaceCulling() == Graphic3d_TypeOfBackfacingModel_DoubleSided
-                                   ? 1
-                                   : (aMat->FaceCulling() == Graphic3d_TypeOfBackfacingModel_BackCulled
-                                    ? 2
-                                    : 0);
+  Standard_Integer aDoubleSidedInt = 0;
+  switch (aMat->FaceCulling())
+  {
+    case Graphic3d_TypeOfBackfacingModel_DoubleSided: aDoubleSidedInt = 1; break;
+    case Graphic3d_TypeOfBackfacingModel_BackCulled:  aDoubleSidedInt = 2; break;
+    case Graphic3d_TypeOfBackfacingModel_FrontCulled: aDoubleSidedInt = 3; break;
+    case Graphic3d_TypeOfBackfacingModel_Auto:        aDoubleSidedInt = 0; break;
+  }
   theTarget.Element().setAttribute (::IsDoubleSided(), aDoubleSidedInt);
   theTarget.Element().setAttribute (::AlphaMode(),     alphaModeToString (aMat->AlphaMode()));
   writeReal (theTarget, ::AlphaCutOff(), aMat->AlphaCutOff());

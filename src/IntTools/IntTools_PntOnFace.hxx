@@ -22,10 +22,7 @@
 
 #include <Standard_Boolean.hxx>
 #include <gp_Pnt.hxx>
-#include <Standard_Real.hxx>
 #include <TopoDS_Face.hxx>
-class TopoDS_Face;
-class gp_Pnt;
 
 
 //! Contains a Face, a 3d point, corresponded UV parameters and a flag

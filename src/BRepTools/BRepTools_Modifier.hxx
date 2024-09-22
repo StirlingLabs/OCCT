@@ -26,8 +26,6 @@
 #include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
-#include <TopoDS_Vertex.hxx>
-#include <Standard_Boolean.hxx>
 
 #include <NCollection_DataMap.hxx>
 #include <TopoDS_Shape.hxx>
@@ -35,9 +33,6 @@
 #include <TopLoc_Location.hxx>
 #include <Message_ProgressRange.hxx>
 
-class Standard_NullObject;
-class Standard_NoSuchObject;
-class TopoDS_Shape;
 class BRepTools_Modification;
 class Geom_Curve;
 class Geom_Surface;

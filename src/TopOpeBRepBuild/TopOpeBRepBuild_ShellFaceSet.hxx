@@ -19,15 +19,12 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
 #include <TopoDS_Solid.hxx>
 #include <TopOpeBRepBuild_ShapeSet.hxx>
-#include <Standard_Address.hxx>
 #include <TCollection_AsciiString.hxx>
 #include <TopTools_ListOfShape.hxx>
 class TopoDS_Shape;
-class TopoDS_Solid;
 class TCollection_AsciiString;
 
 

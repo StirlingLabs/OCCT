@@ -24,10 +24,6 @@
 #include <Standard_Real.hxx>
 class TopoDS_Face;
 class gp_Dir;
-class Draft_Modification;
-class Draft_FaceInfo;
-class Draft_EdgeInfo;
-class Draft_VertexInfo;
 
 
 
@@ -47,31 +43,6 @@ public:
   //! Otherwise, the exception DomainError is raised.
   Standard_EXPORT static Standard_Real Angle (const TopoDS_Face& F, const gp_Dir& Direction);
 
-
-
-
-protected:
-
-
-
-
-
-private:
-
-
-
-
-friend class Draft_Modification;
-friend class Draft_FaceInfo;
-friend class Draft_EdgeInfo;
-friend class Draft_VertexInfo;
-
 };
-
-
-
-
-
-
 
 #endif // _Draft_HeaderFile

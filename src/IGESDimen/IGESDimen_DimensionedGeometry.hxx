@@ -18,13 +18,10 @@
 #define _IGESDimen_DimensionedGeometry_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <Standard_Integer.hxx>
 #include <IGESData_HArray1OfIGESEntity.hxx>
 #include <IGESData_IGESEntity.hxx>
-class IGESData_IGESEntity;
-class Standard_OutOfRange;
 
 
 class IGESDimen_DimensionedGeometry;

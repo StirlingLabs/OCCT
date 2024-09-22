@@ -25,11 +25,8 @@
 #include <TopTools_ListOfShape.hxx>
 #include <BRepPrimAPI_MakeSweep.hxx>
 #include <BRepTools_History.hxx>
-#include <Standard_Real.hxx>
-#include <Standard_Boolean.hxx>
 class TopoDS_Shape;
 class gp_Ax1;
-class BRepSweep_Revol;
 
 
 //! Class to make revolved sweep topologies.
@@ -81,7 +78,7 @@ public:
   Standard_EXPORT const BRepSweep_Revol& Revol() const;
   
   //! Builds the resulting shape (redefined from MakeShape).
-  Standard_EXPORT virtual void Build() Standard_OVERRIDE;
+  Standard_EXPORT virtual void Build(const Message_ProgressRange& theRange = Message_ProgressRange()) Standard_OVERRIDE;
   
   //! Returns the first shape of the revol  (coinciding with
   //! the generating shape).

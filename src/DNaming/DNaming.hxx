@@ -23,9 +23,7 @@
 
 #include <Standard_Integer.hxx>
 #include <Standard_Boolean.hxx>
-#include <TopAbs_ShapeEnum.hxx>
 #include <TopTools_DataMapOfShapeShape.hxx>
-#include <Standard_CString.hxx>
 #include <TopTools_ListOfShape.hxx>
 #include <Draw_Interpretor.hxx>
 class TDataStd_Real;
@@ -42,17 +40,6 @@ class TDF_Label;
 class BRepAlgoAPI_BooleanOperation;
 class TDF_Data;
 class TCollection_AsciiString;
-class DNaming_BoxDriver;
-class DNaming_CylinderDriver;
-class DNaming_SphereDriver;
-class DNaming_SelectionDriver;
-class DNaming_BooleanOperationDriver;
-class DNaming_FilletDriver;
-class DNaming_TransformationDriver;
-class DNaming_PrismDriver;
-class DNaming_RevolutionDriver;
-class DNaming_PointDriver;
-class DNaming_Line3DDriver;
 
 
 
@@ -129,38 +116,6 @@ public:
   //! commands for  testing Naming
   Standard_EXPORT static void ModelingCommands (Draw_Interpretor& DI);
 
-
-
-
-protected:
-
-
-
-
-
-private:
-
-
-
-
-friend class DNaming_BoxDriver;
-friend class DNaming_CylinderDriver;
-friend class DNaming_SphereDriver;
-friend class DNaming_SelectionDriver;
-friend class DNaming_BooleanOperationDriver;
-friend class DNaming_FilletDriver;
-friend class DNaming_TransformationDriver;
-friend class DNaming_PrismDriver;
-friend class DNaming_RevolutionDriver;
-friend class DNaming_PointDriver;
-friend class DNaming_Line3DDriver;
-
 };
-
-
-
-
-
-
 
 #endif // _DNaming_HeaderFile

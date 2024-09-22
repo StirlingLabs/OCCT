@@ -19,13 +19,9 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
 #include <TopTools_ListOfShape.hxx>
-#include <TopTools_DataMapOfShapeShape.hxx>
 #include <BRepBuilderAPI_ModifyShape.hxx>
-#include <Standard_Real.hxx>
-#include <Standard_Boolean.hxx>
 #include <Draft_ErrorStatus.hxx>
 #include <BRepTools_ReShape.hxx>
 
@@ -176,7 +172,7 @@ public:
   Standard_EXPORT const TopTools_ListOfShape& ModifiedFaces() const;
   
   //! Builds the resulting shape (redefined from MakeShape).
-  Standard_EXPORT virtual void Build() Standard_OVERRIDE;
+  Standard_EXPORT virtual void Build(const Message_ProgressRange& theRange = Message_ProgressRange()) Standard_OVERRIDE;
   
   Standard_EXPORT void CorrectWires();
   

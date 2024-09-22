@@ -19,16 +19,11 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
 #include <TopoDS_Vertex.hxx>
 #include <TopoDS_Edge.hxx>
 #include <BRepLib_MakeShape.hxx>
-#include <Standard_Boolean.hxx>
-class StdFail_NotDone;
 class gp_Pnt;
-class TopoDS_Vertex;
-class TopoDS_Edge;
 class TopoDS_Wire;
 
 

@@ -15,6 +15,7 @@
 #include <DBRep.hxx>
 #include <Draw_Appli.hxx>
 #include <Draw_Printer.hxx>
+#include <Draw_PluginMacro.hxx>
 #include <IFSelect_Functions.hxx>
 #include <IFSelect_SessionPilot.hxx>
 #include <Interface_InterfaceModel.hxx>
@@ -30,6 +31,7 @@
 #include <Transfer_FinderProcess.hxx>
 #include <Transfer_TransientProcess.hxx>
 #include <TransferBRep.hxx>
+#include <XSAlgo.hxx>
 #include <XSControl.hxx>
 #include <XSControl_Controller.hxx>
 #include <XSControl_FuncShape.hxx>
@@ -39,17 +41,51 @@
 #include <XSControl_WorkSession.hxx>
 #include <XSDRAW.hxx>
 #include <XSDRAW_Vars.hxx>
+#include <UnitsMethods.hxx>
+#include <Interface_Static.hxx>
+#include <XCAFDoc_DocumentTool.hxx>
 
-#include <stdio.h>
-//#include <XSDRAW_Shape.hxx>
-static int deja = 0, dejald = 0;
-//unused variable 
-//static int okxset = 0;
+#include <iostream>
+#include <string>
+namespace
+{
+  static int deja = 0, dejald = 0;
 
-static NCollection_DataMap<TCollection_AsciiString, Standard_Integer> theolds;
-static Handle(TColStd_HSequenceOfAsciiString) thenews;
+  static NCollection_DataMap<TCollection_AsciiString, Standard_Integer> theolds;
+  static Handle(TColStd_HSequenceOfAsciiString) thenews;
 
-static Handle(IFSelect_SessionPilot)    thepilot;  // detient Session, Model
+  static Handle(IFSelect_SessionPilot)    thepilot;  // detient Session, Model
+
+  //=======================================================================
+  //function : collectActiveWorkSessions
+  //purpose  :
+  //=======================================================================
+  static void collectActiveWorkSessions(const Handle(XSControl_WorkSession)& theWS,
+                                        const TCollection_AsciiString& theName,
+                                        XSControl_WorkSessionMap& theMap,
+                                        const Standard_Boolean theIsFirst)
+  {
+    if (theIsFirst)
+    {
+      theMap.Clear();
+    }
+    if (theWS.IsNull())
+    {
+      return;
+    }
+    if (theMap.IsBound(theName))
+    {
+      return;
+    }
+    theMap.Bind(theName, theWS);
+    for (XSControl_WorkSessionMap::Iterator anIter(theWS->Context());
+         anIter.More(); anIter.Next())
+    {
+      Handle(XSControl_WorkSession) aWS = Handle(XSControl_WorkSession)::DownCast(anIter.Value());
+      collectActiveWorkSessions(aWS, anIter.Key(), theMap, Standard_False);
+    }
+  }
+}
 
 static Standard_Integer XSTEPDRAWRUN (Draw_Interpretor& di, Standard_Integer argc, const char** argv)
 {
@@ -103,6 +139,7 @@ static Standard_Integer XSTEPDRAWRUN (Draw_Interpretor& di, Standard_Integer arg
   IFSelect_Functions::Init();
   XSControl_Functions::Init();
   XSControl_FuncShape::Init();
+  XSAlgo::Init();
 //  XSDRAW_Shape::Init();   passe a present par theCommands
   return Standard_True;
 }
@@ -123,23 +160,34 @@ void XSDRAW::LoadDraw (Draw_Interpretor& theCommands)
   XSDRAW::RemoveCommand("exit");
 
 //  if (!getenv("WBHOSTTOP")) XSDRAW::RemoveCommand("xsnew");
-  Handle(TColStd_HSequenceOfAsciiString) list =
-    IFSelect_Activator::Commands(0);
-  TCollection_AsciiString com;
-  Standard_Integer i, nb = list->Length();
-  for (i = 1; i <= nb; i ++) {
-    Handle(IFSelect_Activator) act;
-    Standard_Integer nact, num = -1;
-    char help[200];
-    com = list->Value(i);
+  Handle(TColStd_HSequenceOfAsciiString) list = IFSelect_Activator::Commands (0);
+  for (TColStd_HSequenceOfAsciiString::Iterator aCmdIter (*list); aCmdIter.More(); aCmdIter.Next())
+  {
+    Standard_Integer num = -1;
+    const TCollection_AsciiString& aCmd = aCmdIter.Value();
     if (!theolds.IsEmpty())
-      theolds.Find(com, num);
-    if (num == 0) continue;
-    if (!IFSelect_Activator::Select(com.ToCString(),nact,act))
-      Sprintf (help,"type :  xhelp %s for help",com.ToCString());
-    else if (!act.IsNull()) strcpy(help,act->Help(nact));
-    if (num < 0) theCommands.Add (com.ToCString(),help,XSTEPDRAWRUN,act->Group());
-    else theCommands.Add (thenews->Value(num).ToCString(),help,XSTEPDRAWRUN,act->Group());
+    {
+      theolds.Find (aCmd, num);
+    }
+    if (num == 0)
+    {
+      continue;
+    }
+
+    Standard_Integer nact = 0;
+    Handle(IFSelect_Activator) anAct;
+    TCollection_AsciiString aHelp;
+    if (!IFSelect_Activator::Select (aCmd.ToCString(), nact, anAct))
+    {
+      aHelp = TCollection_AsciiString("type :  xhelp ") + aCmd + " for help";
+    }
+    else if (!anAct.IsNull())
+    {
+      aHelp = anAct->Help (nact);
+    }
+
+    const TCollection_AsciiString& aCmdName = num < 0 ? aCmd : thenews->Value (num);
+    theCommands.Add (aCmdName.ToCString(), aHelp.ToCString(), "", XSTEPDRAWRUN, anAct->Group());
   }
 }
 
@@ -155,7 +203,10 @@ void XSDRAW::LoadDraw (Draw_Interpretor& theCommands)
     Handle(IFSelect_SessionPilot)  XSDRAW::Pilot ()
       {  return thepilot;  }
 
-    Handle(XSControl_WorkSession)  XSDRAW::Session ()
+    void XSDRAW::SetSession(const Handle(XSControl_WorkSession)& theSession)
+      {  Pilot()->SetSession(theSession);  }
+
+    const Handle(XSControl_WorkSession)  XSDRAW::Session ()
       {  return XSControl::Session(thepilot);  }
 
     void  XSDRAW::SetController (const Handle(XSControl_Controller)& control)
@@ -245,16 +296,23 @@ void XSDRAW::LoadDraw (Draw_Interpretor& theCommands)
     Handle(TColStd_HSequenceOfTransient)  XSDRAW::GetList
   (const Standard_CString first, const Standard_CString second)
 {
-  Handle(TColStd_HSequenceOfTransient) list;
-  if (!first || first[0] == '\0') {
-    char ligne[80];  ligne[0] = '\0'; char truc;
-//    std::cin.clear();  std::cin.get (ligne,79,'\n');
-    std::cin >> ligne;  Standard_Size ln = strlen(ligne);
-    char *ff = &ligne[0], *ss = NULL;
-    std::cin.get(truc);  if (truc != '\n') { std::cin>>&ligne[ln+1]; ss = &ligne[ln+1]; }
-    return  XSDRAW::GetList (ff,ss);
+  if ( !first || first[0] == '\0' )
+  {
+    std::string aLineFirst;
+    std::cin >> aLineFirst;
+    
+    char terminateSymbol = '\0';
+    std::cin.get(terminateSymbol);
+
+    if ( terminateSymbol == '\n' )
+      return XSDRAW::GetList (aLineFirst.c_str(), nullptr);
+    else
+    {
+      std::string aLineSecond;
+      std::cin >> aLineSecond;
+      return XSDRAW::GetList (aLineFirst.c_str(), aLineSecond.c_str());
+    }
   }
-//  return IFSelect_Functions::GiveList (Session(),first,second);
   return IFSelect_Functions::GiveList (Session(),first,second);
 }
 
@@ -270,16 +328,71 @@ void XSDRAW::LoadDraw (Draw_Interpretor& theCommands)
   (Handle(TopTools_HSequenceOfShape)& list, const Standard_CString name)
 {  return XSControl_FuncShape::MoreShapes  (XSDRAW::Session(),list,name);  }
 
-
-//  FONCTION POUR LE DEBUG
-
-Standard_Integer XSDRAW_WHAT (const Handle(Standard_Transient)& ent)
+//=======================================================================
+//function : GetLengthUnit
+//purpose  :
+//=======================================================================
+Standard_Real XSDRAW::GetLengthUnit(const Handle(TDocStd_Document)& theDoc)
 {
-  if (ent.IsNull()) { std::cout<<"(Null Handle)"<<std::endl; return 0; }
-  Handle(Interface_InterfaceModel) model = XSDRAW::Model();
-  if (model.IsNull()) { std::cout<<"(No model)  Type:"<<ent->DynamicType()->Name()<<std::endl; return 0; }
-  std::cout<<" Num/Id :";  
-  model->Print (ent, std::cout, 0);
-  std::cout<<"  --  Recorded Type:"<<model->TypeName (ent)<<std::endl;
-  return model->Number(ent);
+  if (!theDoc.IsNull())
+  {
+    Standard_Real aUnit = 1.;
+    if (XCAFDoc_DocumentTool::GetLengthUnit(theDoc, aUnit,
+      UnitsMethods_LengthUnit_Millimeter))
+    {
+      return aUnit;
+    }
+  }
+  if (Interface_Static::IsPresent("xstep.cascade.unit"))
+  {
+    UnitsMethods::SetCasCadeLengthUnit(Interface_Static::IVal("xstep.cascade.unit"));
+  }
+  return UnitsMethods::GetCasCadeLengthUnit();
 }
+
+//=======================================================================
+//function : WorkSessionList
+//purpose  :
+//=======================================================================
+XSControl_WorkSessionMap& XSDRAW::WorkSessionList()
+{
+  static std::shared_ptr<XSControl_WorkSessionMap> THE_PREVIOUS_WORK_SESSIONS;
+  if (THE_PREVIOUS_WORK_SESSIONS == nullptr)
+  {
+    THE_PREVIOUS_WORK_SESSIONS =
+      std::make_shared<XSControl_WorkSessionMap>();
+  }
+  return *THE_PREVIOUS_WORK_SESSIONS;
+}
+
+//=======================================================================
+//function : CollectActiveWorkSessions
+//purpose  :
+//=======================================================================
+void XSDRAW::CollectActiveWorkSessions(const Handle(XSControl_WorkSession)& theWS,
+  const TCollection_AsciiString& theName,
+  XSControl_WorkSessionMap& theMap)
+{
+  collectActiveWorkSessions(theWS, theName, theMap, Standard_True);
+}
+
+//=======================================================================
+//function : CollectActiveWorkSessions
+//purpose  :
+//=======================================================================
+void XSDRAW::CollectActiveWorkSessions(const TCollection_AsciiString& theName)
+{
+  collectActiveWorkSessions(Session(), theName, WorkSessionList(), Standard_True);
+}
+
+//=======================================================================
+//function : Factory
+//purpose  :
+//=======================================================================
+void XSDRAW::Factory(Draw_Interpretor& theDI)
+{
+  XSDRAW::LoadDraw(theDI);
+}
+
+// Declare entry point PLUGINFACTORY
+DPLUGIN(XSDRAW)

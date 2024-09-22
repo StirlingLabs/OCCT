@@ -23,16 +23,11 @@
 
 #include <FairCurve_AnalysisCode.hxx>
 #include <gp_Pnt2d.hxx>
-#include <Standard_Real.hxx>
-#include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
 #include <TColgp_HArray1OfPnt2d.hxx>
 #include <TColStd_HArray1OfReal.hxx>
 #include <TColStd_HArray1OfInteger.hxx>
 #include <Standard_OStream.hxx>
-class Standard_NegativeValue;
-class Standard_NullValue;
-class gp_Pnt2d;
 class gp_Vec2d;
 class Geom2d_BSplineCurve;
 

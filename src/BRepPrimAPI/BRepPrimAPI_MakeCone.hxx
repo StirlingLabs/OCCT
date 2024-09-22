@@ -23,11 +23,7 @@
 
 #include <BRepPrim_Cone.hxx>
 #include <BRepPrimAPI_MakeOneAxis.hxx>
-#include <Standard_Real.hxx>
-#include <Standard_Address.hxx>
-class Standard_DomainError;
 class gp_Ax2;
-class BRepPrim_Cone;
 
 
 //! Describes functions to build cones or portions of cones.

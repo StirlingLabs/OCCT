@@ -55,18 +55,38 @@ const Handle(OSD_FileSystem)& OSD_FileSystem::DefaultFileSystem()
 }
 
 //=======================================================================
+// function : AddDefaultProtocol
+// purpose :
+//=======================================================================
+void OSD_FileSystem::AddDefaultProtocol (const Handle(OSD_FileSystem)& theFileSystem, bool theIsPreferred)
+{
+  Handle(OSD_FileSystemSelector) aFileSelector = Handle(OSD_FileSystemSelector)::DownCast (DefaultFileSystem());
+  aFileSelector->AddProtocol (theFileSystem, theIsPreferred);
+}
+
+//=======================================================================
+// function : RemoveDefaultProtocol
+// purpose :
+//=======================================================================
+void OSD_FileSystem::RemoveDefaultProtocol (const Handle(OSD_FileSystem)& theFileSystem)
+{
+  Handle(OSD_FileSystemSelector) aFileSelector = Handle(OSD_FileSystemSelector)::DownCast (DefaultFileSystem());
+  aFileSelector->RemoveProtocol (theFileSystem);
+}
+
+//=======================================================================
 // function : openIStream
 // purpose :
 //=======================================================================
-opencascade::std::shared_ptr<std::istream> OSD_FileSystem::OpenIStream (const TCollection_AsciiString& theUrl,
-                                                                        const std::ios_base::openmode theMode,
-                                                                        const int64_t theOffset,
-                                                                        const opencascade::std::shared_ptr<std::istream>& theOldStream)
+std::shared_ptr<std::istream> OSD_FileSystem::OpenIStream (const TCollection_AsciiString& theUrl,
+                                                           const std::ios_base::openmode theMode,
+                                                           const int64_t theOffset,
+                                                           const std::shared_ptr<std::istream>& theOldStream)
 {
   Standard_ASSERT_RAISE (theOffset >= -1, "Incorrect negative stream position during stream opening");
 
-  opencascade::std::shared_ptr<std::istream> aNewStream;
-  opencascade::std::shared_ptr<OSD_IStreamBuffer> anOldStream = opencascade::std::dynamic_pointer_cast<OSD_IStreamBuffer> (theOldStream);
+  std::shared_ptr<std::istream> aNewStream;
+  std::shared_ptr<OSD_IStreamBuffer> anOldStream = std::dynamic_pointer_cast<OSD_IStreamBuffer> (theOldStream);
   if (anOldStream.get() != NULL
    && theUrl.IsEqual (anOldStream->Url().c_str())
    && IsOpenIStream (anOldStream))
@@ -84,10 +104,10 @@ opencascade::std::shared_ptr<std::istream> OSD_FileSystem::OpenIStream (const TC
   }
   if (aNewStream.get() == NULL)
   {
-    opencascade::std::shared_ptr<std::streambuf> aFileBuf = OpenStreamBuffer (theUrl, theMode | std::ios_base::in);
+    std::shared_ptr<std::streambuf> aFileBuf = OpenStreamBuffer (theUrl, theMode | std::ios_base::in);
     if (aFileBuf.get() == NULL)
     {
-      return opencascade::std::shared_ptr<std::istream>();
+      return std::shared_ptr<std::istream>();
     }
 
     aNewStream.reset (new OSD_IStreamBuffer (theUrl.ToCString(), aFileBuf));
@@ -96,5 +116,23 @@ opencascade::std::shared_ptr<std::istream> OSD_FileSystem::OpenIStream (const TC
       aNewStream->seekg ((std::streamoff )theOffset, std::ios_base::beg);
     }
   }
+  return aNewStream;
+}
+
+//=======================================================================
+// function : OpenOStream
+// purpose :
+//=======================================================================
+std::shared_ptr<std::ostream> OSD_FileSystem::OpenOStream (const TCollection_AsciiString& theUrl,
+                                                           const std::ios_base::openmode theMode)
+{
+  std::shared_ptr<std::ostream> aNewStream;
+  std::shared_ptr<std::streambuf> aFileBuf = OpenStreamBuffer (theUrl, theMode | std::ios_base::out);
+  if (aFileBuf.get() == NULL)
+  {
+    return std::shared_ptr<std::ostream>();
+  }
+
+  aNewStream.reset(new OSD_OStreamBuffer (theUrl.ToCString(), aFileBuf));
   return aNewStream;
 }

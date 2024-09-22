@@ -18,20 +18,15 @@
 #define _FEmTool_ProfileMatrix_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <TColStd_Array2OfInteger.hxx>
 #include <TColStd_HArray1OfReal.hxx>
 #include <TColStd_HArray1OfInteger.hxx>
-#include <Standard_Boolean.hxx>
 #include <FEmTool_SparseMatrix.hxx>
 #include <TColStd_Array1OfInteger.hxx>
 #include <Standard_Real.hxx>
 #include <Standard_Integer.hxx>
 #include <math_Vector.hxx>
-class StdFail_NotDone;
-class Standard_NotImplemented;
-class Standard_OutOfRange;
 
 
 class FEmTool_ProfileMatrix;

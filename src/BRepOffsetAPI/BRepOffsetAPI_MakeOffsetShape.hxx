@@ -24,13 +24,10 @@
 #include <BRepOffset_MakeOffset.hxx>
 #include <BRepOffset_MakeSimpleOffset.hxx>
 #include <BRepBuilderAPI_MakeShape.hxx>
-#include <Standard_Real.hxx>
 #include <BRepOffset_Mode.hxx>
-#include <Standard_Boolean.hxx>
 #include <GeomAbs_JoinType.hxx>
 #include <TopTools_ListOfShape.hxx>
 class TopoDS_Shape;
-class BRepOffset_MakeOffset;
 
 
 //! Describes functions to build a shell out of a shape. The
@@ -114,13 +111,14 @@ public:
                                      const Standard_Boolean Intersection = Standard_False,
                                      const Standard_Boolean SelfInter = Standard_False,
                                      const GeomAbs_JoinType Join = GeomAbs_Arc,
-                                     const Standard_Boolean RemoveIntEdges = Standard_False);
+                                     const Standard_Boolean RemoveIntEdges = Standard_False,
+                                     const Message_ProgressRange& theRange = Message_ProgressRange());
 
-  //! Returns instance of the unrelying intersection / arc algorithm.
+  //! Returns instance of the underlying intersection / arc algorithm.
   Standard_EXPORT virtual const BRepOffset_MakeOffset& MakeOffset() const;
 
   //! Does nothing.
-  Standard_EXPORT virtual void Build() Standard_OVERRIDE;
+  Standard_EXPORT virtual void Build(const Message_ProgressRange& theRange = Message_ProgressRange()) Standard_OVERRIDE;
   
   //! Returns the list of shapes generated from the shape <S>.
   Standard_EXPORT virtual const TopTools_ListOfShape& Generated (const TopoDS_Shape& S) Standard_OVERRIDE;

@@ -24,14 +24,11 @@
 
 #include <Standard_Integer.hxx>
 #include <BOPDS_PDS.hxx>
-#include <BOPDS_VectorOfPair.hxx>
 #include <BOPDS_VectorOfVectorOfPair.hxx>
 #include <BOPTools_BoxTree.hxx>
 #include <NCollection_BaseAllocator.hxx>
 #include <Precision.hxx>
-#include <Standard_Boolean.hxx>
 #include <TopAbs_ShapeEnum.hxx>
-class BOPDS_DS;
 class IntTools_Context;
 
 //! The class BOPDS_Iterator is

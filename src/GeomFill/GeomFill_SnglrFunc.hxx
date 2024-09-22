@@ -21,16 +21,12 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
-#include <Standard_Real.hxx>
 #include <Adaptor3d_Curve.hxx>
 #include <Standard_Integer.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <TColStd_Array1OfReal.hxx>
-#include <Standard_Boolean.hxx>
 #include <GeomAbs_CurveType.hxx>
 
-class Standard_OutOfRange;
-class Standard_DomainError;
 class gp_Pnt;
 class gp_Vec;
 
@@ -44,6 +40,9 @@ public:
 
   
   Standard_EXPORT GeomFill_SnglrFunc(const Handle(Adaptor3d_Curve)& HC);
+
+  //! Shallow copy of adaptor
+  Standard_EXPORT virtual Handle(Adaptor3d_Curve) ShallowCopy() const Standard_OVERRIDE;
   
   Standard_EXPORT void SetRatio (const Standard_Real Ratio);
   

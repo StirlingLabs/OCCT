@@ -23,7 +23,6 @@
 
 #include <GeomToStep_Root.hxx>
 class StepGeom_ConicalSurface;
-class StdFail_NotDone;
 class Geom_ConicalSurface;
 
 
@@ -38,7 +37,8 @@ public:
   DEFINE_STANDARD_ALLOC
 
   
-  Standard_EXPORT GeomToStep_MakeConicalSurface(const Handle(Geom_ConicalSurface)& CSurf);
+  Standard_EXPORT GeomToStep_MakeConicalSurface(const Handle(Geom_ConicalSurface)& CSurf,
+                                                const StepData_Factors& theLocalFactors = StepData_Factors());
   
   Standard_EXPORT const Handle(StepGeom_ConicalSurface)& Value() const;
 

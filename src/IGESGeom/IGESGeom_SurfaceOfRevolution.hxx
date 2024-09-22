@@ -20,10 +20,8 @@
 #include <Standard.hxx>
 #include <Standard_Type.hxx>
 
-#include <Standard_Real.hxx>
 #include <IGESData_IGESEntity.hxx>
 class IGESGeom_Line;
-class IGESData_IGESEntity;
 
 
 class IGESGeom_SurfaceOfRevolution;

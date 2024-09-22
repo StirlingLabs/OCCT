@@ -16,7 +16,6 @@
 #include <Bnd_Box.hxx>
 #include <Bnd_OBB.hxx>
 #include <BRep_Tool.hxx>
-#include <BRepAdaptor_Surface.hxx>
 #include <BRepBndLib.hxx>
 #include <BRepClass3d_SolidClassifier.hxx>
 #include <Extrema_LocateExtPC.hxx>
@@ -32,7 +31,6 @@
 #include <gp_Pnt.hxx>
 #include <gp_Pnt2d.hxx>
 #include <IntTools_Context.hxx>
-#include <IntTools_Curve.hxx>
 #include <IntTools_FClass2d.hxx>
 #include <IntTools_SurfaceRangeLocalizeData.hxx>
 #include <IntTools_Tools.hxx>
@@ -127,7 +125,7 @@ IntTools_Context::~IntTools_Context()
   }
   mySClassMap.Clear();
 
-  for (NCollection_DataMap<Handle(Geom_Curve), GeomAPI_ProjectPointOnCurve*, TColStd_MapTransientHasher>::Iterator anIt (myProjPTMap);
+  for (NCollection_DataMap<Handle(Geom_Curve), GeomAPI_ProjectPointOnCurve*>::Iterator anIt (myProjPTMap);
        anIt.More(); anIt.Next())
   {
     GeomAPI_ProjectPointOnCurve* pProjPT = anIt.Value();
@@ -738,7 +736,7 @@ Standard_Boolean IntTools_Context::IsValidBlockForFace
 
   aTInterm=IntTools_Tools::IntermediatePoint(aT1, aT2);
 
-  Handle(Geom_Curve) aC3D=aC.Curve();
+  const Handle(Geom_Curve)& aC3D=aC.Curve();
   // point 3D
   aC3D->D0(aTInterm, aPInterm);
   //
@@ -823,7 +821,7 @@ Standard_Boolean IntTools_Context::IsVertexOnLine
   
   aPv=BRep_Tool::Pnt(aV);
 
-  Handle(Geom_Curve) aC3D=aC.Curve();
+  const Handle(Geom_Curve)& aC3D=aC.Curve();
   
   
   aTolSum=aTolV+aTolC;
@@ -846,7 +844,7 @@ Standard_Boolean IntTools_Context::IsVertexOnLine
   aFirst=aC3D->FirstParameter();
   aLast =aC3D->LastParameter();
   //
-  // Checking extermities first
+  // Checking extremities first
   // It is necessary to chose the closest bound to the point
   Standard_Boolean bFirstValid = Standard_False;
   Standard_Real aFirstDist = Precision::Infinite();

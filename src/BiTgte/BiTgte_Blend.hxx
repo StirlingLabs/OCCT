@@ -21,14 +21,9 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
-#include <Standard_Real.hxx>
-#include <Standard_Boolean.hxx>
-#include <TopoDS_Shape.hxx>
-#include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
 #include <BRepFill_DataMapOfShapeDataMapOfShapeListOfShape.hxx>
 #include <TopTools_DataMapOfShapeListOfShape.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
-#include <TopTools_MapOfShape.hxx>
 #include <BRepOffset_Analyse.hxx>
 #include <BRepOffset_DataMapOfShapeOffset.hxx>
 #include <BRepAlgo_Image.hxx>
@@ -38,9 +33,6 @@
 #include <BiTgte_ContactType.hxx>
 #include <TopTools_DataMapOfShapeBox.hxx>
 class BRepAlgo_AsDes;
-class StdFail_NotDone;
-class Standard_OutOfRange;
-class TopoDS_Shape;
 class TopoDS_Face;
 class TopoDS_Edge;
 class Geom_Surface;

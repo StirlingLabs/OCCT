@@ -20,11 +20,10 @@
 #include <gp_Pnt.hxx>
 #include <Interface_Static.hxx>
 #include <StdFail_NotDone.hxx>
+#include <StepData_StepModel.hxx>
 #include <StepGeom_CartesianPoint.hxx>
-#include <StepShape_TopologicalRepresentationItem.hxx>
 #include <StepShape_VertexPoint.hxx>
 #include <TCollection_HAsciiString.hxx>
-#include <TopoDS_Vertex.hxx>
 #include <TopoDSToStep_MakeStepVertex.hxx>
 #include <TopoDSToStep_Tool.hxx>
 #include <Transfer_FinderProcess.hxx>
@@ -44,10 +43,11 @@ TopoDSToStep_MakeStepVertex::TopoDSToStep_MakeStepVertex()
 TopoDSToStep_MakeStepVertex::TopoDSToStep_MakeStepVertex
 (const TopoDS_Vertex& V, 
  TopoDSToStep_Tool& T,
- const Handle(Transfer_FinderProcess)& FP)
+ const Handle(Transfer_FinderProcess)& FP,
+ const StepData_Factors& theLocalFactors)
 {
   done = Standard_False;
-  Init(V, T, FP);
+  Init(V, T, FP, theLocalFactors);
 }
 
 // ----------------------------------------------------------------------------
@@ -57,13 +57,15 @@ TopoDSToStep_MakeStepVertex::TopoDSToStep_MakeStepVertex
 
 void TopoDSToStep_MakeStepVertex::Init(const TopoDS_Vertex& aVertex, 
                                        TopoDSToStep_Tool& aTool,
-                                       const Handle(Transfer_FinderProcess)& FP)
+                                       const Handle(Transfer_FinderProcess)& FP,
+                                       const StepData_Factors& theLocalFactors)
 {
 
   aTool.SetCurrentVertex(aVertex);
 
   // [BEGIN] Processing non-manifold topology (ssv; 11.11.2010)
-  Standard_Boolean isNMMode = Interface_Static::IVal("write.step.nonmanifold") != 0;
+  Standard_Boolean isNMMode =
+    Handle(StepData_StepModel)::DownCast(FP->Model())->InternalParameters.WriteNonmanifold != 0;
   if (isNMMode) {
     Handle(StepShape_VertexPoint) aVP;
     Handle(TransferBRep_ShapeMapper) aSTEPMapper = TransferBRep::ShapeMapper(FP, aVertex);
@@ -87,7 +89,7 @@ void TopoDSToStep_MakeStepVertex::Init(const TopoDS_Vertex& aVertex,
   gp_Pnt P;
   
   P = BRep_Tool::Pnt(aVertex);
-  GeomToStep_MakeCartesianPoint MkPoint(P);
+  GeomToStep_MakeCartesianPoint MkPoint(P, theLocalFactors.LengthFactor());
   Handle(StepGeom_CartesianPoint) Gpms = MkPoint.Value();
   Handle(StepShape_VertexPoint) Vpms =
     new StepShape_VertexPoint();

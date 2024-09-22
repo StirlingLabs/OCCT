@@ -16,23 +16,16 @@
 #include <BOPAlgo_Section.hxx>
 #include <BOPAlgo_Alerts.hxx>
 #include <BOPAlgo_PaveFiller.hxx>
-#include <BOPDS_CommonBlock.hxx>
 #include <BOPDS_DS.hxx>
 #include <BOPDS_FaceInfo.hxx>
 #include <BOPDS_ListOfPaveBlock.hxx>
-#include <BOPDS_MapOfPaveBlock.hxx>
 #include <BOPDS_PaveBlock.hxx>
-#include <BOPDS_VectorOfFaceInfo.hxx>
 #include <BOPDS_VectorOfListOfPaveBlock.hxx>
 #include <BOPTools_AlgoTools.hxx>
 #include <BRep_Builder.hxx>
-#include <BRep_Tool.hxx>
 #include <TopAbs_ShapeEnum.hxx>
 #include <TopExp.hxx>
 #include <TopExp_Explorer.hxx>
-#include <TopoDS_Compound.hxx>
-#include <TopoDS_Edge.hxx>
-#include <TopoDS_Iterator.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
@@ -83,13 +76,45 @@ void BOPAlgo_Section::CheckData()
   //
   CheckFiller();
 }
+
+//=======================================================================
+// function: fillPIConstants
+// purpose: 
+//=======================================================================
+void BOPAlgo_Section::fillPIConstants (const Standard_Real theWhole,
+                                       BOPAlgo_PISteps& theSteps) const
+{
+  // Fill in the constants:
+  if (myFillHistory)
+  {
+    // for FillHistroty, which takes about 10% of the whole operation
+    theSteps.SetStep(PIOperation_FillHistory, 10. * theWhole / 100.);
+  }
+
+  // and for PostTreat, which takes about 5% of the whole operation 
+  theSteps.SetStep(PIOperation_PostTreat, 5. * theWhole / 100.);
+}
+
+//=======================================================================
+// function: fillPISteps
+// purpose: 
+//=======================================================================
+void BOPAlgo_Section::fillPISteps (BOPAlgo_PISteps& theSteps) const
+{
+  // Compute the rest of the operations - all depend on the number of sub-shapes of certain type
+  NbShapes aNbShapes = getNbShapes();
+  theSteps.SetStep(PIOperation_TreatVertices, aNbShapes.NbVertices());
+  theSteps.SetStep(PIOperation_TreatEdges, aNbShapes.NbEdges());
+  theSteps.SetStep(PIOperation_BuildSection, aNbShapes.NbEdges() + aNbShapes.NbFaces());
+}
 //=======================================================================
 //function : PerformInternal1
 //purpose  : 
 //=======================================================================
 void BOPAlgo_Section::PerformInternal1
-  (const BOPAlgo_PaveFiller& theFiller)
+  (const BOPAlgo_PaveFiller& theFiller, const Message_ProgressRange& theRange)
 {
+  Message_ProgressScope aPS(theRange, "Building result of SECTION operation", 100);
   myPaveFiller=(BOPAlgo_PaveFiller*)&theFiller;
   myDS=myPaveFiller->PDS();
   myContext=myPaveFiller->Context();
@@ -106,9 +131,11 @@ void BOPAlgo_Section::PerformInternal1
     return;
   }
   //
+  BOPAlgo_PISteps aSteps (PIOperation_Last);
+  analyzeProgress(100., aSteps);
   // 3. Fill Images
   // 3.1 Vertices
-  FillImagesVertices();
+  FillImagesVertices(aPS.Next(aSteps.GetStep(PIOperation_TreatVertices)));
   if (HasErrors()) {
     return;
   }
@@ -118,7 +145,7 @@ void BOPAlgo_Section::PerformInternal1
     return;
   }
   // 3.2 Edges
-  FillImagesEdges();
+  FillImagesEdges(aPS.Next(aSteps.GetStep(PIOperation_TreatEdges)));
   if (HasErrors()) {
     return;
   }
@@ -128,26 +155,25 @@ void BOPAlgo_Section::PerformInternal1
     return;
   }
   // 4. Section
-  BuildSection();
-  //
+  BuildSection(aPS.Next(aSteps.GetStep(PIOperation_BuildSection)));
   if (HasErrors()) {
     return;
   }
   // 5.History
-  PrepareHistory();
-  //
+  PrepareHistory(aPS.Next(aSteps.GetStep(PIOperation_FillHistory)));
   if (HasErrors()) {
     return;
   } 
   // 6. Post-treatment
-  PostTreat();
+  PostTreat(aPS.Next(aSteps.GetStep(PIOperation_PostTreat)));
 }
 //=======================================================================
 //function : BuildSection
 //purpose  : 
 //=======================================================================
-void BOPAlgo_Section::BuildSection()
+void BOPAlgo_Section::BuildSection(const Message_ProgressRange& theRange)
 {
+  Message_ProgressScope aPS(theRange, "Building the result of Section operation", 1);
   Standard_Integer i, aNbMS, aNbLE;
   Standard_Integer j,  nE, nV, aNb, aNbF, aNbPBSc;
   TopoDS_Shape aRC, aRC1;
@@ -173,6 +199,10 @@ void BOPAlgo_Section::BuildSection()
     const BOPDS_ShapeInfo& aSI=myDS->ShapeInfo(i);
     if (aSI.ShapeType()!=TopAbs_FACE) {
       continue;
+    }
+    if (UserBreak(aPS))
+    {
+      return;
     }
     //
     const BOPDS_FaceInfo& aFI=myDS->FaceInfo(i);
@@ -250,6 +280,10 @@ void BOPAlgo_Section::BuildSection()
   // 3.1 Set to treat => aLS
   aIt.Initialize(aLSA);
   for (; aIt.More(); aIt.Next()) {
+    if (UserBreak(aPS))
+    {
+      return;
+    }
     const TopoDS_Shape& aSA=aIt.Value();
     //
     aLS.Clear();
@@ -331,6 +365,10 @@ void BOPAlgo_Section::BuildSection()
   //
   aNbMS=aMVE.Extent();
   for (i=1; i<=aNbMS; ++i) {
+    if (UserBreak(aPS))
+    {
+      return;
+    }
     const TopoDS_Shape& aV=aMVE.FindKey(i);
     const TopTools_ListOfShape& aLE=aMVE.FindFromIndex(i);
     aNbLE=aLE.Extent();

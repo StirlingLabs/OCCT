@@ -13,21 +13,19 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef _OpenGl_SceneGeometry_Header
-#define _OpenGl_SceneGeometry_Header
+#ifndef OpenGl_SceneGeometry_HeaderFile
+#define OpenGl_SceneGeometry_HeaderFile
 
 #include <BVH_Geometry.hxx>
 #include <BVH_Triangulation.hxx>
 #include <BVH_BinnedBuilder.hxx>
-#include <NCollection_StdAllocator.hxx>
+#include <NCollection_OccAllocator.hxx>
 #include <OpenGl_Texture.hxx>
 #include <OpenGl_Sampler.hxx>
 
 class  OpenGl_Element;
 struct OpenGl_ElementNode;
 class  OpenGl_Group;
-class  OpenGl_Structure;
-class  OpenGl_PrimitiveArray;
 
 namespace OpenGl_Raytrace
 {
@@ -189,11 +187,11 @@ public:
 
   //! Array of properties of light sources.
   std::vector<OpenGl_RaytraceLight,
-    NCollection_StdAllocator<OpenGl_RaytraceLight> > Sources;
+    NCollection_OccAllocator<OpenGl_RaytraceLight> > Sources;
 
   //! Array of 'front' material properties.
   std::vector<OpenGl_RaytraceMaterial,
-    NCollection_StdAllocator<OpenGl_RaytraceMaterial> > Materials;
+    NCollection_OccAllocator<OpenGl_RaytraceMaterial> > Materials;
 
   //! Global ambient from all light sources.
   BVH_Vec4f Ambient;
@@ -219,7 +217,7 @@ public:
   void ClearMaterials()
   {
     std::vector<OpenGl_RaytraceMaterial,
-      NCollection_StdAllocator<OpenGl_RaytraceMaterial> > anEmptyMaterials;
+      NCollection_OccAllocator<OpenGl_RaytraceMaterial> > anEmptyMaterials;
 
     Materials.swap (anEmptyMaterials);
 

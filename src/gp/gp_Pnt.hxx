@@ -20,11 +20,8 @@
 #include <Standard_Handle.hxx>
 #include <gp_XYZ.hxx>
 #include <Standard_Real.hxx>
-#include <Standard_Integer.hxx>
 #include <Standard_Boolean.hxx>
 
-class gp_XYZ;
-class Standard_OutOfRange;
 class gp_Ax1;
 class gp_Ax2;
 class gp_Trsf;
@@ -216,6 +213,39 @@ private:
   gp_XYZ coord;
 
 };
+
+namespace std
+{
+  template <>
+  struct hash<gp_Pnt>
+  {
+    size_t operator()(const gp_Pnt& thePnt) const noexcept
+    {
+      union
+      {
+        Standard_Real    R[3];
+        Standard_Integer I[6];
+      } U;
+
+      thePnt.Coord(U.R[0], U.R[1], U.R[2]);
+
+      return std::hash<double>{}(U.I[0] / 23 + U.I[1] / 19 + U.I[2] / 17 + U.I[3] / 13 + U.I[4] / 11 + U.I[5] / 7);
+    }
+  };
+
+  template<>
+  struct equal_to<gp_Pnt>
+  {
+    bool operator()(const gp_Pnt& thePnt1,
+                    const gp_Pnt& thePnt2) const noexcept
+    {
+      if (Abs(thePnt1.X() - thePnt2.X()) > Epsilon(thePnt2.X())) return false;
+      if (Abs(thePnt1.Y() - thePnt2.Y()) > Epsilon(thePnt2.Y())) return false;
+      if (Abs(thePnt1.Z() - thePnt2.Z()) > Epsilon(thePnt2.Z())) return false;
+      return true;
+    }
+  };
+}
 
 #include <gp_Trsf.hxx>
 #include <gp_Vec.hxx>

@@ -28,7 +28,6 @@ class Geom_BSplineCurve;
 class Geom2d_BSplineCurve;
 class IGESGeom_SplineSurface;
 class Geom_BSplineSurface;
-class IGESConvGeom_GeomBuilder;
 
 
 //! This package is intended to gather geometric conversion which
@@ -91,28 +90,6 @@ public:
   //! all the knots can be passed to C2, all knots which can be are.
   Standard_EXPORT static Standard_Integer IncreaseSurfaceContinuity (const Handle(Geom_BSplineSurface)& surface, const Standard_Real epsgeom, const Standard_Integer continuity = 2);
 
-
-
-
-protected:
-
-
-
-
-
-private:
-
-
-
-
-friend class IGESConvGeom_GeomBuilder;
-
 };
-
-
-
-
-
-
 
 #endif // _IGESConvGeom_HeaderFile

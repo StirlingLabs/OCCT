@@ -12,8 +12,8 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef _OpenGl_VertexBuffer_H__
-#define _OpenGl_VertexBuffer_H__
+#ifndef OpenGl_VertexBuffer_HeaderFile
+#define OpenGl_VertexBuffer_HeaderFile
 
 #include <OpenGl_Buffer.hxx>
 #include <Graphic3d_Buffer.hxx>
@@ -84,7 +84,7 @@ public: //! @name advanced methods
                                                const Graphic3d_TypeOfAttribute theMode);
 
 private:
-#if !defined(GL_ES_VERSION_2_0)
+
   //! Setup FFP array pointer.
   Standard_EXPORT static void bindFixed (const Handle(OpenGl_Context)&   theGlCtx,
                                          const Graphic3d_TypeOfAttribute theMode,
@@ -100,7 +100,6 @@ private:
   //! Disable FFP color array pointer.
   Standard_EXPORT static void unbindFixedColor (const Handle(OpenGl_Context)& theCtx);
 
-#endif
 public: //! @name methods for interleaved attributes array
 
   //! @return true if buffer contains per-vertex color attribute

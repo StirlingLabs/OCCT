@@ -24,7 +24,6 @@
 #include <TopOpeBRepDS_EdgeInterferenceTool.hxx>
 #include <TopOpeBRepDS_EdgeVertexInterference.hxx>
 #include <TopOpeBRepDS_EIR.hxx>
-#include <TopOpeBRepDS_EXPORT.hxx>
 #include <TopOpeBRepDS_HDataStructure.hxx>
 #include <TopOpeBRepDS_Interference.hxx>
 #include <TopOpeBRepDS_ProcessInterferencesTool.hxx>
@@ -55,7 +54,7 @@ static void FDS_reduceONFACEinterferences(TopOpeBRepDS_ListOfInterference& LI,
   TopOpeBRepDS_ListIteratorOfListOfInterference it1;  // set hasONFACE = True if LI contains interfs with (ON,FACE) transition(s).
   Standard_Boolean hasONFACE = Standard_False;
   for (it1.Initialize(LI); it1.More(); it1.Next() ) {
-    Handle(TopOpeBRepDS_Interference)& I1 = it1.Value();
+    Handle(TopOpeBRepDS_Interference)& I1 = it1.ChangeValue();
     TopOpeBRepDS_Kind GT1,ST1; Standard_Integer G1,S1; FDS_data(I1,GT1,G1,ST1,S1);
     if ( GT1 == TopOpeBRepDS_POINT ) {
       hasONFACE = FUN_hasStateShape(I1->Transition(),TopAbs_ON,TopAbs_FACE);
@@ -67,7 +66,7 @@ static void FDS_reduceONFACEinterferences(TopOpeBRepDS_ListOfInterference& LI,
     // LI has (ON,FACE) : remove all other interf (POINT,(not(ON,FACE)))
     it1.Initialize(LI);
     while( it1.More() ) {
-      Handle(TopOpeBRepDS_Interference)& I1 = it1.Value();
+      Handle(TopOpeBRepDS_Interference)& I1 = it1.ChangeValue();
       TopOpeBRepDS_Kind GT1,ST1; Standard_Integer G1,S1; FDS_data(I1,GT1,G1,ST1,S1);
       if ( GT1 == TopOpeBRepDS_POINT ) {
 	hasONFACE = FUN_hasStateShape(I1->Transition(),TopAbs_ON,TopAbs_FACE);

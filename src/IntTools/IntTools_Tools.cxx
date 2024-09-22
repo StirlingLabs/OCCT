@@ -18,12 +18,10 @@
 #include <BRep_Builder.hxx>
 #include <BRep_Tool.hxx>
 #include <BRepAdaptor_Curve.hxx>
-#include <BRepAdaptor_Surface.hxx>
 #include <Geom2d_Curve.hxx>
 #include <Geom2d_TrimmedCurve.hxx>
-#include <Geom_BoundedCurve.hxx>
+#include <Geom2dAdaptor_Curve.hxx>
 #include <Geom_Curve.hxx>
-#include <Geom_Geometry.hxx>
 #include <Geom_Line.hxx>
 #include <Geom_Surface.hxx>
 #include <Geom_TrimmedCurve.hxx>
@@ -31,8 +29,6 @@
 #include <GeomAdaptor_Curve.hxx>
 #include <GeomAdaptor_Surface.hxx>
 #include <GeomAPI_ProjectPointOnCurve.hxx>
-#include <GeomAPI_ProjectPointOnSurf.hxx>
-#include <gp.hxx>
 #include <gp_Ax1.hxx>
 #include <gp_Dir.hxx>
 #include <gp_Lin.hxx>
@@ -40,21 +36,17 @@
 #include <gp_Pnt.hxx>
 #include <gp_Pnt2d.hxx>
 #include <IntTools_CommonPrt.hxx>
-#include <IntTools_Curve.hxx>
 #include <IntTools_FClass2d.hxx>
 #include <IntTools_Range.hxx>
-#include <IntTools_SequenceOfCurves.hxx>
 #include <IntTools_Tools.hxx>
 #include <Precision.hxx>
 #include <TopExp_Explorer.hxx>
-#include <TopLoc_Location.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Vertex.hxx>
 #include <TopoDS_Wire.hxx>
-#include <TopTools_IndexedDataMapOfShapeShape.hxx>
 
 static
   void ParabolaTolerance(const Handle(Geom_Curve)& ,
@@ -209,12 +201,12 @@ static
   Standard_Integer IntTools_Tools::SplitCurve(const IntTools_Curve& IC,
            IntTools_SequenceOfCurves& aCvs)
 {
-  Handle (Geom_Curve) aC3D =IC.Curve();
+  const Handle (Geom_Curve)& aC3D =IC.Curve();
   if(aC3D.IsNull())
     return 0;
   //
-  Handle (Geom2d_Curve) aC2D1=IC.FirstCurve2d();
-  Handle (Geom2d_Curve) aC2D2=IC.SecondCurve2d();
+  const Handle (Geom2d_Curve)& aC2D1=IC.FirstCurve2d();
+  const Handle (Geom2d_Curve)& aC2D2=IC.SecondCurve2d();
   Standard_Boolean bIsClosed;
 
   bIsClosed=IntTools_Tools::IsClosed(aC3D);
@@ -797,8 +789,17 @@ Standard_Boolean IntTools_Tools::ComputeTolerance
 {
   GeomLib_CheckCurveOnSurface aCS;
   //
-  aCS.Init(theCurve3D, theSurf, theFirst, theLast, theTolRange);
-  aCS.Perform (theCurve2D, theToRunParallel);
+  const Handle(Adaptor3d_Curve) aGeomAdaptorCurve = new GeomAdaptor_Curve(theCurve3D, theFirst, theLast);
+
+  Handle(Adaptor2d_Curve2d) aGeom2dAdaptorCurve = new Geom2dAdaptor_Curve(theCurve2D, theFirst, theLast);
+  Handle(GeomAdaptor_Surface) aGeomAdaptorSurface = new GeomAdaptor_Surface(theSurf);
+
+  Handle(Adaptor3d_CurveOnSurface) anAdaptor3dCurveOnSurface =
+    new Adaptor3d_CurveOnSurface(aGeom2dAdaptorCurve, aGeomAdaptorSurface);
+
+  aCS.Init(aGeomAdaptorCurve, theTolRange);
+  aCS.SetParallel(theToRunParallel);
+  aCS.Perform(anAdaptor3dCurveOnSurface);
   if (!aCS.IsDone()) {
     return Standard_False;
   }

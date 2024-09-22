@@ -18,12 +18,10 @@
 #define _IGESBasic_ExternalReferenceFile_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <Interface_HArray1OfHAsciiString.hxx>
 #include <IGESData_IGESEntity.hxx>
 #include <Standard_Integer.hxx>
-class Standard_OutOfRange;
 class TCollection_HAsciiString;
 
 

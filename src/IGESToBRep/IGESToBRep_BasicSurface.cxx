@@ -22,7 +22,7 @@
 //:p6 abv 26.02.99: improve messages after call to ConvertToPeriodic
 //#75 rln 11.03.99: using message mechanism for periodic B-Spline
 //S4181 pdn 15.04.99 implementing of reading IGES elementary surfaces.
-//sln 29.12.2001 OCC90 : Method checkBSplineSurfaceStatus and varification of creation of bspline surfaces were added
+//sln 29.12.2001 OCC90 : Method checkBSplineSurfaceStatus and verification of creation of bspline surfaces were added
 //=======================================================================
 
 #include <Geom_BSplineSurface.hxx>
@@ -38,8 +38,6 @@
 #include <gp_Pln.hxx>
 #include <gp_Trsf.hxx>
 #include <IGESConvGeom.hxx>
-#include <IGESData_IGESEntity.hxx>
-#include <IGESData_IGESModel.hxx>
 #include <IGESData_ToolLocation.hxx>
 #include <IGESGeom_BSplineSurface.hxx>
 #include <IGESGeom_Direction.hxx>
@@ -50,7 +48,6 @@
 #include <IGESSolid_PlaneSurface.hxx>
 #include <IGESSolid_SphericalSurface.hxx>
 #include <IGESSolid_ToroidalSurface.hxx>
-#include <IGESToBRep.hxx>
 #include <IGESToBRep_BasicSurface.hxx>
 #include <IGESToBRep_CurveAndSurface.hxx>
 #include <Interface_Macros.hxx>
@@ -62,11 +59,9 @@
 #include <Standard_ErrorHandler.hxx>
 #include <Standard_Failure.hxx>
 #include <TColgp_Array2OfPnt.hxx>
-#include <TColgp_HArray2OfPnt.hxx>
 #include <TColStd_Array1OfInteger.hxx>
 #include <TColStd_Array1OfReal.hxx>
 #include <TColStd_Array2OfReal.hxx>
-#include <TColStd_HArray1OfReal.hxx>
 #include <TColStd_SequenceOfInteger.hxx>
 
 //:36
@@ -75,7 +70,7 @@
 //=======================================================================
 //function : CheckBSplineSurface
 //purpose  : Check coincidede knots. Check whether knots are in ascending 
-//           order and difference between vaues of weights more than 1000. 
+//           order and difference between values of weights more than 1000. 
 //           Send corresponding messages. The function returns Standard_False 
 //           if surface can not be created, Standard_True otherwise.
 //=======================================================================
@@ -85,7 +80,7 @@ static Standard_Boolean checkBSplineSurface(IGESToBRep_BasicSurface*            
                                           TColStd_Array1OfReal&                  SVKnots,
                                           const TColStd_Array2OfReal&            SWeights)
 {
-  // check whether difference between vaues of weights more than 1000.
+  // check whether difference between values of weights more than 1000.
   if(!theBSplineSurface->IsPolynomial()) {
     Standard_Real aMinValue = SWeights.Value(SWeights.LowerRow(), SWeights.LowerCol());
     Standard_Real aMaxValue = SWeights.Value(SWeights.LowerRow(), SWeights.LowerCol());

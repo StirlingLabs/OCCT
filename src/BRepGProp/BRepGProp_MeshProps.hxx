@@ -16,12 +16,10 @@
 
 #include <GProp_GProps.hxx>
 #include <TopAbs_Orientation.hxx>
-#include <Poly_Array1OfTriangle.hxx>
 #include <TColgp_Array1OfPnt.hxx>
 
 class Poly_Triangulation;
 class TopLoc_Location;
-class gp_Pnt;
 
 
 //! Computes the global properties of a surface mesh. The mesh can be

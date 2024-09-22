@@ -18,12 +18,9 @@
 #define _IGESGeom_RuledSurface_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <Standard_Integer.hxx>
 #include <IGESData_IGESEntity.hxx>
-#include <Standard_Boolean.hxx>
-class IGESData_IGESEntity;
 
 
 class IGESGeom_RuledSurface;

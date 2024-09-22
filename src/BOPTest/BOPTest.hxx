@@ -19,10 +19,9 @@
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
+#include <BOPAlgo_Operation.hxx>
 
 #include <Draw_Interpretor.hxx>
-class BOPTest_Objects;
-class BOPTest_DrawableShape;
 class Message_Report;
 
 class BOPTest 
@@ -68,12 +67,9 @@ public:
   //! if flag BOPTest_Objects::DrawWarnShapes() is set
   Standard_EXPORT static void ReportAlerts (const Handle(Message_Report)& theReport);
 
-protected:
-
-private:
-
-friend class BOPTest_Objects;
-friend class BOPTest_DrawableShape;
+  //! Returns operation type according to the given string.
+  //! For numeric values, the number correspond to the order in enum.
+  Standard_EXPORT static BOPAlgo_Operation GetOperationType(const Standard_CString theOp);
 
 };
 

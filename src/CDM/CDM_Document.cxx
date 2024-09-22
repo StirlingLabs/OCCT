@@ -19,7 +19,6 @@
 #include <CDM_Application.hxx>
 #include <CDM_DataMapIteratorOfMetaDataLookUpTable.hxx>
 #include <CDM_Document.hxx>
-#include <CDM_ListIteratorOfListOfDocument.hxx>
 #include <CDM_ListOfDocument.hxx>
 #include <CDM_MetaData.hxx>
 #include <CDM_NamesDirectory.hxx>
@@ -29,10 +28,8 @@
 #include <Standard_DomainError.hxx>
 #include <Standard_Dump.hxx>
 #include <Standard_Failure.hxx>
-#include <Standard_GUID.hxx>
 #include <Standard_NoSuchObject.hxx>
 #include <Standard_NullObject.hxx>
-#include <Standard_ProgramError.hxx>
 #include <Standard_Type.hxx>
 #include <TCollection_ExtendedString.hxx>
 #include <UTL.hxx>
@@ -535,7 +532,7 @@ void CDM_Document::SetMetaData(const Handle(CDM_MetaData)& aMetaData)
 
     aMetaData->SetDocument(this);
 
-    // Update the document refencing this MetaData:
+    // Update the document referencing this MetaData:
     CDM_DataMapIteratorOfMetaDataLookUpTable it(Application()->MetaDataLookUpTable());
     for(;it.More();it.Next()) {
       const Handle(CDM_MetaData)& theMetaData=it.Value();
@@ -623,7 +620,7 @@ TCollection_ExtendedString CDM_Document::Folder() const {
 
 void CDM_Document::SetRequestedFolder(const TCollection_ExtendedString& aFolder)
 {
-  TCollection_ExtendedString f(aFolder);
+  const TCollection_ExtendedString& f = aFolder;
   if(f.Length() != 0) {
     myRequestedFolderIsDefined=Standard_True;
     myRequestedFolder=aFolder;
@@ -978,8 +975,8 @@ void CDM_Document::RemoveFromReference(const Standard_Integer aReferenceIdentifi
 //purpose  : 
 //=======================================================================
 
-TCollection_ExtendedString GetResource (const TCollection_ExtendedString aFormat,
-                                        const TCollection_ExtendedString anItem)
+TCollection_ExtendedString GetResource (const TCollection_ExtendedString& aFormat,
+                                        const TCollection_ExtendedString& anItem)
 {
   TCollection_ExtendedString theResource;
   theResource+= aFormat;

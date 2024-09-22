@@ -22,14 +22,9 @@
 
 #include <Expr_PolyExpression.hxx>
 #include <Expr_Array1OfGeneralExpression.hxx>
-#include <Standard_Boolean.hxx>
-#include <Standard_Real.hxx>
 #include <Expr_Array1OfNamedUnknown.hxx>
 #include <TColStd_Array1OfReal.hxx>
 class Expr_GeneralFunction;
-class Standard_NumericError;
-class Standard_OutOfRange;
-class Expr_NotEvaluable;
 class Expr_GeneralExpression;
 class Expr_NamedUnknown;
 class TCollection_AsciiString;

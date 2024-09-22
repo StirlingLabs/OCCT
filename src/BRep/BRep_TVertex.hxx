@@ -18,13 +18,11 @@
 #define _BRep_TVertex_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <gp_Pnt.hxx>
 #include <Standard_Real.hxx>
 #include <BRep_ListOfPointRepresentation.hxx>
 #include <TopoDS_TVertex.hxx>
-class gp_Pnt;
 class TopoDS_TShape;
 
 

@@ -1,6 +1,8 @@
 StepData.cxx
 StepData.hxx
 StepData_Array1OfField.hxx
+StepData_ConfParameters.cxx
+StepData_ConfParameters.hxx
 StepData_DefaultGeneral.cxx
 StepData_DefaultGeneral.hxx
 StepData_Described.cxx
@@ -13,6 +15,8 @@ StepData_EnumTool.cxx
 StepData_EnumTool.hxx
 StepData_ESDescr.cxx
 StepData_ESDescr.hxx
+StepData_Factors.cxx
+StepData_Factors.hxx
 StepData_Field.cxx
 StepData_Field.hxx
 StepData_FieldList.cxx

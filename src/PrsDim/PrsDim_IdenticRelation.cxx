@@ -32,17 +32,13 @@
 #include <gp_Pnt.hxx>
 #include <gp_Vec.hxx>
 #include <Precision.hxx>
-#include <Prs3d_Drawer.hxx>
-#include <Prs3d_LineAspect.hxx>
 #include <Prs3d_Presentation.hxx>
 #include <Select3D_SensitiveCurve.hxx>
 #include <Select3D_SensitiveSegment.hxx>
 #include <SelectMgr_EntityOwner.hxx>
 #include <SelectMgr_Selection.hxx>
-#include <Standard_NotImplemented.hxx>
 #include <TCollection_ExtendedString.hxx>
 #include <TColStd_ListIteratorOfListOfTransient.hxx>
-#include <TopAbs.hxx>
 #include <TopExp.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Edge.hxx>
@@ -169,7 +165,7 @@ static Standard_Boolean ComputeAttach(const gp_Circ& thecirc,
 
   // Case of confusion between the current position and the center 
   // of the circle -> we move the current position
-  Standard_Real confusion (Precision::Confusion());
+  constexpr Standard_Real confusion (Precision::Confusion());
   gp_Pnt aCenter = thecirc.Location();
   if ( aCenter.Distance(curpos) <= confusion )
     {
@@ -233,7 +229,7 @@ static Standard_Boolean ComputeAttach(const gp_Elips& theEll,
 
   // Case of confusion between the current position and the center 
   // of the circle -> we move the current position
-  Standard_Real confusion (Precision::Confusion());
+  constexpr Standard_Real confusion (Precision::Confusion());
   gp_Pnt aCenter = theEll.Location();
   if ( aCenter.Distance(curpos) <= confusion )
     {
@@ -366,9 +362,9 @@ void PrsDim_IdenticRelation::ComputeSelection(const Handle(SelectMgr_Selection)&
   Handle(SelectMgr_EntityOwner) own = new SelectMgr_EntityOwner(this,7);
 
   Handle(Select3D_SensitiveSegment) seg;
-  // attachement point of the segment linking position to the curve
+  // attachment point of the segment linking position to the curve
   gp_Pnt attach; 
-  Standard_Real confusion (Precision::Confusion());
+  constexpr Standard_Real confusion (Precision::Confusion());
     
   if ( myFAttach.IsEqual(mySAttach, confusion) )
     {
@@ -441,7 +437,7 @@ void PrsDim_IdenticRelation::ComputeSelection(const Handle(SelectMgr_Selection)&
 // jfa 24/10/2000 end
     }
 
-  // Creation of the segment linking the attachement point with the
+  // Creation of the segment linking the attachment point with the
   // position
   if ( !attach.IsEqual(myPosition, confusion) )
     {
@@ -657,7 +653,7 @@ void PrsDim_IdenticRelation::ComputeTwoLinesPresentation(const Handle(Prs3d_Pres
       Standard_Real dist = thelin->Lin().Distance(curpos);
       gp_Pnt proj = ElCLib::Value( pcurpos, thelin->Lin());
       gp_Vec  trans;
-      Standard_Real confusion(Precision::Confusion());
+      constexpr Standard_Real confusion(Precision::Confusion());
       if ( dist >= confusion ) {
 	trans = gp_Vec(proj, curpos);
 	trans.Normalize();
@@ -706,7 +702,7 @@ void PrsDim_IdenticRelation::ComputeTwoCirclesPresentation(const Handle(Prs3d_Pr
 							const gp_Pnt& firstp2,
 							const gp_Pnt& lastp2)
 {
-  Standard_Real confusion (Precision::Confusion());
+  constexpr Standard_Real confusion (Precision::Confusion());
 
   // Searching of complete circles
   Standard_Boolean circ1complete = (firstp1.IsEqual(lastp1, confusion));
@@ -987,7 +983,7 @@ void PrsDim_IdenticRelation::ComputeNotAutoCircPresentation(const Handle(Geom_Ci
   
   // Case of confusion between the current position and the center 
   // of the circle -> we move the current position
-  Standard_Real confusion (Precision::Confusion());
+  constexpr Standard_Real confusion (Precision::Confusion());
   if ( myCenter.Distance(curpos) <= confusion )
     {
       gp_Vec vprec(myCenter, myFAttach);
@@ -1061,7 +1057,7 @@ void PrsDim_IdenticRelation::ComputeTwoEllipsesPresentation(const Handle(Prs3d_P
 							 const gp_Pnt& firstp2,
 							 const gp_Pnt& lastp2)
 {
-  Standard_Real confusion (Precision::Confusion());
+  constexpr Standard_Real confusion (Precision::Confusion());
 
   // Searching of complete ellipses
   Standard_Boolean circ1complete = (firstp1.IsEqual(lastp1, confusion));
@@ -1343,7 +1339,7 @@ void PrsDim_IdenticRelation::ComputeNotAutoElipsPresentation(const Handle(Geom_E
   
   // Case of confusion between the current position and the center 
   // of the ellipse -> we move the current position
-  Standard_Real confusion (Precision::Confusion());
+  constexpr Standard_Real confusion (Precision::Confusion());
   if ( myCenter.Distance(curpos) <= confusion )
     {
       gp_Vec vprec(myCenter, myFAttach);
@@ -1428,7 +1424,7 @@ void PrsDim_IdenticRelation::ComputeTwoVerticesPresentation(const Handle(Prs3d_P
     return ;
 
   
-  // The attachement points are the points themselves that must be 
+  // The attachment points are the points themselves that must be 
   //identical
   myFAttach = BRep_Tool::Pnt(FVertex);
   mySAttach = myFAttach;
@@ -1661,7 +1657,7 @@ void PrsDim_IdenticRelation::ComputeOneEdgeOVertexPresentation(const Handle(Prs3
     if (numedge == 1) myExtShape = 2;
     else myExtShape = 1;
   }
-  // The attachement points are the point 
+  // The attachment points are the point 
   myFAttach = BRep_Tool::Pnt(V);
   mySAttach = myFAttach;
 

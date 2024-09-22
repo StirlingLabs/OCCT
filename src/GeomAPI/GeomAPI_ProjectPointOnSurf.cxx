@@ -16,8 +16,6 @@
 
 
 #include <Extrema_ExtPS.hxx>
-#include <Geom_Surface.hxx>
-#include <GeomAdaptor_Surface.hxx>
 #include <GeomAPI_ProjectPointOnSurf.hxx>
 #include <gp_Pnt.hxx>
 #include <Precision.hxx>
@@ -163,7 +161,7 @@ GeomAPI_ProjectPointOnSurf::GeomAPI_ProjectPointOnSurf()
 					 const Standard_Real         Vsup,
 					 const Extrema_ExtAlgo       theProjAlgo)
 {
-  Standard_Real Tolerance = Precision::PConfusion();
+  constexpr Standard_Real Tolerance = Precision::PConfusion();
   //modified by NIZNHY-PKV Thu Apr  4 10:38:23 2002 f
   //GeomAdaptor_Surface TheSurface (Surface,Umin,Usup,Vmin,Vsup);
   //myExtPS = Extrema_ExtPS (P, TheSurface, Tol, Tol);
@@ -213,7 +211,7 @@ GeomAPI_ProjectPointOnSurf::GeomAPI_ProjectPointOnSurf()
 					 const Standard_Real       Vsup,
 					 const Extrema_ExtAlgo     theProjAlgo)
 {
-  Standard_Real Tolerance = Precision::PConfusion();
+  constexpr Standard_Real Tolerance = Precision::PConfusion();
   //modified by NIZNHY-PKV Thu Apr  4 10:41:50 2002 f
   //GeomAdaptor_Surface TheSurface (Surface,Umin,Usup,Vmin,Vsup);
   myGeomAdaptor.Load(Surface, Umin,Usup,Vmin,Vsup);

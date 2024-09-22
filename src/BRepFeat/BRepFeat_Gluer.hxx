@@ -24,7 +24,6 @@
 #include <LocOpe_Gluer.hxx>
 #include <BRepBuilderAPI_MakeShape.hxx>
 #include <LocOpe_Operation.hxx>
-#include <Standard_Boolean.hxx>
 #include <TopTools_ListOfShape.hxx>
 class TopoDS_Shape;
 class TopoDS_Face;
@@ -91,7 +90,7 @@ public:
   
   //! This is  called by  Shape().  It does  nothing but
   //! may be redefined.
-  Standard_EXPORT virtual void Build() Standard_OVERRIDE;
+  Standard_EXPORT virtual void Build(const Message_ProgressRange& theRange = Message_ProgressRange()) Standard_OVERRIDE;
   
   //! returns the status of the Face after
   //! the shape creation.

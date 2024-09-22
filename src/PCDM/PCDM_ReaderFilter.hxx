@@ -14,10 +14,10 @@
 #ifndef _PCDM_ReaderFilter_HeaderFile
 #define _PCDM_ReaderFilter_HeaderFile
 
-#include <Standard_Type.hxx>
 #include <Standard_Transient.hxx>
 #include <TCollection_AsciiString.hxx>
 #include <NCollection_Map.hxx>
+#include <NCollection_DataMap.hxx>
 #include <NCollection_List.hxx>
 
 class PCDM_ReaderFilter;

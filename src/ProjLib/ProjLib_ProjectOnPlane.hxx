@@ -26,13 +26,6 @@
 #include <GeomAbs_Shape.hxx>
 #include <TColStd_Array1OfReal.hxx>
 
-class Standard_OutOfRange;
-class Standard_NoSuchObject;
-class Standard_DomainError;
-class Standard_ConstructionError;
-class Standard_NotImplemented;
-class gp_Ax3;
-class gp_Dir;
 class gp_Pnt;
 class gp_Vec;
 class gp_Lin;
@@ -70,6 +63,9 @@ public:
   //! raises  if the direction  <D>  is parallel  to the
   //! plane <Pl>.
   Standard_EXPORT ProjLib_ProjectOnPlane(const gp_Ax3& Pl, const gp_Dir& D);
+
+  //! Shallow copy of adaptor
+  Standard_EXPORT virtual Handle(Adaptor3d_Curve) ShallowCopy() const Standard_OVERRIDE;
   
   //! Sets the  Curve  and perform  the projection.
   //! if <KeepParametrization> is true, the parametrization
@@ -196,9 +192,12 @@ public:
 
 protected:
 
+  void GetTrimmedResult(const Handle(Geom_Curve)& theProjCurve);
 
+  Standard_Boolean BuildParabolaByApex(Handle(Geom_Curve)& theGeomParabolaPtr);
+  Standard_Boolean BuildHyperbolaByApex(Handle(Geom_Curve)& theGeomParabolaPtr);
 
-
+  void BuildByApprox(const Standard_Real theLimitParameter);
 
 private:
 

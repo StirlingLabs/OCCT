@@ -22,18 +22,11 @@
 #include <Standard_Handle.hxx>
 
 #include <TopoDS_Shape.hxx>
-#include <TopoDS_Face.hxx>
 #include <TopTools_DataMapOfShapeListOfShape.hxx>
 #include <TopoDS_Wire.hxx>
-#include <TColGeom_SequenceOfCurve.hxx>
 #include <BRepFeat_Form.hxx>
 #include <Standard_Integer.hxx>
-#include <Standard_Boolean.hxx>
 class Geom_Curve;
-class Standard_ConstructionError;
-class TopoDS_Shape;
-class TopoDS_Face;
-class TopoDS_Wire;
 class TopoDS_Edge;
 
 

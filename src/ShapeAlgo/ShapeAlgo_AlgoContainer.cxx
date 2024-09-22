@@ -17,7 +17,6 @@
 #include <BRep_Builder.hxx>
 #include <BRep_Tool.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
-#include <BRepBuilderAPI_MakeWire.hxx>
 #include <BRepTools.hxx>
 #include <Geom2d_BSplineCurve.hxx>
 #include <Geom_BSplineCurve.hxx>
@@ -33,15 +32,8 @@
 #include <ShapeAlgo_AlgoContainer.hxx>
 #include <ShapeAlgo_ToolContainer.hxx>
 #include <ShapeAnalysis.hxx>
-#include <ShapeAnalysis_Edge.hxx>
-#include <ShapeAnalysis_Wire.hxx>
-#include <ShapeBuild_Edge.hxx>
 #include <ShapeConstruct.hxx>
-#include <ShapeCustom.hxx>
 #include <ShapeCustom_Surface.hxx>
-#include <ShapeExtend_WireData.hxx>
-#include <ShapeFix.hxx>
-#include <ShapeFix_Edge.hxx>
 #include <ShapeFix_Wire.hxx>
 #include <ShapeUpgrade.hxx>
 #include <ShapeUpgrade_ShapeDivideContinuity.hxx>
@@ -50,7 +42,6 @@
 #include <TColgp_Array1OfPnt2d.hxx>
 #include <TColStd_Array1OfInteger.hxx>
 #include <TColStd_Array1OfReal.hxx>
-#include <TopExp.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
@@ -218,7 +209,7 @@ void ShapeAlgo_AlgoContainer::ApproxBSplineCurve (const Handle(Geom_BSplineCurve
 	R->Add(POn2S);
       }
       GeomInt_WLApprox theapp3d;
-      Standard_Real Tol = Precision::Approximation();
+      constexpr Standard_Real Tol = Precision::Approximation();
       theapp3d.SetParameters(Tol, Tol, 4, 8, 0, 30, Standard_True);
       Handle(IntPatch_WLine) WL = new IntPatch_WLine(R, Standard_False);
       Standard_Integer indicemin = 1;
@@ -350,7 +341,7 @@ void ShapeAlgo_AlgoContainer::ApproxBSplineCurve (const Handle(Geom2d_BSplineCur
 	R->Add(POn2S);
       }
       GeomInt_WLApprox theapp3d;
-      Standard_Real Tol = Precision::PApproximation();
+      constexpr Standard_Real Tol = Precision::PApproximation();
       theapp3d.SetParameters(Tol, Tol, 4, 8, 0, 30, Standard_True);
       Handle(IntPatch_WLine) WL = new IntPatch_WLine(R, Standard_False);
       Standard_Integer indicemin = 1;

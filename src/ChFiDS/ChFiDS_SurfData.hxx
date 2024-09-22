@@ -18,20 +18,15 @@
 #define _ChFiDS_SurfData_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <ChFiDS_CommonPoint.hxx>
 #include <ChFiDS_FaceInterference.hxx>
 #include <gp_Pnt2d.hxx>
 #include <Standard_Real.hxx>
 #include <Standard_Integer.hxx>
-#include <Standard_Boolean.hxx>
 #include <TopAbs_Orientation.hxx>
 #include <Standard_Transient.hxx>
 
-class ChFiDS_FaceInterference;
-class ChFiDS_CommonPoint;
-class gp_Pnt2d;
 
 
 class ChFiDS_SurfData;

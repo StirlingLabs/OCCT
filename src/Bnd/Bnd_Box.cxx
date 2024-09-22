@@ -16,7 +16,6 @@
 
 #include <Bnd_Box.hxx>
 #include <gp_Dir.hxx>
-#include <gp_Lin.hxx>
 #include <gp_Pln.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_Trsf.hxx>
@@ -27,7 +26,6 @@
 #define ClearVoidFlag() ( Flags &= ~VoidMask )
 
 #include <Standard_Stream.hxx>
-#include <gp.hxx>
 // #include <Precision.hxx>
 #define Bnd_Precision_Infinite 1e+100
 
@@ -48,7 +46,7 @@ Bnd_Box::Bnd_Box()
 //function : Bnd_Box
 //purpose  : 
 //=======================================================================
-Bnd_Box::Bnd_Box (const gp_Pnt theMin, const gp_Pnt theMax)
+Bnd_Box::Bnd_Box (const gp_Pnt& theMin, const gp_Pnt& theMax)
 : Gap (0.0)
 {
   SetVoid();
@@ -722,7 +720,7 @@ static Standard_Boolean IsSegmentOut(Standard_Real x1,Standard_Real y1,
                                      Standard_Real xs1,Standard_Real ys1,
                                      Standard_Real xs2,Standard_Real ys2)
 {
-  Standard_Real eps = RealSmall();
+  constexpr Standard_Real eps = RealSmall();
   Standard_Real xsmin = Min (xs1, xs2);
   Standard_Real xsmax = Max (xs1, xs2);
   Standard_Real ysmin = Min (ys1, ys2);
@@ -767,7 +765,7 @@ Standard_Boolean Bnd_Box::IsOut(const gp_Pnt& P1, const gp_Pnt& P2, const gp_Dir
   if        (IsWhole())  return Standard_False;
   else if   (IsVoid())   return Standard_True;
 
-  Standard_Real eps = RealSmall();
+  constexpr Standard_Real eps = RealSmall();
   Standard_Real myXmin, myYmin, myZmin, myXmax, myYmax, myZmax;
   Get (myXmin, myYmin, myZmin, myXmax, myYmax, myZmax);
 

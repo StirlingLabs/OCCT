@@ -22,8 +22,6 @@
 #include <Standard_Handle.hxx>
 
 #include <BRepPrim_GWedge.hxx>
-#include <Standard_Real.hxx>
-class Standard_DomainError;
 class gp_Ax2;
 
 

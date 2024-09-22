@@ -17,7 +17,6 @@
 #ifndef _BRepAdaptor_Surface_HeaderFile
 #define _BRepAdaptor_Surface_HeaderFile
 
-#include <Adaptor3d_Surface.hxx>
 #include <GeomAdaptor_Surface.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <GeomAbs_SurfaceType.hxx>
@@ -25,10 +24,6 @@
 #include <TColStd_Array1OfReal.hxx>
 #include <TopoDS_Face.hxx>
 
-class Standard_OutOfRange;
-class Standard_DomainError;
-class Standard_NoSuchObject;
-class gp_Trsf;
 class gp_Pnt;
 class gp_Vec;
 class gp_Pln;
@@ -68,6 +63,9 @@ public:
   //! the  parameter  range  in   the  UV space  of  the
   //! restriction.
   Standard_EXPORT BRepAdaptor_Surface(const TopoDS_Face& F, const Standard_Boolean R = Standard_True);
+
+  //! Shallow copy of adaptor
+  Standard_EXPORT virtual Handle(Adaptor3d_Surface) ShallowCopy() const Standard_OVERRIDE;
   
   //! Sets the surface to the geometry of <F>.
   Standard_EXPORT void Initialize (const TopoDS_Face& F, const Standard_Boolean Restriction = Standard_True);
@@ -143,17 +141,18 @@ public:
   virtual Standard_Real VPeriod() const Standard_OVERRIDE { return mySurf.VPeriod(); }
 
   //! Computes the point of parameters U,V on the surface.
+  //! Tip: use GeomLib::NormEstim() to calculate surface normal at specified (U, V) point.
   Standard_EXPORT gp_Pnt Value (const Standard_Real U, const Standard_Real V) const Standard_OVERRIDE;
-  
+
   //! Computes the point of parameters U,V on the surface.
   Standard_EXPORT void D0 (const Standard_Real U, const Standard_Real V, gp_Pnt& P) const Standard_OVERRIDE;
-  
-  //! Computes the point  and the first derivatives on
-  //! the surface.
-  //! Raised   if  the continuity  of   the  current
-  //! intervals is not C1.
+
+  //! Computes the point  and the first derivatives on the surface.
+  //! Raised if the continuity of the current intervals is not C1.
+  //!
+  //! Tip: use GeomLib::NormEstim() to calculate surface normal at specified (U, V) point.
   Standard_EXPORT void D1 (const Standard_Real U, const Standard_Real V, gp_Pnt& P, gp_Vec& D1U, gp_Vec& D1V) const Standard_OVERRIDE;
-  
+
   //! Computes   the point,  the  first  and  second
   //! derivatives on the surface.
   //! Raised  if   the   continuity   of the current

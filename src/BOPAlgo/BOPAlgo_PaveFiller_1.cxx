@@ -22,7 +22,6 @@
 #include <BOPAlgo_Alerts.hxx>
 #include <BOPDS_DS.hxx>
 #include <BOPDS_Iterator.hxx>
-#include <BOPDS_PaveBlock.hxx>
 #include <BOPDS_ShapeInfo.hxx>
 #include <BOPDS_VectorOfInterfVV.hxx>
 #include <BOPTools_AlgoTools.hxx>
@@ -35,7 +34,6 @@
 #include <Precision.hxx>
 #include <TColStd_DataMapOfIntegerInteger.hxx>
 #include <TopoDS.hxx>
-#include <TopoDS_Face.hxx>
 #include <TopoDS_Vertex.hxx>
 #include <TopoDS_Compound.hxx>
 #include <TopTools_ListOfShape.hxx>
@@ -44,13 +42,14 @@
 // function: PerformVV
 // purpose: 
 //=======================================================================
-void BOPAlgo_PaveFiller::PerformVV() 
+void BOPAlgo_PaveFiller::PerformVV(const Message_ProgressRange& theRange)
 {
   Standard_Integer n1, n2, iFlag, aSize;
   Handle(NCollection_BaseAllocator) aAllocator;
   //
   myIterator->Initialize(TopAbs_VERTEX, TopAbs_VERTEX);
   aSize=myIterator->ExpectedLength();
+  Message_ProgressScope aPS(theRange, NULL, 2.);
   if (!aSize) {
     return; 
   }
@@ -65,12 +64,18 @@ void BOPAlgo_PaveFiller::PerformVV()
   NCollection_List<TColStd_ListOfInteger> aMBlocks(aAllocator);
   //
   // 1. Map V/LV
-  for (; myIterator->More(); myIterator->Next()) {
+  // Split progress range on intersection stage and making blocks. Display only intersection stage.
+  Message_ProgressScope aPSLoop(aPS.Next(1.), "Performing Vertex-Vertex intersection", aSize);
+  for (; myIterator->More(); myIterator->Next(), aPSLoop.Next()) {
+    if (UserBreak(aPS))
+    {
+      return;
+    }
     myIterator->Value(n1, n2);
     //
     if (myDS->HasInterf(n1, n2))
     {
-      BOPAlgo_Tools::FillMap<Standard_Integer, TColStd_MapIntegerHasher>(n1, n2, aMILI, aAllocator);
+      BOPAlgo_Tools::FillMap(n1, n2, aMILI, aAllocator);
       continue;
     }
 
@@ -86,16 +91,20 @@ void BOPAlgo_PaveFiller::PerformVV()
 
     iFlag = BOPTools_AlgoTools::ComputeVV(aV1, aV2, myFuzzyValue);
     if (!iFlag) {
-      BOPAlgo_Tools::FillMap<Standard_Integer, TColStd_MapIntegerHasher>(n1, n2, aMILI, aAllocator);
+      BOPAlgo_Tools::FillMap(n1, n2, aMILI, aAllocator);
     }
   }
   //
   // 2. Make blocks
-  BOPAlgo_Tools::MakeBlocks<Standard_Integer, TColStd_MapIntegerHasher>(aMILI, aMBlocks, aAllocator);
+  BOPAlgo_Tools::MakeBlocks(aMILI, aMBlocks, aAllocator);
   //
   // 3. Make vertices
   NCollection_List<TColStd_ListOfInteger>::Iterator aItB(aMBlocks);
   for (; aItB.More(); aItB.Next()) {
+    if (UserBreak(aPS))
+    {
+      return;
+    }
     const TColStd_ListOfInteger& aLI = aItB.Value();
     MakeSDVertices(aLI);
   }
@@ -105,6 +114,10 @@ void BOPAlgo_PaveFiller::PerformVV()
   TColStd_DataMapOfIntegerInteger& aDMII=myDS->ShapesSD();
   aItDMII.Initialize(aDMII);
   for (; aItDMII.More(); aItDMII.Next()) {
+    if (UserBreak(aPS))
+    {
+      return;
+    }
     n1=aItDMII.Key();
     myDS->InitPaveBlocksForVertex(n1);
   }
@@ -115,7 +128,7 @@ void BOPAlgo_PaveFiller::PerformVV()
 }
 
 //=======================================================================
-// function: PerformVV
+// function: MakeSDVertices
 // purpose: 
 //=======================================================================
 Standard_Integer BOPAlgo_PaveFiller::MakeSDVertices

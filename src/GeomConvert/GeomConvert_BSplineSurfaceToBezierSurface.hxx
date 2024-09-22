@@ -21,14 +21,10 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
-#include <Standard_Real.hxx>
 #include <Standard_Integer.hxx>
 #include <TColGeom_Array2OfBezierSurface.hxx>
 #include <TColStd_Array1OfReal.hxx>
 class Geom_BSplineSurface;
-class Standard_DimensionError;
-class Standard_DomainError;
-class Standard_OutOfRange;
 class Geom_BezierSurface;
 
 

@@ -22,11 +22,7 @@
 #include <Standard_Handle.hxx>
 
 #include <TColStd_Array1OfReal.hxx>
-#include <Standard_Integer.hxx>
-#include <Standard_Real.hxx>
 #include <math_Vector.hxx>
-class Standard_DimensionError;
-class Standard_RangeError;
 class math_Matrix;
 
 

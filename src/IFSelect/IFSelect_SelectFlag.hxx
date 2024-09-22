@@ -18,18 +18,14 @@
 #define _IFSelect_SelectFlag_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <TCollection_AsciiString.hxx>
 #include <IFSelect_SelectExtract.hxx>
-#include <Standard_CString.hxx>
-#include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
 class Interface_EntityIterator;
 class Interface_Graph;
 class Standard_Transient;
 class Interface_InterfaceModel;
-class TCollection_AsciiString;
 
 
 class IFSelect_SelectFlag;

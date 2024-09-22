@@ -22,10 +22,8 @@
 #include <Standard_Handle.hxx>
 
 #include <math_FunctionSetWithDerivatives.hxx>
-#include <Standard_Integer.hxx>
 #include <Standard_Boolean.hxx>
 #include <math_Vector.hxx>
-#include <Standard_Real.hxx>
 #include <TColStd_Array1OfReal.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <TColStd_Array1OfInteger.hxx>
@@ -33,7 +31,6 @@
 #include <TColgp_Array1OfVec.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
 #include <TColgp_Array1OfVec2d.hxx>
-class Standard_DomainError;
 class math_Matrix;
 class gp_Pnt;
 class Blend_Point;
@@ -118,7 +115,7 @@ public:
   //! Returns the point on the first support.
   Standard_EXPORT virtual const gp_Pnt& Pnt2() const = 0;
   
-  //! Returns  if the section is rationnal
+  //! Returns  if the section is rational
   Standard_EXPORT virtual Standard_Boolean IsRational() const = 0;
   
   //! Returns the length of the maximum section
@@ -148,7 +145,7 @@ public:
                                          Standard_Integer& NbPoles2d) = 0;
   
   //! Returns the tolerance to reach in approximation
-  //! to respecte
+  //! to respect
   //! BoundTol error at the Boundary
   //! AngleTol tangent error at the Boundary
   //! SurfTol error inside the surface.

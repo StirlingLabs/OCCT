@@ -22,7 +22,6 @@
 
 class BinMDF_ADriverTable;
 class Message_Messenger;
-class BinMDocStd_XLinkDriver;
 
 
 //! Storage and Retrieval drivers for TDocStd modelling attributes.
@@ -36,28 +35,6 @@ public:
   //! Adds the attribute drivers to <theDriverTable>.
   Standard_EXPORT static void AddDrivers (const Handle(BinMDF_ADriverTable)& theDriverTable, const Handle(Message_Messenger)& aMsgDrv);
 
-
-
-
-protected:
-
-
-
-
-
-private:
-
-
-
-
-friend class BinMDocStd_XLinkDriver;
-
 };
-
-
-
-
-
-
 
 #endif // _BinMDocStd_HeaderFile

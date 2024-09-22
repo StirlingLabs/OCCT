@@ -13,8 +13,8 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef _OpenGl_RenderFilter_H__
-#define _OpenGl_RenderFilter_H__
+#ifndef OpenGl_RenderFilter_HeaderFile
+#define OpenGl_RenderFilter_HeaderFile
 
 //! Filter for rendering elements.
 enum OpenGl_RenderFilter
@@ -26,6 +26,8 @@ enum OpenGl_RenderFilter
 
   OpenGl_RenderFilter_NonRaytraceableOnly = 0x004, //!< render only non-raytraceable elements
   OpenGl_RenderFilter_FillModeOnly        = 0x008, //!< render only filled elements
+
+  OpenGl_RenderFilter_SkipTrsfPersistence = 0x010, //!< render only normal 3D objects without transformation persistence
 };
 
 #endif

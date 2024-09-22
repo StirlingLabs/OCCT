@@ -47,7 +47,6 @@
 #include <Select3D_SensitiveSegment.hxx>
 #include <SelectMgr_Selection.hxx>
 #include <Standard_ProgramError.hxx>
-#include <UnitsAPI.hxx>
 #include <Geom_Line.hxx>
 #include <Geom_Plane.hxx>
 
@@ -503,7 +502,7 @@ void PrsDim_AngleDimension::DrawArcWithText (const Handle(Prs3d_Presentation)& t
 
   if (isLineBreak)
   {
-    // compute gap for label as parameteric size of sector on circle segment
+    // compute gap for label as parametric size of sector on circle segment
     Standard_Real aSectorOfText = theTextWidth / aRadius;
     Standard_Real aTextBegin = aParamMid - aSectorOfText * 0.5;
     Standard_Real aTextEnd = aParamMid + aSectorOfText * 0.5;

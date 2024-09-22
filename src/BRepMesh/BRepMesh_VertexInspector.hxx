@@ -18,7 +18,6 @@
 
 #include <Precision.hxx>
 #include <gp_XY.hxx>
-#include <gp_XYZ.hxx>
 #include <IMeshData_Types.hxx>
 #include <NCollection_CellFilter.hxx>
 #include <BRepMesh_Vertex.hxx>
@@ -142,7 +141,7 @@ public:
   //! @return status of the check.
   Standard_EXPORT NCollection_CellFilter_Action Inspect(const Standard_Integer theTargetIndex);
 
-  //! Checks indices for equlity.
+  //! Checks indices for equality.
   static Standard_Boolean IsEqual(const Standard_Integer theIndex,
                                                   const Standard_Integer theTargetIndex)
   {

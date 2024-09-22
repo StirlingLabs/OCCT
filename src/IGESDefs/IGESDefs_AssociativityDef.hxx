@@ -23,10 +23,7 @@
 #include <TColStd_HArray1OfInteger.hxx>
 #include <IGESData_IGESEntity.hxx>
 #include <Standard_Integer.hxx>
-#include <Standard_Boolean.hxx>
 class IGESBasic_HArray1OfHArray1OfInteger;
-class Standard_DimensionMismatch;
-class Standard_OutOfRange;
 
 
 class IGESDefs_AssociativityDef;

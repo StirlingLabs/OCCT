@@ -18,9 +18,6 @@
 
 #include <BRepTools_Modification.hxx>
 #include <BRepTools_Modifier.hxx>
-#include <Standard_NoSuchObject.hxx>
-#include <Standard_NullObject.hxx>
-#include <TColStd_ListIteratorOfListOfTransient.hxx>
 #include <TColStd_ListOfTransient.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS_Edge.hxx>
@@ -30,7 +27,6 @@
 #include <TopoDS_Vertex.hxx>
 #include <TopTools_DataMapIteratorOfDataMapOfShapeShape.hxx>
 #include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopTools_ListOfShape.hxx>
 
 #if 0
@@ -51,7 +47,6 @@
 #include <gp.hxx>
 
 #include <Standard_NullObject.hxx>
-#include <gp_Trsf.hxx>
 #include <BRepTools_TrsfModification.hxx>
 #include <Message_ProgressScope.hxx>
 #include <Geom_Surface.hxx>
@@ -272,7 +267,7 @@ Standard_Boolean BRepTools_Modifier::Rebuild
         RevWires = aNSinfo.myRevWires;
         B.MakeFace(TopoDS::Face(result),aNSinfo.mySurface,
           aNSinfo.myLoc.Predivided(S.Location()),aNSinfo.myToler);
-        result.Location(S.Location());
+        result.Location(S.Location(), Standard_False);
         if (aNSinfo.myRevFace) 
           ResOr = TopAbs_REVERSED;
         // set specifics flags of a Face
@@ -288,7 +283,7 @@ Standard_Boolean BRepTools_Modifier::Rebuild
         else
         { // create new face with bare triangulation
           B.MakeFace(TopoDS::Face(result), aTriangulation);
-          result.Location(S.Location());
+          result.Location(S.Location(), Standard_False);
         }
         rebuild = Standard_True;
       }
@@ -313,7 +308,7 @@ Standard_Boolean BRepTools_Modifier::Rebuild
             aNCinfo.myLoc.Predivided(S.Location()),aNCinfo.myToler);
 	  No3DCurve = Standard_False;
 	}
-	result.Location(S.Location());
+	result.Location(S.Location(), Standard_False);
 //	result.Orientation(S.Orientation());
 
 	// set specifics flags of an Edge
@@ -332,7 +327,7 @@ Standard_Boolean BRepTools_Modifier::Rebuild
         else
         { // create new edge with bare polygon
           B.MakeEdge(TopoDS::Edge(result), aPolygon);
-          result.Location(S.Location());
+          result.Location(S.Location(), Standard_False);
         }
         rebuild = Standard_True;
       }

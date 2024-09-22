@@ -18,17 +18,13 @@
 #define _IGESDraw_NetworkSubfigureDef_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <Standard_Integer.hxx>
 #include <IGESData_HArray1OfIGESEntity.hxx>
 #include <IGESDraw_HArray1OfConnectPoint.hxx>
 #include <IGESData_IGESEntity.hxx>
-#include <Standard_Boolean.hxx>
 class TCollection_HAsciiString;
 class IGESGraph_TextDisplayTemplate;
-class Standard_OutOfRange;
-class IGESData_IGESEntity;
 class IGESDraw_ConnectPoint;
 
 

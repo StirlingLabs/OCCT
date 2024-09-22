@@ -21,25 +21,16 @@
 #include <Standard_Type.hxx>
 
 #include <Precision.hxx>
-#include <Standard_Boolean.hxx>
 #include <GeomAbs_BSplKnotDistribution.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <Standard_Integer.hxx>
 #include <TColgp_HArray1OfPnt.hxx>
 #include <TColStd_HArray1OfReal.hxx>
 #include <TColStd_HArray1OfInteger.hxx>
-#include <Standard_Real.hxx>
 #include <Geom_BoundedCurve.hxx>
 #include <TColgp_Array1OfPnt.hxx>
 #include <TColStd_Array1OfReal.hxx>
 #include <TColStd_Array1OfInteger.hxx>
-class Standard_ConstructionError;
-class Standard_DimensionError;
-class Standard_DomainError;
-class Standard_OutOfRange;
-class Standard_RangeError;
-class Standard_NoSuchObject;
-class Geom_UndefinedDerivative;
 class gp_Pnt;
 class gp_Vec;
 class gp_Trsf;
@@ -783,7 +774,7 @@ public:
   //! Creates a new object which is a copy of this BSpline curve.
   Standard_EXPORT Handle(Geom_Geometry) Copy() const Standard_OVERRIDE;
   
-  //! Comapare two Bspline curve on identity;
+  //! Compare two Bspline curve on identity;
   Standard_EXPORT Standard_Boolean IsEqual (const Handle(Geom_BSplineCurve)& theOther, const Standard_Real thePreci) const;
 
   //! Dumps the content of me into the stream

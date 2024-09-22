@@ -21,12 +21,7 @@
 #include <Standard_Type.hxx>
 
 #include <Standard_Transient.hxx>
-#include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
-class Standard_Transient;
-class Standard_OutOfRange;
-class Standard_NullObject;
-class Interface_EntityList;
 class Interface_EntityIterator;
 
 

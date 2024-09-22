@@ -17,13 +17,12 @@
 #ifndef Plugin_MapOfFunctions_HeaderFile
 #define Plugin_MapOfFunctions_HeaderFile
 
-#include <TCollection_AsciiString.hxx>
 #include <OSD_Function.hxx>
 #include <TCollection_AsciiString.hxx>
 #include <NCollection_DataMap.hxx>
 
-typedef NCollection_DataMap<TCollection_AsciiString,OSD_Function,TCollection_AsciiString> Plugin_MapOfFunctions;
-typedef NCollection_DataMap<TCollection_AsciiString,OSD_Function,TCollection_AsciiString>::Iterator Plugin_DataMapIteratorOfMapOfFunctions;
+typedef NCollection_DataMap<TCollection_AsciiString,OSD_Function> Plugin_MapOfFunctions;
+typedef NCollection_DataMap<TCollection_AsciiString,OSD_Function>::Iterator Plugin_DataMapIteratorOfMapOfFunctions;
 
 
 #endif

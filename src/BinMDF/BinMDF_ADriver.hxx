@@ -17,20 +17,13 @@
 #define _BinMDF_ADriver_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
-#include <TCollection_AsciiString.hxx>
 #include <Standard_Transient.hxx>
-#include <Standard_CString.hxx>
-#include <Standard_Type.hxx>
-#include <Standard_Boolean.hxx>
 #include <BinObjMgt_RRelocationTable.hxx>
 #include <BinObjMgt_SRelocationTable.hxx>
 class Message_Messenger;
 class TDF_Attribute;
-class TCollection_AsciiString;
 class BinObjMgt_Persistent;
-class TCollection_ExtendedString;
 
 
 class BinMDF_ADriver;

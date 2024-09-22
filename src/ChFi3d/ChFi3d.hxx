@@ -21,7 +21,6 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
-#include <Standard_Integer.hxx>
 #include <TopAbs_Orientation.hxx>
 #include <Standard_Boolean.hxx>
 #include <ChFiDS_TypeOfConcavity.hxx>
@@ -29,10 +28,6 @@
 class BRepAdaptor_Surface;
 class TopoDS_Edge;
 class TopoDS_Face;
-class ChFi3d_Builder;
-class ChFi3d_ChBuilder;
-class ChFi3d_FilBuilder;
-class ChFi3d_SearchSing;
 
 
 //! creation of spatial fillets on a solid.
@@ -81,31 +76,6 @@ public:
   //! identic or opposed  concave  edges.
   Standard_EXPORT static Standard_Boolean SameSide (const TopAbs_Orientation Or, const TopAbs_Orientation OrSave1, const TopAbs_Orientation OrSave2, const TopAbs_Orientation OrFace1, const TopAbs_Orientation OrFace2);
 
-
-
-
-protected:
-
-
-
-
-
-private:
-
-
-
-
-friend class ChFi3d_Builder;
-friend class ChFi3d_ChBuilder;
-friend class ChFi3d_FilBuilder;
-friend class ChFi3d_SearchSing;
-
 };
-
-
-
-
-
-
 
 #endif // _ChFi3d_HeaderFile

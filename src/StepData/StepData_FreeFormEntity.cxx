@@ -14,7 +14,6 @@
 
 #include <Interface_Macros.hxx>
 #include <Standard_Type.hxx>
-#include <StepData_Field.hxx>
 #include <StepData_FreeFormEntity.hxx>
 #include <NCollection_DataMap.hxx>
 #include <Standard_Transient.hxx>
@@ -87,14 +86,15 @@ void StepData_FreeFormEntity::SetStepType (const Standard_CString typenam)
     e1 = e1->Next();
   }
 //  d abord effacer les next en cours ...
-  NCollection_DataMap<TCollection_AsciiString, Handle(Standard_Transient)>::Iterator iter(dic);
-  for (; iter.More(); iter.Next()) {
+  for (NCollection_DataMap<TCollection_AsciiString, Handle(Standard_Transient)>::Iterator iter(dic);
+       iter.More(); iter.Next()) {
     e1 = GetCasted(StepData_FreeFormEntity,iter.Value());
     if (!e1.IsNull()) e1->SetNext(e2);
   }
 //  ... puis les remettre dans l ordre
   e1.Nullify();
-  for (iter.Reset(); iter.More(); iter.Next()) {
+  for (NCollection_DataMap<TCollection_AsciiString, Handle(Standard_Transient)>::Iterator iter(dic);
+       iter.More(); iter.Next()) {
     e2 = GetCasted(StepData_FreeFormEntity,iter.Value());
     if (!e1.IsNull()) e1->SetNext(e2);
     e1 = e2;

@@ -20,7 +20,6 @@
 #include <Standard.hxx>
 #include <Standard_Type.hxx>
 
-#include <Standard_Boolean.hxx>
 #include <TopOpeBRepDS_Config.hxx>
 #include <TopOpeBRepDS_Interference.hxx>
 #include <TopOpeBRepDS_Kind.hxx>
@@ -39,7 +38,7 @@ class TopOpeBRepDS_ShapeShapeInterference : public TopOpeBRepDS_Interference
 public:
 
   
-  //! a shape interfers on shape <G> with shape <S>.
+  //! a shape interferes on shape <G> with shape <S>.
   //! examples :
   //! create a ShapeShapeInterference describing :
   //! vertex V of edge E1 found on edge E2 :

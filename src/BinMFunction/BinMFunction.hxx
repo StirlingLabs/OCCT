@@ -22,9 +22,6 @@
 
 class BinMDF_ADriverTable;
 class Message_Messenger;
-class BinMFunction_FunctionDriver;
-class BinMFunction_GraphNodeDriver;
-class BinMFunction_ScopeDriver;
 
 
 //! Storage and Retrieval drivers for TFunction modelling attributes.
@@ -38,30 +35,6 @@ public:
   //! Adds the attribute drivers to <theDriverTable>.
   Standard_EXPORT static void AddDrivers (const Handle(BinMDF_ADriverTable)& theDriverTable, const Handle(Message_Messenger)& aMsgDrv);
 
-
-
-
-protected:
-
-
-
-
-
-private:
-
-
-
-
-friend class BinMFunction_FunctionDriver;
-friend class BinMFunction_GraphNodeDriver;
-friend class BinMFunction_ScopeDriver;
-
 };
-
-
-
-
-
-
 
 #endif // _BinMFunction_HeaderFile

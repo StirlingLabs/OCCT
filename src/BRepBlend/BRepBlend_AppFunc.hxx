@@ -21,9 +21,7 @@
 #include <Standard_Type.hxx>
 
 #include <BRepBlend_AppFuncRoot.hxx>
-#include <Standard_Real.hxx>
 #include <math_Vector.hxx>
-class Standard_OutOfRange;
 class BRepBlend_Line;
 class Blend_Function;
 class Blend_AppFunction;

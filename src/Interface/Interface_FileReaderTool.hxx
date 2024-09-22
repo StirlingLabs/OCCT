@@ -22,14 +22,11 @@
 #include <Standard_Handle.hxx>
 
 #include <Standard_Integer.hxx>
-#include <Standard_Boolean.hxx>
 #include <TColStd_HArray1OfTransient.hxx>
 class Interface_Protocol;
 class Interface_FileReaderData;
 class Interface_InterfaceModel;
 class Message_Messenger;
-class Standard_DomainError;
-class Standard_NoSuchObject;
 class Interface_Check;
 class Standard_Transient;
 class Interface_GeneralLib;

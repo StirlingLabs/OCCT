@@ -14,7 +14,6 @@
 // commercial license or contractual agreement.
 
 #include <DDocStd.hxx>
-#include <Draw.hxx>
 #include <Draw_Interpretor.hxx>
 #include <Draw_Viewer.hxx>
 #include <Draw_ProgressIndicator.hxx>
@@ -23,21 +22,14 @@
 #include <TDocStd_Document.hxx>
 #include <TDataStd_Name.hxx>
 #include <Draw.hxx>
-#include <Standard_GUID.hxx>
-#include <Standard_ExtString.hxx>
 #include <TCollection_AsciiString.hxx>
 #include <TCollection_ExtendedString.hxx>
-#include <TDF.hxx>
 #include <TDF_Data.hxx>
 #include <TDF_ChildIterator.hxx>
-#include <TDF_Tool.hxx> 
 #include <PCDM_ReaderFilter.hxx>
 
 #include <OSD_FileSystem.hxx>
-#include <OSD_Path.hxx>
-#include <OSD_OpenFile.hxx>
 #include <TDocStd_PathParser.hxx>
-#include <XmlLDrivers.hxx>
 
 #include <AIS_InteractiveContext.hxx>
 #include <TPrsStd_AISViewer.hxx>
@@ -181,7 +173,7 @@ static Standard_Integer DDocStd_Open (Draw_Interpretor& di,
     if (anUseStream)
     {
       const Handle(OSD_FileSystem)& aFileSystem = OSD_FileSystem::DefaultFileSystem();
-      opencascade::std::shared_ptr<std::istream> aFileStream = aFileSystem->OpenIStream (path, std::ios::in | std::ios::binary);
+      std::shared_ptr<std::istream> aFileStream = aFileSystem->OpenIStream (path, std::ios::in | std::ios::binary);
 
       theStatus = A->Open (*aFileStream, D, aFilter, aProgress->Start());
     }
@@ -298,9 +290,9 @@ static Standard_Integer DDocStd_SaveAs (Draw_Interpretor& di,
     Handle(Draw_ProgressIndicator) aProgress = new Draw_ProgressIndicator(di, 1);
     if (anUseStream)
     {
-      std::ofstream aFileStream;
-      OSD_OpenStream (aFileStream, path, std::ios::out | std::ios::binary);
-      theStatus = A->SaveAs (D, aFileStream, aProgress->Start());
+      const Handle(OSD_FileSystem)& aFileSystem = OSD_FileSystem::DefaultFileSystem();
+      std::shared_ptr<std::ostream> aFileStream = aFileSystem->OpenOStream (path, std::ios::out | std::ios::binary);
+      theStatus = A->SaveAs (D, *aFileStream, aProgress->Start());
     }
     else
     {
@@ -552,39 +544,44 @@ static Standard_Integer DDocStd_PrintComments (Draw_Interpretor& di,
 }
 
 //=======================================================================
-//function : SetStorageFormatVersion
-//purpose  : 
+//function : DDocStd_StorageFormatVersion
+//purpose  :
 //=======================================================================
-static Standard_Integer DDocStd_SetStorageFormatVersion (Draw_Interpretor& ,
-                                                         Standard_Integer nb,
-                                                         const char** a)
+static Standard_Integer DDocStd_StorageFormatVersion (Draw_Interpretor& theDI,
+                                                      Standard_Integer theNbArgs,
+                                                      const char** theArgVec)
 {  
-  if (nb == 3)
+  if (theNbArgs != 2
+   && theNbArgs != 3)
   {
-    Handle(TDocStd_Document) D;
-    if (!DDocStd::GetDocument(a[1], D)) return 1;
-    const int version = atoi(a[2]);
-    D->ChangeStorageFormatVersion((TDocStd_FormatVersion) version);
-    return 0;
+    theDI << "Syntax error: wrong number of arguments";
+    return 1;
   }
-  return 1;
-}
 
-//=======================================================================
-//function : GetStorageFormatVersion
-//purpose  : 
-//=======================================================================
-static Standard_Integer DDocStd_GetStorageFormatVersion (Draw_Interpretor& di,
-                                                         Standard_Integer nb,
-                                                         const char** a)
-{ 
-  if (nb == 2) {
-    Handle(TDocStd_Document) D;
-    if (!DDocStd::GetDocument(a[1], D)) return 1;
-    di << D->StorageFormatVersion() << "\n";
+  Handle(TDocStd_Document) aDoc;
+  if (!DDocStd::GetDocument (theArgVec[1], aDoc))
+  {
+    theDI << "Syntax error: " << theArgVec[1] << " is not a document";
+    return 1;
+  }
+
+  if (theNbArgs == 2)
+  {
+    theDI << aDoc->StorageFormatVersion() << "\n";
     return 0;
   }
-  return 1;
+
+  Standard_Integer aVerInt = 0;
+  if (!Draw::ParseInteger (theArgVec[2], aVerInt)
+   || aVerInt < TDocStd_FormatVersion_LOWER
+   || aVerInt > TDocStd_FormatVersion_UPPER)
+  {
+    theDI << "Syntax error: unknown version '" << theArgVec[2] << "' (valid range is " << TDocStd_FormatVersion_LOWER << ".." << TDocStd_FormatVersion_UPPER << ")";
+    return 1;
+  }
+
+  aDoc->ChangeStorageFormatVersion ((TDocStd_FormatVersion )aVerInt);
+  return 0;
 }
 
 //=======================================================================
@@ -657,12 +654,17 @@ void DDocStd::ApplicationCommands(Draw_Interpretor& theCommands)
 		  "PrintComments Doc",
 		  __FILE__, DDocStd_PrintComments, g);
 
+  static const TCollection_AsciiString THE_SET_VER_HELP = TCollection_AsciiString() +
+    "StorageFormatVersion Doc [Version]"
+    "\n\t\t: Print or set storage format version within range " + int(TDocStd_FormatVersion_LOWER) + ".." + int(TDocStd_FormatVersion_UPPER) +
+    "\n\t\t: defined by TDocStd_FormatVersion enumeration.";
+  theCommands.Add("StorageFormatVersion", THE_SET_VER_HELP.ToCString(),
+                  __FILE__, DDocStd_StorageFormatVersion, g);
   theCommands.Add("GetStorageFormatVersion",
-		  "GetStorageFormatVersion Doc"
-          "\nStorage format versions are defined in TDocStd_FormatVersion.hxx file by an enumeration",
-		  __FILE__, DDocStd_GetStorageFormatVersion, g);
+                  "GetStorageFormatVersion Doc"
+                  "\n\t\t: Alias to StorageFormatVersion",
+		              __FILE__, DDocStd_StorageFormatVersion, g);
   theCommands.Add("SetStorageFormatVersion",
-		  "SetStorageFormatVersion Doc Version"
-          "\nStorage format versions are defined in TDocStd_FormatVersion.hxx file by an enumeration",
-		  __FILE__, DDocStd_SetStorageFormatVersion, g);
+                  "\n\t\t: Alias to StorageFormatVersion",
+                  __FILE__, DDocStd_StorageFormatVersion, g);
 }

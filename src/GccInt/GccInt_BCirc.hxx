@@ -18,12 +18,10 @@
 #define _GccInt_BCirc_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <gp_Circ2d.hxx>
 #include <GccInt_Bisec.hxx>
 #include <GccInt_IType.hxx>
-class gp_Circ2d;
 
 
 class GccInt_BCirc;

@@ -21,8 +21,6 @@
 #include <VrmlData_UnknownNode.hxx>
 #include <VrmlData_Scene.hxx>
 #include <VrmlData_InBuffer.hxx>
-#include <gp_XY.hxx>
-#include <gp_XYZ.hxx>
 #include <VrmlData_Geometry.hxx>
 #include <VrmlData_TextureTransform.hxx>
 #include <VrmlData_Texture.hxx>
@@ -48,15 +46,6 @@ Standard_Boolean IsEqual (const Handle(VrmlData_Node)& theOne,
   if (theOne->Name() != 0L && theTwo->Name() != 0L)
     aResult = (strcmp (theOne->Name(), theTwo->Name()) == 0);
   return aResult;
-}
-
-//=======================================================================
-// function : HashCode
-// purpose  : Global method
-//=======================================================================
-Standard_Integer HashCode (const Handle (VrmlData_Node) & theNode, const Standard_Integer theUpperBound)
-{
-  return (theNode->Name () == NULL ? 1 : HashCode (theNode->Name (), theUpperBound));
 }
 
 //=======================================================================

@@ -18,7 +18,6 @@
 #define _FEmTool_ElementaryCriterion_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <TColStd_HArray2OfReal.hxx>
 #include <Standard_Real.hxx>
@@ -26,8 +25,6 @@
 #include <TColStd_HArray2OfInteger.hxx>
 #include <Standard_Integer.hxx>
 #include <math_Vector.hxx>
-class Standard_NotImplemented;
-class Standard_DomainError;
 class math_Matrix;
 
 

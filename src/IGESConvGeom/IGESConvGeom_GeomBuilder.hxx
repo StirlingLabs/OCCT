@@ -24,13 +24,9 @@
 #include <TColgp_HSequenceOfXYZ.hxx>
 #include <gp_Trsf.hxx>
 #include <Standard_Integer.hxx>
-#include <Standard_Boolean.hxx>
-#include <Standard_Real.hxx>
-class Standard_DomainError;
 class gp_XY;
 class gp_XYZ;
 class IGESGeom_CopiousData;
-class gp_Trsf;
 class gp_Ax3;
 class gp_Ax2;
 class gp_Ax1;

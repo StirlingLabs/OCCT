@@ -13,14 +13,12 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef BRepMesh_CircleInspector_Header
-#define BRepMesh_CircleInspector_Header
+#ifndef BRepMesh_CircleInspector_HeaderFile
+#define BRepMesh_CircleInspector_HeaderFile
 
 #include <IMeshData_Types.hxx>
 #include <BRepMesh_Circle.hxx>
-#include <Precision.hxx>
 #include <gp_XY.hxx>
-#include <gp_XYZ.hxx>
 #include <NCollection_CellFilter.hxx>
 
 //! Auxiliary class to find circles shot by the given point.
@@ -119,7 +117,7 @@ public:
     return CellFilter_Keep;
   }
 
-  //! Checks indices for equlity.
+  //! Checks indices for equality.
   static Standard_Boolean IsEqual(
     const Standard_Integer theIndex,
     const Standard_Integer theTargetIndex)

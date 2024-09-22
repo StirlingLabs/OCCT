@@ -16,6 +16,7 @@
 
 #include <OSD_StreamBuffer.hxx>
 #include <TCollection_AsciiString.hxx>
+#include <NCollection_DefineAlloc.hxx>
 
 //! Base interface for a file stream provider.
 //! It is intended to be implemented for specific file protocol.
@@ -24,8 +25,17 @@ class OSD_FileSystem : public Standard_Transient
   DEFINE_STANDARD_RTTIEXT(OSD_FileSystem, Standard_Transient)
 public:
 
-  //! Returns a global file system, which a selector between registered file systems.
+  //! Returns a global file system, which a selector between registered file systems (OSD_FileSystemSelector).
   Standard_EXPORT static const Handle(OSD_FileSystem)& DefaultFileSystem();
+
+  //! Registers file system within the global file system selector returned by OSD_FileSystem::DefaultFileSystem().
+  //! Note that registering protocols is not thread-safe operation and expected to be done once at application startup.
+  //! @param[in] theFileSystem  file system to register
+  //! @param[in] theIsPreferred add to the beginning of the list when TRUE, or add to the end otherwise
+  Standard_EXPORT static void AddDefaultProtocol (const Handle(OSD_FileSystem)& theFileSystem, bool theIsPreferred = false);
+
+  //! Unregisters file system within the global file system selector returned by OSD_FileSystem::DefaultFileSystem().
+  Standard_EXPORT static void RemoveDefaultProtocol (const Handle(OSD_FileSystem)& theFileSystem);
 
 public:
 
@@ -33,7 +43,10 @@ public:
   virtual Standard_Boolean IsSupportedPath (const TCollection_AsciiString& theUrl) const = 0;
 
   //! Returns TRUE if current input stream is opened for reading operations.
-  virtual Standard_Boolean IsOpenIStream (const opencascade::std::shared_ptr<std::istream>& theStream) const = 0;
+  virtual Standard_Boolean IsOpenIStream (const std::shared_ptr<std::istream>& theStream) const = 0;
+
+  //! Returns TRUE if current output stream is opened for writing operations.
+  virtual Standard_Boolean IsOpenOStream(const std::shared_ptr<std::ostream>& theStream) const = 0;
 
   //! Opens stream for specified file URL for reading operations (std::istream).
   //! Default implementation create a stream from file buffer returned by OSD_FileSystem::OpenFileBuffer().
@@ -43,11 +56,19 @@ public:
   //!                          -1 would keep seek position undefined (in case of re-using theOldStream)
   //! @param theOldStream [in] a pointer to existing stream pointing to theUrl to be reused (without re-opening)
   //! @return pointer to newly created opened stream, to theOldStream if it can be reused or NULL in case of failure.
-  Standard_EXPORT virtual opencascade::std::shared_ptr<std::istream> OpenIStream
+  Standard_EXPORT virtual std::shared_ptr<std::istream> OpenIStream
                           (const TCollection_AsciiString& theUrl,
                            const std::ios_base::openmode theMode,
                            const int64_t theOffset = 0,
-                           const opencascade::std::shared_ptr<std::istream>& theOldStream = opencascade::std::shared_ptr<std::istream>());
+                           const std::shared_ptr<std::istream>& theOldStream = std::shared_ptr<std::istream>());
+
+  //! Opens stream for specified file URL for writing operations (std::ostream).
+  //! Default implementation create a stream from file buffer returned by OSD_FileSystem::OpenFileBuffer().
+  //! @param theUrl       [in] path to open
+  //! @param theMode      [in] flags describing the requested output mode for the stream (std::ios_base::out will be implicitly added)
+  //! @return pointer to newly created opened stream or NULL in case of failure.
+  Standard_EXPORT virtual std::shared_ptr<std::ostream> OpenOStream (const TCollection_AsciiString& theUrl,
+                                                                     const std::ios_base::openmode theMode);
 
   //! Opens stream buffer for specified file URL.
   //! @param theUrl        [in]  path to open
@@ -55,10 +76,10 @@ public:
   //! @param theOffset     [in]  expected stream position from the beginning of the buffer (beginning of the stream buffer by default)
   //! @param theOutBufSize [out] total buffer size (only if buffer is opened for read)
   //! @return pointer to newly created opened stream buffer or NULL in case of failure.
-  virtual opencascade::std::shared_ptr<std::streambuf> OpenStreamBuffer (const TCollection_AsciiString& theUrl,
-                                                                         const std::ios_base::openmode theMode,
-                                                                         const int64_t theOffset = 0,
-                                                                         int64_t* theOutBufSize = NULL) = 0;
+  virtual std::shared_ptr<std::streambuf> OpenStreamBuffer (const TCollection_AsciiString& theUrl,
+                                                            const std::ios_base::openmode theMode,
+                                                            const int64_t theOffset = 0,
+                                                            int64_t* theOutBufSize = NULL) = 0;
 
   //! Constructor.
   Standard_EXPORT OSD_FileSystem();

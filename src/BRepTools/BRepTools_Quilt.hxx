@@ -19,11 +19,8 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
 #include <TopTools_IndexedDataMapOfShapeShape.hxx>
-#include <Standard_Boolean.hxx>
-class Standard_NoSuchObject;
 class TopoDS_Edge;
 class TopoDS_Vertex;
 class TopoDS_Shape;

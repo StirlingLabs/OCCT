@@ -19,7 +19,6 @@
 #include <OpenGl_AspectsTextureSet.hxx>
 #include <OpenGl_AspectsSprite.hxx>
 #include <Graphic3d_Aspects.hxx>
-#include <Graphic3d_BSDF.hxx>
 
 //! The element holding Graphic3d_Aspects.
 class OpenGl_Aspects : public OpenGl_Element
@@ -42,7 +41,7 @@ public:
   Graphic3d_TypeOfShadingModel ShadingModel() const { return myShadingModel; }
 
   //! Set if lighting should be disabled or not.
-  void SetNoLighting() { myShadingModel = Graphic3d_TOSM_UNLIT; }
+  void SetNoLighting() { myShadingModel = Graphic3d_TypeOfShadingModel_Unlit; }
 
   //! Returns textures map.
   const Handle(OpenGl_TextureSet)& TextureSet (const Handle(OpenGl_Context)& theCtx,

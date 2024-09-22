@@ -20,8 +20,6 @@
 #include <Standard.hxx>
 #include <Standard_Type.hxx>
 
-#include <Standard_Real.hxx>
-#include <Standard_Boolean.hxx>
 #include <TopTools_IndexedDataMapOfShapeShape.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
@@ -44,9 +42,6 @@
 #include <Message_ProgressRange.hxx>
 
 class BRepTools_ReShape;
-class Standard_OutOfRange;
-class Standard_NoSuchObject;
-class TopoDS_Shape;
 class TopoDS_Edge;
 class TopoDS_Face;
 class Geom_Surface;

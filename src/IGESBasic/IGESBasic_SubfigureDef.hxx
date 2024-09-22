@@ -18,14 +18,11 @@
 #define _IGESBasic_SubfigureDef_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <Standard_Integer.hxx>
 #include <IGESData_HArray1OfIGESEntity.hxx>
 #include <IGESData_IGESEntity.hxx>
 class TCollection_HAsciiString;
-class Standard_OutOfRange;
-class IGESData_IGESEntity;
 class Standard_Transient;
 
 

@@ -16,7 +16,6 @@
 
 
 #include <AppCont_Function.hxx>
-#include <AppParCurves_MultiCurve.hxx>
 #include <Approx_FitAndDivide.hxx>
 #include <BiTgte_Blend.hxx>
 #include <BiTgte_CurveOnEdge.hxx>
@@ -29,7 +28,6 @@
 #include <BRepBuilderAPI_Sewing.hxx>
 #include <BRepLib.hxx>
 #include <BRepLib_MakeEdge.hxx>
-#include <BRepOffset_DataMapIteratorOfDataMapOfShapeOffset.hxx>
 #include <BRepOffset_DataMapOfShapeOffset.hxx>
 #include <BRepOffset_Inter2d.hxx>
 #include <BRepOffset_Inter3d.hxx>
@@ -40,12 +38,10 @@
 #include <BRepOffset_Tool.hxx>
 #include <BRepTools.hxx>
 #include <BRepTools_Quilt.hxx>
-#include <BSplCLib.hxx>
 #include <ChFi3d.hxx>
 #include <Convert_CompBezierCurvesToBSplineCurve.hxx>
 #include <ElSLib.hxx>
 #include <Geom2d_Curve.hxx>
-#include <Geom2dAdaptor_Curve.hxx>
 #include <Geom2dAPI_ProjectPointOnCurve.hxx>
 #include <Geom_BSplineCurve.hxx>
 #include <Geom_Circle.hxx>
@@ -53,7 +49,6 @@
 #include <Geom_Line.hxx>
 #include <Geom_Surface.hxx>
 #include <Geom_TrimmedCurve.hxx>
-#include <GeomAbs_SurfaceType.hxx>
 #include <GeomAdaptor_Surface.hxx>
 #include <GeomAPI.hxx>
 #include <GeomAPI_ProjectPointOnCurve.hxx>
@@ -70,7 +65,6 @@
 #include <gp_Sphere.hxx>
 #include <Precision.hxx>
 #include <Standard_NotImplemented.hxx>
-#include <Standard_OutOfRange.hxx>
 #include <StdFail_NotDone.hxx>
 #include <TColgp_Array1OfPnt.hxx>
 #include <TColStd_Array1OfInteger.hxx>
@@ -85,10 +79,7 @@
 #include <TopoDS_Vertex.hxx>
 #include <TopoDS_Wire.hxx>
 #include <TopTools_DataMapOfShapeShape.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopTools_ListOfShape.hxx>
-#include <TopTools_MapIteratorOfMapOfShape.hxx>
-#include <TopTools_SequenceOfShape.hxx>
 
 #ifdef OCCT_DEBUG
 #include <OSD_Chronometer.hxx>
@@ -224,7 +215,7 @@ static Standard_Boolean IsInFace(const TopoDS_Edge& E,
 //purpose  : 
 //=======================================================================
 
-static void KPartCurve3d(TopoDS_Edge           Edge,
+static void KPartCurve3d(const TopoDS_Edge&           Edge,
 			 Handle(Geom2d_Curve)  Curve,
 			 Handle(Geom_Surface)  Surf)
 {
@@ -232,7 +223,7 @@ static void KPartCurve3d(TopoDS_Edge           Edge,
   // if not found call BRepLib::BuildCurve3d
 
   TopLoc_Location Loc;
-  Standard_Real Tol = Precision::Confusion();
+  constexpr Standard_Real Tol = Precision::Confusion();
 
   // Search only isos on analytical surfaces.
   Geom2dAdaptor_Curve C(Curve);
@@ -438,7 +429,7 @@ Handle(Geom_Curve) MakeCurve (const BiTgte_CurveOnEdge& HC)
     MakeCurve_Function F(HC);
     Standard_Integer Deg1, Deg2;
     Deg1 = Deg2 = 8;
-    Standard_Real Tol = Precision::Approximation();
+    constexpr Standard_Real Tol = Precision::Approximation();
     Approx_FitAndDivide Fit(F,Deg1,Deg2,Tol,Tol,Standard_True);
     Standard_Integer i;
     Standard_Integer NbCurves = Fit.NbMultiCurves();
@@ -561,7 +552,7 @@ static TopoDS_Edge MakeDegeneratedEdge(const Handle(Geom_Curve)& CC,
 				       const TopoDS_Vertex&    VfOnE)
 {
   BRep_Builder B;
-  Standard_Real Tol = Precision::Confusion();
+  constexpr Standard_Real Tol = Precision::Confusion();
   // kill trimmed curves
   Handle(Geom_Curve) C = CC;
   Handle(Geom_TrimmedCurve) CT = Handle(Geom_TrimmedCurve)::DownCast(C);
@@ -1429,12 +1420,12 @@ Standard_Integer BiTgte_Blend::NbBranches()
   exp.Init(Shells,TopAbs_SHELL);
   for (; exp.More(); exp.Next()) {
     // CurS = the current Shell.
-    const TopoDS_Shape CurS = exp.Current();
+    const TopoDS_Shape& CurS = exp.Current();
 
     TopExp_Explorer exp2(CurS, TopAbs_FACE);
     for (; exp2.More(); exp2.Next()) {
       // CurF = the current face of the current Shell.
-      const TopoDS_Shape CurF = exp2.Current();
+      const TopoDS_Shape& CurF = exp2.Current();
 
       for ( i = 1; i <= NbFaces; i++) {
 	const TopoDS_Shape& Center = myCenters(i);
@@ -1781,12 +1772,8 @@ void BiTgte_Blend::ComputeCenters()
 	}
       }
       TopTools_DataMapOfShapeListOfShape anEmptyMap;
-      BRepOffset_Inter2d::Compute(myAsDes,
-				  CurOF,
-				  myEdges,
-				  myTol,
-                                  anEmptyMap,
-				  aDMVV);
+      BRepOffset_Inter2d::Compute(myAsDes, CurOF, myEdges, myTol,
+                                  anEmptyMap, aDMVV, Message_ProgressRange());
     }
   }
 
@@ -1816,12 +1803,8 @@ void BiTgte_Blend::ComputeCenters()
     }
 
     TopTools_DataMapOfShapeListOfShape anEmptyMap;
-    BRepOffset_Inter2d::Compute(myAsDes,
-				CurOF,
-				myEdges,
-				myTol,
-                                anEmptyMap,
-				aDMVV);
+    BRepOffset_Inter2d::Compute(myAsDes, CurOF, myEdges, myTol,
+                                anEmptyMap, aDMVV, Message_ProgressRange());
   }
   //
   // fuse vertices on edges stored in AsDes
@@ -1831,7 +1814,7 @@ void BiTgte_Blend::ComputeCenters()
   // unwinding 
   // ------------
   BRepOffset_MakeLoops MakeLoops;
-  MakeLoops.Build (LOF, myAsDes, myImageOffset, anEmptyImage);
+  MakeLoops.Build (LOF, myAsDes, myImageOffset, anEmptyImage, Message_ProgressRange());
 
   // ------------------------------------------------------------
   // It is possible to unwind edges at least one ancestor which of 
@@ -2303,7 +2286,6 @@ void BiTgte_Blend::ComputeSurfaces()
 //purpose  : 
 //=======================================================================
 #include <TopTools_DataMapIteratorOfDataMapOfShapeListOfShape.hxx>
-#include <Geom_Curve.hxx>
 
 void BiTgte_Blend::ComputeShape() 
 {

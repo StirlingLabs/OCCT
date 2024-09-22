@@ -22,39 +22,30 @@
 #include <BOPDS_DS.hxx>
 #include <BOPTools_AlgoTools.hxx>
 #include <BOPTools_AlgoTools2D.hxx>
-#include <BRep_CurveRepresentation.hxx>
-#include <BRep_ListIteratorOfListOfCurveRepresentation.hxx>
 #include <BRep_TEdge.hxx>
-#include <BRep_Tool.hxx>
 #include <BRep_Builder.hxx>
 #include <BRepAdaptor_Curve.hxx>
 #include <BRepAdaptor_Curve2d.hxx>
 #include <BRepAdaptor_Surface.hxx>
 #include <BRepAlgo_AsDes.hxx>
 #include <BRepAlgo_Image.hxx>
-#include <BRepAlgo_Tool.hxx>
-#include <BRepBndLib.hxx>
 #include <BRepLib.hxx>
 #include <BRepLib_MakeEdge.hxx>
 #include <BRepLib_MakeFace.hxx>
-#include <BRepLib_MakePolygon.hxx>
 #include <BRepLib_MakeVertex.hxx>
 #include <BRepOffset_Analyse.hxx>
 #include <BRepOffset_Interval.hxx>
 #include <BRepOffset_ListOfInterval.hxx>
 #include <BRepTools.hxx>
 #include <BRepTools_Modifier.hxx>
-#include <BRepTools_TrsfModification.hxx>
 #include <BRepTools_WireExplorer.hxx>
 #include <BRepTopAdaptor_FClass2d.hxx>
 #include <ElCLib.hxx>
 #include <ElSLib.hxx>
-#include <Extrema_ExtPC.hxx>
 #include <Extrema_ExtPC2d.hxx>
 #include <BRepExtrema_DistShapeShape.hxx>
 #include <GCPnts_AbscissaPoint.hxx>
 #include <GCPnts_QuasiUniformDeflection.hxx>
-#include <GCPnts_UniformAbscissa.hxx>
 #include <Geom2d_BezierCurve.hxx>
 #include <Geom2d_BSplineCurve.hxx>
 #include <Geom2d_Circle.hxx>
@@ -70,7 +61,6 @@
 #include <Geom2dInt_GInter.hxx>
 #include <Geom_BezierSurface.hxx>
 #include <Geom_BSplineCurve.hxx>
-#include <Geom_BSplineSurface.hxx>
 #include <Geom_Conic.hxx>
 #include <Geom_ConicalSurface.hxx>
 #include <Geom_Curve.hxx>
@@ -98,11 +88,9 @@
 #include <IntRes2d_IntersectionSegment.hxx>
 #include <IntTools_FaceFace.hxx>
 #include <Precision.hxx>
-#include <ProjLib_HProjectedCurve.hxx>
 #include <ProjLib_ProjectedCurve.hxx>
 #include <ShapeCustom_Curve2d.hxx>
 #include <Standard_ConstructionError.hxx>
-#include <TColgp_Array1OfPnt2d.hxx>
 #include <TopAbs.hxx>
 #include <TopExp.hxx>
 #include <TopExp_Explorer.hxx>
@@ -115,7 +103,6 @@
 #include <TopoDS_Vertex.hxx>
 #include <TopoDS_Wire.hxx>
 #include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopTools_SequenceOfShape.hxx>
 
 #include <stdio.h>
@@ -339,7 +326,7 @@ static void BuildPCurves (const TopoDS_Edge&  E,
   if (!C2d.IsNull()) return;
 
   //Standard_Real Tolerance = Max(Precision::Confusion(),BRep_Tool::Tolerance(E));
-  Standard_Real Tolerance = Precision::Confusion();
+  constexpr Standard_Real Tolerance = Precision::Confusion();
 
   BRepAdaptor_Surface AS(F,0);
   BRepAdaptor_Curve   AC(E);
@@ -599,7 +586,7 @@ Standard_Boolean BRepOffset_Tool::FindCommonShapes(const TopoDS_Shape& theS1,
 
 static Standard_Boolean ToSmall (const Handle(Geom_Curve)& C)
 {
-  Standard_Real Tol = 10*Precision::Confusion();
+  constexpr Standard_Real Tol = 10*Precision::Confusion();
   Standard_Real m   = (C->FirstParameter()*0.668 + C->LastParameter()*0.332); 
   gp_Pnt P1 = C->Value(C->FirstParameter());
   gp_Pnt P2 = C->Value(C->LastParameter());
@@ -1543,7 +1530,7 @@ void BRepOffset_Tool::Inter3D(const TopoDS_Face& F1,
     }
   }
 
-  Standard_Real aSameParTol = Precision::Confusion();
+  constexpr Standard_Real aSameParTol = Precision::Confusion();
   Standard_Boolean isEl1 = Standard_False, isEl2 = Standard_False;
 
   Handle(Geom_Surface) aSurf = BRep_Tool::Surface(F1);
@@ -1894,6 +1881,10 @@ Standard_Boolean BRepOffset_Tool::TryProject
     if (C.IsNull()) {
       BRepLib::BuildCurve3d(CurE,BRep_Tool::Tolerance(CurE));
       C  = BRep_Tool::Curve(CurE,L,f,l);
+      if (C.IsNull())
+      {
+        return Standard_False;
+      }
     }
     C = new Geom_TrimmedCurve(C,f,l);
     if ( !L.IsIdentity()) C->Transform(L);
@@ -2528,7 +2519,7 @@ static void MakeFace(const Handle(Geom_Surface)& S,
   
   // compute vertices
   BRep_Builder B;
-  Standard_Real tol = Precision::Confusion();
+  constexpr Standard_Real tol = Precision::Confusion();
   
   TopoDS_Vertex V00,V10,V11,V01;
   
@@ -3532,9 +3523,8 @@ void BRepOffset_Tool::ExtentFace (const TopoDS_Face&            F,
       if (ToBuild.IsBound(E)) {
 	TopTools_ListOfShape LOE;
 	LOE.Append(E);
-	BRepOffset_Tool::TryProject (TopoDS::Face(ToBuild(E)),
-				     EF,LOE,LInt2,LInt1,Side,TolConf);
-	if (!LInt1.IsEmpty()) 
+	if (BRepOffset_Tool::TryProject(TopoDS::Face(ToBuild(E)), EF, LOE, LInt2, LInt1, Side, TolConf)
+        && !LInt1.IsEmpty())
 	  ToBuild.UnBind(E);
       }
     }
@@ -3726,7 +3716,7 @@ void BRepOffset_Tool::ExtentFace (const TopoDS_Face&            F,
     TopoDS_Vertex      NV1,NV2;
     TopAbs_Orientation Or;
     Standard_Real      U1,U2;
-    Standard_Real      eps = Precision::Confusion();
+    constexpr Standard_Real eps = Precision::Confusion();
 
 #ifdef OCCT_DEBUG
     TopLoc_Location    L;
@@ -3901,11 +3891,73 @@ void BRepOffset_Tool::ExtentFace (const TopoDS_Face&            F,
 //function : Deboucle3D
 //purpose  : 
 //=======================================================================
-
 TopoDS_Shape BRepOffset_Tool::Deboucle3D(const TopoDS_Shape& S,
-					 const TopTools_MapOfShape& Boundary)
+                                         const TopTools_MapOfShape& Boundary)
 {
-  return BRepAlgo_Tool::Deboucle3D(S,Boundary);
+  TopoDS_Shape SS;
+  switch (S.ShapeType())
+  {
+    case TopAbs_SHELL: 
+    {
+      // if the shell contains free borders that do not belong to the 
+      // free borders of caps ( Boundary) it is removed.
+      TopTools_IndexedDataMapOfShapeListOfShape Map;
+      TopExp::MapShapesAndAncestors(S, TopAbs_EDGE, TopAbs_FACE, Map);
+
+      Standard_Boolean JeGarde = Standard_True;
+      for (Standard_Integer i = 1; i <= Map.Extent() && JeGarde; i++) {
+        const TopTools_ListOfShape& aLF = Map(i);
+        if (aLF.Extent() < 2) {
+          const TopoDS_Edge& anEdge = TopoDS::Edge(Map.FindKey(i));
+          if (anEdge.Orientation() == TopAbs_INTERNAL) {
+            const TopoDS_Face& aFace = TopoDS::Face(aLF.First());
+            if (aFace.Orientation() != TopAbs_INTERNAL) {
+              continue;
+            }
+          }
+          if (!Boundary.Contains(anEdge) &&
+              !BRep_Tool::Degenerated(anEdge))
+            JeGarde = Standard_False;
+        }
+      }
+      if (JeGarde) SS = S;
+    }
+    break;
+
+    case TopAbs_COMPOUND:  
+    case TopAbs_SOLID:
+    {
+      // iterate on sub-shapes and add non-empty.
+      TopoDS_Iterator it(S);
+      TopoDS_Shape SubShape;
+      Standard_Integer NbSub = 0;
+      BRep_Builder B;
+      if (S.ShapeType() == TopAbs_COMPOUND) {
+        B.MakeCompound(TopoDS::Compound(SS));
+      }
+      else {
+        B.MakeSolid(TopoDS::Solid(SS));
+      }
+      for (; it.More(); it.Next()) {
+        const TopoDS_Shape& CurS = it.Value();
+        SubShape = Deboucle3D(CurS, Boundary);
+        if (!SubShape.IsNull()) {
+          B.Add(SS, SubShape);
+          NbSub++;
+        }
+      }
+      if (NbSub == 0)
+      {
+        SS = TopoDS_Shape();
+      }
+    }
+    break;
+
+    default:
+      break;
+  }
+
+  return SS;
 }
 
 //=======================================================================
@@ -3914,10 +3966,10 @@ TopoDS_Shape BRepOffset_Tool::Deboucle3D(const TopoDS_Shape& S,
 //=======================================================================
 
 static Standard_Boolean IsInOut (BRepTopAdaptor_FClass2d& FC,
-				 Geom2dAdaptor_Curve      AC,
+				 const Geom2dAdaptor_Curve&      AC,
 				 const TopAbs_State&      S )
 {
- Standard_Real Def = 100*Precision::Confusion();
+ constexpr Standard_Real Def = 100*Precision::Confusion();
  GCPnts_QuasiUniformDeflection QU(AC,Def);
  
  for (Standard_Integer i = 1; i <= QU.NbPoints(); i++) {
@@ -3967,7 +4019,7 @@ void BRepOffset_Tool::CorrectOrientation(const TopoDS_Shape&        SI,
 //	BRepTopAdaptor_FClass2d FC (TopoDS::Face(FI.Oriented(TopAbs_FORWARD)),
 //				    Precision::Confusion());
 	for (itE.Initialize(LOE); itE.More(); itE.Next()) {
-	  TopoDS_Shape&   OE   = itE.Value();
+	  TopoDS_Shape&   OE   = itE.ChangeValue();
 	  if (NewEdges.Contains(OE)) {
 	    Handle(Geom2d_Curve) CO2d = 
 	      BRep_Tool::CurveOnSurface(TopoDS::Edge(OE),OF,f,l);

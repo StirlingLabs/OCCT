@@ -17,9 +17,6 @@
 #define _SelectMgr_SensitiveEntitySet_HeaderFile
 
 #include <BVH_PrimitiveSet3d.hxx>
-#include <NCollection_DataMap.hxx>
-#include <NCollection_IndexedMap.hxx>
-#include <Select3D_BndBox3d.hxx>
 #include <Select3D_BVHBuilder3d.hxx>
 #include <SelectMgr_EntityOwner.hxx>
 #include <SelectMgr_SensitiveEntity.hxx>
@@ -80,7 +77,7 @@ public:
   const SelectMgr_MapOfOwners& Owners() const { return myOwnersMap; }
 
   //! Returns map of entities.
-  Standard_Boolean HasEntityWithPersistence() const { return myHasEntityWithPersistence; }
+  Standard_Boolean HasEntityWithPersistence() const { return myNbEntityWithPersistence > 0; }
 
 protected:
 
@@ -92,9 +89,9 @@ protected:
 
 private:
 
-  SelectMgr_IndexedMapOfHSensitive mySensitives; //!< Map of entities and its corresponding index in BVH
-  SelectMgr_MapOfOwners            myOwnersMap;  //!< Map of entity owners and its corresponding number of sensitives
-  Standard_Boolean  myHasEntityWithPersistence;  //!< flag if some of sensitive entity has own transform persistence
+  SelectMgr_IndexedMapOfHSensitive mySensitives;              //!< Map of entities and its corresponding index in BVH
+  SelectMgr_MapOfOwners            myOwnersMap;               //!< Map of entity owners and its corresponding number of sensitives
+  Standard_Integer                 myNbEntityWithPersistence; //!< number of sensitive entities that have own transform persistence
 };
 
 #endif // _SelectMgr_SensitiveEntitySet_HeaderFile

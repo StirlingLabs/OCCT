@@ -22,11 +22,9 @@
 
 #include <IGESData_IGESEntity.hxx>
 #include <Standard_Integer.hxx>
-#include <Standard_Boolean.hxx>
 class IGESDimen_GeneralNote;
 class IGESDimen_LeaderArrow;
 class IGESDimen_WitnessLine;
-class Standard_OutOfRange;
 
 
 class IGESDimen_LinearDimension;

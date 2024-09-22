@@ -12,8 +12,8 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef   _Standard_PrimitiveTypes_HeaderFile
-#define   _Standard_PrimitiveTypes_HeaderFile
+#ifndef Standard_PrimitiveTypes_HeaderFile
+#define Standard_PrimitiveTypes_HeaderFile
 
 #include <stddef.h>
 #include <stdlib.h>
@@ -26,7 +26,5 @@
 #include <Standard_Character.hxx>
 #include <Standard_ExtCharacter.hxx>
 #include <Standard_CString.hxx>
-#include <Standard_ExtString.hxx>
-#include <Standard_Address.hxx>
 
 #endif

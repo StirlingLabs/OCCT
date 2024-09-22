@@ -18,15 +18,11 @@
 #define _IGESDraw_ViewsVisible_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <IGESDraw_HArray1OfViewKindEntity.hxx>
 #include <IGESData_HArray1OfIGESEntity.hxx>
 #include <IGESData_ViewKindEntity.hxx>
-#include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
-class Standard_OutOfRange;
-class IGESData_ViewKindEntity;
 class IGESData_IGESEntity;
 
 

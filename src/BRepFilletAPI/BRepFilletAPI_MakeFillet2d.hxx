@@ -23,10 +23,7 @@
 
 #include <ChFi2d_Builder.hxx>
 #include <BRepBuilderAPI_MakeShape.hxx>
-#include <Standard_Real.hxx>
-#include <Standard_Boolean.hxx>
 #include <TopTools_SequenceOfShape.hxx>
-#include <Standard_Integer.hxx>
 #include <TopTools_ListOfShape.hxx>
 #include <ChFi2d_ConstructionError.hxx>
 class TopoDS_Face;
@@ -282,7 +279,7 @@ public:
     ChFi2d_ConstructionError Status() const;
   
   //! Update the result and set the Done flag
-  Standard_EXPORT virtual void Build() Standard_OVERRIDE;
+  Standard_EXPORT virtual void Build(const Message_ProgressRange& theRange = Message_ProgressRange()) Standard_OVERRIDE;
 
 
 

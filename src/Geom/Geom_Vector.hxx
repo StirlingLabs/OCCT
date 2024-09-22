@@ -18,15 +18,10 @@
 #define _Geom_Vector_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <gp_Vec.hxx>
 #include <Geom_Geometry.hxx>
 #include <Standard_Real.hxx>
-class Standard_ConstructionError;
-class Standard_DomainError;
-class gp_VectorWithNullMagnitude;
-class gp_Vec;
 
 
 class Geom_Vector;

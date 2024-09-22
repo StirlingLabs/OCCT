@@ -11,5 +11,7 @@ TCollection
 TShort
 Units
 UnitsAPI
+UnitsMethods
 NCollection
 Message
+FlexLexer

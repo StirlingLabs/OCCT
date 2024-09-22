@@ -15,8 +15,6 @@
 //:j4 gka 11 Mar 99 S4134 :  added new types for DIS
 //    gka 09.04.99: S4136: new name of parameter write.step.schema 
 
-#include <Interface_Protocol.hxx>
-#include <Standard_Type.hxx>
 #include <StepAP214_Protocol.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(StepAP214_Protocol,StepData_Protocol)
@@ -29,14 +27,12 @@ static Standard_CString schemaAP242DIS = "AP242_MANAGED_MODEL_BASED_3D_ENGINEERI
 
 #include <HeaderSection_Protocol.hxx>
 
-#include <StepBasic_Address.hxx>
 #include <StepShape_AdvancedBrepShapeRepresentation.hxx>
 #include <StepShape_AdvancedFace.hxx>
 // Removed from CC1-Rev2 to Rev4 : <StepVisual_AnnotationCurveOccurrence.hxx>
 // Removed from CC1-Rev2 to Rev4 : <StepVisual_AnnotationFillArea.hxx>
 // Removed from CC1-Rev2 to Rev4 : <StepVisual_AnnotationFillAreaOccurrence.hxx>
 // Removed from CC1-Rev2 to CC1-Rev4, re-added CC2-Rev4 :
-#include <StepVisual_AnnotationOccurrence.hxx>
 // Removed from CC1-Rev2 to Rev4 : <StepVisual_AnnotationSubfigureOccurrence.hxx>
 // Removed from CC1-Rev2 to Rev4 : <StepVisual_AnnotationSymbol.hxx>
 // Removed from CC1-Rev2 to Rev4 : <StepVisual_AnnotationSymbolOccurrence.hxx>
@@ -45,9 +41,7 @@ static Standard_CString schemaAP242DIS = "AP242_MANAGED_MODEL_BASED_3D_ENGINEERI
 #include <StepVisual_AnnotationTextOccurrence.hxx>
 
 #include <StepBasic_ApplicationContext.hxx>
-#include <StepBasic_ApplicationContextElement.hxx>
 #include <StepBasic_ApplicationProtocolDefinition.hxx>
-#include <StepBasic_Approval.hxx>
 #include <StepBasic_ApprovalPersonOrganization.hxx>
 #include <StepBasic_ApprovalRelationship.hxx>
 #include <StepBasic_ApprovalRole.hxx>
@@ -67,41 +61,29 @@ static Standard_CString schemaAP242DIS = "AP242_MANAGED_MODEL_BASED_3D_ENGINEERI
 // Removed from CC1-Rev2 to Rev4 : <StepAP214_AutoDesignViewArea.hxx>
 #include <StepGeom_Axis1Placement.hxx>
 #include <StepGeom_Axis2Placement2d.hxx>
-#include <StepGeom_Axis2Placement3d.hxx>
-#include <StepGeom_BSplineCurve.hxx>
 #include <StepGeom_BSplineCurveWithKnots.hxx>
-#include <StepGeom_BSplineSurface.hxx>
 #include <StepGeom_BSplineSurfaceWithKnots.hxx>
 #include <StepVisual_BackgroundColour.hxx>
 #include <StepGeom_BezierCurve.hxx>
 #include <StepGeom_BezierSurface.hxx>
 #include <StepShape_Block.hxx>
 #include <StepShape_BooleanResult.hxx>
-#include <StepGeom_BoundaryCurve.hxx>
 #include <StepGeom_BoundedCurve.hxx>
 #include <StepGeom_BoundedSurface.hxx>
 #include <StepShape_BoxDomain.hxx>
 #include <StepShape_BoxedHalfSpace.hxx>
 #include <StepShape_BrepWithVoids.hxx>
 #include <StepBasic_CalendarDate.hxx>
-#include <StepVisual_CameraImage.hxx>
-#include <StepVisual_CameraModel.hxx>
 #include <StepVisual_CameraModelD2.hxx>
-#include <StepVisual_CameraModelD3.hxx>
 #include <StepVisual_CameraUsage.hxx>
 #include <StepGeom_CartesianPoint.hxx>
-#include <StepGeom_CartesianTransformationOperator.hxx>
 #include <StepGeom_CartesianTransformationOperator3d.hxx>
 #include <StepGeom_Circle.hxx>
 #include <StepShape_ClosedShell.hxx>
 #include <StepVisual_Colour.hxx>
 #include <StepVisual_ColourRgb.hxx>
 #include <StepVisual_ColourSpecification.hxx>
-#include <StepGeom_CompositeCurve.hxx>
-#include <StepGeom_CompositeCurveOnSurface.hxx>
-#include <StepGeom_CompositeCurveSegment.hxx>
 // Removed from CC1-Rev2 to CC1-Rev4, re-added CC2-Rev4 :
-#include <StepVisual_CompositeText.hxx>
 // Removed from CC1-Rev2 to Rev4 : <StepVisual_CompositeTextWithAssociatedCurves.hxx>
 // Removed from CC1-Rev2 to Rev4 : <StepVisual_CompositeTextWithBlankingBox.hxx>
 // Removed from CC1-Rev2 to CC1-Rev4, re-added CC2-Rev4 :
@@ -112,7 +94,6 @@ static Standard_CString schemaAP242DIS = "AP242_MANAGED_MODEL_BASED_3D_ENGINEERI
 #include <StepShape_ConnectedFaceSet.hxx>
 #include <StepVisual_ContextDependentInvisibility.hxx>
 #include <StepVisual_ContextDependentOverRidingStyledItem.hxx>
-#include <StepBasic_ConversionBasedUnit.hxx>
 #include <StepBasic_CoordinatedUniversalTimeOffset.hxx>
 // Removed from CC1-Rev2 to Rev4 : <StepShape_CsgRepresentation.hxx>
 #include <StepShape_CsgShapeRepresentation.hxx>
@@ -129,14 +110,11 @@ static Standard_CString schemaAP242DIS = "AP242_MANAGED_MODEL_BASED_3D_ENGINEERI
 #include <StepBasic_DateRole.hxx>
 #include <StepBasic_DateTimeRole.hxx>
 // Removed from CC1-Rev2 to Rev4 : <StepVisual_DefinedSymbol.hxx>
-#include <StepRepr_DefinitionalRepresentation.hxx>
-#include <StepGeom_DegeneratePcurve.hxx>
 #include <StepGeom_DegenerateToroidalSurface.hxx>
 #include <StepRepr_DescriptiveRepresentationItem.hxx>
 // Removed from CC1-Rev2 to Rev4 : <StepVisual_DimensionCurve.hxx>
 // Removed from CC1-Rev2 to Rev4 : <StepVisual_DimensionCurveTerminator.hxx>
 #include <StepBasic_DimensionalExponents.hxx>
-#include <StepGeom_Direction.hxx>
 // Removed from CC1-Rev2 to CC1-Rev4, re-added CC2-Rev4 :
 #include <StepVisual_DraughtingAnnotationOccurrence.hxx>
 // Removed from CC1-Rev2 to Rev4 : <StepVisual_DraughtingCallout.hxx>
@@ -147,7 +125,6 @@ static Standard_CString schemaAP242DIS = "AP242_MANAGED_MODEL_BASED_3D_ENGINEERI
 // Removed from CC1-Rev2 to Rev4 : <StepVisual_DraughtingTextLiteralWithDelineation.hxx>
 // Removed from CC1-Rev2 to Rev4 : <StepVisual_DrawingDefinition.hxx>
 // Removed from CC1-Rev2 to Rev4 : <StepVisual_DrawingRevision.hxx>
-#include <StepShape_Edge.hxx>
 #include <StepShape_EdgeCurve.hxx>
 #include <StepShape_EdgeLoop.hxx>
 #include <StepGeom_ElementarySurface.hxx>
@@ -175,21 +152,19 @@ static Standard_CString schemaAP242DIS = "AP242_MANAGED_MODEL_BASED_3D_ENGINEERI
 // Removed from CC1-Rev2 to Rev4 : <StepVisual_FillAreaStyleTileSymbolWithStyle.hxx>
 // Removed from CC1-Rev2 to Rev4 : <StepVisual_FillAreaStyleTiles.hxx>
 #include <StepRepr_FunctionallyDefinedTransformation.hxx>
-#include <StepShape_GeometricCurveSet.hxx>
 #include <StepGeom_GeometricRepresentationContext.hxx>
 #include <StepGeom_GeometricRepresentationItem.hxx>
-#include <StepShape_GeometricSet.hxx>
 #include <StepShape_GeometricallyBoundedSurfaceShapeRepresentation.hxx>
 #include <StepShape_GeometricallyBoundedWireframeShapeRepresentation.hxx>
 #include <StepRepr_GlobalUncertaintyAssignedContext.hxx>
 #include <StepRepr_GlobalUnitAssignedContext.hxx>
-#include <StepBasic_Group.hxx>
+#include <StepBasic_GeneralPropertyAssociation.hxx>
+#include <StepBasic_GeneralPropertyRelationship.hxx>
 #include <StepBasic_GroupRelationship.hxx>
 #include <StepShape_HalfSpaceSolid.hxx>
 #include <StepGeom_Hyperbola.hxx>
 #include <StepGeom_IntersectionCurve.hxx>
 #include <StepVisual_Invisibility.hxx>
-#include <StepBasic_LengthMeasureWithUnit.hxx>
 #include <StepBasic_LengthUnit.hxx>
 #include <StepGeom_Line.hxx>
 #include <StepBasic_LocalTime.hxx>
@@ -206,9 +181,7 @@ static Standard_CString schemaAP242DIS = "AP242_MANAGED_MODEL_BASED_3D_ENGINEERI
 #include <StepGeom_OffsetCurve3d.hxx>
 #include <StepGeom_OffsetSurface.hxx>
 // Removed from CC1-Rev2 to Rev4 : <StepAP214_OneDirectionRepeatFactor.hxx>
-#include <StepShape_OpenShell.hxx>
 #include <StepBasic_OrdinalDate.hxx>
-#include <StepBasic_Organization.hxx>
 #include <StepBasic_OrganizationRole.hxx>
 #include <StepBasic_OrganizationalAddress.hxx>
 #include <StepShape_OrientedClosedShell.hxx>
@@ -222,7 +195,6 @@ static Standard_CString schemaAP242DIS = "AP242_MANAGED_MODEL_BASED_3D_ENGINEERI
 #include <StepRepr_ParametricRepresentationContext.hxx>
 #include <StepShape_Path.hxx>
 #include <StepGeom_Pcurve.hxx>
-#include <StepBasic_Person.hxx>
 #include <StepBasic_PersonAndOrganization.hxx>
 #include <StepBasic_PersonAndOrganizationRole.hxx>
 #include <StepBasic_PersonalAddress.hxx>
@@ -230,11 +202,8 @@ static Standard_CString schemaAP242DIS = "AP242_MANAGED_MODEL_BASED_3D_ENGINEERI
 #include <StepVisual_PlanarBox.hxx>
 #include <StepVisual_PlanarExtent.hxx>
 #include <StepGeom_Plane.hxx>
-#include <StepBasic_PlaneAngleMeasureWithUnit.hxx>
 #include <StepBasic_PlaneAngleUnit.hxx>
 #include <StepGeom_Point.hxx>
-#include <StepGeom_PointOnCurve.hxx>
-#include <StepGeom_PointOnSurface.hxx>
 #include <StepGeom_PointReplica.hxx>
 #include <StepVisual_PointStyle.hxx>
 #include <StepShape_PolyLoop.hxx>
@@ -254,34 +223,24 @@ static Standard_CString schemaAP242DIS = "AP242_MANAGED_MODEL_BASED_3D_ENGINEERI
 #include <StepVisual_PresentationStyleAssignment.hxx>
 #include <StepVisual_PresentationStyleByContext.hxx>
 #include <StepVisual_PresentationView.hxx>
-#include <StepBasic_Product.hxx>
-#include <StepBasic_ProductCategory.hxx>
-#include <StepBasic_ProductContext.hxx>
 #include <StepBasic_MechanicalContext.hxx>
 // Removed from CC1-Rev2 to Rev4 : <StepVisual_ProductDataRepresentationView.hxx>
-#include <StepBasic_ProductDefinition.hxx>
-#include <StepBasic_ProductDefinitionContext.hxx>
-#include <StepBasic_ProductDefinitionFormation.hxx>
 #include <StepBasic_ProductDefinitionFormationWithSpecifiedSource.hxx>
 #include <StepRepr_ProductDefinitionShape.hxx>
-#include <StepBasic_ProductRelatedProductCategory.hxx>
 #include <StepBasic_ProductType.hxx>
 #include <StepRepr_PropertyDefinition.hxx>
-#include <StepRepr_PropertyDefinitionRepresentation.hxx>
 #include <StepGeom_QuasiUniformCurve.hxx>
 #include <StepGeom_QuasiUniformSurface.hxx>
 #include <StepBasic_RatioMeasureWithUnit.hxx>
 #include <StepGeom_RationalBSplineCurve.hxx>
 #include <StepGeom_RationalBSplineSurface.hxx>
 #include <StepGeom_RectangularCompositeSurface.hxx>
-#include <StepGeom_RectangularTrimmedSurface.hxx>
 #include <StepAP214_RepItemGroup.hxx>
 #include <StepGeom_ReparametrisedCompositeCurveSegment.hxx>
 #include <StepRepr_Representation.hxx>
 #include <StepRepr_RepresentationContext.hxx>
 #include <StepRepr_RepresentationItem.hxx>
 #include <StepRepr_RepresentationMap.hxx>
-#include <StepRepr_RepresentationRelationship.hxx>
 #include <StepShape_RevolvedAreaSolid.hxx>
 #include <StepShape_RightAngularWedge.hxx>
 #include <StepShape_RightCircularCone.hxx>
@@ -289,14 +248,11 @@ static Standard_CString schemaAP242DIS = "AP242_MANAGED_MODEL_BASED_3D_ENGINEERI
 #include <StepGeom_SeamCurve.hxx>
 #include <StepBasic_SecurityClassification.hxx>
 #include <StepBasic_SecurityClassificationLevel.hxx>
-#include <StepRepr_ShapeAspect.hxx>
-#include <StepRepr_ShapeAspectRelationship.hxx>
 #include <StepRepr_FeatureForDatumTargetRelationship.hxx>
 #include <StepRepr_ShapeAspectTransition.hxx>
 #include <StepShape_ShapeDefinitionRepresentation.hxx>
 #include <StepShape_ShapeRepresentation.hxx>
 #include <StepShape_ShellBasedSurfaceModel.hxx>
-#include <StepBasic_SiUnit.hxx>
 #include <StepBasic_SolidAngleMeasureWithUnit.hxx>
 #include <StepShape_SolidModel.hxx>
 #include <StepShape_SolidReplica.hxx>
@@ -335,7 +291,6 @@ static Standard_CString schemaAP242DIS = "AP242_MANAGED_MODEL_BASED_3D_ENGINEERI
 // Removed from CC1-Rev2 to Rev4 : <StepVisual_TextLiteralWithDelineation.hxx>
 // Removed from CC1-Rev2 to Rev4 : <StepVisual_TextLiteralWithExtent.hxx>
 // Removed from CC1-Rev2 to CC1-Rev4, re-added CC2-Rev4 :
-#include <StepVisual_TextStyle.hxx>
 #include <StepVisual_TextStyleForDefinedFont.hxx>
 #include <StepVisual_TextStyleWithBoxCharacteristics.hxx>
 // Removed from CC1-Rev2 to Rev4 : <StepVisual_TextStyleWithMirror.hxx>
@@ -343,7 +298,6 @@ static Standard_CString schemaAP242DIS = "AP242_MANAGED_MODEL_BASED_3D_ENGINEERI
 #include <StepGeom_ToroidalSurface.hxx>
 #include <StepShape_Torus.hxx>
 #include <StepShape_TransitionalShapeRepresentation.hxx>
-#include <StepGeom_TrimmedCurve.hxx>
 // Removed from CC1-Rev2 to Rev4 : <StepAP214_TwoDirectionRepeatFactor.hxx>
 #include <StepBasic_UncertaintyMeasureWithUnit.hxx>
 #include <StepGeom_UniformCurve.hxx>
@@ -394,29 +348,22 @@ static Standard_CString schemaAP242DIS = "AP242_MANAGED_MODEL_BASED_3D_ENGINEERI
 #include <StepGeom_CartesianTransformationOperator2d.hxx>
 #include <StepBasic_DerivedUnit.hxx>
 #include <StepBasic_DerivedUnitElement.hxx>
-#include <StepRepr_ItemDefinedTransformation.hxx>
 #include <StepVisual_PresentedItemRepresentation.hxx>
 #include <StepVisual_PresentationLayerUsage.hxx>
 
 //  Added by CKY (JUL-1998) for AP214 CC1 -> CC2
 
 #include <StepAP214_AutoDesignDocumentReference.hxx>
-#include <StepBasic_Document.hxx>
 #include <StepBasic_DigitalDocument.hxx>
 #include <StepBasic_DocumentRelationship.hxx>
 #include <StepBasic_DocumentType.hxx>
 #include <StepBasic_DocumentUsageConstraint.hxx>
-#include <StepBasic_Effectivity.hxx>
-#include <StepBasic_ProductDefinitionEffectivity.hxx>
-#include <StepBasic_ProductDefinitionRelationship.hxx>
 
 #include <StepBasic_ProductDefinitionWithAssociatedDocuments.hxx>
 #include <StepBasic_PhysicallyModeledProductDefinition.hxx>
 
 
-#include <StepRepr_ProductDefinitionUsage.hxx>
 #include <StepRepr_MakeFromUsageOption.hxx>
-#include <StepRepr_AssemblyComponentUsage.hxx>
 #include <StepRepr_NextAssemblyUsageOccurrence.hxx>
 #include <StepRepr_PromissoryUsageOccurrence.hxx>
 #include <StepRepr_QuantifiedAssemblyComponentUsage.hxx>
@@ -424,8 +371,6 @@ static Standard_CString schemaAP242DIS = "AP242_MANAGED_MODEL_BASED_3D_ENGINEERI
 #include <StepRepr_AssemblyComponentUsageSubstitute.hxx>
 #include <StepRepr_SuppliedPartRelationship.hxx>
 #include <StepRepr_ExternallyDefinedRepresentation.hxx>
-#include <StepRepr_ShapeRepresentationRelationship.hxx>
-#include <StepRepr_RepresentationRelationshipWithTransformation.hxx>
 #include <StepRepr_ShapeRepresentationRelationshipWithTransformation.hxx>
 #include <StepRepr_MaterialDesignation.hxx>
 
@@ -464,9 +409,7 @@ static Standard_CString schemaAP242DIS = "AP242_MANAGED_MODEL_BASED_3D_ENGINEERI
 
 // Added by ABV 10.11.99 for AP203
 #include <StepBasic_Action.hxx>
-#include <StepBasic_ActionAssignment.hxx>
 #include <StepBasic_ActionMethod.hxx>
-#include <StepBasic_ActionRequestAssignment.hxx>
 #include <StepAP203_CcDesignApproval.hxx>
 #include <StepAP203_CcDesignCertification.hxx>
 #include <StepAP203_CcDesignContract.hxx>
@@ -493,7 +436,6 @@ static Standard_CString schemaAP242DIS = "AP242_MANAGED_MODEL_BASED_3D_ENGINEERI
 #include <StepBasic_ActionRequestSolution.hxx>
 
 // Added by ABV 13.01.00 for CAX-IF TRJ3
-#include <StepVisual_DraughtingModel.hxx>
 
 // Added by ABV 18.04.00 for CAX-IF TRJ4 (dimensions)
 #include <StepShape_AngularLocation.hxx>
@@ -510,20 +452,14 @@ static Standard_CString schemaAP242DIS = "AP242_MANAGED_MODEL_BASED_3D_ENGINEERI
 #include <StepBasic_ObjectRole.hxx>
 #include <StepBasic_RoleAssociation.hxx>
 #include <StepBasic_IdentificationRole.hxx>
-#include <StepBasic_IdentificationAssignment.hxx>
-#include <StepBasic_ExternalIdentificationAssignment.hxx>
 #include <StepBasic_EffectivityAssignment.hxx>
 #include <StepBasic_NameAssignment.hxx>
-#include <StepBasic_GeneralProperty.hxx>
-#include <StepAP214_Class.hxx>
 #include <StepAP214_ExternallyDefinedClass.hxx>
 #include <StepAP214_ExternallyDefinedGeneralProperty.hxx>
 #include <StepAP214_AppliedExternalIdentificationAssignment.hxx>
 #include <StepShape_DefinitionalRepresentationAndShapeRepresentation.hxx>
 
 // Added by CKY , 25 APR 2001 for Dimensional Tolerances (CAX-IF TRJ7)
-#include <StepRepr_CompositeShapeAspect.hxx>
-#include <StepRepr_DerivedShapeAspect.hxx>
 #include <StepRepr_Extension.hxx>
 #include <StepShape_DirectedDimensionalLocation.hxx>
 #include <StepShape_LimitsAndFits.hxx>
@@ -534,13 +470,11 @@ static Standard_CString schemaAP242DIS = "AP242_MANAGED_MODEL_BASED_3D_ENGINEERI
 #include <StepShape_TypeQualifier.hxx>
 #include <StepShape_QualifiedRepresentationItem.hxx>
 #include <StepShape_MeasureRepresentationItemAndQualifiedRepresentationItem.hxx>
-#include <StepRepr_CompoundRepresentationItem.hxx>
 #include <StepRepr_ValueRange.hxx>
 #include <StepRepr_ShapeAspectDerivingRelationship.hxx>
 
 // Added by ABV 28.12.01 for CAX-IF TRJ9 (edge_based_wireframe_model)
 #include <StepShape_CompoundShapeRepresentation.hxx>
-#include <StepShape_ConnectedEdgeSet.hxx>
 #include <StepShape_ConnectedFaceShapeRepresentation.hxx>
 #include <StepShape_EdgeBasedWireframeModel.hxx>
 #include <StepShape_EdgeBasedWireframeShapeRepresentation.hxx>
@@ -558,15 +492,11 @@ static Standard_CString schemaAP242DIS = "AP242_MANAGED_MODEL_BASED_3D_ENGINEERI
 #include <StepBasic_ThermodynamicTemperatureUnit.hxx>
 #include <StepElement_AnalysisItemWithinRepresentation.hxx>
 #include <StepElement_Curve3dElementDescriptor.hxx>
-#include <StepElement_CurveElementEndReleasePacket.hxx>
-#include <StepElement_CurveElementSectionDefinition.hxx>
 #include <StepElement_CurveElementSectionDerivedDefinitions.hxx>
 #include <StepElement_ElementDescriptor.hxx>
 #include <StepElement_ElementMaterial.hxx>
 #include <StepElement_Surface3dElementDescriptor.hxx>
 #include <StepElement_SurfaceElementProperty.hxx>
-#include <StepElement_SurfaceSection.hxx>
-#include <StepElement_SurfaceSectionField.hxx>
 #include <StepElement_SurfaceSectionFieldConstant.hxx>
 #include <StepElement_SurfaceSectionFieldVarying.hxx>
 #include <StepElement_UniformSurfaceSection.hxx>
@@ -575,7 +505,6 @@ static Standard_CString schemaAP242DIS = "AP242_MANAGED_MODEL_BASED_3D_ENGINEERI
 #include <StepFEA_ArbitraryVolume3dElementCoordinateSystem.hxx>
 #include <StepFEA_Curve3dElementProperty.hxx>
 #include <StepFEA_Curve3dElementRepresentation.hxx>
-#include <StepFEA_Node.hxx>
 #include <StepFEA_CurveElementEndOffset.hxx>
 #include <StepFEA_CurveElementEndRelease.hxx>
 #include <StepFEA_CurveElementInterval.hxx>
@@ -592,7 +521,6 @@ static Standard_CString schemaAP242DIS = "AP242_MANAGED_MODEL_BASED_3D_ENGINEERI
 #include <StepFEA_FeaMassDensity.hxx>
 #include <StepFEA_FeaMaterialPropertyRepresentation.hxx>
 #include <StepFEA_FeaMaterialPropertyRepresentationItem.hxx>
-#include <StepFEA_FeaModel.hxx>
 #include <StepFEA_FeaModel3d.hxx>
 #include <StepFEA_FeaMoistureAbsorption.hxx>
 #include <StepFEA_FeaParametricPoint.hxx>
@@ -639,12 +567,10 @@ static Standard_CString schemaAP242DIS = "AP242_MANAGED_MODEL_BASED_3D_ENGINEERI
 #include <StepFEA_FeaSurfaceSectionGeometricRelationship.hxx>
 
 //added PTV TRJ11 8.02.2003
-#include <StepBasic_DocumentProductAssociation.hxx>
 #include <StepBasic_DocumentProductEquivalence.hxx>
 
 //TR12J 4.06.2003 G&DT entities
 #include <StepShape_ShapeRepresentationWithParameters.hxx>
-#include <StepDimTol_ShapeToleranceSelect.hxx>
 #include <StepDimTol_AngularityTolerance.hxx>
 #include <StepDimTol_ConcentricityTolerance.hxx>
 #include <StepDimTol_CircularRunoutTolerance.hxx>
@@ -668,7 +594,6 @@ static Standard_CString schemaAP242DIS = "AP242_MANAGED_MODEL_BASED_3D_ENGINEERI
 #include <StepDimTol_DatumFeature.hxx>
 #include <StepDimTol_DatumReference.hxx>
 #include <StepDimTol_CommonDatum.hxx>
-#include <StepDimTol_DatumTarget.hxx>
 #include <StepDimTol_PlacedDatumTargetFeature.hxx>
 
 #include <StepRepr_ReprItemAndLengthMeasureWithUnit.hxx>
@@ -678,10 +603,6 @@ static Standard_CString schemaAP242DIS = "AP242_MANAGED_MODEL_BASED_3D_ENGINEERI
 #include <StepBasic_ConversionBasedUnitAndMassUnit.hxx>
 #include <StepBasic_MassMeasureWithUnit.hxx>
 #include <StepBasic_CharacterizedObject.hxx>
-#include <StepFEA_CurveElementEndCoordinateSystem.hxx>
-#include <StepFEA_SymmetricTensor22d.hxx>
-#include <StepFEA_SymmetricTensor42d.hxx>
-#include <StepFEA_SymmetricTensor43d.hxx>
 
 // Added by ika for GD&T AP242
 #include <StepRepr_Apex.hxx>
@@ -710,7 +631,6 @@ static Standard_CString schemaAP242DIS = "AP242_MANAGED_MODEL_BASED_3D_ENGINEERI
 #include <StepDimTol_ToleranceZoneDefinition.hxx>
 #include <StepDimTol_ToleranceZoneForm.hxx>
 #include <StepShape_ValueFormatTypeQualifier.hxx>
-#include <StepDimTol_DatumReferenceCompartment.hxx>
 #include <StepDimTol_DatumReferenceElement.hxx>
 #include <StepDimTol_DatumReferenceModifierWithValue.hxx>
 #include <StepDimTol_DatumSystem.hxx>
@@ -718,30 +638,30 @@ static Standard_CString schemaAP242DIS = "AP242_MANAGED_MODEL_BASED_3D_ENGINEERI
 #include <StepRepr_ReprItemAndPlaneAngleMeasureWithUnit.hxx>
 #include <StepRepr_ReprItemAndLengthMeasureWithUnitAndQRI.hxx>
 #include <StepRepr_ReprItemAndPlaneAngleMeasureWithUnitAndQRI.hxx>
-#include <StepDimTol_GeoTolAndGeoTolWthDatRef.hxx>
-#include <StepDimTol_GeoTolAndGeoTolWthDatRefAndGeoTolWthMod.hxx>
-#include <StepDimTol_GeoTolAndGeoTolWthMod.hxx>
 #include <StepDimTol_GeoTolAndGeoTolWthDatRefAndUneqDisGeoTol.hxx>
 #include <StepRepr_CompGroupShAspAndCompShAspAndDatumFeatAndShAsp.hxx>
 #include <StepRepr_CompShAspAndDatumFeatAndShAsp.hxx>
+#include <StepRepr_BooleanRepresentationItem.hxx>
 #include <StepRepr_IntegerRepresentationItem.hxx>
+#include <StepRepr_RealRepresentationItem.hxx>
 #include <StepRepr_ValueRepresentationItem.hxx>
 #include <StepAP242_DraughtingModelItemAssociation.hxx>
 #include <StepDimTol_GeoTolAndGeoTolWthDatRefAndGeoTolWthMaxTol.hxx>
 #include <StepDimTol_GeoTolAndGeoTolWthMaxTol.hxx>
-#include <StepVisual_AnnotationCurveOccurrence.hxx>
 #include <StepVisual_AnnotationPlane.hxx>
 #include <StepVisual_DraughtingCallout.hxx>
 
 
 #include <StepVisual_TessellatedAnnotationOccurrence.hxx>
-#include <StepVisual_TessellatedItem.hxx>
 #include <StepVisual_TessellatedGeometricSet.hxx>
 #include <StepVisual_TessellatedCurveSet.hxx>
+#include <StepVisual_RepositionedTessellatedGeometricSet.hxx>
+#include <StepVisual_RepositionedTessellatedItem.hxx>
 #include <StepVisual_CoordinatesList.hxx>
 #include <StepRepr_CharacterizedRepresentation.hxx>
 #include <StepRepr_ConstructiveGeometryRepresentation.hxx>
 #include <StepRepr_ConstructiveGeometryRepresentationRelationship.hxx>
+#include <StepRepr_MechanicalDesignAndDraughtingRelationship.hxx>
 #include <StepVisual_CharacterizedObjAndRepresentationAndDraughtingModel.hxx>
 #include <StepVisual_AnnotationFillArea.hxx>
 #include <StepVisual_AnnotationFillAreaOccurrence.hxx>
@@ -750,13 +670,93 @@ static Standard_CString schemaAP242DIS = "AP242_MANAGED_MODEL_BASED_3D_ENGINEERI
 #include <StepVisual_CameraModelD3MultiClippingUnion.hxx>
 #include <StepVisual_AnnotationCurveOccurrenceAndGeomReprItem.hxx>
 
+// Added for kinematics implementation
+#include <StepRepr_RepresentationReference.hxx>
+#include <StepGeom_SuParameters.hxx>
+#include <StepKinematics_RotationAboutDirection.hxx>
+#include <StepKinematics_ActuatedKinematicPair.hxx>
+#include <StepKinematics_ContextDependentKinematicLinkRepresentation.hxx>
+#include <StepKinematics_CylindricalPairValue.hxx>
+#include <StepKinematics_CylindricalPairWithRange.hxx>
+#include <StepKinematics_FullyConstrainedPair.hxx>
+#include <StepKinematics_GearPairValue.hxx>
+#include <StepKinematics_GearPairWithRange.hxx>
+#include <StepKinematics_HomokineticPair.hxx>
+#include <StepKinematics_KinematicLinkRepresentationAssociation.hxx>
+#include <StepKinematics_KinematicPropertyMechanismRepresentation.hxx>
+#include <StepKinematics_KinematicTopologyDirectedStructure.hxx>
+#include <StepKinematics_KinematicTopologyNetworkStructure.hxx>
+#include <StepKinematics_KinematicTopologyStructure.hxx>
+#include <StepKinematics_LinearFlexibleAndPinionPair.hxx>
+#include <StepKinematics_LinearFlexibleAndPlanarCurvePair.hxx>
+#include <StepKinematics_LinearFlexibleLinkRepresentation.hxx>
+#include <StepKinematics_LowOrderKinematicPair.hxx>
+#include <StepKinematics_LowOrderKinematicPairValue.hxx>
+#include <StepKinematics_LowOrderKinematicPairWithRange.hxx>
+#include <StepKinematics_MechanismRepresentation.hxx>
+#include <StepKinematics_OrientedJoint.hxx>
+#include <StepKinematics_PairRepresentationRelationship.hxx>
+#include <StepKinematics_PlanarCurvePairRange.hxx>
+#include <StepKinematics_PlanarPairValue.hxx>
+#include <StepKinematics_PlanarPairWithRange.hxx>
+#include <StepKinematics_PointOnPlanarCurvePairValue.hxx>
+#include <StepKinematics_PointOnPlanarCurvePairWithRange.hxx>
+#include <StepKinematics_PointOnSurfacePairValue.hxx>
+#include <StepKinematics_PointOnSurfacePairWithRange.hxx>
+#include <StepKinematics_PrismaticPairValue.hxx>
+#include <StepKinematics_PrismaticPairWithRange.hxx>
+#include <StepKinematics_ProductDefinitionKinematics.hxx>
+#include <StepKinematics_ProductDefinitionRelationshipKinematics.hxx>
+#include <StepKinematics_RackAndPinionPairValue.hxx>
+#include <StepKinematics_RackAndPinionPairWithRange.hxx>
+#include <StepKinematics_RevolutePairValue.hxx>
+#include <StepKinematics_RevolutePairWithRange.hxx>
+#include <StepKinematics_RigidLinkRepresentation.hxx>
+#include <StepKinematics_RollingCurvePair.hxx>
+#include <StepKinematics_RollingCurvePairValue.hxx>
+#include <StepKinematics_RollingSurfacePair.hxx>
+#include <StepKinematics_RollingSurfacePairValue.hxx>
+#include <StepKinematics_ScrewPairValue.hxx>
+#include <StepKinematics_ScrewPairWithRange.hxx>
+#include <StepKinematics_SlidingCurvePair.hxx>
+#include <StepKinematics_SlidingCurvePairValue.hxx>
+#include <StepKinematics_SlidingSurfacePair.hxx>
+#include <StepKinematics_SlidingSurfacePairValue.hxx>
+#include <StepKinematics_SphericalPairValue.hxx>
+#include <StepKinematics_SphericalPairWithPinAndRange.hxx>
+#include <StepKinematics_SphericalPairWithRange.hxx>
+#include <StepKinematics_SurfacePairWithRange.hxx>
+#include <StepKinematics_UnconstrainedPair.hxx>
+#include <StepKinematics_UnconstrainedPairValue.hxx>
+#include <StepKinematics_UniversalPair.hxx>
+#include <StepKinematics_UniversalPairValue.hxx>
+#include <StepKinematics_UniversalPairWithRange.hxx>
+#include <StepKinematics_ActuatedKinPairAndOrderKinPair.hxx>
+#include <StepKinematics_MechanismStateRepresentation.hxx>
+
 #include <StepVisual_SurfaceStyleTransparent.hxx>
 #include <StepVisual_SurfaceStyleReflectanceAmbient.hxx>
-#include <StepVisual_SurfaceStyleRendering.hxx>
 #include <StepVisual_SurfaceStyleRenderingWithProperties.hxx>
 
+#include <StepVisual_TessellatedConnectingEdge.hxx>
+#include <StepVisual_TessellatedEdge.hxx>
+#include <StepVisual_TessellatedPointSet.hxx>
+#include <StepVisual_TessellatedShapeRepresentation.hxx>
+#include <StepVisual_TessellatedShapeRepresentationWithAccuracyParameters.hxx>
+#include <StepVisual_TessellatedShell.hxx>
+#include <StepVisual_TessellatedSolid.hxx>
+#include <StepVisual_TessellatedStructuredItem.hxx>
+#include <StepVisual_TessellatedVertex.hxx>
+#include <StepVisual_TessellatedWire.hxx>
+#include <StepVisual_TriangulatedFace.hxx>
+#include <StepVisual_ComplexTriangulatedFace.hxx>
+#include <StepVisual_ComplexTriangulatedSurfaceSet.hxx>
+#include <StepVisual_CubicBezierTessellatedEdge.hxx>
+#include <StepVisual_CubicBezierTriangulatedFace.hxx>
+#include <StepVisual_TriangulatedSurfaceSet.hxx>
+
 static int THE_StepAP214_Protocol_init = 0;
-static Interface_DataMapOfTransientInteger types(800);
+static Interface_DataMapOfTransientInteger types(819);
 
 //=======================================================================
 //function : StepAP214_Protocol
@@ -1468,6 +1468,108 @@ StepAP214_Protocol::StepAP214_Protocol ()
   types.Bind (STANDARD_TYPE(StepVisual_SurfaceStyleReflectanceAmbient), 721);
   types.Bind (STANDARD_TYPE(StepVisual_SurfaceStyleRendering), 722);
   types.Bind (STANDARD_TYPE(StepVisual_SurfaceStyleRenderingWithProperties), 723);
+
+  // Added for kinematics implementation
+  types.Bind(STANDARD_TYPE(StepRepr_RepresentationContextReference), 724);
+  types.Bind(STANDARD_TYPE(StepRepr_RepresentationReference), 725);
+  types.Bind(STANDARD_TYPE(StepGeom_SuParameters), 726);
+  types.Bind(STANDARD_TYPE(StepKinematics_RotationAboutDirection), 727);
+  types.Bind(STANDARD_TYPE(StepKinematics_KinematicJoint), 728);
+  types.Bind(STANDARD_TYPE(StepKinematics_ActuatedKinematicPair), 729);
+  types.Bind(STANDARD_TYPE(StepKinematics_ContextDependentKinematicLinkRepresentation), 730);
+  types.Bind(STANDARD_TYPE(StepKinematics_CylindricalPair), 731);
+  types.Bind(STANDARD_TYPE(StepKinematics_CylindricalPairValue), 732);
+  types.Bind(STANDARD_TYPE(StepKinematics_CylindricalPairWithRange), 733);
+  types.Bind(STANDARD_TYPE(StepKinematics_FullyConstrainedPair), 734);
+  types.Bind(STANDARD_TYPE(StepKinematics_GearPair), 735);
+  types.Bind(STANDARD_TYPE(StepKinematics_GearPairValue), 736);
+  types.Bind(STANDARD_TYPE(StepKinematics_GearPairWithRange), 737);
+  types.Bind(STANDARD_TYPE(StepKinematics_HomokineticPair), 738);
+  types.Bind(STANDARD_TYPE(StepKinematics_KinematicLink), 739);
+  types.Bind(STANDARD_TYPE(StepKinematics_KinematicLinkRepresentationAssociation), 740);
+  types.Bind(STANDARD_TYPE(StepKinematics_KinematicPropertyMechanismRepresentation), 741);
+  types.Bind(STANDARD_TYPE(StepKinematics_KinematicTopologyStructure), 742);
+  types.Bind(STANDARD_TYPE(StepKinematics_LowOrderKinematicPair), 743);
+  types.Bind(STANDARD_TYPE(StepKinematics_LowOrderKinematicPairValue), 744);
+  types.Bind(STANDARD_TYPE(StepKinematics_LowOrderKinematicPairWithRange), 745);
+  types.Bind(STANDARD_TYPE(StepKinematics_MechanismRepresentation), 746);
+  types.Bind(STANDARD_TYPE(StepKinematics_OrientedJoint), 747);
+  types.Bind(STANDARD_TYPE(StepKinematics_PlanarCurvePair), 748);
+  types.Bind(STANDARD_TYPE(StepKinematics_PlanarCurvePairRange), 749);
+  types.Bind(STANDARD_TYPE(StepKinematics_PlanarPair), 750);
+  types.Bind(STANDARD_TYPE(StepKinematics_PlanarPairValue), 751);
+  types.Bind(STANDARD_TYPE(StepKinematics_PlanarPairWithRange), 752);
+  types.Bind(STANDARD_TYPE(StepKinematics_PointOnPlanarCurvePair), 753);
+  types.Bind(STANDARD_TYPE(StepKinematics_PointOnPlanarCurvePairValue), 754);
+  types.Bind(STANDARD_TYPE(StepKinematics_PointOnPlanarCurvePairWithRange), 755);
+  types.Bind(STANDARD_TYPE(StepKinematics_PointOnSurfacePair), 756);
+  types.Bind(STANDARD_TYPE(StepKinematics_PointOnSurfacePairValue), 757);
+  types.Bind(STANDARD_TYPE(StepKinematics_PointOnSurfacePairWithRange), 758);
+  types.Bind(STANDARD_TYPE(StepKinematics_PrismaticPair), 759);
+  types.Bind(STANDARD_TYPE(StepKinematics_PrismaticPairValue), 760);
+  types.Bind(STANDARD_TYPE(StepKinematics_PrismaticPairWithRange), 761);
+  types.Bind(STANDARD_TYPE(StepKinematics_ProductDefinitionKinematics), 762);
+  types.Bind(STANDARD_TYPE(StepKinematics_ProductDefinitionRelationshipKinematics), 763);
+  types.Bind(STANDARD_TYPE(StepKinematics_RackAndPinionPair), 764);
+  types.Bind(STANDARD_TYPE(StepKinematics_RackAndPinionPairValue), 765);
+  types.Bind(STANDARD_TYPE(StepKinematics_RackAndPinionPairWithRange), 766);
+  types.Bind(STANDARD_TYPE(StepKinematics_RevolutePair), 767);
+  types.Bind(STANDARD_TYPE(StepKinematics_RevolutePairValue), 768);
+  types.Bind(STANDARD_TYPE(StepKinematics_RevolutePairWithRange), 769);
+  types.Bind(STANDARD_TYPE(StepKinematics_RollingCurvePair), 770);
+  types.Bind(STANDARD_TYPE(StepKinematics_RollingCurvePairValue), 771);
+  types.Bind(STANDARD_TYPE(StepKinematics_RollingSurfacePair), 772);
+  types.Bind(STANDARD_TYPE(StepKinematics_RollingSurfacePairValue), 773);
+  types.Bind(STANDARD_TYPE(StepKinematics_ScrewPair), 774);
+  types.Bind(STANDARD_TYPE(StepKinematics_ScrewPairValue), 775);
+  types.Bind(STANDARD_TYPE(StepKinematics_ScrewPairWithRange), 776);
+  types.Bind(STANDARD_TYPE(StepKinematics_SlidingCurvePair), 777);
+  types.Bind(STANDARD_TYPE(StepKinematics_SlidingCurvePairValue), 778);
+  types.Bind(STANDARD_TYPE(StepKinematics_SlidingSurfacePair), 779);
+  types.Bind(STANDARD_TYPE(StepKinematics_SlidingSurfacePairValue), 780);
+  types.Bind(STANDARD_TYPE(StepKinematics_SphericalPair), 781);
+  types.Bind(STANDARD_TYPE(StepKinematics_SphericalPairValue), 782);
+  types.Bind(STANDARD_TYPE(StepKinematics_SphericalPairWithPin), 783);
+  types.Bind(STANDARD_TYPE(StepKinematics_SphericalPairWithPinAndRange), 784);
+  types.Bind(STANDARD_TYPE(StepKinematics_SphericalPairWithRange), 785);
+  types.Bind(STANDARD_TYPE(StepKinematics_SurfacePairWithRange), 786);
+  types.Bind(STANDARD_TYPE(StepKinematics_UnconstrainedPair), 787);
+  types.Bind(STANDARD_TYPE(StepKinematics_UnconstrainedPairValue), 788);
+  types.Bind(STANDARD_TYPE(StepKinematics_UniversalPair), 789);
+  types.Bind(STANDARD_TYPE(StepKinematics_UniversalPairValue), 790);
+  types.Bind(STANDARD_TYPE(StepKinematics_UniversalPairWithRange), 791);
+  types.Bind(STANDARD_TYPE(StepKinematics_PairRepresentationRelationship), 792);
+  types.Bind(STANDARD_TYPE(StepKinematics_RigidLinkRepresentation), 793);
+  types.Bind(STANDARD_TYPE(StepKinematics_KinematicTopologyDirectedStructure), 794);
+  types.Bind(STANDARD_TYPE(StepKinematics_KinematicTopologyNetworkStructure), 795);
+  types.Bind(STANDARD_TYPE(StepKinematics_LinearFlexibleAndPinionPair), 796);
+  types.Bind(STANDARD_TYPE(StepKinematics_LinearFlexibleAndPlanarCurvePair), 797);
+  types.Bind(STANDARD_TYPE(StepKinematics_LinearFlexibleLinkRepresentation), 798);
+  types.Bind(STANDARD_TYPE(StepKinematics_ActuatedKinPairAndOrderKinPair), 800);
+  types.Bind(STANDARD_TYPE(StepKinematics_MechanismStateRepresentation), 801);
+  types.Bind(STANDARD_TYPE(StepVisual_RepositionedTessellatedGeometricSet), 802);
+  types.Bind(STANDARD_TYPE(StepVisual_RepositionedTessellatedItem), 803);
+  types.Bind(STANDARD_TYPE(StepVisual_TessellatedConnectingEdge), 804);
+  types.Bind(STANDARD_TYPE(StepVisual_TessellatedEdge), 805);
+  types.Bind(STANDARD_TYPE(StepVisual_TessellatedPointSet), 806);
+  types.Bind(STANDARD_TYPE(StepVisual_TessellatedShapeRepresentation), 807);
+  types.Bind(STANDARD_TYPE(StepVisual_TessellatedShapeRepresentationWithAccuracyParameters), 808);
+  types.Bind(STANDARD_TYPE(StepVisual_TessellatedShell), 809);
+  types.Bind(STANDARD_TYPE(StepVisual_TessellatedSolid), 810);
+  types.Bind(STANDARD_TYPE(StepVisual_TessellatedStructuredItem), 811);
+  types.Bind(STANDARD_TYPE(StepVisual_TessellatedVertex), 812);
+  types.Bind(STANDARD_TYPE(StepVisual_TessellatedWire), 813);
+  types.Bind(STANDARD_TYPE(StepVisual_TriangulatedFace), 814);
+  types.Bind(STANDARD_TYPE(StepVisual_ComplexTriangulatedFace), 815);
+  types.Bind(STANDARD_TYPE(StepVisual_ComplexTriangulatedSurfaceSet), 816);
+  types.Bind(STANDARD_TYPE(StepVisual_CubicBezierTessellatedEdge), 817);
+  types.Bind(STANDARD_TYPE(StepVisual_CubicBezierTriangulatedFace), 818);
+  types.Bind(STANDARD_TYPE(StepVisual_TriangulatedSurfaceSet), 819);
+  types.Bind(STANDARD_TYPE(StepBasic_GeneralPropertyAssociation), 820);
+  types.Bind(STANDARD_TYPE(StepBasic_GeneralPropertyRelationship), 821);
+  types.Bind(STANDARD_TYPE(StepRepr_BooleanRepresentationItem), 822);
+  types.Bind(STANDARD_TYPE(StepRepr_RealRepresentationItem), 823);
+  types.Bind(STANDARD_TYPE(StepRepr_MechanicalDesignAndDraughtingRelationship), 824);
 }
 
 

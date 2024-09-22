@@ -25,18 +25,14 @@
 #include <BRepLib_FuseEdges.hxx>
 #include <BRepLib_MakeEdge.hxx>
 #include <BRepTools_Substitution.hxx>
-#include <BSplCLib.hxx>
 #include <ElCLib.hxx>
-#include <ElSLib.hxx>
 #include <Extrema_LocateExtPC.hxx>
-#include <Geom2d_BoundedCurve.hxx>
 #include <Geom2d_BSplineCurve.hxx>
 #include <Geom2d_Curve.hxx>
 #include <Geom2d_TrimmedCurve.hxx>
 #include <Geom2dConvert_CompCurveToBSplineCurve.hxx>
 #include <Geom_BezierCurve.hxx>
 #include <Geom_BoundedCurve.hxx>
-#include <Geom_BSplineCurve.hxx>
 #include <Geom_Circle.hxx>
 #include <Geom_Curve.hxx>
 #include <Geom_Ellipse.hxx>
@@ -47,10 +43,6 @@
 #include <GeomConvert.hxx>
 #include <GeomConvert_CompCurveToBSplineCurve.hxx>
 #include <GeomLib.hxx>
-#include <gp_Dir2d.hxx>
-#include <gp_Pnt2d.hxx>
-#include <gp_Trsf2d.hxx>
-#include <gp_Vec2d.hxx>
 #include <Precision.hxx>
 #include <Standard_ConstructionError.hxx>
 #include <Standard_NullObject.hxx>
@@ -64,10 +56,7 @@
 #include <TopoDS_Face.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Vertex.hxx>
-#include <TopoDS_Wire.hxx>
-#include <TopTools_DataMapIteratorOfDataMapOfIntegerListOfShape.hxx>
 #include <TopTools_DataMapOfIntegerListOfShape.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopTools_ListOfShape.hxx>
 #include <TopTools_MapOfShape.hxx>
 
@@ -789,8 +778,8 @@ Standard_Boolean BRepLib_FuseEdges::SameSupport(const TopoDS_Edge& E1,
   }
 
   // On a presomption de confusion
-  const Standard_Real tollin = Precision::Confusion();
-  const Standard_Real tolang = Precision::Angular();
+  constexpr Standard_Real tollin = Precision::Confusion();
+  constexpr Standard_Real tolang = Precision::Angular();
   if (typC1 == STANDARD_TYPE(Geom_Line)) {
     gp_Lin li1( Handle(Geom_Line)::DownCast (C1)->Lin());
     gp_Lin li2( Handle(Geom_Line)::DownCast (C2)->Lin());
@@ -1066,7 +1055,7 @@ Standard_Boolean BRepLib_FuseEdges::UpdatePCurve(const TopoDS_Edge& theOldEdge,
 	    iter.Next();
 	    for (; iter.More(); iter.Next())
 	      {
-		TopoDS_Edge& E = TopoDS::Edge(iter.Value());
+		const TopoDS_Edge& E = TopoDS::Edge(iter.Value());
 		Standard_Real first, last;
 		Handle(Geom2d_Curve) C = BRep_Tool::CurveOnSurface( E, Surf, loc, first, last );
 		Handle(Geom2d_BoundedCurve) BC = Handle(Geom2d_BoundedCurve)::DownCast(C);

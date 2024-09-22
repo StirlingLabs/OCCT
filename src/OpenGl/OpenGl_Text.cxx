@@ -13,14 +13,11 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <OpenGl_Aspects.hxx>
 #include <OpenGl_GlCore11.hxx>
 #include <OpenGl_GraphicDriver.hxx>
 #include <OpenGl_ShaderManager.hxx>
 #include <OpenGl_ShaderProgram.hxx>
-#include <OpenGl_ShaderStates.hxx>
 #include <OpenGl_Text.hxx>
-#include <OpenGl_Workspace.hxx>
 #include <OpenGl_View.hxx>
 #include <OpenGl_VertexBufferCompat.hxx>
 
@@ -315,7 +312,7 @@ void OpenGl_Text::StringSize (const Handle(OpenGl_Context)& theCtx,
   }
   theWidth = Max (theWidth, aWidth);
 
-  Handle(OpenGl_Context) aCtx = theCtx;
+  const Handle(OpenGl_Context)& aCtx = theCtx;
   aFont.Nullify();
   aCtx->ReleaseResource (aFontKey, Standard_True);
 }
@@ -374,10 +371,8 @@ void OpenGl_Text::Render (const Handle(OpenGl_Context)& theCtx,
                           unsigned int theResolution,
                           Font_Hinting theFontHinting) const
 {
-#if !defined(GL_ES_VERSION_2_0)
   const Standard_Integer aPrevPolygonMode  = theCtx->SetPolygonMode (GL_FILL);
   const bool             aPrevHatchingMode = theCtx->SetPolygonHatchEnabled (false);
-#endif
 
   render (theCtx, theTextAspect,
           theTextAspect.Aspect()->ColorRGBA(),
@@ -385,10 +380,8 @@ void OpenGl_Text::Render (const Handle(OpenGl_Context)& theCtx,
           theResolution,
           theFontHinting);
 
-#if !defined(GL_ES_VERSION_2_0)
   theCtx->SetPolygonMode         (aPrevPolygonMode);
   theCtx->SetPolygonHatchEnabled (aPrevHatchingMode);
-#endif
 }
 
 // =======================================================================
@@ -640,17 +633,16 @@ void OpenGl_Text::drawRect (const Handle(OpenGl_Context)& theCtx,
   }
 
   // bind unlit program
-  theCtx->ShaderManager()->BindFaceProgram (Handle(OpenGl_TextureSet)(), Graphic3d_TOSM_UNLIT,
+  theCtx->ShaderManager()->BindFaceProgram (Handle(OpenGl_TextureSet)(), Graphic3d_TypeOfShadingModel_Unlit,
                                             Graphic3d_AlphaMode_Opaque, Standard_False, Standard_False,
                                             Handle(OpenGl_ShaderProgram)());
 
-#if !defined(GL_ES_VERSION_2_0)
   if (theCtx->core11ffp != NULL
    && theCtx->ActiveProgram().IsNull())
   {
     theCtx->core11fwd->glBindTexture (GL_TEXTURE_2D, 0);
   }
-#endif
+
   theCtx->SetColor4fv (theColorSubs);
   setupMatrix (theCtx, theTextAspect, OpenGl_Vec3 (0.0f, 0.0f, 0.0f));
   myBndVertsVbo->BindAttribute (theCtx, Graphic3d_TOA_POS);
@@ -758,13 +750,11 @@ void OpenGl_Text::render (const Handle(OpenGl_Context)& theCtx,
     }
   }
 
-#if !defined(GL_ES_VERSION_2_0)
   if (theCtx->core11ffp != NULL
    && theCtx->caps->ffpEnable)
   {
     theCtx->core11fwd->glDisable (GL_LIGHTING);
   }
-#endif
 
   // setup depth test
   const bool hasDepthTest = !myIs2d
@@ -778,20 +768,13 @@ void OpenGl_Text::render (const Handle(OpenGl_Context)& theCtx,
   {
     theCtx->core15fwd->glActiveTexture (GL_TEXTURE0);
   }
-#if !defined(GL_ES_VERSION_2_0)
+
   // activate texture unit
-  GLint aTexEnvParam = GL_REPLACE;
-  if (theCtx->core11ffp != NULL)
+  if (theCtx->core11ffp != NULL && theCtx->ActiveProgram().IsNull())
   {
-    theCtx->core11fwd->glDisable (GL_TEXTURE_1D);
-    theCtx->core11fwd->glEnable  (GL_TEXTURE_2D);
-    theCtx->core11ffp->glGetTexEnviv (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, &aTexEnvParam);
-    if (aTexEnvParam != GL_REPLACE)
-    {
-      theCtx->core11ffp->glTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
-    }
+    const Handle(OpenGl_Texture)& aTexture = myFont->Texture();
+    OpenGl_Sampler::applyGlobalTextureParams (theCtx, *aTexture, aTexture->Sampler()->Parameters());
   }
-#endif
 
   // setup blending
   if (theTextAspect.Aspect()->AlphaMode() == Graphic3d_AlphaMode_MaskBlend)
@@ -808,10 +791,11 @@ void OpenGl_Text::render (const Handle(OpenGl_Context)& theCtx,
   {
     case Aspect_TODT_BLEND:
     {
-    #if !defined(GL_ES_VERSION_2_0)
-      theCtx->core11fwd->glEnable (GL_COLOR_LOGIC_OP);
-      theCtx->core11ffp->glLogicOp (GL_XOR);
-    #endif
+      if (theCtx->GraphicsLibrary() == Aspect_GraphicsLibrary_OpenGL)
+      {
+        theCtx->core11fwd->glEnable (GL_COLOR_LOGIC_OP);
+        theCtx->core11fwd->glLogicOp (GL_XOR);
+      }
       break;
     }
     case Aspect_TODT_SUBTITLE:
@@ -860,12 +844,11 @@ void OpenGl_Text::render (const Handle(OpenGl_Context)& theCtx,
     theCtx->ApplyProjectionMatrix();
   }
 
-#if !defined(GL_ES_VERSION_2_0)
-  if (theCtx->core11ffp != NULL)
+  if (theCtx->core11ffp != NULL && theCtx->ActiveProgram().IsNull())
   {
-    theCtx->core11ffp->glTexEnvi (GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, aTexEnvParam);
+    const Handle(OpenGl_Texture)& aTexture = myFont->Texture();
+    OpenGl_Sampler::resetGlobalTextureParams (theCtx, *aTexture, aTexture->Sampler()->Parameters());
   }
-#endif
 
   if (theTextAspect.Aspect()->TextDisplayType() == Aspect_TODT_DIMENSION)
   {
@@ -877,12 +860,11 @@ void OpenGl_Text::render (const Handle(OpenGl_Context)& theCtx,
     {
       theCtx->core11fwd->glDisable (GL_DEPTH_TEST);
     }
-  #if !defined(GL_ES_VERSION_2_0)
     if (theCtx->core11ffp != NULL)
     {
       theCtx->core11fwd->glDisable (GL_TEXTURE_2D);
     }
-  #endif
+
     const bool aColorMaskBack = theCtx->SetColorMask (false);
 
     theCtx->core11fwd->glClear (GL_STENCIL_BUFFER_BIT);
@@ -903,9 +885,10 @@ void OpenGl_Text::render (const Handle(OpenGl_Context)& theCtx,
     theCtx->core11fwd->glDisable (GL_BLEND);
   }
   theCtx->core11fwd->glDisable (GL_STENCIL_TEST);
-#if !defined(GL_ES_VERSION_2_0)
-  theCtx->core11fwd->glDisable (GL_COLOR_LOGIC_OP);
-#endif
+  if (theCtx->GraphicsLibrary() == Aspect_GraphicsLibrary_OpenGL)
+  {
+    theCtx->core11fwd->glDisable (GL_COLOR_LOGIC_OP);
+  }
 
   // model view matrix was modified
   theCtx->WorldViewState.Pop();

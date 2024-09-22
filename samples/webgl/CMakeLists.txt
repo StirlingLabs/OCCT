@@ -2,7 +2,6 @@ cmake_minimum_required(VERSION 3.2)
 
 project(occt-webgl-sample)
 
-set(CMAKE_CXX_STANDARD 11)
 set(APP_VERSION_MAJOR 1)
 set(APP_VERSION_MINOR 0)
 set(APP_TARGET occt-webgl-sample)
@@ -60,7 +59,7 @@ else()
   set(OCCT_BIN_DIR)
 endif()
 
-set(OpenCASCADE_LIBS TKRWMesh TKBinXCAF TKBin TKBinL TKOpenGles TKXCAF TKVCAF TKCAF TKV3d TKHLR TKMesh TKService TKShHealing TKPrim TKTopAlgo TKGeomAlgo TKBRep TKGeomBase TKG3d TKG2d TKMath TKLCAF TKCDF TKernel)
+set(OpenCASCADE_LIBS TKRWMesh TKDEGLTF TKDEOBJ TKDEPLY TKBinXCAF TKBin TKBinL TKOpenGles TKXCAF TKVCAF TKCAF TKV3d TKHLR TKMesh TKService TKShHealing TKPrim TKTopAlgo TKGeomAlgo TKBRep TKGeomBase TKG3d TKG2d TKMath TKLCAF TKCDF TKernel)
 
 add_executable(${APP_TARGET} ${SOURCES})
 target_link_libraries(
@@ -77,5 +76,8 @@ if (NOT "${SOURCE_MAP_BASE}" STREQUAL "")
   endif()
 endif()
 install(FILES occt-webgl-sample.html DESTINATION ${CMAKE_INSTALL_PREFIX})
-install(FILES ${OpenCASCADE_RESOURCE_DIR}/DrawResources/OCC_logo.png DESTINATION ${CMAKE_INSTALL_PREFIX})
-install(FILES ${OpenCASCADE_RESOURCE_DIR}/DrawResources/lamp.ico DESTINATION ${CMAKE_INSTALL_PREFIX})
+install(FILES ${OpenCASCADE_RESOURCE_DIR}/DrawResources/OCC_logo.png  DESTINATION ${CMAKE_INSTALL_PREFIX})
+install(FILES ${OpenCASCADE_RESOURCE_DIR}/DrawResources/lamp.ico      DESTINATION ${CMAKE_INSTALL_PREFIX})
+if (CMAKE_CXX_FLAGS MATCHES "-pthread")
+  install(FILES ${CMAKE_CURRENT_BINARY_DIR}/${PROJECT_NAME}.worker.js DESTINATION ${CMAKE_INSTALL_PREFIX})
+endif()

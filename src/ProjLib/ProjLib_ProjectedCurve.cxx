@@ -16,11 +16,9 @@
 
 //  Modified by skv - Wed Aug 11 15:45:58 2004 OCC6272
 
-#include <GeomAbs_SurfaceType.hxx>
 #include <Standard_NoSuchObject.hxx>
 #include <Standard_NotImplemented.hxx>
 #include <ProjLib_ProjectedCurve.hxx>
-#include <ProjLib_CompProjectedCurve.hxx>
 #include <ProjLib_HCompProjectedCurve.hxx>
 #include <ProjLib_ComputeApproxOnPolarSurface.hxx>
 #include <ProjLib_ComputeApprox.hxx>
@@ -34,25 +32,15 @@
 #include <ProjLib_Sphere.hxx>
 #include <ProjLib_Torus.hxx>
 #include <Precision.hxx>
-#include <Geom2d_BSplineCurve.hxx>
 #include <Geom2d_BezierCurve.hxx>
 #include <gp_Vec2d.hxx>
 #include <StdFail_NotDone.hxx>
-#include <gp_XY.hxx>
-#include <TColgp_HArray1OfPnt2d.hxx>
-#include <TColStd_HArray1OfReal.hxx>
 #include <Geom2dConvert_CompCurveToBSplineCurve.hxx>
 #include <Geom2dConvert.hxx>
 #include <TColStd_Array1OfReal.hxx>
-#include <TColStd_Array1OfInteger.hxx>
-#include <TColgp_Array1OfPnt2d.hxx>
-#include <TColgp_HArray1OfVec2d.hxx>
-#include <TColStd_HArray1OfBoolean.hxx>
-#include <BSplCLib.hxx>
 #include <GeomAbs_IsoType.hxx>
 #include <Geom2d_Line.hxx>
 #include <Geom2d_TrimmedCurve.hxx>
-#include <ElCLib.hxx>
 #include <GeomLib.hxx>
 #include <Extrema_ExtPC.hxx>
 #include <NCollection_DataMap.hxx>
@@ -203,7 +191,7 @@ static void ExtendC2d (Handle(Geom2d_BSplineCurve)& aRes,
   gp_Dir2d                              aDBnd;
   Handle(Geom2d_TrimmedCurve)           aSegment;
   Geom2dConvert_CompCurveToBSplineCurve aCompCurve(aRes, Convert_RationalC1);
-  Standard_Real                         aTol = Precision::Confusion();
+  constexpr Standard_Real               aTol = Precision::Confusion();
 
   aRes->D1(theParam, aPBnd, aVBnd);
   aDBnd.SetXY(aVBnd.XY());
@@ -262,8 +250,9 @@ static void ExtendC2d (Handle(Geom2d_BSplineCurve)& aRes,
   aSegment = (FirstOrLast == 0)?
     new Geom2d_TrimmedCurve(aSegLine, ParOnLin, 0.) :
     new Geom2d_TrimmedCurve(aSegLine, 0., ParOnLin);
-
-  aCompCurve.Add(aSegment, aTol);
+  
+  Standard_Boolean anAfter = FirstOrLast != 0;
+  aCompCurve.Add(aSegment, aTol, anAfter);
   aRes = aCompCurve.BSplineCurve();
 }
 
@@ -371,6 +360,33 @@ ProjLib_ProjectedCurve::ProjLib_ProjectedCurve
   Perform(C);
 }
 
+//=======================================================================
+//function : ShallowCopy
+//purpose  : 
+//=======================================================================
+
+Handle(Adaptor2d_Curve2d) ProjLib_ProjectedCurve::ShallowCopy() const
+{
+  Handle(ProjLib_ProjectedCurve) aCopy = new ProjLib_ProjectedCurve();
+
+  aCopy->myTolerance   = myTolerance;
+  if (!mySurface.IsNull())
+  {
+    aCopy->mySurface = mySurface->ShallowCopy();
+  }
+  if (!myCurve.IsNull())
+  {
+    aCopy->myCurve = myCurve->ShallowCopy();
+  }
+  aCopy->myResult      = myResult;
+  aCopy->myDegMin      = myDegMin;
+  aCopy->myDegMax      = myDegMax;
+  aCopy->myMaxSegments = myMaxSegments;
+  aCopy->myMaxDist     = myMaxDist;
+  aCopy->myBndPnt      = myBndPnt;
+
+  return aCopy;
+}
 
 //=======================================================================
 //function : Load

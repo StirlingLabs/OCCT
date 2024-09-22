@@ -24,7 +24,6 @@
 #include <TopoDSToStep_MakeFaceError.hxx>
 #include <TopoDSToStep_Root.hxx>
 class StepShape_TopologicalRepresentationItem;
-class StdFail_NotDone;
 class TopoDS_Face;
 class TopoDSToStep_Tool;
 class Transfer_FinderProcess;
@@ -42,9 +41,15 @@ public:
   
   Standard_EXPORT TopoDSToStep_MakeStepFace();
   
-  Standard_EXPORT TopoDSToStep_MakeStepFace(const TopoDS_Face& F, TopoDSToStep_Tool& T, const Handle(Transfer_FinderProcess)& FP);
+  Standard_EXPORT TopoDSToStep_MakeStepFace(const TopoDS_Face& F,
+                                            TopoDSToStep_Tool& T,
+                                            const Handle(Transfer_FinderProcess)& FP,
+                                            const StepData_Factors& theLocalFactors = StepData_Factors());
   
-  Standard_EXPORT void Init (const TopoDS_Face& F, TopoDSToStep_Tool& T, const Handle(Transfer_FinderProcess)& FP);
+  Standard_EXPORT void Init (const TopoDS_Face& F,
+                             TopoDSToStep_Tool& T,
+                             const Handle(Transfer_FinderProcess)& FP,
+                             const StepData_Factors& theLocalFactors = StepData_Factors());
   
   Standard_EXPORT const Handle(StepShape_TopologicalRepresentationItem)& Value() const;
   

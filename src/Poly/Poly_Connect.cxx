@@ -17,7 +17,6 @@
 #include <Poly_Connect.hxx>
 
 #include <NCollection_IncAllocator.hxx>
-#include <Poly_Triangle.hxx>
 #include <Poly_Triangulation.hxx>
 
 // this structure records one of the edges starting from a node
@@ -223,6 +222,8 @@ void Poly_Connect::Initialize(const Standard_Integer N)
   mytr = myfirst;
   mysense = Standard_True;
   mymore = (myfirst != 0);
+  myPassedTr.Clear();
+  myPassedTr.Add (mytr);
   if (mymore)
   {
     Standard_Integer i, no[3];
@@ -247,15 +248,16 @@ void Poly_Connect::Next()
   if (mysense) {
     for (i = 0; i < 3; i++) {
       if (t[i] != 0) {
-	myTriangulation->Triangle (t[i]).Get (n[0], n[1], n[2]);
-	for (j = 0; j < 3; j++) {
-	  if ((n[j] == mynode) && (n[(j+1)%3] == myothernode)) {
-	    mytr = t[i];
-	    myothernode = n[(j+2)%3];
-	    mymore = (mytr != myfirst);
-	    return;
-	  }
-	}
+        myTriangulation->Triangle (t[i]).Get (n[0], n[1], n[2]);
+        for (j = 0; j < 3; j++) {
+          if ((n[j] == mynode) && (n[(j+1)%3] == myothernode)) {
+            mytr = t[i];
+            myothernode = n[(j+2)%3];
+            mymore = !myPassedTr.Contains (mytr);
+            myPassedTr.Add (mytr);
+            return;
+          }
+        }
       }
     }
     // sinon, depart vers la gauche.
@@ -270,15 +272,16 @@ void Poly_Connect::Next()
   if (!mysense) {
     for (i = 0; i < 3; i++) {
       if (t[i] != 0) {
-	myTriangulation->Triangle (t[i]).Get (n[0], n[1], n[2]);
-	for (j = 0; j < 3; j++) {
-	  if ((n[j] == mynode) && (n[(j+2)%3] == myothernode)) {
-	    mytr = t[i];
-	    myothernode = n[(j+1)%3];
-	    mymore = Standard_True;
-	    return;
-	  }
-	}
+        myTriangulation->Triangle (t[i]).Get (n[0], n[1], n[2]);
+        for (j = 0; j < 3; j++) {
+          if ((n[j] == mynode) && (n[(j+2)%3] == myothernode)) {
+            mytr = t[i];
+            myothernode = n[(j+1)%3];
+            mymore = !myPassedTr.Contains (mytr);
+            myPassedTr.Add (mytr);
+            return;
+          }
+        }
       }
     }
   }

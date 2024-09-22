@@ -21,8 +21,6 @@
 #include <gp_Ax2.hxx>
 #include <gp_Dir.hxx>
 #include <Law_Function.hxx>
-#include <Standard_DomainError.hxx>
-#include <Standard_NotImplemented.hxx>
 #include <StdFail_NotDone.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Vertex.hxx>
@@ -253,7 +251,7 @@ void BRepOffsetAPI_MakePipeShell::SetMaxSegments(const Standard_Integer NewMaxSe
 //function :Build() 
 //purpose  : 
 //=======================================================================
- void BRepOffsetAPI_MakePipeShell::Build()
+ void BRepOffsetAPI_MakePipeShell::Build(const Message_ProgressRange& /*theRange*/)
 {
   Standard_Boolean Ok;
   Ok = myPipe->Build();

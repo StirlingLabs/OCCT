@@ -18,7 +18,6 @@
 #define _IGESDraw_ViewsVisibleWithAttr_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <IGESDraw_HArray1OfViewKindEntity.hxx>
 #include <TColStd_HArray1OfInteger.hxx>
@@ -26,11 +25,7 @@
 #include <IGESGraph_HArray1OfColor.hxx>
 #include <IGESData_HArray1OfIGESEntity.hxx>
 #include <IGESData_ViewKindEntity.hxx>
-#include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
-class Standard_DimensionMismatch;
-class Standard_OutOfRange;
-class IGESData_ViewKindEntity;
 class IGESData_LineFontEntity;
 class IGESGraph_Color;
 class IGESData_IGESEntity;

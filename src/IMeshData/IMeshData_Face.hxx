@@ -19,13 +19,11 @@
 #include <IMeshData_TessellatedShape.hxx>
 #include <IMeshData_StatusOwner.hxx>
 #include <Standard_Type.hxx>
-#include <TopoDS_Face.hxx>
 #include <TopoDS.hxx>
 #include <IMeshData_Status.hxx>
 #include <IMeshData_Types.hxx>
 #include <BRepAdaptor_Surface.hxx>
 
-class IMeshData_Wire;
 class TopoDS_Wire;
 
 //! Interface class representing discrete model of a face.

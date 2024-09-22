@@ -16,14 +16,10 @@
 #ifndef _BOPAlgo_CellsBuilder_HeaderFile
 #define _BOPAlgo_CellsBuilder_HeaderFile
 
-#include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
-#include <Standard_OStream.hxx>
 
 #include <TopoDS_Shape.hxx>
 
-#include <TopAbs_ShapeEnum.hxx>
-#include <TopTools_MapOfShape.hxx>
 #include <BOPAlgo_Builder.hxx>
 
 #include <TopTools_ListOfShape.hxx>
@@ -242,7 +238,7 @@ class BOPAlgo_CellsBuilder : public BOPAlgo_Builder
 
   //! Redefined method PerformInternal1 - makes all split parts,
   //! nullifies the result <myShape>, and index all parts.
-  Standard_EXPORT virtual void PerformInternal1 (const BOPAlgo_PaveFiller& thePF) Standard_OVERRIDE;
+  Standard_EXPORT virtual void PerformInternal1 (const BOPAlgo_PaveFiller& thePF, const Message_ProgressRange& theRange) Standard_OVERRIDE;
 
   //! Indexes the parts for quick access to the arguments.
   Standard_EXPORT void IndexParts();

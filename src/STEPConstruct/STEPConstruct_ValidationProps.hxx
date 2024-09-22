@@ -23,9 +23,7 @@
 
 #include <StepBasic_Unit.hxx>
 #include <STEPConstruct_Tool.hxx>
-#include <Standard_Boolean.hxx>
 #include <Standard_CString.hxx>
-#include <Standard_Real.hxx>
 #include <TColStd_SequenceOfTransient.hxx>
 class StepBasic_ProductDefinition;
 class XSControl_WorkSession;
@@ -113,10 +111,16 @@ public:
   //! If Property is neither Area nor Volume, returns False
   //! Else returns True and isArea indicates whether property
   //! is area or volume
-  Standard_EXPORT Standard_Boolean GetPropReal (const Handle(StepRepr_RepresentationItem)& item, Standard_Real& Val, Standard_Boolean& isArea) const;
+  Standard_EXPORT Standard_Boolean GetPropReal (const Handle(StepRepr_RepresentationItem)& item,
+                                                Standard_Real& Val,
+                                                Standard_Boolean& isArea,
+                                                const StepData_Factors& theLocalFactors = StepData_Factors()) const;
   
-  //! Returns value of Centriod property (or False if it is not)
-  Standard_EXPORT Standard_Boolean GetPropPnt (const Handle(StepRepr_RepresentationItem)& item, const Handle(StepRepr_RepresentationContext)& Context, gp_Pnt& Pnt) const;
+  //! Returns value of Centroid property (or False if it is not)
+  Standard_EXPORT Standard_Boolean GetPropPnt (const Handle(StepRepr_RepresentationItem)& item,
+                                               const Handle(StepRepr_RepresentationContext)& Context,
+                                               gp_Pnt& Pnt,
+                                               const StepData_Factors& theLocalFactors = StepData_Factors()) const;
   
   //! Sets current assembly shape SDR (for FindCDSR calls)
   Standard_EXPORT void SetAssemblyShape (const TopoDS_Shape& shape);

@@ -15,9 +15,12 @@
 // commercial license or contractual agreement.
 
 
+#include <Interface_Static.hxx>
 #include <MoniTool_DataMapOfShapeTransient.hxx>
 #include <Message_ProgressScope.hxx>
 #include <StdFail_NotDone.hxx>
+#include <StepData_Factors.hxx>
+#include <StepData_StepModel.hxx>
 #include <StepShape_ClosedShell.hxx>
 #include <StepShape_ConnectedFaceSet.hxx>
 #include <StepShape_FaceSurface.hxx>
@@ -27,6 +30,9 @@
 #include <StepShape_Shell.hxx>
 #include <StepShape_ShellBasedSurfaceModel.hxx>
 #include <StepShape_TopologicalRepresentationItem.hxx>
+#include <StepVisual_TessellatedGeometricSet.hxx>
+#include <StepVisual_TessellatedShell.hxx>
+#include <StepVisual_TessellatedSolid.hxx>
 #include <TCollection_HAsciiString.hxx>
 #include <TColStd_SequenceOfTransient.hxx>
 #include <TopoDS.hxx>
@@ -47,39 +53,57 @@
 TopoDSToStep_MakeShellBasedSurfaceModel::
   TopoDSToStep_MakeShellBasedSurfaceModel(const TopoDS_Face& aFace,
                                           const Handle(Transfer_FinderProcess)& FP,
+                                          const StepData_Factors& theLocalFactors,
                                           const Message_ProgressRange& theProgress)
 {
   done = Standard_False;
   MoniTool_DataMapOfShapeTransient aMap;
 
-  TopoDSToStep_Tool    aTool(aMap, Standard_False);
-  TopoDSToStep_Builder StepB(aFace, aTool, FP, theProgress);
+  Handle(StepData_StepModel) aStepModel = Handle(StepData_StepModel)::DownCast(FP->Model());
+  Standard_Integer aWriteTessGeom = aStepModel->InternalParameters.WriteTessellated;
+  const Standard_Integer aWriteTessSchema = aStepModel->InternalParameters.WriteSchema;
+  if (aWriteTessSchema != 5)
+  {
+    aWriteTessGeom = 0;
+    Handle(TransferBRep_ShapeMapper) anErrShape =
+      new TransferBRep_ShapeMapper(aFace);
+    FP->AddWarning(anErrShape, " Tessellation can not be exported into not AP242");
+  }
+
+  TopoDSToStep_Tool    aTool(aMap, Standard_False, aStepModel->InternalParameters.WriteSurfaceCurMode);
+  TopoDSToStep_Builder StepB(aFace, aTool, FP, aWriteTessGeom, theLocalFactors, theProgress);
   if (theProgress.UserBreak())
     return;
 
   TopoDSToStep::AddResult ( FP, aTool );
 
-  if (StepB.IsDone()) {
+  if (StepB.IsDone())
+  {
     Handle(StepShape_FaceSurface) aFS =
       Handle(StepShape_FaceSurface)::DownCast(StepB.Value());
-    StepShape_Shell aShellSelect;
-    Handle(StepShape_OpenShell) aOpenShell 
-      = new StepShape_OpenShell();
-    Handle(StepShape_HArray1OfFace) aCfsFaces =
-      new StepShape_HArray1OfFace(1,1);
-    aCfsFaces->SetValue(1,aFS);
-    Handle(TCollection_HAsciiString) aName = 
-      new TCollection_HAsciiString("");
-    aOpenShell->Init(aName, aCfsFaces);
-    aShellSelect.SetValue(aOpenShell);
-    Handle(StepShape_HArray1OfShell) aSbsmFaces =
-      new StepShape_HArray1OfShell(1,1);
-    aSbsmFaces->SetValue(1, aShellSelect);
-    theShellBasedSurfaceModel = new StepShape_ShellBasedSurfaceModel();
-    theShellBasedSurfaceModel->Init(aName, aSbsmFaces);
+    if (!aFS.IsNull()) 
+    {
+      StepShape_Shell aShellSelect;
+      Handle(StepShape_OpenShell) aOpenShell
+        = new StepShape_OpenShell();
+      Handle(StepShape_HArray1OfFace) aCfsFaces =
+        new StepShape_HArray1OfFace(1, 1);
+      aCfsFaces->SetValue(1, aFS);
+      Handle(TCollection_HAsciiString) aName =
+        new TCollection_HAsciiString("");
+      aOpenShell->Init(aName, aCfsFaces);
+      aShellSelect.SetValue(aOpenShell);
+      Handle(StepShape_HArray1OfShell) aSbsmFaces =
+        new StepShape_HArray1OfShell(1, 1);
+      aSbsmFaces->SetValue(1, aShellSelect);
+      theShellBasedSurfaceModel = new StepShape_ShellBasedSurfaceModel();
+      theShellBasedSurfaceModel->Init(aName, aSbsmFaces);
+    }
+    theTessellatedItem = StepB.TessellatedValue();
     done = Standard_True;
   }
-  else {
+  else 
+  {
     done = Standard_False;
     Handle(TransferBRep_ShapeMapper) errShape =
       new TransferBRep_ShapeMapper(aFace);
@@ -90,10 +114,10 @@ TopoDSToStep_MakeShellBasedSurfaceModel::
 //=============================================================================
 // Create a ShellBasedSurfaceModel of StepShape from a Shell of TopoDS
 //=============================================================================
-
 TopoDSToStep_MakeShellBasedSurfaceModel::
   TopoDSToStep_MakeShellBasedSurfaceModel(const TopoDS_Shell& aShell,
                                           const Handle(Transfer_FinderProcess)& FP,
+                                          const StepData_Factors& theLocalFactors,
                                           const Message_ProgressRange& theProgress)
 {
   done = Standard_False;
@@ -102,31 +126,43 @@ TopoDSToStep_MakeShellBasedSurfaceModel::
   Handle(StepShape_OpenShell)                     aOpenShell;
   Handle(StepShape_ClosedShell)                   aClosedShell;
   MoniTool_DataMapOfShapeTransient                aMap;
-  
-  TopoDSToStep_Tool    aTool(aMap, Standard_False);
-  TopoDSToStep_Builder StepB(aShell, aTool, FP, theProgress);
+
+  Handle(StepData_StepModel) aStepModel = Handle(StepData_StepModel)::DownCast(FP->Model());
+  Standard_Integer aWriteTessGeom = aStepModel->InternalParameters.WriteTessellated;
+  const Standard_Integer aWriteTessSchema = aStepModel->InternalParameters.WriteSchema;
+  if (aWriteTessSchema != 5)
+  {
+    aWriteTessGeom = 0;
+    Handle(TransferBRep_ShapeMapper) anErrShape =
+      new TransferBRep_ShapeMapper(aShell);
+    FP->AddWarning(anErrShape, " Tessellation can not be exported into not AP242");
+  }
+
+  TopoDSToStep_Tool    aTool(aMap, Standard_False, aStepModel->InternalParameters.WriteSurfaceCurMode);
+  TopoDSToStep_Builder StepB(aShell, aTool, FP, aWriteTessGeom, theLocalFactors, theProgress);
   if (theProgress.UserBreak())
     return;
   //TopoDSToStep::AddResult ( FP, aTool );
 
   if (StepB.IsDone()) {
-    aSbsmBoundary = new StepShape_HArray1OfShell(1,1);
-    if (aShell.Closed()) {
-      aClosedShell = Handle(StepShape_ClosedShell)::DownCast(StepB.Value());
-      aShellSelect.SetValue(aClosedShell);
+    if (!StepB.Value().IsNull()) {
+      aSbsmBoundary = new StepShape_HArray1OfShell(1, 1);
+      if (aShell.Closed()) {
+        aClosedShell = Handle(StepShape_ClosedShell)::DownCast(StepB.Value());
+        aShellSelect.SetValue(aClosedShell);
+      }
+      else {
+        aOpenShell = Handle(StepShape_OpenShell)::DownCast(StepB.Value());
+        aShellSelect.SetValue(aOpenShell);
+      }
+      aSbsmBoundary->SetValue(1, aShellSelect);
+      theShellBasedSurfaceModel = new StepShape_ShellBasedSurfaceModel();
+      Handle(TCollection_HAsciiString) aName =
+        new TCollection_HAsciiString("");
+      theShellBasedSurfaceModel->Init(aName, aSbsmBoundary);
+      TopoDSToStep::AddResult(FP, aShell, theShellBasedSurfaceModel);
     }
-    else {
-      aOpenShell = Handle(StepShape_OpenShell)::DownCast(StepB.Value());
-      aShellSelect.SetValue(aOpenShell);
-    }
-    aSbsmBoundary->SetValue(1,aShellSelect);
-    theShellBasedSurfaceModel = new StepShape_ShellBasedSurfaceModel();
-    Handle(TCollection_HAsciiString) aName = 
-      new TCollection_HAsciiString("");
-    theShellBasedSurfaceModel->Init(aName, aSbsmBoundary);
-    
-    // bind SBSM
-    TopoDSToStep::AddResult(FP,aShell,theShellBasedSurfaceModel);
+    theTessellatedItem = StepB.TessellatedValue();
     done = Standard_True;
   }
   else {
@@ -135,7 +171,7 @@ TopoDSToStep_MakeShellBasedSurfaceModel::
       new TransferBRep_ShapeMapper(aShell);
     FP->AddWarning(errShape, " Shell not mapped to ShellBasedSurfaceModel");
   }
-  
+
   TopoDSToStep::AddResult ( FP, aTool );
 }
 
@@ -146,6 +182,7 @@ TopoDSToStep_MakeShellBasedSurfaceModel::
 TopoDSToStep_MakeShellBasedSurfaceModel::
   TopoDSToStep_MakeShellBasedSurfaceModel(const TopoDS_Solid& aSolid,
                                           const Handle(Transfer_FinderProcess)& FP,
+                                          const StepData_Factors& theLocalFactors,
                                           const Message_ProgressRange& theProgress)
 {
   done = Standard_False;
@@ -153,11 +190,23 @@ TopoDSToStep_MakeShellBasedSurfaceModel::
   Handle(StepShape_HArray1OfShell) aSbsmBoundary;
   Handle(StepShape_OpenShell)      aOpenShell;
   Handle(StepShape_ClosedShell)    aClosedShell;
-  TopoDS_Iterator              It;
-  TopoDS_Shell                 aShell;
-  MoniTool_DataMapOfShapeTransient   aMap;
-  TColStd_SequenceOfTransient  S;
-  
+  TopoDS_Iterator                  It;
+  TopoDS_Shell                     aShell;
+  MoniTool_DataMapOfShapeTransient aMap;
+  TColStd_SequenceOfTransient      S;
+  TColStd_SequenceOfTransient      aTessShells;
+
+  Handle(StepData_StepModel) aStepModel = Handle(StepData_StepModel)::DownCast(FP->Model());
+  Standard_Integer aWriteTessGeom = aStepModel->InternalParameters.WriteTessellated;
+  const Standard_Integer aWriteTessSchema = aStepModel->InternalParameters.WriteSchema;
+  if (aWriteTessSchema != 5)
+  {
+    aWriteTessGeom = 0;
+    Handle(TransferBRep_ShapeMapper) anErrShape =
+      new TransferBRep_ShapeMapper(aShell);
+    FP->AddWarning(anErrShape, " Tessellation can not be exported into not AP242");
+  }
+
   Standard_Integer nbshapes = 0;
   for (It.Initialize(aSolid); It.More(); It.Next())
     if (It.Value().ShapeType() == TopAbs_SHELL)
@@ -168,17 +217,24 @@ TopoDSToStep_MakeShellBasedSurfaceModel::
     if (It.Value().ShapeType() == TopAbs_SHELL) {
       aShell = TopoDS::Shell(It.Value());
 
-      TopoDSToStep_Tool    aTool(aMap, Standard_False);
-      TopoDSToStep_Builder StepB(aShell, aTool, FP, aPS.Next());
+      TopoDSToStep_Tool    aTool(aMap, Standard_False, aStepModel->InternalParameters.WriteSurfaceCurMode);
+      TopoDSToStep_Builder StepB(aShell, aTool, FP, aWriteTessGeom, theLocalFactors, aPS.Next());
       TopoDSToStep::AddResult ( FP, aTool );
 
       if (StepB.IsDone()) {
-	S.Append(StepB.Value());
+        if (!StepB.Value().IsNull()) {
+          S.Append(StepB.Value());
+        }
+        Handle(StepVisual_TessellatedItem) aTessShell = StepB.TessellatedValue();
+        if (!aTessShell.IsNull()) 
+        {
+          aTessShells.Append(aTessShell);
+        }
       }
       else {
-	Handle(TransferBRep_ShapeMapper) errShape =
-	  new TransferBRep_ShapeMapper(aShell);
-	FP->AddWarning(errShape," Shell from Solid not mapped to ShellBasedSurfaceModel");
+        Handle(TransferBRep_ShapeMapper) errShape =
+          new TransferBRep_ShapeMapper(aShell);
+        FP->AddWarning(errShape, " Shell from Solid not mapped to ShellBasedSurfaceModel");
       }
     }
   }
@@ -190,11 +246,11 @@ TopoDSToStep_MakeShellBasedSurfaceModel::
     for (Standard_Integer i=1; i<=N; i++) {
       aOpenShell = Handle(StepShape_OpenShell)::DownCast(S.Value(i));
       if (!aOpenShell.IsNull()) {
-	aShellSelect.SetValue(aOpenShell);
+        aShellSelect.SetValue(aOpenShell);
       }
       else {
-	aClosedShell = Handle(StepShape_ClosedShell)::DownCast(S.Value(i));
-	aShellSelect.SetValue(aClosedShell);
+        aClosedShell = Handle(StepShape_ClosedShell)::DownCast(S.Value(i));
+        aShellSelect.SetValue(aClosedShell);
       }
       aSbsmBoundary->SetValue(i,aShellSelect);
     }
@@ -203,6 +259,22 @@ TopoDSToStep_MakeShellBasedSurfaceModel::
     Handle(TCollection_HAsciiString) aName = 
       new TCollection_HAsciiString("");
     theShellBasedSurfaceModel->Init(aName,aSbsmBoundary);
+
+    if (!aTessShells.IsEmpty()) 
+    {
+      Handle(StepVisual_TessellatedGeometricSet) aTessGS = new StepVisual_TessellatedGeometricSet();
+      Handle(TCollection_HAsciiString) aTessName = new TCollection_HAsciiString("");
+      NCollection_Handle<StepVisual_Array1OfTessellatedItem> anItems
+        = new StepVisual_Array1OfTessellatedItem(1, aTessShells.Length());
+      Standard_Integer i = 1;
+      for (TColStd_SequenceOfTransient::Iterator anIt(aTessShells); anIt.More(); anIt.Next(), ++i) 
+      {
+        Handle(StepVisual_TessellatedShell) aTessShell = Handle(StepVisual_TessellatedShell)::DownCast(anIt.Value());
+        anItems->SetValue(i, aTessShell);
+      }
+      aTessGS->Init(aTessName, anItems);
+    }
+
     done = Standard_True;
   }
   else {
@@ -222,4 +294,16 @@ const Handle(StepShape_ShellBasedSurfaceModel) &
 {
   StdFail_NotDone_Raise_if (!done, "TopoDSToStep_MakeShellBasedSurfaceModel::Value() - no result");
   return theShellBasedSurfaceModel;
+}
+
+// ============================================================================
+// Method  : TopoDSToStep_MakeShellBasedSurfaceModel::TessellatedValue
+// Purpose : Returns TessellatedItem as the optional result
+// ============================================================================
+
+const Handle(StepVisual_TessellatedItem)&
+TopoDSToStep_MakeShellBasedSurfaceModel::TessellatedValue() const
+{
+  StdFail_NotDone_Raise_if(!done, "TopoDSToStep_MakeShellBasedSurfaceModel::TessellatedValue() - no result");
+  return theTessellatedItem;
 }

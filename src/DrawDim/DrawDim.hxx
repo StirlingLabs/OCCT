@@ -21,7 +21,6 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
-#include <Standard_CString.hxx>
 #include <Draw_Interpretor.hxx>
 #include <Standard_Boolean.hxx>
 #include <Standard_Real.hxx>
@@ -32,15 +31,6 @@ class gp_Lin;
 class gp_Circ;
 class TopoDS_Face;
 class gp_Pln;
-class DrawDim_Dimension;
-class DrawDim_Angle;
-class DrawDim_Distance;
-class DrawDim_Radius;
-class DrawDim_PlanarDimension;
-class DrawDim_PlanarAngle;
-class DrawDim_PlanarDistance;
-class DrawDim_PlanarRadius;
-class DrawDim_PlanarDiameter;
 
 
 //! This package provides Drawable Dimensions.
@@ -80,36 +70,6 @@ public:
   //! false if <f> is not a planar face
   Standard_EXPORT static Standard_Boolean Pln (const TopoDS_Face& f, gp_Pln& p);
 
-
-
-
-protected:
-
-
-
-
-
-private:
-
-
-
-
-friend class DrawDim_Dimension;
-friend class DrawDim_Angle;
-friend class DrawDim_Distance;
-friend class DrawDim_Radius;
-friend class DrawDim_PlanarDimension;
-friend class DrawDim_PlanarAngle;
-friend class DrawDim_PlanarDistance;
-friend class DrawDim_PlanarRadius;
-friend class DrawDim_PlanarDiameter;
-
 };
-
-
-
-
-
-
 
 #endif // _DrawDim_HeaderFile

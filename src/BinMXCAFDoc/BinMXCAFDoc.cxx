@@ -13,19 +13,18 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
+#include <BinMXCAFDoc.hxx>
 
 #include <BinMDF_ADriverTable.hxx>
-#include <BinMNaming_NamedShapeDriver.hxx>
-#include <BinMXCAFDoc.hxx>
 #include <BinMXCAFDoc_AssemblyItemRefDriver.hxx>
 #include <BinMXCAFDoc_CentroidDriver.hxx>
 #include <BinMXCAFDoc_ColorDriver.hxx>
 #include <BinMXCAFDoc_DatumDriver.hxx>
 #include <BinMXCAFDoc_DimTolDriver.hxx>
 #include <BinMXCAFDoc_GraphNodeDriver.hxx>
+#include <BinMXCAFDoc_LengthUnitDriver.hxx>
 #include <BinMXCAFDoc_LocationDriver.hxx>
 #include <BinMXCAFDoc_MaterialDriver.hxx>
-#include <BinMXCAFDoc_NoteDriver.hxx>
 #include <BinMXCAFDoc_NoteBinDataDriver.hxx>
 #include <BinMXCAFDoc_NoteCommentDriver.hxx>
 #include <BinMXCAFDoc_VisMaterialDriver.hxx>
@@ -57,6 +56,7 @@ void BinMXCAFDoc::AddDrivers(const Handle(BinMDF_ADriverTable)& theDriverTable,
   }
   
   theDriverTable->AddDriver( aLocationDriver);
+  theDriverTable->AddDriver(new BinMXCAFDoc_LengthUnitDriver   (theMsgDrv));
   theDriverTable->AddDriver( new BinMXCAFDoc_AssemblyItemRefDriver(theMsgDrv));
   theDriverTable->AddDriver( new BinMXCAFDoc_DatumDriver       (theMsgDrv));
   theDriverTable->AddDriver( new BinMXCAFDoc_DimTolDriver      (theMsgDrv));

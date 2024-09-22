@@ -23,10 +23,6 @@
 #include <Standard_Integer.hxx>
 #include <TColStd_Array1OfReal.hxx>
 
-class Standard_NoSuchObject;
-class Standard_DomainError;
-class Standard_OutOfRange;
-class Standard_TypeMismatch;
 class gp_Pnt2d;
 class gp_Vec2d;
 class gp_Lin2d;
@@ -57,6 +53,9 @@ public:
   //! WFirst,WLast define the bounds of the Offset curve.
   Standard_EXPORT Adaptor2d_OffsetCurve(const Handle(Adaptor2d_Curve2d)& C, const Standard_Real Offset, const Standard_Real WFirst, const Standard_Real WLast);
   
+  //! Shallow copy of adaptor
+  Standard_EXPORT virtual Handle(Adaptor2d_Curve2d) ShallowCopy() const Standard_OVERRIDE;
+
   //! Changes  the curve.  The Offset is reset to 0.
   Standard_EXPORT void Load (const Handle(Adaptor2d_Curve2d)& S);
   

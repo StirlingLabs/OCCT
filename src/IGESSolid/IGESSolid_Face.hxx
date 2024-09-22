@@ -18,14 +18,10 @@
 #define _IGESSolid_Face_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
-#include <Standard_Boolean.hxx>
 #include <IGESSolid_HArray1OfLoop.hxx>
 #include <IGESData_IGESEntity.hxx>
 #include <Standard_Integer.hxx>
-class IGESData_IGESEntity;
-class Standard_OutOfRange;
 class IGESSolid_Loop;
 
 

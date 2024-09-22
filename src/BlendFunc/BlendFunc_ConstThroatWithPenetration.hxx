@@ -19,16 +19,9 @@
 #include <BlendFunc_ConstThroat.hxx>
 #include <math_Vector.hxx>
 #include <TColStd_Array1OfReal.hxx>
-#include <GeomAbs_Shape.hxx>
 #include <TColStd_Array1OfInteger.hxx>
-#include <TColgp_Array1OfPnt.hxx>
-#include <TColgp_Array1OfVec.hxx>
-#include <TColgp_Array1OfPnt2d.hxx>
-#include <TColgp_Array1OfVec2d.hxx>
 
 class math_Matrix;
-class gp_Lin;
-class Blend_Point;
 
 //! Class for a function used to compute a chamfer with constant throat:
 //! the section of chamfer is right-angled triangle,

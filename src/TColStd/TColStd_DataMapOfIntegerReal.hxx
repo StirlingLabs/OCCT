@@ -16,12 +16,10 @@
 #define TColStd_DataMapOfIntegerReal_HeaderFile
 
 #include <Standard_Integer.hxx>
-#include <Standard_Real.hxx>
-#include <TColStd_MapIntegerHasher.hxx>
 #include <NCollection_DataMap.hxx>
 
-typedef NCollection_DataMap<Standard_Integer,Standard_Real,TColStd_MapIntegerHasher> TColStd_DataMapOfIntegerReal;
-typedef NCollection_DataMap<Standard_Integer,Standard_Real,TColStd_MapIntegerHasher>::Iterator TColStd_DataMapIteratorOfDataMapOfIntegerReal;
+typedef NCollection_DataMap<Standard_Integer,Standard_Real> TColStd_DataMapOfIntegerReal;
+typedef NCollection_DataMap<Standard_Integer,Standard_Real>::Iterator TColStd_DataMapIteratorOfDataMapOfIntegerReal;
 
 
 #endif

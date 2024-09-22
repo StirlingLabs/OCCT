@@ -21,11 +21,8 @@
 #include <Standard_Type.hxx>
 
 #include <Geom_Vector.hxx>
-#include <Standard_Real.hxx>
-class Standard_ConstructionError;
 class gp_Vec;
 class gp_Pnt;
-class Geom_Vector;
 class gp_Trsf;
 class Geom_Geometry;
 

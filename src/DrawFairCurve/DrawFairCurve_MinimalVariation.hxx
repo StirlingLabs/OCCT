@@ -18,10 +18,8 @@
 #define _DrawFairCurve_MinimalVariation_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <DrawFairCurve_Batten.hxx>
-#include <Standard_Address.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_Real.hxx>
 

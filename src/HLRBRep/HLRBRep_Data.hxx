@@ -31,7 +31,6 @@
 #include <HLRBRep_SLProps.hxx>
 #include <Standard_Real.hxx>
 #include <HLRBRep_FaceIterator.hxx>
-#include <Standard_Address.hxx>
 #include <GeomAbs_SurfaceType.hxx>
 #include <Standard_Boolean.hxx>
 #include <GeomAbs_CurveType.hxx>
@@ -43,9 +42,6 @@
 #include <TopAbs_State.hxx>
 #include <HLRAlgo_InterferenceList.hxx>
 class BRepTopAdaptor_TopolTool;
-class StdFail_UndefinedDerivative;
-class HLRAlgo_Projector;
-class HLRAlgo_Interference;
 class gp_Dir2d;
 class HLRBRep_EdgeData;
 class HLRBRep_FaceData;

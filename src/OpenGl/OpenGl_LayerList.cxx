@@ -19,14 +19,12 @@
 #include <OpenGl_DepthPeeling.hxx>
 #include <OpenGl_FrameBuffer.hxx>
 #include <OpenGl_LayerList.hxx>
+#include <OpenGl_RenderFilter.hxx>
 #include <OpenGl_ShaderManager.hxx>
 #include <OpenGl_ShadowMap.hxx>
-#include <OpenGl_Structure.hxx>
 #include <OpenGl_VertexBuffer.hxx>
 #include <OpenGl_View.hxx>
 #include <OpenGl_Workspace.hxx>
-
-#include <Graphic3d_GraphicDriver.hxx>
 
 namespace
 {
@@ -60,10 +58,12 @@ namespace
     //! Main constructor.
     OpenGl_FilteredIndexedLayerIterator (const NCollection_List<Handle(Graphic3d_Layer)>& theSeq,
                                          Standard_Boolean theToDrawImmediate,
-                                         OpenGl_LayerFilter theLayersToProcess)
+                                         OpenGl_LayerFilter theFilterMode,
+                                         Graphic3d_ZLayerId theLayersToProcess)
     : myIter (theSeq),
-      myLayersToProcess (theLayersToProcess),
-      myToDrawImmediate (theToDrawImmediate)
+      myFilterMode (theFilterMode),
+      myToDrawImmediate (theToDrawImmediate),
+      myLayersToProcess (theLayersToProcess)
     {
       next();
     }
@@ -96,11 +96,15 @@ namespace
           continue;
         }
 
-        switch (myLayersToProcess)
+        switch (myFilterMode)
         {
           case OpenGl_LF_All:
           {
-            return;
+            if (aLayer->LayerId() >= myLayersToProcess)
+            {
+              return;
+            }
+            break;
           }
           case OpenGl_LF_Upper:
           {
@@ -121,6 +125,14 @@ namespace
             }
             break;
           }
+          case OpenGl_LF_Single:
+          {
+            if (aLayer->LayerId() == myLayersToProcess)
+            {
+              return;
+            }
+            break;
+          }
           case OpenGl_LF_RayTracable:
           {
             if (aLayer->LayerSettings().IsRaytracable()
@@ -135,8 +147,9 @@ namespace
     }
   private:
     OpenGl_IndexedLayerIterator myIter;
-    OpenGl_LayerFilter          myLayersToProcess;
+    OpenGl_LayerFilter          myFilterMode;
     Standard_Boolean            myToDrawImmediate;
+    Graphic3d_ZLayerId          myLayersToProcess;
   };
 
   static const Standard_Integer THE_DRAW_BUFFERS0[]   = { GL_COLOR_ATTACHMENT0 };
@@ -156,9 +169,8 @@ struct OpenGl_GlobalLayerSettings
 //purpose  : Constructor
 //=======================================================================
 
-OpenGl_LayerList::OpenGl_LayerList (const Standard_Integer theNbPriorities)
+OpenGl_LayerList::OpenGl_LayerList()
 : myBVHBuilder (new BVH_LinearBuilder<Standard_Real, 3> (BVH_Constants_LeafNodeSizeSingle, BVH_Constants_MaxTreeDepth)),
-  myNbPriorities (theNbPriorities),
   myNbStructures (0),
   myImmediateNbStructures (0),
   myModifStateOfRaytraceable (0)
@@ -201,7 +213,7 @@ void OpenGl_LayerList::InsertLayerBefore (const Graphic3d_ZLayerId theNewLayerId
     return;
   }
 
-  Handle(Graphic3d_Layer) aNewLayer = new Graphic3d_Layer (theNewLayerId, myNbPriorities, myBVHBuilder);
+  Handle(Graphic3d_Layer) aNewLayer = new Graphic3d_Layer (theNewLayerId, myBVHBuilder);
   aNewLayer->SetLayerSettings (theSettings);
 
   Handle(Graphic3d_Layer) anOtherLayer;
@@ -239,7 +251,7 @@ void OpenGl_LayerList::InsertLayerAfter (const Graphic3d_ZLayerId theNewLayerId,
     return;
   }
 
-  Handle(Graphic3d_Layer) aNewLayer = new Graphic3d_Layer (theNewLayerId, myNbPriorities, myBVHBuilder);
+  Handle(Graphic3d_Layer) aNewLayer = new Graphic3d_Layer (theNewLayerId, myBVHBuilder);
   aNewLayer->SetLayerSettings (theSettings);
 
   Handle(Graphic3d_Layer) anOtherLayer;
@@ -294,7 +306,7 @@ void OpenGl_LayerList::RemoveLayer (const Graphic3d_ZLayerId theLayerId)
 
 void OpenGl_LayerList::AddStructure (const OpenGl_Structure*  theStruct,
                                      const Graphic3d_ZLayerId theLayerId,
-                                     const Standard_Integer   thePriority,
+                                     const Graphic3d_DisplayPriority thePriority,
                                      Standard_Boolean         isForChangePriority)
 {
   // add structure to associated layer,
@@ -324,7 +336,7 @@ void OpenGl_LayerList::RemoveStructure (const OpenGl_Structure* theStructure)
   const Handle(Graphic3d_Layer)* aLayerPtr = myLayerIds.Seek (aLayerId);
   const Handle(Graphic3d_Layer)& aLayer = aLayerPtr != NULL ? *aLayerPtr : myLayerIds.Find (Graphic3d_ZLayerId_Default);
 
-  Standard_Integer aPriority = -1;
+  Graphic3d_DisplayPriority aPriority = Graphic3d_DisplayPriority_INVALID;
 
   // remove structure from associated list
   // if the structure is not found there,
@@ -396,7 +408,7 @@ void OpenGl_LayerList::ChangeLayer (const OpenGl_Structure*  theStructure,
   const Handle(Graphic3d_Layer)* aLayerPtr = myLayerIds.Seek (theOldLayerId);
   const Handle(Graphic3d_Layer)& aLayer = aLayerPtr != NULL ? *aLayerPtr : myLayerIds.Find (Graphic3d_ZLayerId_Default);
 
-  Standard_Integer aPriority = -1;
+  Graphic3d_DisplayPriority aPriority = Graphic3d_DisplayPriority_INVALID;
 
   // take priority and remove structure from list found by <theOldLayerId>
   // if the structure is not found there, scan through all other layers
@@ -460,13 +472,12 @@ void OpenGl_LayerList::ChangeLayer (const OpenGl_Structure*  theStructure,
 //=======================================================================
 void OpenGl_LayerList::ChangePriority (const OpenGl_Structure*  theStructure,
                                        const Graphic3d_ZLayerId theLayerId,
-                                       const Standard_Integer   theNewPriority)
+                                       const Graphic3d_DisplayPriority theNewPriority)
 {
   const Handle(Graphic3d_Layer)* aLayerPtr = myLayerIds.Seek (theLayerId);
   const Handle(Graphic3d_Layer)& aLayer = aLayerPtr != NULL ? *aLayerPtr : myLayerIds.Find (Graphic3d_ZLayerId_Default);
 
-  Standard_Integer anOldPriority = -1;
-
+  Graphic3d_DisplayPriority anOldPriority = Graphic3d_DisplayPriority_INVALID;
   if (aLayer->Remove (theStructure, anOldPriority, Standard_True))
   {
     --myNbStructures;
@@ -573,11 +584,11 @@ void OpenGl_LayerList::renderLayer (const Handle(OpenGl_Workspace)& theWorkspace
   if (aLayerSettings.ToEnableDepthTest())
   {
     // assuming depth test is enabled by default
-    glDepthFunc (theDefaultSettings.DepthFunc);
+    aCtx->core11fwd->glDepthFunc (theDefaultSettings.DepthFunc);
   }
   else
   {
-    glDepthFunc (GL_ALWAYS);
+    aCtx->core11fwd->glDepthFunc (GL_ALWAYS);
   }
 
   // save environment texture
@@ -592,7 +603,7 @@ void OpenGl_LayerList::renderLayer (const Handle(OpenGl_Workspace)& theWorkspace
 
   // handle depth write
   theWorkspace->UseDepthWrite() = aLayerSettings.ToEnableDepthWrite() && theDefaultSettings.DepthMask == GL_TRUE;
-  glDepthMask (theWorkspace->UseDepthWrite() ? GL_TRUE : GL_FALSE);
+  aCtx->core11fwd->glDepthMask (theWorkspace->UseDepthWrite() ? GL_TRUE : GL_FALSE);
 
   const Standard_Boolean hasLocalCS = !aLayerSettings.OriginTransformation().IsNull();
   const Handle(OpenGl_ShaderManager)& aManager = aCtx->ShaderManager();
@@ -664,9 +675,9 @@ void OpenGl_LayerList::renderLayer (const Handle(OpenGl_Workspace)& theWorkspace
 
   // render priority list
   const Standard_Integer aViewId = theWorkspace->View()->Identification();
-  for (Graphic3d_ArrayOfIndexedMapOfStructure::Iterator aMapIter (theLayer.ArrayOfStructures()); aMapIter.More(); aMapIter.Next())
+  for (Standard_Integer aPriorityIter = Graphic3d_DisplayPriority_Bottom; aPriorityIter <= Graphic3d_DisplayPriority_Topmost; ++aPriorityIter)
   {
-    const Graphic3d_IndexedMapOfStructure& aStructures = aMapIter.Value();
+    const Graphic3d_IndexedMapOfStructure& aStructures = theLayer.Structures ((Graphic3d_DisplayPriority )aPriorityIter);
     for (OpenGl_Structure::StructIterator aStructIter (aStructures); aStructIter.More(); aStructIter.Next())
     {
       const OpenGl_Structure* aStruct = aStructIter.Value();
@@ -718,7 +729,8 @@ void OpenGl_LayerList::renderLayer (const Handle(OpenGl_Workspace)& theWorkspace
 //=======================================================================
 void OpenGl_LayerList::Render (const Handle(OpenGl_Workspace)& theWorkspace,
                                const Standard_Boolean          theToDrawImmediate,
-                               const OpenGl_LayerFilter        theLayersToProcess,
+                               const OpenGl_LayerFilter        theFilterMode,
+                               const Graphic3d_ZLayerId        theLayersToProcess,
                                OpenGl_FrameBuffer*             theReadDrawFbo,
                                OpenGl_FrameBuffer*             theOitAccumFbo) const
 {
@@ -754,7 +766,7 @@ void OpenGl_LayerList::Render (const Handle(OpenGl_Workspace)& theWorkspace,
                                   && !isShadowMapPass;
   const Handle(Graphic3d_LightSet)    aLightsBack = aCtx->ShaderManager()->LightSourceState().LightSources();
   const Handle(OpenGl_ShadowMapArray) aShadowMaps = aCtx->ShaderManager()->LightSourceState().ShadowMaps();
-  for (OpenGl_FilteredIndexedLayerIterator aLayerIterStart (myLayers, theToDrawImmediate, theLayersToProcess); aLayerIterStart.More();)
+  for (OpenGl_FilteredIndexedLayerIterator aLayerIterStart (myLayers, theToDrawImmediate, theFilterMode, theLayersToProcess); aLayerIterStart.More();)
   {
     bool hasSkippedDepthLayers = false;
     for (int aPassIter = toPerformDepthPrepass ? 0 : 2; aPassIter < 3; ++aPassIter)
@@ -863,8 +875,8 @@ void OpenGl_LayerList::Render (const Handle(OpenGl_Workspace)& theWorkspace,
     if (aClearDepthLayer > aClearDepthLayerPrev)
     {
       aClearDepthLayerPrev = aClearDepthLayer;
-      glDepthMask (GL_TRUE);
-      glClear (GL_DEPTH_BUFFER_BIT);
+      aCtx->core11fwd->glDepthMask (GL_TRUE);
+      aCtx->core11fwd->glClear (GL_DEPTH_BUFFER_BIT);
     }
   }
 
@@ -1219,6 +1231,13 @@ void OpenGl_LayerList::renderTransparent (const Handle(OpenGl_Workspace)&   theW
         }
       }
       aView->DepthPeelingFbos()->DetachDepthTexture (aCtx);
+
+      // Bind the framebuffer for reading depth and writing final color
+      // after DetachDepthTexture() because after the function it's unbinded.
+      if (theReadDrawFbo)
+      {
+        theReadDrawFbo->BindBuffer (aCtx);
+      }
       break;
     }
   }
@@ -1243,7 +1262,6 @@ void OpenGl_LayerList::DumpJson (Standard_OStream& theOStream, Standard_Integer 
     OCCT_DUMP_FIELD_VALUES_DUMPED (theOStream, theDepth, aLayerId.get())
   }
 
-  OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myNbPriorities)
   OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myNbStructures)
   OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myImmediateNbStructures)
   OCCT_DUMP_FIELD_VALUE_NUMERICAL (theOStream, myModifStateOfRaytraceable)

@@ -25,18 +25,14 @@
 #include <TColStd_Array1OfAsciiString.hxx>
 #include <TColStd_Array1OfInteger.hxx>
 #include <Standard_Transient.hxx>
-#include <Standard_CString.hxx>
 #include <IFSelect_EditValue.hxx>
-#include <Standard_Boolean.hxx>
 #include <TColStd_HSequenceOfHAsciiString.hxx>
 #include <TCollection_AsciiString.hxx>
 #include <NCollection_DataMap.hxx>
-class Standard_OutOfRange;
 class Interface_TypedValue;
 class IFSelect_EditForm;
 class TCollection_HAsciiString;
 class IFSelect_ListEditor;
-class Standard_Transient;
 class Interface_InterfaceModel;
 
 

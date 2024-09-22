@@ -20,13 +20,10 @@
 #include <Standard_Handle.hxx>
 
 #include <BOPDS_PDS.hxx>
-#include <BOPDS_Pair.hxx>
 #include <BOPDS_VectorOfPair.hxx>
 #include <NCollection_BaseAllocator.hxx>
 #include <TColStd_ListOfInteger.hxx>
-#include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
-class BOPDS_DS;
 
 
 //! The class BOPDS_SubIterator is used to compute intersections between

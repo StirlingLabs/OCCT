@@ -16,21 +16,15 @@
 
 // Modified by xpu, Wed May 20 10:47:38 1998
 
-#include <gp_Dir.hxx>
-#include <gp_Pnt.hxx>
 #include <gp_Pnt2d.hxx>
-#include <Geom_Curve.hxx>
 #include <TopoDS.hxx>
-#include <BRep_Tool.hxx>
 #include <BRepTools.hxx>
 #include <TopExp.hxx>
 #include <TopExp_Explorer.hxx>
 #include <Precision.hxx>
 #include <GeomAdaptor_Surface.hxx>
-#include <TColStd_DataMapOfIntegerInteger.hxx>
 #include <TColStd_DataMapIteratorOfDataMapOfIntegerInteger.hxx>
 
-#include <TopOpeBRepTool_CurveTool.hxx>
 #include <TopOpeBRepTool_ShapeTool.hxx>
 #include <TopOpeBRepTool_TOOL.hxx>
 #include <TopOpeBRepTool_EXPORT.hxx>
@@ -39,7 +33,6 @@
 #include <Standard_ProgramError.hxx>
 
 #include <TopOpeBRepDS_InterferenceTool.hxx>
-#include <TopOpeBRepDS_BuildTool.hxx>
 #include <TopOpeBRepDS_PointIterator.hxx>
 #include <TopOpeBRepDS_BuildTool.hxx>
 #include <TopOpeBRepDS_EXPORT.hxx>
@@ -1725,7 +1718,7 @@ Standard_EXPORT void FUN_ds_completeforSE8(const Handle(TopOpeBRepDS_HDataStruct
       if (redu2d) { // {I1d=(Tr(Esd),vG,Esd), I2d=(Tr(F),vG,E)}	
 	TopOpeBRepDS_ListIteratorOfListOfInterference it(l2dFE); TopOpeBRepDS_ListOfInterference al2dFE;
 	while (it.More()) {
-	  Handle(TopOpeBRepDS_Interference)& I2dFE = it.Value();
+	  Handle(TopOpeBRepDS_Interference)& I2dFE = it.ChangeValue();
 	  TopOpeBRepDS_Transition newT2d; Standard_Boolean ok = FUN_ds_redu2d1d(BDS,ISE,I2dFE,l1dE, newT2d);
 	  if (!ok) {it.Next(); continue;}
 	  I2dFE->ChangeTransition() = newT2d; al2dFE.Append(I2dFE);

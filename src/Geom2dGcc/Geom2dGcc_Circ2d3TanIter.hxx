@@ -19,19 +19,13 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
-#include <Standard_Boolean.hxx>
 #include <gp_Circ2d.hxx>
 #include <GccEnt_Position.hxx>
 #include <gp_Pnt2d.hxx>
-#include <Standard_Real.hxx>
-class StdFail_NotDone;
 class GccEnt_QualifiedCirc;
 class Geom2dGcc_QCurve;
 class GccEnt_QualifiedLin;
-class gp_Pnt2d;
-class gp_Circ2d;
 
 
 //! This class implements the algorithms used to

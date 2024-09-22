@@ -21,12 +21,8 @@
 #include <Standard_Type.hxx>
 
 #include <Standard_Integer.hxx>
-#include <Standard_Real.hxx>
 #include <IGESData_ViewKindEntity.hxx>
-#include <Standard_Boolean.hxx>
 class IGESGeom_Plane;
-class Standard_OutOfRange;
-class IGESData_ViewKindEntity;
 class IGESData_TransfEntity;
 class gp_XYZ;
 

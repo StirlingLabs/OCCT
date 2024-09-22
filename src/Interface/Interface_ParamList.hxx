@@ -17,14 +17,10 @@
 #define _Interface_ParamList_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <Interface_VectorOfFileParameter.hxx>
 #include <Standard_Transient.hxx>
 #include <Standard_Integer.hxx>
-class Standard_RangeError;
-class Standard_OutOfRange;
-class Standard_OutOfMemory;
 class Interface_FileParameter;
 
 

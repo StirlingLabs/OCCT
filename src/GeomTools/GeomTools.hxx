@@ -28,10 +28,6 @@ class Geom_Surface;
 class Geom_Curve;
 class Geom2d_Curve;
 class GeomTools_UndefinedTypeHandler;
-class GeomTools_UndefinedTypeHandler;
-class GeomTools_SurfaceSet;
-class GeomTools_CurveSet;
-class GeomTools_Curve2dSet;
 
 
 //! The GeomTools package provides  utilities for Geometry.
@@ -83,31 +79,6 @@ public:
   //! in case of error
   Standard_EXPORT static void GetReal (Standard_IStream& IS, Standard_Real& theValue);
 
-
-
-
-protected:
-
-
-
-
-
-private:
-
-
-
-
-friend class GeomTools_UndefinedTypeHandler;
-friend class GeomTools_SurfaceSet;
-friend class GeomTools_CurveSet;
-friend class GeomTools_Curve2dSet;
-
 };
-
-
-
-
-
-
 
 #endif // _GeomTools_HeaderFile

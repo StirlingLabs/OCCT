@@ -21,18 +21,13 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
-#include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
 #include <Extrema_ExtPS.hxx>
 #include <GeomAdaptor_Surface.hxx>
 #include <Extrema_ExtAlgo.hxx>
 #include <Extrema_ExtFlag.hxx>
-#include <Standard_Real.hxx>
-class Standard_OutOfRange;
-class StdFail_NotDone;
 class gp_Pnt;
 class Geom_Surface;
-class Extrema_ExtPS;
 
 
 

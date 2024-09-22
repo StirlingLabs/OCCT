@@ -18,17 +18,12 @@
 #define _Geom2d_Transformation_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <gp_Trsf2d.hxx>
 #include <Standard_Transient.hxx>
 #include <Standard_Real.hxx>
-#include <Standard_Boolean.hxx>
 #include <gp_TrsfForm.hxx>
 #include <Standard_Integer.hxx>
-class Standard_ConstructionError;
-class Standard_OutOfRange;
-class gp_Trsf2d;
 class gp_Pnt2d;
 class gp_Ax2d;
 class gp_Vec2d;

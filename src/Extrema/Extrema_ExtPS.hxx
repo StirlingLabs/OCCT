@@ -24,7 +24,6 @@
 #include <Extrema_ExtPElS.hxx>
 #include <Extrema_GenExtPS.hxx>
 #include <Extrema_SequenceOfPOnSurf.hxx>
-#include <Standard_Real.hxx>
 #include <gp_Pnt.hxx>
 #include <TColStd_SequenceOfReal.hxx>
 #include <GeomAbs_SurfaceType.hxx>
@@ -33,10 +32,6 @@
 #include <Standard_Integer.hxx>
 class Extrema_ExtPExtS;
 class Extrema_ExtPRevS;
-class StdFail_NotDone;
-class Standard_OutOfRange;
-class Standard_TypeMismatch;
-class gp_Pnt;
 class Adaptor3d_Surface;
 class Extrema_POnSurf;
 
@@ -77,7 +72,7 @@ public:
   Standard_EXPORT void Initialize (const Adaptor3d_Surface& S, const Standard_Real Uinf, const Standard_Real Usup, const Standard_Real Vinf, const Standard_Real Vsup, const Standard_Real TolU, const Standard_Real TolV);
   
   //! Computes the distances.
-  //! An exception is raised if the fieds have not been
+  //! An exception is raised if the fields have not been
   //! initialized.
   Standard_EXPORT void Perform (const gp_Pnt& P);
   

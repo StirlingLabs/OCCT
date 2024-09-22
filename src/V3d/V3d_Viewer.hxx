@@ -17,20 +17,13 @@
 #ifndef _V3d_Viewer_HeaderFile
 #define _V3d_Viewer_HeaderFile
 
-#include <Aspect_Background.hxx>
-#include <Aspect_GenId.hxx>
-#include <Aspect_GradientBackground.hxx>
-#include <Aspect_GradientFillMethod.hxx>
 #include <Aspect_GridDrawMode.hxx>
 #include <Aspect_GridType.hxx>
-#include <gp_Ax3.hxx>
 #include <Graphic3d_StructureManager.hxx>
 #include <Graphic3d_Vertex.hxx>
 #include <Graphic3d_ZLayerSettings.hxx>
 #include <TColStd_MapOfInteger.hxx>
-#include <TColStd_ListIteratorOfListOfTransient.hxx>
 #include <TColStd_SequenceOfInteger.hxx>
-#include <TCollection_AsciiString.hxx>
 #include <TCollection_ExtendedString.hxx>
 #include <V3d_ListOfLight.hxx>
 #include <V3d_ListOfView.hxx>
@@ -44,11 +37,9 @@ class Graphic3d_AspectMarker3d;
 class Graphic3d_GraphicDriver;
 class Graphic3d_Group;
 class Graphic3d_Structure;
-class V3d_BadValue;
 class V3d_CircularGrid;
 class V3d_RectangularGrid;
 class V3d_View;
-class Quantity_Color;
 
 //! Defines services on Viewer type objects.
 //! The methods of this class allow editing and
@@ -130,7 +121,7 @@ public:
   //! attached to the viewer by supplying the colour objects
   void SetDefaultBgGradientColors (const Quantity_Color& theColor1,
                                    const Quantity_Color& theColor2,
-                                   const Aspect_GradientFillMethod theFillStyle = Aspect_GFM_HOR)
+                                   const Aspect_GradientFillMethod theFillStyle = Aspect_GradientFillMethod_Horizontal)
   {
     myGradientBackground.SetColors (theColor1, theColor2, theFillStyle);
   }
@@ -153,7 +144,7 @@ public:
   //! Gives the default visualization mode.
   void SetDefaultVisualization (const V3d_TypeOfVisualization theType) { myVisualization = theType; }
 
-  //! Returns the default type of Shading; Graphic3d_TOSM_FRAGMENT by default.
+  //! Returns the default type of Shading; Graphic3d_TypeOfShadingModel_Phong by default.
   Graphic3d_TypeOfShadingModel DefaultShadingModel() const { return myDefaultRenderingParams.ShadingModel; }
 
   //! Gives the default type of SHADING.
@@ -403,7 +394,7 @@ public: //! @name grid management
   //! Display grid echo at requested point in the view.
   Standard_EXPORT void ShowGridEcho (const Handle(V3d_View)& theView, const Graphic3d_Vertex& thePoint);
 
-  //! Temporarly hide grid echo.
+  //! Temporarily hide grid echo.
   Standard_EXPORT void HideGridEcho (const Handle(V3d_View)& theView);
 
 public: //! @name deprecated methods
@@ -484,7 +475,7 @@ private:
   Standard_EXPORT void AddView (const Handle(V3d_View)& theView);
   
   //! Delete View in Sequence Of Views.
-  Standard_EXPORT void DelView (const Handle(V3d_View)& theView);
+  Standard_EXPORT void DelView (const V3d_View* theView);
   
 private:
 

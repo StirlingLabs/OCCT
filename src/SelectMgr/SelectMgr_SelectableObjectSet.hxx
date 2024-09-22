@@ -16,12 +16,7 @@
 #ifndef _SelectMgr_SelectableObjectSet_HeaderFile
 #define _SelectMgr_SelectableObjectSet_HeaderFile
 
-#include <BVH_Builder.hxx>
-#include <BVH_Tree.hxx>
-#include <Graphic3d_Mat4d.hxx>
-#include <Graphic3d_WorldViewProjState.hxx>
 #include <NCollection_Handle.hxx>
-#include <NCollection_IndexedMap.hxx>
 #include <Select3D_BVHBuilder3d.hxx>
 #include <SelectMgr_SelectableObject.hxx>
 
@@ -47,11 +42,22 @@ public:
   //! needs to be updated only when camera's projection changes. Bounding volumes for this object subclass
   //! is represented directly in eye space coordinates.
   //! This subset uses linear BVH builder with 32 levels of depth and 1 element per leaf.
+  //! - BVHSubset_ortho3dPersistent refers to the subset of 3D persistent selectable objects (rotate, pan, zoom persistence)
+  //! that contains `Graphic3d_TMF_OrthoPers` persistence mode.
+  //! Associated BVH tree needs to be updated when either the camera's projection and position change.
+  //! This subset uses linear BVH builder with 32 levels of depth and 1 element per leaf.
+  //! - BVHSubset_ortho2dPersistent refers to the subset of 2D persistent selectable objects
+  //! that contains `Graphic3d_TMF_OrthoPers` persistence mode. Associated BVH tree
+  //! needs to be updated only when camera's projection changes. Bounding volumes for this object subclass
+  //! is represented directly in eye space coordinates.
+  //! This subset uses linear BVH builder with 32 levels of depth and 1 element per leaf.
   enum BVHSubset
   {
     BVHSubset_3d,
     BVHSubset_3dPersistent,
     BVHSubset_2dPersistent,
+    BVHSubset_ortho3dPersistent,
+    BVHSubset_ortho2dPersistent,
     BVHSubsetNb
   };
 
@@ -145,7 +151,9 @@ public:
   {
     return myObjects[BVHSubset_3d].Contains (theObject)
         || myObjects[BVHSubset_3dPersistent].Contains (theObject)
-        || myObjects[BVHSubset_2dPersistent].Contains (theObject);
+        || myObjects[BVHSubset_2dPersistent].Contains (theObject)
+        || myObjects[BVHSubset_ortho3dPersistent].Contains (theObject)
+        || myObjects[BVHSubset_ortho2dPersistent].Contains (theObject);
   }
 
   //! Returns true if the object set does not contain any selectable objects.
@@ -153,7 +161,9 @@ public:
   {
     return myObjects[BVHSubset_3d].IsEmpty()
         && myObjects[BVHSubset_3dPersistent].IsEmpty()
-        && myObjects[BVHSubset_2dPersistent].IsEmpty();
+        && myObjects[BVHSubset_2dPersistent].IsEmpty()
+        && myObjects[BVHSubset_ortho3dPersistent].IsEmpty()
+        && myObjects[BVHSubset_ortho2dPersistent].IsEmpty();
   }
 
   //! Returns true if the specified object subset is empty.
@@ -197,9 +207,17 @@ private:
       }
       return SelectMgr_SelectableObjectSet::BVHSubset_3d;
     }
-    else if (theObject->TransformPersistence()->Mode() == Graphic3d_TMF_2d)
+    else if ((theObject->TransformPersistence()->Mode() & Graphic3d_TMF_2d) != 0)
     {
+      if (theObject->TransformPersistence()->IsOrthoPers())
+      {
+        return SelectMgr_SelectableObjectSet::BVHSubset_ortho2dPersistent;
+      }
       return SelectMgr_SelectableObjectSet::BVHSubset_2dPersistent;
+    }
+    else if (theObject->TransformPersistence()->IsOrthoPers())
+    {
+      return SelectMgr_SelectableObjectSet::BVHSubset_ortho3dPersistent;
     }
     else
     {

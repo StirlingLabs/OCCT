@@ -21,13 +21,10 @@
 #include <Standard_Type.hxx>
 
 #include <gp_XYZ.hxx>
-#include <Standard_Real.hxx>
 #include <IGESDimen_HArray1OfLeaderArrow.hxx>
 #include <IGESData_IGESEntity.hxx>
 #include <Standard_Integer.hxx>
 class IGESDimen_GeneralNote;
-class Standard_OutOfRange;
-class gp_XYZ;
 class gp_Pnt;
 class IGESDimen_LeaderArrow;
 

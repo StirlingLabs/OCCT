@@ -18,12 +18,9 @@
 #define _IGESData_ViewKindEntity_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <IGESData_IGESEntity.hxx>
-#include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
-class Standard_OutOfRange;
 
 
 class IGESData_ViewKindEntity;

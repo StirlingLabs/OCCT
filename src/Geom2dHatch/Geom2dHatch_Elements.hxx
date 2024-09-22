@@ -23,12 +23,8 @@
 
 #include <Geom2dHatch_MapOfElements.hxx>
 #include <Geom2dHatch_DataMapIteratorOfMapOfElements.hxx>
-#include <Standard_Integer.hxx>
 #include <Standard_Boolean.hxx>
-#include <Standard_Real.hxx>
 #include <TopAbs_Orientation.hxx>
-class Standard_DomainError;
-class Standard_NoSuchObject;
 class Geom2dHatch_Element;
 class gp_Pnt2d;
 class gp_Lin2d;

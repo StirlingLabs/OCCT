@@ -16,14 +16,8 @@
 
 
 #include <gp_Circ.hxx>
-#include <gp_Elips.hxx>
-#include <gp_Hypr.hxx>
-#include <gp_Lin.hxx>
-#include <gp_Parab.hxx>
 #include <IntPatch_GLine.hxx>
 #include <IntPatch_Point.hxx>
-#include <Standard_DomainError.hxx>
-#include <Standard_OutOfRange.hxx>
 #include <Standard_Type.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(IntPatch_GLine,IntPatch_Line)
@@ -353,7 +347,7 @@ void IntPatch_GLine::AddVertex (const IntPatch_Point& Pnt)
         while(par<pf) par+=M_PI+M_PI;
         while(par>pl) par-=M_PI+M_PI;
         if(par<pf) { 
-          const Standard_Real PrecisionPConfusion ( Precision::PConfusion()*1000.0 );
+          constexpr Standard_Real PrecisionPConfusion ( Precision::PConfusion()*1000.0 );
           if((pf-par)>PrecisionPConfusion) {
             return;
           }
@@ -402,7 +396,7 @@ void IntPatch_GLine::ComputeVertexParameters(const Standard_Real /*Tol*/)
   
   Standard_Integer nbvtx = NbVertex();
 
-  const Standard_Real PrecisionPConfusion ( Precision::PConfusion()*1000.0 );
+  constexpr Standard_Real PrecisionPConfusion ( Precision::PConfusion()*1000.0 );
 
   do { 
     APointDeleted = Standard_False;

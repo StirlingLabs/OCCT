@@ -20,17 +20,10 @@
 #include <Standard.hxx>
 #include <Standard_Type.hxx>
 
-#include <Standard_Real.hxx>
 #include <Geom2d_BoundedCurve.hxx>
-#include <Standard_Boolean.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <Standard_Integer.hxx>
 class Geom2d_Curve;
-class Standard_ConstructionError;
-class Standard_RangeError;
-class Standard_NoSuchObject;
-class Geom2d_UndefinedDerivative;
-class Geom2d_UndefinedValue;
 class gp_Pnt2d;
 class gp_Vec2d;
 class gp_Trsf2d;

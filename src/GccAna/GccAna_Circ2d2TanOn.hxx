@@ -19,20 +19,14 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
-#include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
 #include <TColgp_Array1OfCirc2d.hxx>
 #include <GccEnt_Array1OfPosition.hxx>
 #include <TColStd_Array1OfInteger.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
 #include <TColStd_Array1OfReal.hxx>
-#include <Standard_Real.hxx>
 #include <GccEnt_Position.hxx>
-class Standard_OutOfRange;
-class StdFail_NotDone;
-class GccEnt_BadQualifier;
 class GccEnt_QualifiedCirc;
 class gp_Lin2d;
 class GccEnt_QualifiedLin;
@@ -191,7 +185,7 @@ public:
   //! (2 circles).
   //! If R1 is the radius of the first argument and Rsol the radius
   //! of the solution and dist the distance between the two centers,
-  //! we concider the two circles are identical if R1+dist-Rsol is
+  //! we consider the two circles are identical if R1+dist-Rsol is
   //! less than Tolerance.
   //! False in the other cases.
   //! Raises OutOfRange if Index is greater than the number
@@ -202,7 +196,7 @@ public:
   //! (2 circles).
   //! If R2 is the radius of the second argument and Rsol the radius
   //! of the solution and dist the distance between the two centers,
-  //! we concider the two circles are identical if R2+dist-Rsol is
+  //! we consider the two circles are identical if R2+dist-Rsol is
   //! less than Tolerance.
   //! False in the other cases.
   //! Raises OutOfRange if Index is greater than the number

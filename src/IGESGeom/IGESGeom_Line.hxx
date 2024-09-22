@@ -23,7 +23,6 @@
 #include <gp_XYZ.hxx>
 #include <IGESData_IGESEntity.hxx>
 #include <Standard_Integer.hxx>
-class gp_XYZ;
 class gp_Pnt;
 
 
@@ -39,7 +38,7 @@ DEFINE_STANDARD_HANDLE(IGESGeom_Line, IGESData_IGESEntity)
 //! From IGES-5.3, two other Forms are admitted (same params) :
 //! 0 remains for standard limited line (the default)
 //! 1 for semi-infinite line (End is just a passing point)
-//! 2 for full infinite Line (both Start and End are abitrary)
+//! 2 for full infinite Line (both Start and End are arbitrary)
 class IGESGeom_Line : public IGESData_IGESEntity
 {
 

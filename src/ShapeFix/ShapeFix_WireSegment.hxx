@@ -24,11 +24,9 @@
 #include <TopoDS_Vertex.hxx>
 #include <TopAbs_Orientation.hxx>
 #include <TColStd_HSequenceOfInteger.hxx>
-#include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
 class ShapeExtend_WireData;
 class TopoDS_Wire;
-class TopoDS_Vertex;
 class TopoDS_Edge;
 
 
@@ -87,11 +85,11 @@ public:
   Standard_EXPORT TopAbs_Orientation Orientation() const;
   
   //! Returns first vertex of the first edge in the wire
-  //! (no dependance on Orientation()).
+  //! (no dependence on Orientation()).
   Standard_EXPORT TopoDS_Vertex FirstVertex() const;
   
   //! Returns last vertex of the last edge in the wire
-  //! (no dependance on Orientation()).
+  //! (no dependence on Orientation()).
   Standard_EXPORT TopoDS_Vertex LastVertex() const;
   
   //! Returns True if FirstVertex() == LastVertex()

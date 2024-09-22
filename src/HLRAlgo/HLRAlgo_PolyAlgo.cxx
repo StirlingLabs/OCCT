@@ -76,7 +76,7 @@ void HLRAlgo_PolyAlgo::Update ()
   Standard_Real xTrianMax,yTrianMax,zTrianMax;
   Standard_Real xSegmnMin,ySegmnMin,zSegmnMin;
   Standard_Real xSegmnMax,ySegmnMax,zSegmnMax;
-  Standard_Real Big = Precision::Infinite();
+  constexpr Standard_Real Big = Precision::Infinite();
   HLRAlgo_PolyData::Box aBox(Big, Big, Big, -Big, -Big, -Big);
 
   myNbrShell = myHShell.Size();
@@ -115,7 +115,7 @@ void HLRAlgo_PolyAlgo::Update ()
 
     for (mySegListIt.Initialize (aPsd->Edges()); mySegListIt.More(); mySegListIt.Next())
     {
-      HLRAlgo_BiPoint& BP = mySegListIt.Value();
+      HLRAlgo_BiPoint& BP = mySegListIt.ChangeValue();
       HLRAlgo_BiPoint::PointsT& aPoints = BP.Points();
       HLRAlgo_BiPoint::IndicesT& theIndices = BP.Indices();
       if (aPoints.PntP1.X() < aPoints.PntP2.X()) { xSegmnMin = aPoints.PntP1.X(); xSegmnMax = aPoints.PntP2.X(); }
@@ -349,7 +349,7 @@ HLRAlgo_BiPoint::PointsT& HLRAlgo_PolyAlgo::Hide (HLRAlgo_EdgeStatus& theStatus,
                                                   Standard_Boolean& theOutl,
                                                   Standard_Boolean& theIntl)
 {
-  HLRAlgo_BiPoint& aBP = mySegListIt.Value();
+  HLRAlgo_BiPoint& aBP = mySegListIt.ChangeValue();
   HLRAlgo_BiPoint::PointsT&  aPoints   = aBP.Points();
   HLRAlgo_BiPoint::IndicesT& anIndices = aBP.Indices();
   theStatus = HLRAlgo_EdgeStatus (0.0, (Standard_ShortReal)myTriangle.TolParam,
@@ -431,7 +431,7 @@ HLRAlgo_BiPoint::PointsT& HLRAlgo_PolyAlgo::Show (
 			     Standard_Boolean& outl,
 			     Standard_Boolean& intl)
 {
-  HLRAlgo_BiPoint& BP = mySegListIt.Value();
+  HLRAlgo_BiPoint& BP = mySegListIt.ChangeValue();
   HLRAlgo_BiPoint::IndicesT& theIndices = BP.Indices();
   HLRAlgo_BiPoint::PointsT& aPoints = BP.Points();
   Index = theIndices.ShapeIndex;

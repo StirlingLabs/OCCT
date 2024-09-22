@@ -14,8 +14,6 @@
 #ifndef _AIS_ViewController_HeaderFile
 #define _AIS_ViewController_HeaderFile
 
-#include <Aspect_VKeySet.hxx>
-#include <Aspect_TouchMap.hxx>
 #include <Aspect_WindowInputListener.hxx>
 #include <Aspect_XRHapticActionData.hxx>
 #include <Aspect_XRTrackedDeviceRole.hxx>
@@ -34,13 +32,13 @@
 #include <Quantity_ColorRGBA.hxx>
 #include <Standard_Mutex.hxx>
 
+class AIS_Animation;
 class AIS_AnimationCamera;
 class AIS_InteractiveObject;
 class AIS_InteractiveContext;
 class AIS_Point;
 class AIS_RubberBand;
 class AIS_XRTrackedDevice;
-class Graphic3d_Camera;
 class SelectMgr_EntityOwner;
 class V3d_View;
 class WNT_HIDSpaceMouse;
@@ -76,6 +74,25 @@ public:
 
   //! Interrupt active view animation.
   Standard_EXPORT void AbortViewAnimation();
+
+  //! Return objects animation; empty (but not NULL) animation by default.
+  const Handle(AIS_Animation)& ObjectsAnimation() const { return myObjAnimation; }
+
+  //! Set object animation to be handled within handleViewRedraw().
+  void SetObjectsAnimation (const Handle(AIS_Animation)& theAnimation) { myObjAnimation = theAnimation; }
+
+  //! Return TRUE if object animation should be paused on mouse click; FALSE by default.
+  bool ToPauseObjectsAnimation() const { return myToPauseObjAnimation; }
+
+  //! Set if object animation should be paused on mouse click.
+  void SetPauseObjectsAnimation (bool theToPause) { myToPauseObjAnimation = theToPause; }
+
+  //! Return TRUE if continuous redrawing is enabled; FALSE by default.
+  //! This option would request a next viewer frame to be completely redrawn right after current frame is finished.
+  bool IsContinuousRedraw() const { return myIsContinuousRedraw; }
+
+  //! Enable or disable continuous updates.
+  void SetContinuousRedraw (bool theToEnable) { myIsContinuousRedraw = theToEnable; }
 
 public: //! @name global parameters
 
@@ -422,10 +439,13 @@ public: //! @name resize events
   virtual void ProcessInput() Standard_OVERRIDE {}
 
   //! Handle focus event.
-  //! Default implementation does nothing.
+  //! Default implementation resets cached input state (pressed keys).
   virtual void ProcessFocus (bool theIsActivated) Standard_OVERRIDE
   {
-    (void )theIsActivated;
+    if (!theIsActivated)
+    {
+      ResetViewInput();
+    }
   }
 
   //! Handle window close event.
@@ -471,6 +491,12 @@ public:
   Standard_EXPORT virtual void OnObjectDragged (const Handle(AIS_InteractiveContext)& theCtx,
                                                 const Handle(V3d_View)& theView,
                                                 AIS_DragAction theAction);
+
+  //! Callback called by HandleViewEvents() on Selection of another (sub)view.
+  //! This method is expected to be called from rendering thread.
+  Standard_EXPORT virtual void OnSubviewChanged (const Handle(AIS_InteractiveContext)& theCtx,
+                                                 const Handle(V3d_View)& theOldView,
+                                                 const Handle(V3d_View)& theNewView);
 
   //! Pick closest point under mouse cursor.
   //! This method is expected to be called from rendering thread.
@@ -679,6 +705,7 @@ protected:
 
   Standard_Real       myLastEventsTime;           //!< last fetched events timer value for computing delta/progress
   Standard_Boolean    myToAskNextFrame;           //!< flag indicating that another frame should be drawn right after this one
+  Standard_Boolean    myIsContinuousRedraw;       //!< continuous redrawing (without immediate rendering optimization)
 
   Standard_Real       myMinCamDistance;           //!< minimal camera distance for zoom operation
   AIS_RotationMode    myRotationMode;             //!< rotation mode
@@ -705,6 +732,8 @@ protected:
   Standard_Boolean    myHasThrust;                //!< flag indicating active thrust
 
   Handle(AIS_AnimationCamera) myViewAnimation;    //!< view animation
+  Handle(AIS_Animation)       myObjAnimation;     //!< objects animation
+  Standard_Boolean       myToPauseObjAnimation;   //!< flag to pause objects animation on mouse click; FALSE by default
   Handle(AIS_RubberBand) myRubberBand;            //!< Rubber-band presentation
   Handle(SelectMgr_EntityOwner) myDragOwner;      //!< detected owner of currently dragged object
   Handle(AIS_InteractiveObject) myDragObject;     //!< currently dragged object
@@ -734,6 +763,7 @@ protected: //! @name mouse input variables
   Standard_ShortReal  myScrollZoomRatio;          //!< distance ratio for mapping mouse scroll event to zoom; 15.0 by default
 
   AIS_MouseGestureMap myMouseGestureMap;          //!< map defining mouse gestures
+  AIS_MouseGestureMap myMouseGestureMapDrag;      //!< secondary map defining mouse gestures for dragging
   AIS_MouseGesture    myMouseActiveGesture;       //!< initiated mouse gesture (by pressing mouse button)
   AIS_MouseSelectionSchemeMap
                       myMouseSelectionSchemes;    //!< map defining selection schemes bound to mouse + modifiers
@@ -754,6 +784,7 @@ protected: //! @name multi-touch input variables
   Standard_ShortReal  myTouchPanThresholdPx;      //!< threshold for starting two-touch panning      gesture in pixels;  4 by default
   Standard_ShortReal  myTouchZoomThresholdPx;     //!< threshold for starting two-touch zoom (pitch) gesture in pixels;  6 by default
   Standard_ShortReal  myTouchZoomRatio;           //!< distance ratio for mapping two-touch zoom (pitch) gesture from pixels to zoom; 0.13 by default
+  Standard_ShortReal  myTouchDraggingThresholdPx; //!< distance for starting one-touch dragging gesture in pixels;  6 by default
 
   Aspect_Touch        myTouchClick;               //!< single touch position for handling clicks
   OSD_Timer           myTouchDoubleTapTimer;      //!< timer for handling double tap

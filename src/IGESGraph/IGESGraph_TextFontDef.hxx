@@ -23,11 +23,8 @@
 #include <Standard_Integer.hxx>
 #include <TColStd_HArray1OfInteger.hxx>
 #include <IGESData_IGESEntity.hxx>
-#include <Standard_Boolean.hxx>
 class TCollection_HAsciiString;
 class IGESBasic_HArray1OfHArray1OfInteger;
-class Standard_DimensionMismatch;
-class Standard_OutOfRange;
 
 
 class IGESGraph_TextFontDef;

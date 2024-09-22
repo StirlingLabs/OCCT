@@ -18,7 +18,6 @@
 #define _IGESAppli_ElementResults_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <Standard_Integer.hxx>
 #include <Standard_Real.hxx>
@@ -29,8 +28,6 @@
 class IGESDimen_GeneralNote;
 class IGESBasic_HArray1OfHArray1OfInteger;
 class IGESBasic_HArray1OfHArray1OfReal;
-class Standard_DimensionMismatch;
-class Standard_OutOfRange;
 class IGESAppli_FiniteElement;
 
 

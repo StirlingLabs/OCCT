@@ -19,21 +19,14 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
-#include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
 #include <TColgp_Array1OfCirc2d.hxx>
 #include <GccEnt_Array1OfPosition.hxx>
 #include <TColStd_Array1OfInteger.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
 #include <TColStd_Array1OfReal.hxx>
-#include <Standard_Real.hxx>
 #include <GccEnt_Position.hxx>
-class Standard_OutOfRange;
-class GccEnt_BadQualifier;
-class StdFail_NotDone;
-class Standard_NegativeValue;
 class GccEnt_QualifiedCirc;
 class Geom2dGcc_QCurve;
 class GccEnt_QualifiedLin;

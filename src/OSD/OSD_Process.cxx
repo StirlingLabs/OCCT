@@ -28,7 +28,6 @@
 #include <OSD_OSDError.hxx>
 #include <OSD_Path.hxx>
 #include <OSD_WhoAmI.hxx>
-#include <Standard_PExtCharacter.hxx>
 #include <TCollection_ExtendedString.hxx>
 #include <Quantity_Date.hxx>
 
@@ -41,7 +40,9 @@
   #include <stdlib.h>
   #include <sys/param.h>
   #include <sys/time.h>
+  #if !defined(__EMSCRIPTEN__)
   #include <pwd.h>       // For command getpwuid
+  #endif
   #include <unistd.h>
 #endif
 

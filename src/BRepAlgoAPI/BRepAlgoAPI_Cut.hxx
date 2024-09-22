@@ -19,10 +19,8 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
 #include <BRepAlgoAPI_BooleanOperation.hxx>
-#include <Standard_Boolean.hxx>
 class BOPAlgo_PaveFiller;
 class TopoDS_Shape;
 
@@ -50,7 +48,8 @@ Standard_EXPORT virtual ~BRepAlgoAPI_Cut();
   //! <S2>  -tool
   //! <anOperation> - the type of the operation
   //! Obsolete
-  Standard_EXPORT BRepAlgoAPI_Cut(const TopoDS_Shape& S1, const TopoDS_Shape& S2);
+  Standard_EXPORT BRepAlgoAPI_Cut(const TopoDS_Shape& S1, const TopoDS_Shape& S2,
+                                  const Message_ProgressRange& theRange = Message_ProgressRange());
   
   //! Constructor with two shapes
   //! <S1>  -argument
@@ -58,7 +57,9 @@ Standard_EXPORT virtual ~BRepAlgoAPI_Cut();
   //! <anOperation> - the type of the operation
   //! <PF> - PaveFiller object that is carried out
   //! Obsolete
-  Standard_EXPORT BRepAlgoAPI_Cut(const TopoDS_Shape& S1, const TopoDS_Shape& S2, const BOPAlgo_PaveFiller& aDSF, const Standard_Boolean bFWD = Standard_True);
+  Standard_EXPORT BRepAlgoAPI_Cut(const TopoDS_Shape& S1, const TopoDS_Shape& S2, const BOPAlgo_PaveFiller& aDSF, 
+                                  const Standard_Boolean bFWD = Standard_True, 
+                                  const Message_ProgressRange& theRange = Message_ProgressRange());
 
 
 

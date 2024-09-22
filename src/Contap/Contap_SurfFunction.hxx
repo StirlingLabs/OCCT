@@ -26,16 +26,12 @@
 #include <math_FunctionSetWithDerivatives.hxx>
 #include <math_Vector.hxx>
 
-class gp_Pnt;
-class gp_Dir;
 class math_Matrix;
-class gp_Vec;
-class gp_Dir2d;
 
 
 //! This class describes the function on a parametric surface.
 //! the form of the function is F(u,v) = 0 where u and v are
-//! the parameteric coordinates of a point on the surface,
+//! the parametric coordinates of a point on the surface,
 //! to compute the contours of the surface.
 class Contap_SurfFunction  : public math_FunctionSetWithDerivatives
 {

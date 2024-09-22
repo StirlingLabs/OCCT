@@ -24,20 +24,15 @@
 #include <Standard_Integer.hxx>
 #include <TColStd_HArray1OfReal.hxx>
 #include <TColStd_HArray2OfReal.hxx>
-#include <Standard_Address.hxx>
-#include <Standard_Boolean.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <AdvApprox_EvaluatorFunction.hxx>
 #include <TColStd_Array1OfInteger.hxx>
 #include <TColStd_Array1OfReal.hxx>
-#include <Standard_Real.hxx>
 #include <Standard_OStream.hxx>
 class PLib_JacobiPolynomial;
-class Standard_OutOfRange;
-class Standard_ConstructionError;
 
 
-//! Approximate  a function on   an intervall [First,Last]
+//! Approximate  a function on   an interval [First,Last]
 //! The result  is  a simple  polynomial  whose  degree is  as low as
 //! possible  to   satisfy  the required  tolerance  and  the
 //! maximum degree.  The maximum  error and the averrage error

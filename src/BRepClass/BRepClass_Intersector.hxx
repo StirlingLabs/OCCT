@@ -19,10 +19,8 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
 #include <Geom2dInt_IntConicCurveOfGInter.hxx>
-#include <Standard_Real.hxx>
 class gp_Lin2d;
 class BRepClass_Edge;
 class gp_Dir2d;
@@ -47,19 +45,6 @@ public:
   //! <U>.
   Standard_EXPORT void LocalGeometry (const BRepClass_Edge& E, const Standard_Real U, gp_Dir2d& T, gp_Dir2d& N, Standard_Real& C) const;
 
-  //! Returns the maximum tolerance
-  Standard_Real MaxTolerance()
-  {
-    return myMaxTolerance;
-  }
-
-  //! Sets the maximum tolerance at 
-  //! which to start checking in the intersector
-  void SetMaxTolerance(const Standard_Real theValue)
-  {
-    myMaxTolerance = theValue;
-  }
-
 
 
 protected:
@@ -71,7 +56,6 @@ protected:
 private:
 
 
-  Standard_Real myMaxTolerance;
 
 
 };

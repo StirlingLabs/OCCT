@@ -17,7 +17,6 @@
 #include <RWStepVisual_RWContextDependentOverRidingStyledItem.hxx>
 #include <StepData_StepReaderData.hxx>
 #include <StepData_StepWriter.hxx>
-#include <StepRepr_RepresentationItem.hxx>
 #include <StepVisual_ContextDependentOverRidingStyledItem.hxx>
 #include <StepVisual_HArray1OfPresentationStyleAssignment.hxx>
 #include <StepVisual_HArray1OfStyleContextSelect.hxx>
@@ -85,6 +84,10 @@ void RWStepVisual_RWContextDependentOverRidingStyledItem::ReadStep
 	    if (data->ReadEntity (nsub5,i5,"style_context",ach,aStyleContextItem))
 	      aStyleContext->SetValue(i5,aStyleContextItem);
 	  }
+	}
+	else
+	{
+	  aStyleContext = new StepVisual_HArray1OfStyleContextSelect();
 	}
 
 	//--- Initialisation of the read entity ---

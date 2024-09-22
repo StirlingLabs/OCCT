@@ -27,6 +27,7 @@ set "HAVE_D3D=false"
 set "HAVE_ZLIB=false"
 set "HAVE_LIBLZMA=false"
 set "HAVE_RAPIDJSON=false"
+set "HAVE_DRACO=false"
 set "HAVE_OPENVR=false"
 set "HAVE_E57=false"
 set "CSF_OPT_INC="
@@ -34,6 +35,14 @@ set "CSF_OPT_LIB32="
 set "CSF_OPT_LIB64="
 set "CSF_OPT_BIN32="
 set "CSF_OPT_BIN64="
+set "CSF_OPT_LIB32D="
+set "CSF_OPT_LIB64D="
+set "CSF_OPT_BIN32D="
+set "CSF_OPT_BIN64D="
+set "CSF_OPT_LIB32I="
+set "CSF_OPT_LIB64I="
+set "CSF_OPT_BIN32I="
+set "CSF_OPT_BIN64I="
 set "CSF_DEFINES=%CSF_DEFINES_EXTRA%"
 
 if not ["%CASROOT%"] == [""] if exist "%SCRIPTROOT%\%CASROOT%" set "CASROOT=%SCRIPTROOT%\%CASROOT%"
@@ -112,8 +121,12 @@ if not "%DevEnvDir%" == "" (
   for /f "usebackq delims=" %%i in (`vswhere.exe -version "[16.0,16.99]" -latest -requires Microsoft.VisualStudio.Workload.%VCPROP% -property installationPath`) do (
     set "DevEnvDir=%%i\Common7\IDE\"
   )
+) else if /I "%VCFMT%" == "vc143" (
+  for /f "usebackq delims=" %%i in (`vswhere.exe -version "[17.0,17.99]" -latest -requires Microsoft.VisualStudio.Workload.%VCPROP% -property installationPath`) do (
+    set "DevEnvDir=%%i\Common7\IDE\"
+  )
 ) else if /I "%VCFMT%" == "vclang" (
-  for /f "usebackq delims=" %%i in (`vswhere.exe -version "[16.0,16.99]" -latest -requires Microsoft.VisualStudio.Workload.%VCPROP% -property installationPath`) do (
+  for /f "usebackq delims=" %%i in (`vswhere.exe -version "[16.0,17.99]" -latest -requires Microsoft.VisualStudio.Workload.%VCPROP% -property installationPath`) do (
     set "DevEnvDir=%%i\Common7\IDE\"
   )
 ) else if /I "%VCFMT%" == "gcc" (
@@ -128,6 +141,7 @@ if not "%DevEnvDir%" == "" (
   echo vc14  = VS 2015
   echo vc141 = VS 2017
   echo vc142 = VS 2019
+  echo vc143 = VS 2022
   echo vclang = VS 2019 with ClangCL toolset
   exit /B
 )
@@ -158,10 +172,15 @@ if /I "%VCFMT%" == "vc9" (
     set "VCVARS=%%i\VC\Auxiliary\Build\vcvarsall.bat"
   ) 
   set "VCPlatformToolSet=v142"
-) else if /I "%VCFMT%" == "vclang" (
-  for /f "usebackq delims=" %%i in (`vswhere.exe -version "[16.0,16.99]" -latest -requires Microsoft.VisualStudio.Workload.%VCPROP% -property installationPath`) do (
+) else if /I "%VCFMT%" == "vc143" (
+  for /f "usebackq delims=" %%i in (`vswhere.exe -version "[17.0,17.99]" -latest -requires Microsoft.VisualStudio.Workload.%VCPROP% -property installationPath`) do (
     set "VCVARS=%%i\VC\Auxiliary\Build\vcvarsall.bat"
   ) 
+  set "VCPlatformToolSet=v143"
+) else if /I "%VCFMT%" == "vclang" (
+  for /f "usebackq delims=" %%i in (`vswhere.exe -version "[16.0,17.99]" -latest -requires Microsoft.VisualStudio.Workload.%VCPROP% -property installationPath`) do (
+    set "VCVARS=%%i\VC\Auxiliary\Build\vcvarsall.bat"
+  )
   set "VCPlatformToolSet=ClangCL"
 ) else if /I "%VCFMT%" == "gcc" (
   rem MinGW
@@ -170,14 +189,14 @@ if /I "%VCFMT%" == "vc9" (
   exit /B
 )
 
-set "CSF_OPT_LIB32D=%CSF_OPT_LIB32%"
-set "CSF_OPT_LIB64D=%CSF_OPT_LIB64%"
-set "CSF_OPT_BIN32D=%CSF_OPT_BIN32%"
-set "CSF_OPT_BIN64D=%CSF_OPT_BIN64%"
-set "CSF_OPT_LIB32I=%CSF_OPT_LIB32%"
-set "CSF_OPT_LIB64I=%CSF_OPT_LIB64%"
-set "CSF_OPT_BIN32I=%CSF_OPT_BIN32%"
-set "CSF_OPT_BIN64I=%CSF_OPT_BIN64%"
+if ["%CSF_OPT_LIB32D%"] == [""] set "CSF_OPT_LIB32D=%CSF_OPT_LIB32%"
+if ["%CSF_OPT_LIB64D%"] == [""] set "CSF_OPT_LIB64D=%CSF_OPT_LIB64%"
+if ["%CSF_OPT_BIN32D%"] == [""] set "CSF_OPT_BIN32D=%CSF_OPT_BIN32%"
+if ["%CSF_OPT_BIN64D%"] == [""] set "CSF_OPT_BIN64D=%CSF_OPT_BIN64%"
+if ["%CSF_OPT_LIB32I%"] == [""] set "CSF_OPT_LIB32I=%CSF_OPT_LIB32%"
+if ["%CSF_OPT_LIB64I%"] == [""] set "CSF_OPT_LIB64I=%CSF_OPT_LIB64%"
+if ["%CSF_OPT_BIN32I%"] == [""] set "CSF_OPT_BIN32I=%CSF_OPT_BIN32%"
+if ["%CSF_OPT_BIN64I%"] == [""] set "CSF_OPT_BIN64I=%CSF_OPT_BIN64%"
 
 rem ----- Optional 3rd-parties should be enabled by HAVE macros -----
 set "CSF_OPT_CMPL="
@@ -194,6 +213,7 @@ if ["%HAVE_D3D%"]       == ["true"] set "PRODUCTS_DEFINES=%PRODUCTS_DEFINES% -DH
 if ["%HAVE_ZLIB%"]      == ["true"] set "PRODUCTS_DEFINES=%PRODUCTS_DEFINES% -DHAVE_ZLIB"      & set "CSF_DEFINES=HAVE_ZLIB;%CSF_DEFINES%"
 if ["%HAVE_LIBLZMA%"]   == ["true"] set "PRODUCTS_DEFINES=%PRODUCTS_DEFINES% -DHAVE_LIBLZMA"   & set "CSF_DEFINES=HAVE_LIBLZMA;%CSF_DEFINES%"
 if ["%HAVE_RAPIDJSON%"] == ["true"] set "PRODUCTS_DEFINES=%PRODUCTS_DEFINES% -DHAVE_RAPIDJSON" & set "CSF_DEFINES=HAVE_RAPIDJSON;%CSF_DEFINES%"
+if ["%HAVE_DRACO%"]     == ["true"] set "PRODUCTS_DEFINES=%PRODUCTS_DEFINES% -DHAVE_DRACO"     & set "CSF_DEFINES=HAVE_DRACO;%CSF_DEFINES%"
 if ["%HAVE_OPENVR%"]    == ["true"] set "PRODUCTS_DEFINES=%PRODUCTS_DEFINES% -DHAVE_OPENVR"    & set "CSF_DEFINES=HAVE_OPENVR;%CSF_DEFINES%"
 if ["%HAVE_E57%"]       == ["true"] set "PRODUCTS_DEFINES=%PRODUCTS_DEFINES% -DHAVE_E57"       & set "CSF_DEFINES=HAVE_E57;%CSF_DEFINES%"
 

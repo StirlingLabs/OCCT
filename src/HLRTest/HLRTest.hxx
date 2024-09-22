@@ -21,17 +21,11 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
-#include <Standard_CString.hxx>
 #include <Standard_Boolean.hxx>
 #include <Draw_Interpretor.hxx>
 class HLRAlgo_Projector;
 class TopoDS_Shape;
 class HLRTopoBRep_OutLiner;
-class HLRTest_ShapeData;
-class HLRTest_DrawableEdgeTool;
-class HLRTest_DrawablePolyEdgeTool;
-class HLRTest_Projector;
-class HLRTest_OutLiner;
 
 
 //! This package   is  a test  of  the    Hidden Lines
@@ -62,32 +56,6 @@ public:
   //! Defines commands to test the Hidden Line Removal
   Standard_EXPORT static void Commands (Draw_Interpretor& I);
 
-
-
-
-protected:
-
-
-
-
-
-private:
-
-
-
-
-friend class HLRTest_ShapeData;
-friend class HLRTest_DrawableEdgeTool;
-friend class HLRTest_DrawablePolyEdgeTool;
-friend class HLRTest_Projector;
-friend class HLRTest_OutLiner;
-
 };
-
-
-
-
-
-
 
 #endif // _HLRTest_HeaderFile

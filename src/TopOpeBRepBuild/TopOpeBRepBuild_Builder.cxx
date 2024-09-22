@@ -15,32 +15,21 @@
 // commercial license or contractual agreement.
 
 
-#include <BRep_Builder.hxx>
-#include <BRep_Tool.hxx>
 #include <BRepClass3d_SolidClassifier.hxx>
-#include <Geom2d_Curve.hxx>
 #include <Geom_Curve.hxx>
 #include <gp_Pnt.hxx>
 #include <Precision.hxx>
-#include <Standard_NoSuchObject.hxx>
 #include <Standard_ProgramError.hxx>
-#include <TCollection_AsciiString.hxx>
 #include <TopExp.hxx>
 #include <TopoDS.hxx>
-#include <TopoDS_Compound.hxx>
 #include <TopoDS_Edge.hxx>
-#include <TopoDS_Face.hxx>
 #include <TopoDS_Shape.hxx>
-#include <TopoDS_Shell.hxx>
 #include <TopoDS_Vertex.hxx>
-#include <TopoDS_Wire.hxx>
 #include <TopOpeBRepBuild_Builder.hxx>
 #include <TopOpeBRepBuild_define.hxx>
 #include <TopOpeBRepBuild_EdgeBuilder.hxx>
 #include <TopOpeBRepBuild_FaceBuilder.hxx>
 #include <TopOpeBRepBuild_GTool.hxx>
-#include <TopOpeBRepBuild_GTopo.hxx>
-#include <TopOpeBRepBuild_HBuilder.hxx>
 #include <TopOpeBRepBuild_PaveSet.hxx>
 #include <TopOpeBRepBuild_ShapeSet.hxx>
 #include <TopOpeBRepBuild_ShellFaceSet.hxx>
@@ -48,17 +37,13 @@
 #include <TopOpeBRepBuild_WireEdgeSet.hxx>
 #include <TopOpeBRepDS_BuildTool.hxx>
 #include <TopOpeBRepDS_Config.hxx>
-#include <TopOpeBRepDS_Curve.hxx>
-#include <TopOpeBRepDS_CurveExplorer.hxx>
 #include <TopOpeBRepDS_CurveIterator.hxx>
 #include <TopOpeBRepDS_DataMapIteratorOfDataMapOfShapeListOfShapeOn1State.hxx>
 #include <TopOpeBRepDS_Filter.hxx>
 #include <TopOpeBRepDS_HDataStructure.hxx>
 #include <TopOpeBRepDS_ListOfShapeOn1State.hxx>
-#include <TopOpeBRepDS_Point.hxx>
 #include <TopOpeBRepDS_PointIterator.hxx>
 #include <TopOpeBRepDS_Reducer.hxx>
-#include <TopOpeBRepDS_Surface.hxx>
 #include <TopOpeBRepDS_SurfaceIterator.hxx>
 #include <TopOpeBRepTool_ShapeExplorer.hxx>
 
@@ -684,7 +669,7 @@ Standard_Boolean TopOpeBRepBuild_Builder::IsShapeOf(const TopoDS_Shape& s,const 
 Standard_Boolean TopOpeBRepBuild_Builder::Contains(const TopoDS_Shape& S,const TopTools_ListOfShape& L) 
 {
   for (TopTools_ListIteratorOfListOfShape it(L); it.More(); it.Next() ) {
-    TopoDS_Shape& SL = it.Value();
+    const TopoDS_Shape& SL = it.Value();
     Standard_Boolean issame = SL.IsSame(S);
     if ( issame ) return Standard_True;
   }
@@ -1602,7 +1587,7 @@ void TopOpeBRepBuild_Builder::FillShape(const TopoDS_Shape& S1,
       TopOpeBRepTool_ShapeExplorer ex11(aSubShape,t11);
       SplitShapes(ex11,ToBuild1,ToBuild2,aSet,RevOri);
     } 
-  } // exploration ot SubShapes of type <t1> of shape <S1>
+  } // exploration of SubShapes of type <t1> of shape <S1>
 
 } // FillShape
 

@@ -25,14 +25,13 @@
 #include <Interface_HArray1OfHAsciiString.hxx>
 #include <Interface_Macros.hxx>
 #include <Interface_MSG.hxx>
-#include <Interface_Protocol.hxx>
 #include <Interface_Version.hxx>
 #include <StepData_Protocol.hxx>
 #include <StepData_StepModel.hxx>
 #include <TCollection_HAsciiString.hxx>
 
 #include <stdio.h>
-// This is a generic header for any STEP sheme
+// This is a generic header for any STEP scheme
 static Handle(TCollection_HAsciiString) nulstr;
 static Handle(Interface_HArray1OfHAsciiString) nularr;
 

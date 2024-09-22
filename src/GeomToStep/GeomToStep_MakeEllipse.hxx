@@ -22,8 +22,8 @@
 #include <Standard_Handle.hxx>
 
 #include <GeomToStep_Root.hxx>
+
 class StepGeom_Ellipse;
-class StdFail_NotDone;
 class gp_Elips;
 class Geom_Ellipse;
 class Geom2d_Ellipse;
@@ -40,11 +40,14 @@ public:
   DEFINE_STANDARD_ALLOC
 
   
-  Standard_EXPORT GeomToStep_MakeEllipse(const gp_Elips& C);
+  Standard_EXPORT GeomToStep_MakeEllipse(const gp_Elips& C,
+                                         const StepData_Factors& theLocalFactors = StepData_Factors());
   
-  Standard_EXPORT GeomToStep_MakeEllipse(const Handle(Geom_Ellipse)& C);
+  Standard_EXPORT GeomToStep_MakeEllipse(const Handle(Geom_Ellipse)& C,
+                                         const StepData_Factors& theLocalFactors = StepData_Factors());
   
-  Standard_EXPORT GeomToStep_MakeEllipse(const Handle(Geom2d_Ellipse)& C);
+  Standard_EXPORT GeomToStep_MakeEllipse(const Handle(Geom2d_Ellipse)& C,
+                                         const StepData_Factors& theLocalFactors = StepData_Factors());
   
   Standard_EXPORT const Handle(StepGeom_Ellipse)& Value() const;
 

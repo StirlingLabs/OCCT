@@ -19,12 +19,10 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
 #include <Prs3d_Drawer.hxx>
 #include <Standard_Real.hxx>
 #include <DsgPrs_ArrowSide.hxx>
-#include <Standard_Boolean.hxx>
 #include <Prs3d_Presentation.hxx>
 
 class TCollection_ExtendedString;
@@ -42,7 +40,7 @@ public:
   DEFINE_STANDARD_ALLOC
 
   
-  //! Draws the presenation of the full angle of a cone.
+  //! Draws the presentation of the full angle of a cone.
   //! VminCircle - a circle at V parameter = Vmin
   //! VmaxCircle - a circle at V parameter = Vmax
   //! aCircle - a circle at V parameter from projection of aPosition to axis of the cone

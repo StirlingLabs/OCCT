@@ -25,15 +25,8 @@
 #include <Standard_Real.hxx>
 #include <Expr_Array1OfNamedUnknown.hxx>
 #include <TColStd_Array1OfReal.hxx>
-#include <Standard_Boolean.hxx>
-class Expr_GeneralFunction;
 class Expr_GeneralExpression;
 class Expr_NamedUnknown;
-class Standard_OutOfRange;
-class Standard_DimensionMismatch;
-class Standard_NumericError;
-class Expr_NotEvaluable;
-class Expr_NamedFunction;
 class TCollection_AsciiString;
 
 

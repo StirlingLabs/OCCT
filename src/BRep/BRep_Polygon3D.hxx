@@ -21,11 +21,8 @@
 #include <Standard_Type.hxx>
 
 #include <BRep_CurveRepresentation.hxx>
-#include <Standard_Boolean.hxx>
 class Poly_Polygon3D;
-class Standard_DomainError;
 class TopLoc_Location;
-class BRep_CurveRepresentation;
 
 
 class BRep_Polygon3D;

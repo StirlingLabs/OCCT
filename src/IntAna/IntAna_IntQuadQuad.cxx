@@ -34,7 +34,6 @@
 #include <gp_Cone.hxx>
 #include <gp_Cylinder.hxx>
 #include <gp_Pnt.hxx>
-#include <IntAna_Curve.hxx>
 #include <IntAna_IntQuadQuad.hxx>
 #include <IntAna_Quadric.hxx>
 #include <math_TrigonometricFunctionRoots.hxx>
@@ -138,7 +137,7 @@ class TrigonometricRoots {
   //IsARoot
   Standard_Boolean IsARoot(Standard_Real u) {
     Standard_Integer i;
-    Standard_Real aEps=RealEpsilon();
+    constexpr Standard_Real aEps=RealEpsilon();
     Standard_Real PIpPI = M_PI + M_PI;
     //
     for(i=0 ; i<NbRoots; ++i) {

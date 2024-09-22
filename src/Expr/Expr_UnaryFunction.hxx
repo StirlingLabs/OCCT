@@ -21,14 +21,9 @@
 #include <Standard_Type.hxx>
 
 #include <Expr_UnaryExpression.hxx>
-#include <Standard_Boolean.hxx>
-#include <Standard_Real.hxx>
 #include <Expr_Array1OfNamedUnknown.hxx>
 #include <TColStd_Array1OfReal.hxx>
 class Expr_GeneralFunction;
-class Expr_InvalidFunction;
-class Standard_NumericError;
-class Expr_NotEvaluable;
 class Expr_GeneralExpression;
 class Expr_NamedUnknown;
 class TCollection_AsciiString;

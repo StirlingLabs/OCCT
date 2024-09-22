@@ -16,14 +16,11 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <Bnd_Box.hxx>
-#include <Bnd_Box2d.hxx>
 #include <BOPAlgo_BuilderFace.hxx>
 #include <BOPAlgo_WireEdgeSet.hxx>
 #include <BOPAlgo_WireSplitter.hxx>
 #include <BOPAlgo_Alerts.hxx>
 #include <BOPTools_AlgoTools.hxx>
-#include <BOPTools_AlgoTools2D.hxx>
 #include <BOPTools_BoxTree.hxx>
 #include <Bnd_Tools.hxx>
 #include <BRep_Builder.hxx>
@@ -31,16 +28,10 @@
 #include <BRepBndLib.hxx>
 #include <BRepTools.hxx>
 #include <Geom_Surface.hxx>
-#include <gp_Dir.hxx>
-#include <gp_Pln.hxx>
-#include <gp_Pnt.hxx>
 #include <gp_Pnt2d.hxx>
-#include <gp_Vec.hxx>
 #include <IntTools_Context.hxx>
 #include <IntTools_FClass2d.hxx>
-#include <NCollection_DataMap.hxx>
 #include <TColStd_MapOfInteger.hxx>
-#include <TopAbs.hxx>
 #include <TopExp.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopLoc_Location.hxx>
@@ -141,8 +132,10 @@ void BOPAlgo_BuilderFace::CheckData()
 //function : Perform
 //purpose  : 
 //=======================================================================
-void BOPAlgo_BuilderFace::Perform()
+void BOPAlgo_BuilderFace::Perform(const Message_ProgressRange& theRange)
 {
+  Message_ProgressScope aPS (theRange, NULL, 100);
+
   GetReport()->Clear();
   //
   CheckData();
@@ -150,50 +143,43 @@ void BOPAlgo_BuilderFace::Perform()
     return;
   }
   //
-  UserBreak();
-  //
-  PerformShapesToAvoid();
+  PerformShapesToAvoid (aPS.Next(1));
   if (HasErrors()) {
     return;
   }
   //
-  UserBreak();
-  //
-  PerformLoops();
+  PerformLoops (aPS.Next(10));
   if (HasErrors()) {
     return;
   }
   //
-  UserBreak();
-  //
-  PerformAreas();
+  PerformAreas (aPS.Next(80));
   if (HasErrors()) {
     return;
   }
   //
-  UserBreak();
-  //
-  PerformInternalShapes();
-  if (HasErrors()) {
-    return;
-  }
+  PerformInternalShapes(aPS.Next(9));
 }
 //=======================================================================
 //function :PerformShapesToAvoid
 //purpose  : 
 //=======================================================================
-void BOPAlgo_BuilderFace::PerformShapesToAvoid()
+void BOPAlgo_BuilderFace::PerformShapesToAvoid(const Message_ProgressRange& theRange)
 {
   Standard_Boolean bFound;
-  Standard_Integer i, iCnt, aNbV, aNbE;
+  Standard_Integer i, aNbV, aNbE;
   TopTools_IndexedDataMapOfShapeListOfShape aMVE;
   TopTools_ListIteratorOfListOfShape aIt;
   //
   myShapesToAvoid.Clear();
   //
-  iCnt=0;
+  Message_ProgressScope aPS(theRange, NULL, 1);
+  //
   for(;;) {
-    ++iCnt;
+    if (UserBreak(aPS))
+    {
+      return;
+    }
     bFound=Standard_False;
     //
     // 1. MEF
@@ -247,15 +233,13 @@ void BOPAlgo_BuilderFace::PerformShapesToAvoid()
     if (!bFound) {
       break;
     }
-    //
-  }//while (1) 
-  //printf(" EdgesToAvoid=%d, iCnt=%d\n", EdgesToAvoid.Extent(), iCnt);
+  }
 }  
 //=======================================================================
 //function : PerformLoops
 //purpose  : 
 //=======================================================================
-void BOPAlgo_BuilderFace::PerformLoops()
+void BOPAlgo_BuilderFace::PerformLoops(const Message_ProgressRange& theRange)
 {
   Standard_Boolean bFlag;
   Standard_Integer i, aNbEA;
@@ -266,6 +250,8 @@ void BOPAlgo_BuilderFace::PerformLoops()
   BRep_Builder aBB; 
   BOPAlgo_WireEdgeSet aWES(myAllocator);
   BOPAlgo_WireSplitter aWSp(myAllocator);
+  //
+  Message_ProgressScope aMainScope(theRange, "Making wires", 10);
   //
   // 1. 
   myLoops.Clear();
@@ -282,7 +268,7 @@ void BOPAlgo_BuilderFace::PerformLoops()
   aWSp.SetWES(aWES);
   aWSp.SetRunParallel(myRunParallel);
   aWSp.SetContext(myContext);
-  aWSp.Perform();
+  aWSp.Perform(aMainScope.Next(9));
   if (aWSp.HasErrors()) {
     return;
   }
@@ -306,6 +292,9 @@ void BOPAlgo_BuilderFace::PerformLoops()
       aMEP.Add(aE);
     }
   }
+  if (UserBreak (aMainScope)) {
+    return;
+  }
   // 
   // b. collect all edges that are to avoid
   aNbEA = myShapesToAvoid.Extent();
@@ -323,16 +312,19 @@ void BOPAlgo_BuilderFace::PerformLoops()
     }
   }
   //
+  if (UserBreak (aMainScope)) {
+    return;
+  }
   // 2. Internal Wires
   myLoopsInternal.Clear();
   //
   aNbEA = myShapesToAvoid.Extent();
   for (i = 1; i <= aNbEA; ++i) {
     const TopoDS_Shape& aEE = myShapesToAvoid(i);
-    TopExp::MapShapesAndAncestors(aEE, 
-                                    TopAbs_VERTEX, 
-                                    TopAbs_EDGE, 
-                                    aVEMap);
+    TopExp::MapShapesAndAncestors(aEE,
+                                  TopAbs_VERTEX,
+                                  TopAbs_EDGE,
+                                  aVEMap);
   }
   //
   bFlag=Standard_True;
@@ -342,6 +334,9 @@ void BOPAlgo_BuilderFace::PerformLoops()
       continue;
     }
     //
+    if (UserBreak (aMainScope)) {
+      return;
+    }
     // make new wire
     TopoDS_Wire aW;
     aBB.MakeWire(aW);
@@ -375,7 +370,7 @@ void BOPAlgo_BuilderFace::PerformLoops()
 //function : PerformAreas
 //purpose  : 
 //=======================================================================
-void BOPAlgo_BuilderFace::PerformAreas()
+void BOPAlgo_BuilderFace::PerformAreas(const Message_ProgressRange& theRange)
 {
   myAreas.Clear();
   BRep_Builder aBB;
@@ -385,6 +380,8 @@ void BOPAlgo_BuilderFace::PerformAreas()
   const Handle(Geom_Surface)& aS = BRep_Tool::Surface(myFace, aLoc);
   // Get tolerance of myFace
   Standard_Real aTol = BRep_Tool::Tolerance(myFace);
+
+  Message_ProgressScope aMainScope (theRange, NULL, 10);
 
   // Check if there are no loops at all
   if (myLoops.IsEmpty())
@@ -410,9 +407,15 @@ void BOPAlgo_BuilderFace::PerformAreas()
   TopTools_IndexedMapOfShape aMHE;
 
   // Analyze the new wires - classify them to be the holes and growths
+  Message_ProgressScope aPSClass(aMainScope.Next(5), "Making faces", myLoops.Size());
   TopTools_ListIteratorOfListOfShape aItLL(myLoops);
-  for (; aItLL.More(); aItLL.Next())
+  for (; aItLL.More(); aItLL.Next(), aPSClass.Next())
   {
+    if (UserBreak(aPSClass))
+    {
+      return;
+    }
+
     const TopoDS_Shape& aWire = aItLL.Value();
 
     TopoDS_Face aFace;
@@ -471,9 +474,14 @@ void BOPAlgo_BuilderFace::PerformAreas()
   BOPTools_Box2dTreeSelector aSelector;
   aSelector.SetBVHSet (&aBoxTree);
 
+  Message_ProgressScope aPSHoles(aMainScope.Next(4), "Adding holes", aNewFaces.Extent());
   TopTools_ListIteratorOfListOfShape aItLS(aNewFaces);
-  for (; aItLS.More(); aItLS.Next())
+  for (; aItLS.More(); aItLS.Next(), aPSHoles.Next())
   {
+    if (UserBreak (aPSHoles))
+    {
+      return;
+    }
     const TopoDS_Face& aFace = TopoDS::Face(aItLS.Value());
 
     // Build box
@@ -550,9 +558,15 @@ void BOPAlgo_BuilderFace::PerformAreas()
   }
 
   // Add Holes to Faces and add them to myAreas
+  Message_ProgressScope aPSU (aMainScope.Next(), NULL, aNewFaces.Size());
   aItLS.Initialize(aNewFaces);
-  for ( ; aItLS.More(); aItLS.Next())
+  for ( ; aItLS.More(); aItLS.Next(), aPSU.Next())
   {
+    if (UserBreak (aPSU))
+    {
+      return;
+    }
+
     TopoDS_Face& aFace = *(TopoDS_Face*)&aItLS.Value();
     const TopTools_ListOfShape* pLHoles = aFaceHolesMap.Seek(aFace);
     if (pLHoles)
@@ -579,7 +593,7 @@ void BOPAlgo_BuilderFace::PerformAreas()
 //function : PerformInternalShapes
 //purpose  : 
 //=======================================================================
-void BOPAlgo_BuilderFace::PerformInternalShapes()
+void BOPAlgo_BuilderFace::PerformInternalShapes(const Message_ProgressRange& theRange)
 {
   if (myAvoidInternalShapes)
     // User-defined option to avoid internal edges
@@ -596,10 +610,17 @@ void BOPAlgo_BuilderFace::PerformInternalShapes()
   // Map of edges to classify
   TopTools_IndexedMapOfShape anEdgesMap;
 
+  // Main progress scope
+  Message_ProgressScope aMainScope (theRange, "Adding internal shapes", 3);
+
   // Fill the tree and the map
   TopTools_ListIteratorOfListOfShape itLE(myLoopsInternal);
   for (; itLE.More(); itLE.Next())
   {
+    if (UserBreak (aMainScope))
+    {
+      return;
+    }
     TopoDS_Iterator itE(itLE.Value());
     for (; itE.More(); itE.Next())
     {
@@ -618,13 +639,20 @@ void BOPAlgo_BuilderFace::PerformInternalShapes()
   // Build BVH
   aBoxTree.Build();
 
+  aMainScope.Next();
+
   // Fence map
   TColStd_MapOfInteger aMEDone;
 
   // Classify edges relatively faces
+  Message_ProgressScope aPSClass(aMainScope.Next(), NULL, myAreas.Size());
   TopTools_ListIteratorOfListOfShape itLF(myAreas);
-  for (; itLF.More(); itLF.Next())
+  for (; itLF.More(); itLF.Next(), aPSClass.Next())
   {
+    if (UserBreak(aPSClass))
+    {
+      return;
+    }
     TopoDS_Face& aF = *(TopoDS_Face*)&itLF.Value();
 
     // Build box

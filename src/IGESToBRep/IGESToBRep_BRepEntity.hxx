@@ -22,12 +22,9 @@
 #include <Standard_Handle.hxx>
 
 #include <IGESToBRep_CurveAndSurface.hxx>
-#include <Standard_Real.hxx>
-#include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
 #include <Message_ProgressRange.hxx>
 
-class IGESToBRep_CurveAndSurface;
 class TopoDS_Shape;
 class IGESData_IGESEntity;
 class TopoDS_Vertex;

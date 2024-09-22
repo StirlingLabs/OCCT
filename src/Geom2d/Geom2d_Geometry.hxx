@@ -22,7 +22,6 @@
 
 #include <Standard_Transient.hxx>
 #include <Standard_Real.hxx>
-class Standard_ConstructionError;
 class gp_Pnt2d;
 class gp_Ax2d;
 class gp_Vec2d;
@@ -84,7 +83,7 @@ public:
   //! Translates a Geometry from the point P1 to the point P2.
   Standard_EXPORT void Translate (const gp_Pnt2d& P1, const gp_Pnt2d& P2);
   
-  //! Transformation of a geometric object. This tansformation
+  //! Transformation of a geometric object. This transformation
   //! can be a translation, a rotation, a symmetry, a scaling
   //! or a complex transformation obtained by combination of
   //! the previous elementaries transformations.

@@ -21,7 +21,6 @@
 #include <BRepAdaptor_Surface.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <ChFiDS_ErrorStatus.hxx>
-#include <ChFiDS_ListOfStripe.hxx>
 #include <ChFiDS_Map.hxx>
 #include <ChFiDS_Regularities.hxx>
 #include <ChFiDS_SequenceOfSurfData.hxx>
@@ -37,9 +36,6 @@
 
 class TopOpeBRepDS_HDataStructure;
 class TopOpeBRepBuild_HBuilder;
-class Standard_OutOfRange;
-class Standard_NoSuchObject;
-class Standard_ConstructionError;
 class TopoDS_Edge;
 class ChFiDS_Spine;
 class TopoDS_Vertex;
@@ -852,6 +848,10 @@ private:
                                    const Standard_Integer IEdge,
                                    Handle(BRepAdaptor_Surface)& HS1,
                                    Handle(BRepAdaptor_Surface)& HS2) const;
+
+  //! Assign to tolesp parameter minimal value of spine's tolesp if it is less
+  //! than default initial value.
+  Standard_EXPORT void UpdateTolesp();
 
 
   TopoDS_Shape myShape;

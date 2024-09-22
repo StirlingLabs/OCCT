@@ -17,34 +17,20 @@
 
 #include <BRep_Tool.hxx>
 #include <gp_Pnt.hxx>
-#include <Standard_NoSuchObject.hxx>
-#include <TCollection_AsciiString.hxx>
 #include <TopExp.hxx>
 #include <TopoDS.hxx>
-#include <TopoDS_Edge.hxx>
-#include <TopoDS_Face.hxx>
 #include <TopoDS_Shape.hxx>
-#include <TopoDS_Vertex.hxx>
-#include <TopOpeBRepBuild_Builder.hxx>
 #include <TopOpeBRepBuild_define.hxx>
-#include <TopOpeBRepBuild_EdgeBuilder.hxx>
 #include <TopOpeBRepBuild_FaceBuilder.hxx>
 #include <TopOpeBRepBuild_GTopo.hxx>
-#include <TopOpeBRepBuild_HBuilder.hxx>
 #include <TopOpeBRepBuild_PaveSet.hxx>
 #include <TopOpeBRepBuild_ShapeSet.hxx>
-#include <TopOpeBRepBuild_ShellFaceSet.hxx>
-#include <TopOpeBRepBuild_SolidBuilder.hxx>
 #include <TopOpeBRepBuild_WireEdgeSet.hxx>
 #include <TopOpeBRepDS.hxx>
-#include <TopOpeBRepDS_BuildTool.hxx>
 #include <TopOpeBRepDS_CurveIterator.hxx>
-#include <TopOpeBRepDS_EXPORT.hxx>
 #include <TopOpeBRepDS_HDataStructure.hxx>
 #include <TopOpeBRepDS_InterferenceTool.hxx>
-#include <TopOpeBRepDS_PointIterator.hxx>
 #include <TopOpeBRepDS_ProcessInterferencesTool.hxx>
-#include <TopOpeBRepDS_SurfaceIterator.hxx>
 #include <TopOpeBRepTool_2d.hxx>
 #include <TopOpeBRepTool_EXPORT.hxx>
 #include <TopOpeBRepTool_ShapeExplorer.hxx>
@@ -149,7 +135,7 @@ Standard_Boolean FUN_computeLIFfaces2d(const TopOpeBRepBuild_Builder& BU,
 				       const TopoDS_Edge& E, 
 				       TopOpeBRepDS_PDataStructure& pDS2d)
 // purpose : compute new face/face interferences F FTRA,
-//  {I = (T(F),ES,FTRA)} / Fsdm F and ES interfers with E which has splits ON
+//  {I = (T(F),ES,FTRA)} / Fsdm F and ES interferes with E which has splits ON
 //  E is edge of F
 { 
   const TopOpeBRepDS_DataStructure& BDS = BU.DataStructure()->DS(); 
@@ -488,7 +474,7 @@ static Standard_Boolean FUN_validF1edge(const TopoDS_Shape& F)
 
   // les faces construites (LOFS) prennent l'orientation originale de FF  
   TopAbs_Orientation odsFF = myDataStructure->Shape(iFF).Orientation();
-  for(TopTools_ListIteratorOfListOfShape itt(LOFS);itt.More();itt.Next()) itt.Value().Orientation(odsFF);
+  for(TopTools_ListIteratorOfListOfShape itt(LOFS);itt.More();itt.Next()) itt.ChangeValue().Orientation(odsFF);
 
   TopTools_ListIteratorOfListOfShape it1;
   for (it1.Initialize(LF1); it1.More(); it1.Next()) {
@@ -651,7 +637,7 @@ static Standard_Boolean FUN_validF1edge(const TopoDS_Shape& F)
   if(tSPS) debfille(iE);
 #endif
   
-  TopOpeBRepBuild_GTopo GME = G1;
+  const TopOpeBRepBuild_GTopo& GME = G1;
   GMergeEdgeWES(EOR,GME,WES);
   
   TopOpeBRepBuild_GTopo GSE = G1;

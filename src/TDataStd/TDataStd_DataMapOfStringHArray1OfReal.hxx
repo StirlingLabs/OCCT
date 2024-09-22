@@ -19,11 +19,10 @@
 
 #include <TCollection_ExtendedString.hxx>
 #include <TColStd_HArray1OfReal.hxx>
-#include <TCollection_ExtendedString.hxx>
 #include <NCollection_DataMap.hxx>
 
-typedef NCollection_DataMap<TCollection_ExtendedString,Handle(TColStd_HArray1OfReal),TCollection_ExtendedString> TDataStd_DataMapOfStringHArray1OfReal;
-typedef NCollection_DataMap<TCollection_ExtendedString,Handle(TColStd_HArray1OfReal),TCollection_ExtendedString>::Iterator TDataStd_DataMapIteratorOfDataMapOfStringHArray1OfReal;
+typedef NCollection_DataMap<TCollection_ExtendedString,Handle(TColStd_HArray1OfReal)> TDataStd_DataMapOfStringHArray1OfReal;
+typedef NCollection_DataMap<TCollection_ExtendedString,Handle(TColStd_HArray1OfReal)>::Iterator TDataStd_DataMapIteratorOfDataMapOfStringHArray1OfReal;
 
 
 #endif

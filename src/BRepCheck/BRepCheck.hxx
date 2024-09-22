@@ -26,14 +26,6 @@ class TopoDS_Wire;
 class TopoDS_Face;
 class TopoDS_Edge;
 class Adaptor3d_Curve;
-class BRepCheck_Result;
-class BRepCheck_Vertex;
-class BRepCheck_Edge;
-class BRepCheck_Wire;
-class BRepCheck_Face;
-class BRepCheck_Shell;
-class BRepCheck_Solid;
-class BRepCheck_Analyzer;
 
 
 //! This package  provides tools to check the validity
@@ -57,34 +49,6 @@ public:
   //! Returns the resolution on the surface
   Standard_EXPORT static Standard_Real PrecSurface(const Handle(Adaptor3d_Surface)& aAHSurf);
 
-
-
-protected:
-
-
-
-
-
-private:
-
-
-
-
-friend class BRepCheck_Result;
-friend class BRepCheck_Vertex;
-friend class BRepCheck_Edge;
-friend class BRepCheck_Wire;
-friend class BRepCheck_Face;
-friend class BRepCheck_Shell;
-friend class BRepCheck_Solid;
-friend class BRepCheck_Analyzer;
-
 };
-
-
-
-
-
-
 
 #endif // _BRepCheck_HeaderFile

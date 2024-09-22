@@ -25,16 +25,13 @@
 #include <IGESData_GlobalSection.hxx>
 #include <IGESData_Array1OfDirPart.hxx>
 #include <IGESData_ReadStage.hxx>
-#include <Standard_Real.hxx>
 #include <Interface_FileReaderData.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_CString.hxx>
 #include <Interface_ParamType.hxx>
 class Interface_ParamSet;
 class Interface_Check;
-class IGESData_GlobalSection;
 class IGESData_DirPart;
-class IGESData_IGESType;
 
 
 class IGESData_IGESReaderData;

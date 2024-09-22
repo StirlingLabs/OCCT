@@ -14,11 +14,8 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <BRepOffset_MakeOffset.hxx>
 #include <BRepOffsetAPI_MakeOffsetShape.hxx>
-#include <Standard_ConstructionError.hxx>
 #include <TopoDS_Shape.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
 
 //=======================================================================
 //function : BRepOffsetAPI_MakeOffsetShape
@@ -41,14 +38,15 @@ void BRepOffsetAPI_MakeOffsetShape::PerformByJoin
  const Standard_Boolean Intersection,
  const Standard_Boolean SelfInter,
  const GeomAbs_JoinType Join,
- const Standard_Boolean RemoveIntEdges)
+ const Standard_Boolean RemoveIntEdges,
+ const Message_ProgressRange& theRange)
 {
   NotDone();
   myLastUsedAlgo = OffsetAlgo_JOIN;
 
   myOffsetShape.Initialize (S,Offset,Tol,Mode,Intersection,SelfInter,
                             Join, Standard_False, RemoveIntEdges);
-  myOffsetShape.MakeOffsetShape();
+  myOffsetShape.MakeOffsetShape(theRange);
 
   if (!myOffsetShape.IsDone())
     return;
@@ -90,7 +88,7 @@ const BRepOffset_MakeOffset& BRepOffsetAPI_MakeOffsetShape::MakeOffset() const
 //function : Build
 //purpose  : 
 //=======================================================================
-void BRepOffsetAPI_MakeOffsetShape::Build()
+void BRepOffsetAPI_MakeOffsetShape::Build(const Message_ProgressRange& /*theRange*/)
 {
 }
 

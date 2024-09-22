@@ -22,15 +22,11 @@
 #include <Standard_Handle.hxx>
 
 #include <TopLoc_SListOfItemLocation.hxx>
-#include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_OStream.hxx>
 
-class Standard_NoSuchObject;
-class Standard_ConstructionError;
 class gp_Trsf;
 class TopLoc_Datum3D;
-
 
 //! A Location is a composite transition. It comprises a
 //! series of elementary reference coordinates, i.e.
@@ -118,10 +114,9 @@ Standard_NODISCARD TopLoc_Location operator/ (const TopLoc_Location& Other) cons
   Standard_NODISCARD Standard_EXPORT TopLoc_Location Powered (const Standard_Integer pwr) const;
 
   //! Returns a hashed value for this local coordinate system. This value is used, with map tables, to store and
-  //! retrieve the object easily, and is in the range [1, theUpperBound].
-  //! @param theUpperBound the upper bound of the range a computing hash code must be within
-  //! @return a computed hash code, in the range [1, theUpperBound]
-  Standard_EXPORT Standard_Integer HashCode (Standard_Integer theUpperBound) const;
+  //! retrieve the object easily
+  //! @return a computed hash code
+  size_t HashCode () const;
   
   //! Returns true if this location and the location Other
   //! have the same elementary data, i.e. contain the same
@@ -156,7 +151,10 @@ Standard_Boolean operator != (const TopLoc_Location& Other) const
   }
 
 
-
+  static Standard_Real ScalePrec()
+  {
+    return  1.e-14;
+  }
 
 protected:
 
@@ -173,23 +171,6 @@ private:
 
 };
 
-
 #include <TopLoc_Location.lxx>
-
-
-//! Computes a hash code for the given location, in the range [1, theUpperBound]
-//! @param theLocation the location which hash code is to be computed
-//! @param theUpperBound the upper bound of the range a computing hash code must be within
-//! @return a computed hash code, in the range [1, theUpperBound]
-inline Standard_Integer HashCode (const TopLoc_Location& theLocation, const Standard_Integer theUpperBound)
-{
-  return theLocation.HashCode (theUpperBound);
-}
-
-inline void ShallowDump(const TopLoc_Location& me,Standard_OStream& S) {
- me.ShallowDump(S);
-}
-
-
 
 #endif // _TopLoc_Location_HeaderFile

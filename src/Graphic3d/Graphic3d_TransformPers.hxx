@@ -17,7 +17,6 @@
 #define _Graphic3d_TransformPers_HeaderFile
 
 #include <Aspect_TypeOfTriedronPosition.hxx>
-#include <Bnd_Box.hxx>
 #include <BVH_Box.hxx>
 #include <Graphic3d_Camera.hxx>
 #include <Graphic3d_TransformUtils.hxx>
@@ -41,6 +40,9 @@ DEFINE_STANDARD_HANDLE(Graphic3d_TransformPers, Standard_Transient)
 //! Beware that Graphic3d_RenderingParams::ResolutionRatio() will be ignored!
 //! For other Persistence flags, normal (world) length units will apply.
 //!
+//! Graphic3d_TMF_AxialPers and Graphic3d_TMF_AxialZoomPers defines persistence in the axial scale,
+//! i.e., keeps the object visual coherence when the camera's axial scale is changed.
+//! Meant to be used by objects such as Manipulators and trihedrons.
 //! WARNING: Graphic3d_TMF_None is not permitted for defining instance of this class - NULL handle should be used for this purpose!
 class Graphic3d_TransformPers : public Standard_Transient
 {
@@ -59,13 +61,25 @@ public:
     return (theMode & (Graphic3d_TMF_TriedronPers | Graphic3d_TMF_2d)) != 0;
   }
 
+  //! Return true if specified mode is orthographic projection transformation persistence.
+  static Standard_Boolean IsOrthoPers (Graphic3d_TransModeFlags theMode)
+  {
+    return (theMode & Graphic3d_TMF_OrthoPers) != 0;
+  }
+
+  //! Return true if specified mode is axial transformation persistence.
+  static Standard_Boolean IsAxial (Graphic3d_TransModeFlags theMode)
+  {
+    return (theMode & Graphic3d_TMF_AxialScalePers) != 0;
+  }
+
 public:
 
   //! Set transformation persistence.
   Graphic3d_TransformPers (const Graphic3d_TransModeFlags theMode)
   : myMode (theMode)
   {
-    if (IsZoomOrRotate (theMode))
+    if (IsZoomOrRotate (theMode) || IsAxial (theMode))
     {
       SetPersistence (theMode, gp_Pnt(0.0, 0.0, 0.0));
     }
@@ -111,6 +125,12 @@ public:
   //! Return true for Graphic3d_TMF_TriedronPers and Graphic3d_TMF_2d modes.
   Standard_Boolean IsTrihedronOr2d() const { return IsTrihedronOr2d (myMode); }
 
+  //! Return true for Graphic3d_TMF_OrthoPers mode.
+  Standard_Boolean IsOrthoPers () const { return IsOrthoPers (myMode); }
+
+  //! Return true for Graphic3d_TMF_AxialScalePers modes.
+  Standard_Boolean IsAxial() const { return IsAxial (myMode); }
+
   //! Transformation persistence mode flags.
   Graphic3d_TransModeFlags Mode() const { return myMode; }
 
@@ -122,7 +142,7 @@ public:
   void SetPersistence (const Graphic3d_TransModeFlags theMode,
                        const gp_Pnt& thePnt)
   {
-    if (!IsZoomOrRotate (theMode))
+    if (!IsZoomOrRotate (theMode) && !IsAxial (theMode))
     {
       throw Standard_ProgramError("Graphic3d_TransformPers::SetPersistence(), wrong persistence mode.");
     }
@@ -155,7 +175,7 @@ public:
   //! Return the anchor point for zoom/rotate transformation persistence.
   gp_Pnt AnchorPoint() const
   {
-    if (!IsZoomOrRotate())
+    if (!IsZoomOrRotate() && !IsAxial())
     {
       throw Standard_ProgramError("Graphic3d_TransformPers::AnchorPoint(), wrong persistence mode.");
     }
@@ -166,7 +186,7 @@ public:
   //! Set the anchor point for zoom/rotate transformation persistence.
   void SetAnchorPoint (const gp_Pnt& thePnt)
   {
-    if (!IsZoomOrRotate())
+    if (!IsZoomOrRotate() && !IsAxial())
     {
       throw Standard_ProgramError("Graphic3d_TransformPers::SetAnchorPoint(), wrong persistence mode.");
     }
@@ -228,9 +248,10 @@ public:
   //! @param theViewportWidth [in] the width of viewport.
   //! @param theViewportHeight [in] the height of viewport.
   virtual Standard_Real persistentScale (const Handle(Graphic3d_Camera)& theCamera,
-                                         const Standard_Integer /*theViewportWidth*/,
+                                         const Standard_Integer theViewportWidth,
                                          const Standard_Integer theViewportHeight) const
   {
+    (void )theViewportWidth;
     // use total size when tiling is active
     const Standard_Integer aVPSizeY = theCamera->Tile().IsValid() ? theCamera->Tile().TotalSize.y() : theViewportHeight;
 
@@ -239,6 +260,24 @@ public:
     const Standard_Real aFocus = aVecToObj.Dot (aVecToEye);
     const gp_XYZ aViewDim = theCamera->ViewDimensions (aFocus);
     return Abs(aViewDim.Y()) / Standard_Real(aVPSizeY);
+  }
+
+  //! Create orientation matrix based on camera and view dimensions.
+  //! Default implementation locks rotation by nullifying rotation component.
+  //! Camera and view dimensions are not used, by default.
+  //! @param theCamera [in] camera definition
+  //! @param theViewportWidth [in] the width of viewport
+  //! @param theViewportHeight [in] the height of viewport
+  virtual NCollection_Mat3<Standard_Real> persistentRotationMatrix (const Handle(Graphic3d_Camera)& theCamera,
+                                                                    const Standard_Integer theViewportWidth,
+                                                                    const Standard_Integer theViewportHeight) const
+  {
+    (void )theCamera;
+    (void )theViewportWidth;
+    (void )theViewportHeight;
+
+    NCollection_Mat3<Standard_Real> aRotMat;
+    return aRotMat;
   }
 
   //! Apply transformation to bounding box of presentation.
@@ -279,28 +318,189 @@ public:
   //! @param theWorldView [in] the world view transformation matrix.
   //! @param theViewportWidth [in] the width of viewport (for 2d persistence).
   //! @param theViewportHeight [in] the height of viewport (for 2d persistence).
+  //! @param theToApplyProjPers [in] if should apply projection persistence to matrix (for orthographic persistence).
   //! @return transformation matrix to be applied to model world transformation of an object.
   template<class T>
   NCollection_Mat4<T> Compute (const Handle(Graphic3d_Camera)& theCamera,
                                const NCollection_Mat4<T>& theProjection,
                                const NCollection_Mat4<T>& theWorldView,
                                const Standard_Integer theViewportWidth,
-                               const Standard_Integer theViewportHeight) const;
+                               const Standard_Integer theViewportHeight,
+                               const Standard_Boolean theToApplyProjPers = false) const;
 
   //! Apply transformation persistence on specified matrices.
-  //! @param theCamera camera definition
-  //! @param theProjection projection matrix to modify
-  //! @param theWorldView  world-view matrix to modify
-  //! @param theViewportWidth  viewport width
-  //! @param theViewportHeight viewport height
-  //! @param theAnchor if not NULL, overrides anchor point
+  //! @param theCamera [in] camera definition
+  //! @param theProjection [in] projection matrix to modify
+  //! @param theWorldView [in/out]  world-view matrix to modify
+  //! @param theViewportWidth [in]  viewport width
+  //! @param theViewportHeight [in] viewport height
+  //! @param theAnchor [in] if not NULL, overrides anchor point
+  //! @param theToApplyProjPers [in] if should apply projection persistence to matrix (for orthographic persistence).
   template<class T>
   void Apply (const Handle(Graphic3d_Camera)& theCamera,
               const NCollection_Mat4<T>& theProjection,
               NCollection_Mat4<T>& theWorldView,
               const Standard_Integer theViewportWidth,
               const Standard_Integer theViewportHeight,
-              const gp_Pnt* theAnchor = NULL) const;
+              const gp_Pnt* theAnchor = NULL,
+              const Standard_Boolean theToApplyProjPers = true) const;
+
+  //! Perform computations for applying transformation persistence on specified matrices.
+  //! @param theCamera [in] camera definition
+  //! @param theViewportWidth [in]  viewport width
+  //! @param theViewportHeight [in] viewport height
+  //! @param theAnchor [in] if not NULL, overrides anchor point
+  virtual NCollection_Mat4<Standard_Real> ComputeApply (Handle(Graphic3d_Camera)& theCamera,
+                                                        const Standard_Integer theViewportWidth,
+                                                        const Standard_Integer theViewportHeight,
+                                                        const gp_Pnt* theAnchor = NULL) const
+  {
+    (void)theViewportWidth;
+    Handle(Graphic3d_Camera) aProxyCamera = theCamera;
+    if (IsOrthoPers() && !aProxyCamera->IsOrthographic())
+    {
+      aProxyCamera = new Graphic3d_Camera(*theCamera); // If OrthoPers, copy camera and set to orthographic projection
+      aProxyCamera->SetProjectionType (Graphic3d_Camera::Projection_Orthographic);
+    }
+
+    NCollection_Mat4<Standard_Real> aWorldView = aProxyCamera->OrientationMatrix();
+
+    // use total size when tiling is active
+    const Standard_Integer aVPSizeY = aProxyCamera->Tile().IsValid() ? aProxyCamera->Tile().TotalSize.y() : theViewportHeight;
+
+    // a small enough jitter compensation offset
+    // to avoid image dragging within single pixel in corner cases
+    const Standard_Real aJitterComp = 0.001;
+    if ((myMode & Graphic3d_TMF_TriedronPers) != 0)
+    {
+      // reset Z focus for trihedron persistence
+      const Standard_Real aFocus = aProxyCamera->IsOrthographic()
+        ? aProxyCamera->Distance()
+        : (aProxyCamera->ZFocusType() == Graphic3d_Camera::FocusType_Relative
+          ? Standard_Real(aProxyCamera->ZFocus() * aProxyCamera->Distance())
+          : Standard_Real(aProxyCamera->ZFocus()));
+
+      // scale factor to pixels
+      const gp_XYZ aViewDim = aProxyCamera->ViewDimensions (aFocus);
+      const Standard_Real aScale = Abs(aViewDim.Y()) / Standard_Real(aVPSizeY);
+      const gp_Dir aForward = aProxyCamera->Direction();
+      gp_XYZ aCenter = aProxyCamera->Center().XYZ() + aForward.XYZ() * (aFocus - aProxyCamera->Distance());
+      if ((myParams.Params2d.Corner & (Aspect_TOTP_LEFT | Aspect_TOTP_RIGHT)) != 0)
+      {
+        const Standard_Real anOffsetX = (Standard_Real(myParams.Params2d.OffsetX) + aJitterComp) * aScale;
+        const gp_Dir aSide = aForward.Crossed (aProxyCamera->Up());
+        const gp_XYZ aDeltaX = aSide.XYZ() * (Abs(aViewDim.X()) * aProxyCamera->NDC2dOffsetX() - anOffsetX);
+        if ((myParams.Params2d.Corner & Aspect_TOTP_RIGHT) != 0)
+        {
+          aCenter += aDeltaX;
+        }
+        else
+        {
+          aCenter -= aDeltaX;
+        }
+      }
+      if ((myParams.Params2d.Corner & (Aspect_TOTP_TOP | Aspect_TOTP_BOTTOM)) != 0)
+      {
+        const Standard_Real anOffsetY = (Standard_Real(myParams.Params2d.OffsetY) + aJitterComp) * aScale;
+        const gp_XYZ aDeltaY = aProxyCamera->Up().XYZ() * (Abs(aViewDim.Y()) * aProxyCamera->NDC2dOffsetY() - anOffsetY);
+        if ((myParams.Params2d.Corner & Aspect_TOTP_TOP) != 0)
+        {
+          aCenter += aDeltaY;
+        }
+        else
+        {
+          aCenter -= aDeltaY;
+        }
+      }
+      Graphic3d_TransformUtils::Scale (aWorldView,
+                                       1.0 / theCamera->AxialScale().X(),
+                                       1.0 / theCamera->AxialScale().Y(),
+                                       1.0 / theCamera->AxialScale().Z());
+      Graphic3d_TransformUtils::Translate (aWorldView, aCenter.X(), aCenter.Y(), aCenter.Z());
+      Graphic3d_TransformUtils::Scale     (aWorldView, aScale, aScale, aScale);
+    }
+    else if ((myMode & Graphic3d_TMF_2d) != 0)
+    {
+      const Standard_Real aFocus = aProxyCamera->IsOrthographic()
+        ? aProxyCamera->Distance()
+        : (aProxyCamera->ZFocusType() == Graphic3d_Camera::FocusType_Relative
+          ? Standard_Real(aProxyCamera->ZFocus() * aProxyCamera->Distance())
+          : Standard_Real(aProxyCamera->ZFocus()));
+
+      // scale factor to pixels
+      const gp_XYZ        aViewDim = aProxyCamera->ViewDimensions (aFocus);
+      const Standard_Real aScale = Abs(aViewDim.Y()) / Standard_Real(aVPSizeY);
+      gp_XYZ aCenter (0.0, 0.0, -aFocus);
+      if ((myParams.Params2d.Corner & (Aspect_TOTP_LEFT | Aspect_TOTP_RIGHT)) != 0)
+      {
+        aCenter.SetX (-aViewDim.X() * aProxyCamera->NDC2dOffsetX() + (Standard_Real(myParams.Params2d.OffsetX) + aJitterComp) * aScale);
+        if ((myParams.Params2d.Corner & Aspect_TOTP_RIGHT) != 0)
+        {
+          aCenter.SetX (-aCenter.X());
+        }
+      }
+      if ((myParams.Params2d.Corner & (Aspect_TOTP_TOP | Aspect_TOTP_BOTTOM)) != 0)
+      {
+        aCenter.SetY (-aViewDim.Y() * aProxyCamera->NDC2dOffsetY() + (Standard_Real(myParams.Params2d.OffsetY) + aJitterComp) * aScale);
+        if ((myParams.Params2d.Corner & Aspect_TOTP_TOP) != 0)
+        {
+          aCenter.SetY (-aCenter.Y());
+        }
+      }
+
+      aWorldView.InitIdentity();
+      Graphic3d_TransformUtils::Translate (aWorldView, aCenter.X(), aCenter.Y(), aCenter.Z());
+      Graphic3d_TransformUtils::Scale     (aWorldView, aScale, aScale, aScale);
+    }
+    else if ((myMode & Graphic3d_TMF_CameraPers) != 0)
+    {
+      aWorldView.InitIdentity();
+    }
+    else
+    {
+      // Compute reference point for transformation in untransformed projection space.
+      if (theAnchor != NULL)
+      {
+        Graphic3d_TransformUtils::Translate (aWorldView, theAnchor->X(), theAnchor->Y(), theAnchor->Z());
+      }
+      else
+      {
+        Graphic3d_TransformUtils::Translate (aWorldView, myParams.Params3d.PntX, myParams.Params3d.PntY, myParams.Params3d.PntZ);
+      }
+
+      if ((myMode & Graphic3d_TMF_RotatePers) != 0)
+      {
+        NCollection_Mat3<Standard_Real> aRotMat = persistentRotationMatrix (theCamera, theViewportWidth, theViewportHeight);
+
+        aWorldView.SetValue (0, 0, aRotMat.GetColumn (0).x());
+        aWorldView.SetValue (1, 0, aRotMat.GetColumn (0).y());
+        aWorldView.SetValue (2, 0, aRotMat.GetColumn (0).z());
+
+        aWorldView.SetValue (0, 1, aRotMat.GetColumn (1).x());
+        aWorldView.SetValue (1, 1, aRotMat.GetColumn (1).y());
+        aWorldView.SetValue (2, 1, aRotMat.GetColumn (1).z());
+
+        aWorldView.SetValue (0, 2, aRotMat.GetColumn (2).x());
+        aWorldView.SetValue (1, 2, aRotMat.GetColumn (2).y());
+        aWorldView.SetValue (2, 2, aRotMat.GetColumn (2).z());
+      }
+      if (IsAxial())
+      {
+        Graphic3d_TransformUtils::Scale (aWorldView,
+                                         1.0 / theCamera->AxialScale().X(),
+                                         1.0 / theCamera->AxialScale().Y(),
+                                         1.0 / theCamera->AxialScale().Z());
+      }
+      if ((myMode & Graphic3d_TMF_ZoomPers) != 0)
+      {
+        // lock zooming
+        Standard_Real aScale = persistentScale (aProxyCamera, theViewportWidth, theViewportHeight);
+        Graphic3d_TransformUtils::Scale (aWorldView, aScale, aScale, aScale);
+      }
+    }
+    theCamera = aProxyCamera;
+    return aWorldView;
+  }
 
   //! Dumps the content of me into the stream
   Standard_EXPORT virtual void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const;
@@ -350,146 +550,26 @@ void Graphic3d_TransformPers::Apply (const Handle(Graphic3d_Camera)& theCamera,
                                      NCollection_Mat4<T>& theWorldView,
                                      const Standard_Integer theViewportWidth,
                                      const Standard_Integer theViewportHeight,
-                                     const gp_Pnt* theAnchor) const
+                                     const gp_Pnt* theAnchor,
+                                     const Standard_Boolean theToApplyProjPers) const
 {
-  (void )theViewportWidth;
-  (void )theProjection;
-  if (myMode == Graphic3d_TMF_None
-   || theViewportHeight == 0)
+  (void)theViewportWidth;
+  if (myMode == Graphic3d_TMF_None || theViewportHeight == 0)
   {
     return;
   }
 
-  // use total size when tiling is active
-  const Standard_Integer aVPSizeY = theCamera->Tile().IsValid() ? theCamera->Tile().TotalSize.y() : theViewportHeight;
+  Handle(Graphic3d_Camera) aCamera = new Graphic3d_Camera(*theCamera);
+  NCollection_Mat4<Standard_Real> aWorldView = ComputeApply (aCamera, theViewportWidth, theViewportHeight, theAnchor);
 
-  // a small enough jitter compensation offset
-  // to avoid image dragging within single pixel in corner cases
-  const Standard_Real aJitterComp = 0.001;
-  if (myMode == Graphic3d_TMF_TriedronPers)
+  if (!theCamera->IsOrthographic() && IsOrthoPers() && theToApplyProjPers)
   {
-    // reset Z focus for trihedron persistence
-    const Standard_Real aFocus = theCamera->IsOrthographic()
-                               ? theCamera->Distance()
-                               : (theCamera->ZFocusType() == Graphic3d_Camera::FocusType_Relative
-                                ? Standard_Real(theCamera->ZFocus() * theCamera->Distance())
-                                : Standard_Real(theCamera->ZFocus()));
-
-    // scale factor to pixels
-    const gp_XYZ aViewDim = theCamera->ViewDimensions (aFocus);
-    const Standard_Real aScale = Abs(aViewDim.Y()) / Standard_Real(aVPSizeY);
-    const gp_Dir aForward = theCamera->Direction();
-    gp_XYZ aCenter = theCamera->Center().XYZ() + aForward.XYZ() * (aFocus - theCamera->Distance());
-    if ((myParams.Params2d.Corner & (Aspect_TOTP_LEFT | Aspect_TOTP_RIGHT)) != 0)
-    {
-      const Standard_Real anOffsetX = (Standard_Real(myParams.Params2d.OffsetX) + aJitterComp) * aScale;
-      const gp_Dir aSide   = aForward.Crossed (theCamera->Up());
-      const gp_XYZ aDeltaX = aSide.XYZ() * (Abs(aViewDim.X()) * theCamera->NDC2dOffsetX() - anOffsetX);
-      if ((myParams.Params2d.Corner & Aspect_TOTP_RIGHT) != 0)
-      {
-        aCenter += aDeltaX;
-      }
-      else
-      {
-        aCenter -= aDeltaX;
-      }
-    }
-    if ((myParams.Params2d.Corner & (Aspect_TOTP_TOP | Aspect_TOTP_BOTTOM)) != 0)
-    {
-      const Standard_Real anOffsetY = (Standard_Real(myParams.Params2d.OffsetY) + aJitterComp) * aScale;
-      const gp_XYZ aDeltaY = theCamera->Up().XYZ() * (Abs(aViewDim.Y()) * theCamera->NDC2dOffsetY() - anOffsetY);
-      if ((myParams.Params2d.Corner & Aspect_TOTP_TOP) != 0)
-      {
-        aCenter += aDeltaY;
-      }
-      else
-      {
-        aCenter -= aDeltaY;
-      }
-    }
-
-    NCollection_Mat4<Standard_Real> aWorldView = theCamera->OrientationMatrix();
-    Graphic3d_TransformUtils::Translate (aWorldView, aCenter.X(), aCenter.Y(), aCenter.Z());
-    Graphic3d_TransformUtils::Scale     (aWorldView, aScale,      aScale,      aScale);
-    theWorldView.ConvertFrom (aWorldView);
-    return;
+    Graphic3d_Mat4d aProjInv;
+    aProjInv.ConvertFrom (theProjection.Inverted());
+    aWorldView = (aProjInv * aCamera->ProjectionMatrix()) * aWorldView;
   }
-  else if (myMode == Graphic3d_TMF_2d)
-  {
-    const Standard_Real aFocus = theCamera->IsOrthographic()
-                               ? theCamera->Distance()
-                               : (theCamera->ZFocusType() == Graphic3d_Camera::FocusType_Relative
-                                ? Standard_Real(theCamera->ZFocus() * theCamera->Distance())
-                                : Standard_Real(theCamera->ZFocus()));
 
-    // scale factor to pixels
-    const gp_XYZ        aViewDim = theCamera->ViewDimensions (aFocus);
-    const Standard_Real aScale   = Abs(aViewDim.Y()) / Standard_Real(aVPSizeY);
-    gp_XYZ aCenter (0.0, 0.0, -aFocus);
-    if ((myParams.Params2d.Corner & (Aspect_TOTP_LEFT | Aspect_TOTP_RIGHT)) != 0)
-    {
-      aCenter.SetX (-aViewDim.X() * theCamera->NDC2dOffsetX() + (Standard_Real(myParams.Params2d.OffsetX) + aJitterComp) * aScale);
-      if ((myParams.Params2d.Corner & Aspect_TOTP_RIGHT) != 0)
-      {
-        aCenter.SetX (-aCenter.X());
-      }
-    }
-    if ((myParams.Params2d.Corner & (Aspect_TOTP_TOP | Aspect_TOTP_BOTTOM)) != 0)
-    {
-      aCenter.SetY (-aViewDim.Y() * theCamera->NDC2dOffsetY() + (Standard_Real(myParams.Params2d.OffsetY) + aJitterComp) * aScale);
-      if ((myParams.Params2d.Corner & Aspect_TOTP_TOP) != 0)
-      {
-        aCenter.SetY (-aCenter.Y());
-      }
-    }
-
-    theWorldView.InitIdentity();
-    Graphic3d_TransformUtils::Translate (theWorldView, T(aCenter.X()), T(aCenter.Y()), T(aCenter.Z()));
-    Graphic3d_TransformUtils::Scale     (theWorldView, T(aScale),      T(aScale),      T(aScale));
-    return;
-  }
-  else if ((myMode & Graphic3d_TMF_CameraPers) != 0)
-  {
-    theWorldView.InitIdentity();
-  }
-  else
-  {
-    // Compute reference point for transformation in untransformed projection space.
-    NCollection_Mat4<Standard_Real> aWorldView = theCamera->OrientationMatrix();
-    if (theAnchor != NULL)
-    {
-      Graphic3d_TransformUtils::Translate (aWorldView, theAnchor->X(), theAnchor->Y(), theAnchor->Z());
-    }
-    else
-    {
-      Graphic3d_TransformUtils::Translate (aWorldView, myParams.Params3d.PntX, myParams.Params3d.PntY, myParams.Params3d.PntZ);
-    }
-
-    if ((myMode & Graphic3d_TMF_RotatePers) != 0)
-    {
-      // lock rotation by nullifying rotation component
-      aWorldView.SetValue (0, 0, 1.0);
-      aWorldView.SetValue (1, 0, 0.0);
-      aWorldView.SetValue (2, 0, 0.0);
-
-      aWorldView.SetValue (0, 1, 0.0);
-      aWorldView.SetValue (1, 1, 1.0);
-      aWorldView.SetValue (2, 1, 0.0);
-
-      aWorldView.SetValue (0, 2, 0.0);
-      aWorldView.SetValue (1, 2, 0.0);
-      aWorldView.SetValue (2, 2, 1.0);
-    }
-
-    if ((myMode & Graphic3d_TMF_ZoomPers) != 0)
-    {
-      // lock zooming
-      Standard_Real aScale = persistentScale (theCamera, theViewportWidth, theViewportHeight);
-      Graphic3d_TransformUtils::Scale (aWorldView, aScale, aScale, aScale);
-    }
-    theWorldView.ConvertFrom (aWorldView);
-    return;
-  }
+  theWorldView.ConvertFrom (aWorldView);
 }
 
 // =======================================================================
@@ -536,7 +616,7 @@ void Graphic3d_TransformPers::Apply (const Handle(Graphic3d_Camera)& theCamera,
                                      const Standard_Integer theViewportHeight,
                                      BVH_Box<T, 3>& theBoundingBox) const
 {
-  NCollection_Mat4<T> aTPers = Compute (theCamera, theProjection, theWorldView, theViewportWidth, theViewportHeight);
+  NCollection_Mat4<T> aTPers = Compute (theCamera, theProjection, theWorldView, theViewportWidth, theViewportHeight, false);
   if (aTPers.IsIdentity()
   || !theBoundingBox.IsValid())
   {
@@ -575,7 +655,8 @@ NCollection_Mat4<T> Graphic3d_TransformPers::Compute (const Handle(Graphic3d_Cam
                                                       const NCollection_Mat4<T>& theProjection,
                                                       const NCollection_Mat4<T>& theWorldView,
                                                       const Standard_Integer theViewportWidth,
-                                                      const Standard_Integer theViewportHeight) const
+                                                      const Standard_Integer theViewportHeight,
+                                                      const Standard_Boolean theToApplyProjPers) const
 {
   if (myMode == Graphic3d_TMF_None)
   {
@@ -591,7 +672,7 @@ NCollection_Mat4<T> Graphic3d_TransformPers::Compute (const Handle(Graphic3d_Cam
 
   // compute only world-view matrix difference to avoid floating point instability
   // caused by projection matrix modifications outside of this algorithm (e.g. by Z-fit)
-  Apply (theCamera, theProjection, aWorldView, theViewportWidth, theViewportHeight);
+  Apply (theCamera, theProjection, aWorldView, theViewportWidth, theViewportHeight, NULL, theToApplyProjPers);
   return anUnviewMat * aWorldView;
 }
 

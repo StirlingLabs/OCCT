@@ -17,15 +17,8 @@
 #ifndef _GeomAdaptor_SurfaceOfLinearExtrusion_HeaderFile
 #define _GeomAdaptor_SurfaceOfLinearExtrusion_HeaderFile
 
-#include <gp_Dir.hxx>
 #include <GeomAdaptor_Surface.hxx>
 
-class Standard_OutOfRange;
-class Standard_NoSuchObject;
-class Standard_DomainError;
-class gp_Dir;
-class gp_Pnt;
-class gp_Vec;
 class gp_Pln;
 class gp_Cylinder;
 class gp_Cone;
@@ -57,6 +50,9 @@ public:
   //! Thew Curve and the Direction are loaded.
   Standard_EXPORT GeomAdaptor_SurfaceOfLinearExtrusion(const Handle(Adaptor3d_Curve)& C, const gp_Dir& V);
   
+  //! Shallow copy of adaptor
+  Standard_EXPORT virtual Handle(Adaptor3d_Surface) ShallowCopy() const Standard_OVERRIDE;
+
   //! Changes the Curve
   Standard_EXPORT void Load (const Handle(Adaptor3d_Curve)& C);
   

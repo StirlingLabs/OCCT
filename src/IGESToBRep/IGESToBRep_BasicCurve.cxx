@@ -21,7 +21,7 @@
 //#60 rln 29.12.98 PRO17015
 //:l3 abv 11.01.99: CATIA01.igs: using less values for checking short lines
 //%11 pdn 12.01.98 CTS22023 correcting used tolerances
-//sln 29.12.2001 OCC90 : Method checkBSplineCurve and varification before creation of bspline curves were added
+//sln 29.12.2001 OCC90 : Method checkBSplineCurve and verification before creation of bspline curves were added
 //=======================================================================
 
 #include <ElCLib.hxx>
@@ -51,20 +51,16 @@
 #include <gp_Pnt.hxx>
 #include <gp_Pnt2d.hxx>
 #include <gp_Trsf.hxx>
-#include <gp_XY.hxx>
 #include <gp_XYZ.hxx>
 #include <IGESConvGeom.hxx>
-#include <IGESData_IGESEntity.hxx>
 #include <IGESData_ToolLocation.hxx>
 #include <IGESGeom_BSplineCurve.hxx>
 #include <IGESGeom_CircularArc.hxx>
 #include <IGESGeom_ConicArc.hxx>
 #include <IGESGeom_CopiousData.hxx>
 #include <IGESGeom_Line.hxx>
-#include <IGESGeom_Point.hxx>
 #include <IGESGeom_SplineCurve.hxx>
 #include <IGESGeom_TransformationMatrix.hxx>
-#include <IGESToBRep.hxx>
 #include <IGESToBRep_BasicCurve.hxx>
 #include <IGESToBRep_CurveAndSurface.hxx>
 #include <Interface_Macros.hxx>
@@ -75,13 +71,8 @@
 #include <Standard_Failure.hxx>
 #include <TColGeom_SequenceOfCurve.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
-#include <TColgp_HArray1OfPnt.hxx>
-#include <TColgp_HArray1OfPnt2d.hxx>
-#include <TColgp_HArray2OfPnt.hxx>
 #include <TColStd_Array1OfInteger.hxx>
 #include <TColStd_Array1OfReal.hxx>
-#include <TColStd_HArray1OfInteger.hxx>
-#include <TColStd_HArray1OfReal.hxx>
 #include <TColStd_SequenceOfInteger.hxx>
 
 //:36
@@ -89,7 +80,7 @@
 //=======================================================================
 //function : CheckBSplineCurve
 //purpose  : Check coincidede knots Check whether knots are in ascending 
-//           order and difference between vaues of weights more than 1000. 
+//           order and difference between values of weights more than 1000. 
 //           Send corresponding messages. The function returns Standard_False 
 //           if curve can not be created, Standard_True otherwise.
 //=======================================================================
@@ -98,7 +89,7 @@ static Standard_Boolean checkBSplineCurve(IGESToBRep_BasicCurve*               t
                                           TColStd_Array1OfReal&                CKnots,
                                           const TColStd_Array1OfReal&          CWeights)
 {
-  // check whether difference between vaues of weights more than 1000.
+  // check whether difference between values of weights more than 1000.
   if(!theBSplineCurve->IsPolynomial()) {
     Standard_Real aMinValue = CWeights.Value(CWeights.Lower());
     Standard_Real aMaxValue = CWeights.Value(CWeights.Lower());
@@ -352,7 +343,7 @@ Handle(Geom_Curve) IGESToBRep_BasicCurve::TransferConicArc
     //The dimensions should be also obliged:
     //[a]=[b]=[c]=L^-2
     //if ( (Abs(a-c) <= GetEpsGeom()) && (Abs(b) < GetEpsCoeff()))
-    Standard_Real eps2 = Precision::PConfusion() * Precision::PConfusion();
+    constexpr Standard_Real eps2 = Precision::PConfusion() * Precision::PConfusion();
     if ( (Abs(a-c) <= eps2) && (Abs(b) < eps2)) {
     
 //                          =================
@@ -521,7 +512,7 @@ Handle(Geom2d_Curve) IGESToBRep_BasicCurve::Transfer2dConicArc
 
     //#60 rln 29.12.98 PRO17015
     //if ( (Abs(a-c) <= GetEpsGeom()) && (Abs(b) < GetEpsCoeff()))
-    Standard_Real eps2 = Precision::PConfusion() * Precision::PConfusion();
+    constexpr Standard_Real eps2 = Precision::PConfusion() * Precision::PConfusion();
     if ( (Abs(a-c) <= eps2) && (Abs(b) < eps2)) {
 
       //                          =================

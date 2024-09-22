@@ -32,11 +32,6 @@
 #include <TColStd_Array1OfReal.hxx>
 #include <GeomAbs_CurveType.hxx>
 
-class Standard_NullObject;
-class Standard_DomainError;
-class Standard_OutOfRange;
-class Standard_NoSuchObject;
-class TopoDS_Wire;
 class TopoDS_Edge;
 class gp_Pnt;
 class gp_Vec;
@@ -74,6 +69,9 @@ public:
   //! <W>.
   Standard_EXPORT BRepAdaptor_CompCurve(const TopoDS_Wire& W, const Standard_Boolean KnotByCurvilinearAbcissa, const Standard_Real First, const Standard_Real Last, const Standard_Real Tol);
   
+  //! Shallow copy of adaptor
+  Standard_EXPORT virtual Handle(Adaptor3d_Curve) ShallowCopy() const Standard_OVERRIDE;
+
   //! Sets the  wire <W>.
   Standard_EXPORT void Initialize (const TopoDS_Wire& W, const Standard_Boolean KnotByCurvilinearAbcissa);
   

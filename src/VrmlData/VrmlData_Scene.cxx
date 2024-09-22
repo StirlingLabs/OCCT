@@ -13,13 +13,9 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#include <VrmlData_Scene.hxx>
-#include <VrmlData_InBuffer.hxx>
 #include <VrmlData_Appearance.hxx>
 #include <VrmlData_Box.hxx>
-#include <VrmlData_Color.hxx>
 #include <VrmlData_Cone.hxx>
-#include <VrmlData_Coordinate.hxx>
 #include <VrmlData_Cylinder.hxx>
 #include <VrmlData_DataMapOfShapeAppearance.hxx>
 #include <VrmlData_Group.hxx>
@@ -36,9 +32,7 @@
 #include <VrmlData_UnknownNode.hxx>
 //#include <VrmlData_WorldInfo.hxx>
 #include <NCollection_Vector.hxx>
-#include <TopoDS_TFace.hxx>
 #include <TopoDS.hxx>
-#include <TopoDS_Face.hxx>
 #include <TopExp_Explorer.hxx>
 #include <BRep_Builder.hxx>
 #include <Precision.hxx>
@@ -50,6 +44,8 @@
 #define _CRT_SECURE_NO_DEPRECATE
 #pragma warning (disable:4996)
 #endif
+
+#define VRMLDATA_LCOMPARE_SKIP(aa, bb) (strncmp (aa, bb, sizeof(bb)-1) == 0)
 
 static void     dumpNode        (Standard_OStream&              theStream,
                                  const Handle(VrmlData_Node)&   theNode,
@@ -174,6 +170,10 @@ Standard_OStream& operator << (Standard_OStream&     theOutput,
 void VrmlData_Scene::SetVrmlDir (const TCollection_ExtendedString& theDir)
 {
   TCollection_ExtendedString& aDir = myVrmlDir.Append (theDir);
+  if (aDir.IsEmpty())
+  {
+    return;
+  }
   const Standard_ExtCharacter aTerminator = aDir.Value(aDir.Length());
   if (aTerminator != Standard_ExtCharacter('\\') &&
       aTerminator != Standard_ExtCharacter('/'))
@@ -199,29 +199,63 @@ const Handle(VrmlData_WorldInfo)& VrmlData_Scene::WorldInfo() const
 //purpose  : 
 //=======================================================================
 
-VrmlData_ErrorStatus VrmlData_Scene::readLine (VrmlData_InBuffer& theBuffer)
+VrmlData_ErrorStatus VrmlData_Scene::readLine(VrmlData_InBuffer& theBuffer)
 {
   VrmlData_ErrorStatus aStatus = VrmlData_StatusOK;
   if (theBuffer.Input.eof())
-    aStatus = VrmlData_EndOfFile;
-  else {
-    theBuffer.Input.getline (theBuffer.Line, sizeof(theBuffer.Line));
-    theBuffer.LineCount++;
-    const int stat = theBuffer.Input.rdstate();
-    if (stat & std::ios::badbit) {
-      aStatus = VrmlData_UnrecoverableError;
-    }
-    else if (stat & std::ios::failbit) {
-      if (stat & std::ios::eofbit) {
-        aStatus = VrmlData_EndOfFile;
-      }
-      else {
-        aStatus = VrmlData_GeneralError;
-      }
-    }
-    theBuffer.LinePtr = &theBuffer.Line[0];
-    theBuffer.IsProcessed = Standard_False;
+  {
+    return VrmlData_EndOfFile;
   }
+  // Read a line.
+  theBuffer.Input.getline(theBuffer.Line, sizeof(theBuffer.Line));
+
+  // Check the number of read symbols.
+  // If maximum number is read, process the array of symbols separately
+  // rolling back the array to the last comma or space symbol.
+  std::streamsize aNbChars = theBuffer.Input.gcount();
+  if (theBuffer.Input.rdstate() & std::ios::failbit &&
+      aNbChars == sizeof(theBuffer.Line) - 1)
+  {
+    // Clear the error.
+    // We will fix it here below.
+    theBuffer.Input.clear();
+    size_t anInd = aNbChars - 1;
+    for (; anInd > 0; anInd--)
+    {
+      Standard_Character aChar = theBuffer.Line[anInd];
+      if (aChar == ',' || aChar == ' ')
+      {
+        theBuffer.Line[anInd + 1] = '\0';
+        break;
+      }
+    }
+    if (anInd == 0) // no possible to rolling back
+    {
+      return VrmlData_UnrecoverableError;
+    }
+    theBuffer.Input.seekg(-static_cast<std::streamoff>((aNbChars - anInd - 1)), std::ios::cur);
+  }
+
+  // Check the reading status.
+  theBuffer.LineCount++;
+  const int stat = theBuffer.Input.rdstate();
+  if (stat & std::ios::badbit)
+  {
+    aStatus = VrmlData_UnrecoverableError;
+  }
+  else if (stat & std::ios::failbit)
+  {
+    if (stat & std::ios::eofbit)
+    {
+      aStatus = VrmlData_EndOfFile;
+    }
+    else
+    {
+      aStatus = VrmlData_GeneralError;
+    }
+  }
+  theBuffer.LinePtr = &theBuffer.Line[0];
+  theBuffer.IsProcessed = Standard_False;
   return aStatus;
 }
 
@@ -285,12 +319,23 @@ VrmlData_ErrorStatus VrmlData_Scene::ReadLine (VrmlData_InBuffer& theBuffer)
 
 VrmlData_ErrorStatus VrmlData_Scene::readHeader (VrmlData_InBuffer& theBuffer)
 {
-  VrmlData_ErrorStatus aStat = readLine (theBuffer);
-  if (aStat == VrmlData_StatusOK &&
-      !VRMLDATA_LCOMPARE(theBuffer.LinePtr, "#VRML V2.0"))
-    aStat = VrmlData_NotVrmlFile;
-  else 
+  VrmlData_ErrorStatus aStat = readLine(theBuffer);
+  if (aStat != VrmlData_StatusOK)
+  {
+    return VrmlData_NotVrmlFile;
+  }
+  TCollection_AsciiString aHeader(theBuffer.LinePtr);
+  // The max possible header size is 25 (with spaces)
+  // 4 (max BOM size) + 11 (search string) + 9 (max size for encoding)
+  if (aHeader.Length() <= 25 &&
+      aHeader.Search("#VRML V2.0") != -1)
+  {
     aStat = readLine(theBuffer);
+  }
+  else
+  {
+    aStat = VrmlData_NotVrmlFile;
+  }
   return aStat;
 }
 
@@ -468,7 +513,8 @@ VrmlData_ErrorStatus VrmlData_Scene::createNode
     // create the new node
     if (VRMLDATA_LCOMPARE(theBuffer.LinePtr, "Appearance"))
       aNode = new VrmlData_Appearance     (* this, strName);
-    else if (VRMLDATA_LCOMPARE(theBuffer.LinePtr, "Shape"))
+    else if (!VRMLDATA_LCOMPARE_SKIP(theBuffer.LinePtr, "ShapeHints")
+             && VRMLDATA_LCOMPARE(theBuffer.LinePtr, "Shape"))
       aNode = new VrmlData_ShapeNode      (* this, strName);
     else if (VRMLDATA_LCOMPARE(theBuffer.LinePtr, "Box"))
       aNode = new VrmlData_Box            (* this, strName);
@@ -825,7 +871,7 @@ VrmlData_ErrorStatus VrmlData_Scene::ReadArrIndex
           if (vecInt.Length() > 2)
           {
             // additional check for redundant point:
-            // ignore last point which is a dublicate of first point
+            // ignore last point which is a duplicate of first point
             if (anIntValue == vecInt[0])
             {
               continue;

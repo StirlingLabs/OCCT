@@ -20,15 +20,12 @@
 #include <Geom_BSplineCurve.hxx>
 #include <gp_Pnt2d.hxx>
 #include <Hermit.hxx>
-#include <PLib.hxx>
 #include <Precision.hxx>
-#include <Standard_Boolean.hxx>
 #include <Standard_DimensionError.hxx>
 #include <Standard_Real.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
 #include <TColStd_Array1OfInteger.hxx>
 #include <TColStd_Array1OfReal.hxx>
-#include <TColStd_HArray1OfInteger.hxx>
 #include <TColStd_HArray1OfReal.hxx>
 
 #include <algorithm>
@@ -290,7 +287,7 @@ static void PolyTest(const TColStd_Array1OfReal&         Herm,
     }
   } // end of the loop
   
-  if (!SignDenom(Polesinit)) //invertion of the polynome sign
+  if (!SignDenom(Polesinit)) //inversion of the polynome sign
   {
     for (index=0;index<=3;index++)
       Polesinit(index).SetCoord(0.0,-Polesinit(index).Y());
@@ -523,7 +520,7 @@ static void PolyTest(const TColStd_Array1OfReal&        Herm,
     }
   } // end of the loop
   
-  if (!SignDenom(Polesinit)) // invertion of the polynome sign
+  if (!SignDenom(Polesinit)) // inversion of the polynome sign
   {
     for (index=0;index<=3;index++)
       Polesinit(index).SetCoord(0.0,-Polesinit(index).Y());

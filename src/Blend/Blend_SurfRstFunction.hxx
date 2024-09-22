@@ -18,13 +18,9 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
 #include <Blend_AppFunction.hxx>
-#include <Standard_Integer.hxx>
-#include <Standard_Boolean.hxx>
 #include <math_Vector.hxx>
-#include <Standard_Real.hxx>
 #include <TColStd_Array1OfReal.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <TColStd_Array1OfInteger.hxx>
@@ -32,7 +28,6 @@
 #include <TColgp_Array1OfVec.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
 #include <TColgp_Array1OfVec2d.hxx>
-class Standard_DomainError;
 class math_Matrix;
 class gp_Pnt;
 class gp_Pnt2d;
@@ -155,7 +150,7 @@ public:
   //! specific to  the function.
   Standard_EXPORT virtual Standard_Boolean Decroch (const math_Vector& Sol, gp_Vec& NS, gp_Vec& TgS) const = 0;
   
-  //! Returns  if the section is rationnal
+  //! Returns  if the section is rational
   Standard_EXPORT virtual Standard_Boolean IsRational() const = 0;
   
   //! Returns the length of the maximum section
@@ -179,7 +174,7 @@ public:
   Standard_EXPORT virtual void GetShape (Standard_Integer& NbPoles, Standard_Integer& NbKnots, Standard_Integer& Degree, Standard_Integer& NbPoles2d) = 0;
   
   //! Returns the tolerance to reach in approximation
-  //! to respecte
+  //! to respect
   //! BoundTol error at the Boundary
   //! AngleTol tangent error at the Boundary
   //! SurfTol error inside the surface.

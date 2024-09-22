@@ -16,13 +16,12 @@
 #ifndef XCAFPrs_DataMapOfStyleShape_HeaderFile
 #define XCAFPrs_DataMapOfStyleShape_HeaderFile
 
-#include <XCAFPrs_Style.hxx>
 #include <TopoDS_Shape.hxx>
 #include <XCAFPrs_Style.hxx>
 #include <NCollection_DataMap.hxx>
 
-typedef NCollection_DataMap<XCAFPrs_Style,TopoDS_Shape,XCAFPrs_Style> XCAFPrs_DataMapOfStyleShape;
-typedef NCollection_DataMap<XCAFPrs_Style,TopoDS_Shape,XCAFPrs_Style>::Iterator XCAFPrs_DataMapIteratorOfDataMapOfStyleShape;
+typedef NCollection_DataMap<XCAFPrs_Style,TopoDS_Shape> XCAFPrs_DataMapOfStyleShape;
+typedef NCollection_DataMap<XCAFPrs_Style,TopoDS_Shape>::Iterator XCAFPrs_DataMapIteratorOfDataMapOfStyleShape;
 
 
 #endif

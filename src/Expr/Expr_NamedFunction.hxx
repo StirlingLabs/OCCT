@@ -24,17 +24,9 @@
 #include <Expr_Array1OfNamedUnknown.hxx>
 #include <Expr_GeneralFunction.hxx>
 #include <Standard_Integer.hxx>
-#include <Standard_Real.hxx>
 #include <TColStd_Array1OfReal.hxx>
-#include <Standard_Boolean.hxx>
 class Expr_GeneralExpression;
-class Standard_OutOfRange;
-class Standard_DimensionMismatch;
-class Standard_NumericError;
-class Expr_NotEvaluable;
-class TCollection_AsciiString;
 class Expr_NamedUnknown;
-class Expr_GeneralFunction;
 
 
 class Expr_NamedFunction;

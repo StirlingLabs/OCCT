@@ -23,10 +23,8 @@
 
 #include <TopoDS_Face.hxx>
 #include <StepToTopoDS_Root.hxx>
-#include <Standard_Boolean.hxx>
 class StepGeom_CurveBoundedSurface;
 class Transfer_TransientProcess;
-class TopoDS_Face;
 
 
 //! Translate curve_bounded_surface into TopoDS_Face
@@ -41,10 +39,14 @@ public:
   Standard_EXPORT StepToTopoDS_TranslateCurveBoundedSurface();
   
   //! Translate surface
-  Standard_EXPORT StepToTopoDS_TranslateCurveBoundedSurface(const Handle(StepGeom_CurveBoundedSurface)& CBS, const Handle(Transfer_TransientProcess)& TP);
+  Standard_EXPORT StepToTopoDS_TranslateCurveBoundedSurface(const Handle(StepGeom_CurveBoundedSurface)& CBS,
+                                                            const Handle(Transfer_TransientProcess)& TP,
+                                                            const StepData_Factors& theLocalFactors = StepData_Factors());
   
   //! Translate surface
-  Standard_EXPORT Standard_Boolean Init (const Handle(StepGeom_CurveBoundedSurface)& CBS, const Handle(Transfer_TransientProcess)& TP);
+  Standard_EXPORT Standard_Boolean Init (const Handle(StepGeom_CurveBoundedSurface)& CBS,
+                                         const Handle(Transfer_TransientProcess)& TP,
+                                         const StepData_Factors& theLocalFactors = StepData_Factors());
   
   //! Returns result of last translation or null wire if failed.
   Standard_EXPORT const TopoDS_Face& Value() const;

@@ -14,37 +14,22 @@
 
 
 #include <Standard_ErrorHandler.hxx>
-#include <Standard_Persistent.hxx>
 #include <Standard_Type.hxx>
 #include <Storage.hxx>
 #include <Storage_BaseDriver.hxx>
-#include <Storage_BucketOfPersistent.hxx>
-#include <Storage_CallBack.hxx>
 #include <Storage_Data.hxx>
-#include <Storage_DataMapIteratorOfMapOfCallBack.hxx>
 #include <Storage_DefaultCallBack.hxx>
 #include <Storage_HArrayOfCallBack.hxx>
 #include <Storage_HeaderData.hxx>
-#include <Storage_HPArray.hxx>
 #include <Storage_HSeqOfRoot.hxx>
-#include <Storage_InternalData.hxx>
 #include <Storage_Root.hxx>
-#include <Storage_RootData.hxx>
 #include <Storage_Schema.hxx>
-#include <Storage_StreamExtCharParityError.hxx>
-#include <Storage_StreamFormatError.hxx>
-#include <Storage_StreamModeError.hxx>
-#include <Storage_StreamReadError.hxx>
-#include <Storage_StreamTypeMismatchError.hxx>
-#include <Storage_StreamUnknownTypeError.hxx>
 #include <Storage_StreamWriteError.hxx>
 #include <Storage_TypeData.hxx>
 #include <Storage_TypedCallBack.hxx>
 #include <TCollection_AsciiString.hxx>
 #include <TColStd_HSequenceOfAsciiString.hxx>
-#include <TColStd_MapOfAsciiString.hxx>
 
-#include <locale.h>
 #include <stdio.h>
 IMPLEMENT_STANDARD_RTTIEXT(Storage_Schema,Standard_Transient)
 
@@ -733,75 +718,80 @@ void Storage_Schema::Clear() const
 // containing migration types table: oldtype - newtype
 //=======================================================================
 Standard_Boolean Storage_Schema::CheckTypeMigration(
-                                  const TCollection_AsciiString&  oldName,
-				  TCollection_AsciiString&  newName)
+  const TCollection_AsciiString& oldName,
+  TCollection_AsciiString& newName)
 {
   static Standard_Boolean isChecked(Standard_False);
   static DataMapOfAStringAString aDMap;
   Standard_Boolean aMigration(Standard_False);
-  
-  if(!isChecked) {
+
+  if (!isChecked)
+  {
     isChecked = Standard_True;
-//    TCollection_AsciiString aFileName = getenv("CSF_MIGRATION_TYPES");
+    //    TCollection_AsciiString aFileName = getenv("CSF_MIGRATION_TYPES");
     OSD_Environment csf(TCollection_AsciiString("CSF_MIGRATION_TYPES"));
     TCollection_AsciiString aFileName = csf.Value();
-    if(aFileName.Length() > 0) {
-      OSD_Path aPath(aFileName,OSD_Default);
-      OSD_File aFile;
-      aFile.SetPath(aPath);
-      if(aFile.Exists()) {
-	OSD_Protection aProt(OSD_R,OSD_R,OSD_R,OSD_R);
-	aFile.Open(OSD_ReadOnly, aProt);
-	if(aFile.IsOpen() && aFile.IsReadable()) {
-	  TCollection_AsciiString aLine;
-	  Standard_Integer aNbReaded(0);
-	  for (;;) {
-	    aFile.ReadLine(aLine, 80, aNbReaded);
-	    if(aFile.IsAtEnd() || !aNbReaded) {
-	      aFile.Close();
-	      break;
-	    }
+    OSD_File aFile;
+    OSD_Path aPath(aFileName, OSD_Default);
+    aFile.SetPath(aPath);
+    if (aFile.Exists())
+    {
+      OSD_Protection aProt(OSD_R, OSD_R, OSD_R, OSD_R);
+      aFile.Open(OSD_ReadOnly, aProt);
+      if (aFile.IsOpen() && aFile.IsReadable())
+      {
+        TCollection_AsciiString aLine;
+        Standard_Integer aNbReaded(0);
+        for (;;)
+        {
+          aFile.ReadLine(aLine, 80, aNbReaded);
+          if (aFile.IsAtEnd() || !aNbReaded)
+          {
+            aFile.Close();
+            break;
+          }
 #ifdef OCCT_DEBUG
-	    std::cout << "Storage_Sheme:: Line: = " << aLine <<std::endl;
+          std::cout << "Storage_Sheme:: Line: = " << aLine << std::endl;
 #endif
-	    TCollection_AsciiString aKey, aValue;
-	    aKey = aLine.Token();
-	    aValue = aLine.Token(" \t\n\r", 2);
-	    aDMap.Bind(aKey, aValue);
-	  }
+          TCollection_AsciiString aKey, aValue;
+          aKey = aLine.Token();
+          aValue = aLine.Token(" \t\n\r", 2);
+          aDMap.Bind(aKey, aValue);
         }
       }
-      else
-      {
-        // hard-code migration table for known types	
-	aDMap.Bind("TDataStd_Shape",          "TDataXtd_Shape");
-	aDMap.Bind("TDataStd_Constraint",     "TDataXtd_Constraint");
-        aDMap.Bind("TDataStd_Geometry",       "TDataXtd_Geometry");
-	aDMap.Bind("TDataStd_Axis",           "TDataXtd_Axis");
-	aDMap.Bind("TDataStd_Point",          "TDataXtd_Point");
-	aDMap.Bind("TDataStd_Plane",          "TDataXtd_Plane");
-	aDMap.Bind("TDataStd_Position",       "TDataXtd_Position");
-	aDMap.Bind("TDataStd_Placement",      "TDataXtd_Placement");
-	aDMap.Bind("TDataStd_PatternStd",     "TDataXtd_PatternStd");
-	aDMap.Bind("TPrsStd_AISPresentation", "TDataXtd_Presentation");
-        aDMap.Bind("PDataStd_Shape",          "PDataXtd_Shape");
-        aDMap.Bind("PDataStd_Constraint",     "PDataXtd_Constraint");
-        aDMap.Bind("PDataStd_Geometry",       "PDataXtd_Geometry");
-        aDMap.Bind("PDataStd_Axis",           "PDataXtd_Axis");
-        aDMap.Bind("PDataStd_Point",          "PDataXtd_Point");
-        aDMap.Bind("PDataStd_Plane",          "PDataXtd_Plane");
-        aDMap.Bind("PDataStd_Position",       "PDataXtd_Position");
-        aDMap.Bind("PDataStd_Placement",      "PDataXtd_Placement");
-        aDMap.Bind("PDataStd_PatternStd",     "PDataXtd_PatternStd");
-      }
-#ifdef OCCT_DEBUG
-      std::cout << "Storage_Sheme:: aDataMap.Size = " << aDMap.Extent() << std::endl;
-#endif
     }
+    else
+    {
+      // hard-code migration table for known types	
+      aDMap.Bind("TDataStd_Shape", "TDataXtd_Shape");
+      aDMap.Bind("TDataStd_Constraint", "TDataXtd_Constraint");
+      aDMap.Bind("TDataStd_Geometry", "TDataXtd_Geometry");
+      aDMap.Bind("TDataStd_Axis", "TDataXtd_Axis");
+      aDMap.Bind("TDataStd_Point", "TDataXtd_Point");
+      aDMap.Bind("TDataStd_Plane", "TDataXtd_Plane");
+      aDMap.Bind("TDataStd_Position", "TDataXtd_Position");
+      aDMap.Bind("TDataStd_Placement", "TDataXtd_Placement");
+      aDMap.Bind("TDataStd_PatternStd", "TDataXtd_PatternStd");
+      aDMap.Bind("TPrsStd_AISPresentation", "TDataXtd_Presentation");
+      aDMap.Bind("PDataStd_Shape", "PDataXtd_Shape");
+      aDMap.Bind("PDataStd_Constraint", "PDataXtd_Constraint");
+      aDMap.Bind("PDataStd_Geometry", "PDataXtd_Geometry");
+      aDMap.Bind("PDataStd_Axis", "PDataXtd_Axis");
+      aDMap.Bind("PDataStd_Point", "PDataXtd_Point");
+      aDMap.Bind("PDataStd_Plane", "PDataXtd_Plane");
+      aDMap.Bind("PDataStd_Position", "PDataXtd_Position");
+      aDMap.Bind("PDataStd_Placement", "PDataXtd_Placement");
+      aDMap.Bind("PDataStd_PatternStd", "PDataXtd_PatternStd");
+    }
+#ifdef OCCT_DEBUG
+    std::cout << "Storage_Sheme:: aDataMap.Size = " << aDMap.Extent() << std::endl;
+#endif
   }
 
-  if(aDMap.Extent()) {
-    if(aDMap.IsBound(oldName)) {
+  if (aDMap.Extent())
+  {
+    if (aDMap.IsBound(oldName))
+    {
       newName.Clear();
       newName = aDMap.Find(oldName);
       aMigration = Standard_True;
@@ -809,7 +799,7 @@ Standard_Boolean Storage_Schema::CheckTypeMigration(
       std::cout << " newName = " << newName << std::endl;
 #endif
     }
-  } 
+  }
   return aMigration;
 }
 #endif

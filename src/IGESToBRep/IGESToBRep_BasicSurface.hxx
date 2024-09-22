@@ -22,9 +22,6 @@
 #include <Standard_Handle.hxx>
 
 #include <IGESToBRep_CurveAndSurface.hxx>
-#include <Standard_Real.hxx>
-#include <Standard_Boolean.hxx>
-class IGESToBRep_CurveAndSurface;
 class Geom_Surface;
 class IGESData_IGESEntity;
 class Geom_Plane;

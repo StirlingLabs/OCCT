@@ -13,35 +13,26 @@
 
 
 #include <IFSelect_ContextWrite.hxx>
-#include <IFSelect_GeneralModifier.hxx>
 #include <Interface_Check.hxx>
 #include <Interface_CheckIterator.hxx>
 #include <Interface_CopyTool.hxx>
 #include <Interface_EntityIterator.hxx>
-#include <Interface_InterfaceModel.hxx>
 #include <Interface_Macros.hxx>
-#include <Interface_ParamType.hxx>
-#include <Interface_Protocol.hxx>
 #include <Interface_ReportEntity.hxx>
-#include <Interface_UndefinedContent.hxx>
 #include <Message.hxx>
 #include <Message_Messenger.hxx>
-#include <OSD_OpenFile.hxx>
+#include <OSD_FileSystem.hxx>
 #include <Standard_Transient.hxx>
 #include <Standard_Type.hxx>
 #include <StepData_Protocol.hxx>
 #include <StepData_StepDumper.hxx>
 #include <StepData_StepModel.hxx>
 #include <StepData_StepWriter.hxx>
-#include <StepData_UndefinedEntity.hxx>
 #include <StepFile_Read.hxx>
 #include <StepSelect_FileModifier.hxx>
 #include <StepSelect_WorkLibrary.hxx>
-#include <TCollection_HAsciiString.hxx>
-#include <TColStd_HSequenceOfInteger.hxx>
 
 #include <errno.h>
-#include <sys/stat.h>
 IMPLEMENT_STANDARD_RTTIEXT(StepSelect_WorkLibrary,IFSelect_WorkLibrary)
 
 StepSelect_WorkLibrary::StepSelect_WorkLibrary
@@ -67,13 +58,10 @@ Standard_Integer  StepSelect_WorkLibrary::ReadFile
    Handle(Interface_InterfaceModel)& model,
    const Handle(Interface_Protocol)& protocol) const
 {
-  long status = 1;
   DeclareAndCast(StepData_Protocol,stepro,protocol);
   if (stepro.IsNull()) return 1;
-  Handle(StepData_StepModel) stepmodel  = new StepData_StepModel;
-  model  = stepmodel;
-  status = StepFile_Read(name, 0, stepmodel, stepro);
-  return status;
+  Standard_Integer aStatus = StepFile_Read(name, 0, Handle(StepData_StepModel)::DownCast(model), stepro);
+  return aStatus;
 }
 
 Standard_Integer  StepSelect_WorkLibrary::ReadStream (const Standard_CString theName,
@@ -81,13 +69,10 @@ Standard_Integer  StepSelect_WorkLibrary::ReadStream (const Standard_CString the
                                                       Handle(Interface_InterfaceModel)& model,
                                                       const Handle(Interface_Protocol)& protocol) const
 {
-  long status = 1;
   DeclareAndCast(StepData_Protocol, stepro, protocol);
   if (stepro.IsNull()) return 1;
-  Handle(StepData_StepModel) stepmodel = new StepData_StepModel;
-  model = stepmodel;
-  status = StepFile_Read(theName, &theIStream, stepmodel, stepro);
-  return status;
+  Standard_Integer aStatus = StepFile_Read(theName, &theIStream, Handle(StepData_StepModel)::DownCast(model), stepro);
+  return aStatus;
 }
 
 
@@ -100,10 +85,10 @@ Standard_Boolean  StepSelect_WorkLibrary::WriteFile
   DeclareAndCast(StepData_Protocol,stepro,ctx.Protocol());
   if (stepmodel.IsNull() || stepro.IsNull()) return Standard_False;
 
-  std::ofstream fout;
-  OSD_OpenStream(fout,ctx.FileName(),std::ios::out|std::ios::trunc);
+  const Handle(OSD_FileSystem)& aFileSystem = OSD_FileSystem::DefaultFileSystem();
+  std::shared_ptr<std::ostream> aStream = aFileSystem->OpenOStream (ctx.FileName(), std::ios::out | std::ios::binary | std::ios::trunc);
 
-  if (!fout || !fout.is_open()) {
+  if (aStream.get() == NULL) {
     ctx.CCheck(0)->AddFail("Step File could not be created");
     sout<<" Step File could not be created : " << ctx.FileName() << std::endl; return 0;
   }
@@ -130,12 +115,13 @@ Standard_Boolean  StepSelect_WorkLibrary::WriteFile
   for (chl.Start(); chl.More(); chl.Next())
     ctx.CCheck(chl.Number())->GetMessages(chl.Value());
   sout<<" Write ";
-  Standard_Boolean isGood = SW.Print(fout);                 
+  Standard_Boolean isGood = SW.Print (*aStream);                 
   sout<<" Done"<<std::endl;
       
   errno = 0;
-  fout.close();
-  isGood = fout.good() && isGood && !errno;
+  aStream->flush();
+  isGood = aStream->good() && isGood && !errno;
+  aStream.reset();
   if(errno)
     sout << strerror(errno) << std::endl;
   return isGood;  

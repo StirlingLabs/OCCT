@@ -21,23 +21,12 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
-#include <Standard_Real.hxx>
 #include <Standard_Boolean.hxx>
 #include <TColgp_Array1OfXYZ.hxx>
 
 class TopoDS_Shape;
 class GProp_GProps;
 class gp_Pln;
-class BRepGProp_EdgeTool;
-class BRepGProp_Face;
-class BRepGProp_Domain;
-class BRepGProp_Cinert;
-class BRepGProp_Sinert;
-class BRepGProp_Vinert;
-class BRepGProp_VinertGK;
-class BRepGProp_UFunction;
-class BRepGProp_TFunction;
-class gp_XYZ;
 
 
 //! Provides global functions to compute a shape's global
@@ -258,34 +247,6 @@ public:
     const Standard_Boolean IFlag = Standard_False, 
     const Standard_Boolean SkipShared = Standard_False);
 
-
-protected:
-
-
-
-
-
-private:
-
-
-
-
-friend class BRepGProp_EdgeTool;
-friend class BRepGProp_Face;
-friend class BRepGProp_Domain;
-friend class BRepGProp_Cinert;
-friend class BRepGProp_Sinert;
-friend class BRepGProp_Vinert;
-friend class BRepGProp_VinertGK;
-friend class BRepGProp_UFunction;
-friend class BRepGProp_TFunction;
-
 };
-
-
-
-
-
-
 
 #endif // _BRepGProp_HeaderFile

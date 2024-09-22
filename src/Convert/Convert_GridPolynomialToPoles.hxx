@@ -25,10 +25,7 @@
 #include <TColStd_HArray1OfInteger.hxx>
 #include <TColgp_HArray2OfPnt.hxx>
 #include <Standard_Integer.hxx>
-#include <Standard_Boolean.hxx>
 #include <TColStd_HArray2OfInteger.hxx>
-class Standard_DomainError;
-class StdFail_NotDone;
 
 
 //! Convert a grid of Polynomial Surfaces

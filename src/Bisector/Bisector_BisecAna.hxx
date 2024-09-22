@@ -23,12 +23,9 @@
 #include <Bisector_Curve.hxx>
 #include <Standard_Real.hxx>
 #include <GeomAbs_JoinType.hxx>
-#include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
 #include <GeomAbs_Shape.hxx>
 class Geom2d_TrimmedCurve;
-class Standard_DomainError;
-class Standard_RangeError;
 class Geom2d_Curve;
 class gp_Pnt2d;
 class gp_Vec2d;

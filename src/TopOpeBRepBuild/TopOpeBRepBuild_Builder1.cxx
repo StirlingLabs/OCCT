@@ -25,7 +25,6 @@
 #include <TopAbs_ShapeEnum.hxx>
 #include <TopExp.hxx>
 #include <TopoDS.hxx>
-#include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopOpeBRepBuild_Builder1.hxx>
@@ -39,7 +38,6 @@
 #include <TopOpeBRepDS_EXPORT.hxx>
 #include <TopOpeBRepDS_HDataStructure.hxx>
 #include <TopOpeBRepDS_Interference.hxx>
-#include <TopOpeBRepDS_ListIteratorOfListOfInterference.hxx>
 #include <TopOpeBRepDS_ListOfInterference.hxx>
 #include <TopOpeBRepDS_ShapeShapeInterference.hxx>
 #include <TopOpeBRepDS_ShapeWithState.hxx>
@@ -183,7 +181,7 @@ void TopOpeBRepBuild_Builder1::MergeKPart()
    
     TopTools_ListIteratorOfListOfShape its(Merged(myShape1,myState1));
     for (; its.More(); its.Next()) {
-      CorrectResult2d(its.Value());
+      CorrectResult2d(its.ChangeValue());
     }
   }
     
@@ -267,7 +265,7 @@ void TopOpeBRepBuild_Builder1::GFillShellSFS (const TopoDS_Shape& SH,
   
   TopOpeBRepTool_ShapeExplorer exFace;
 
-  TopoDS_Shape SH1 = SH;// SH1.Orientation(TopAbs_FORWARD);
+  const TopoDS_Shape& SH1 = SH;// SH1.Orientation(TopAbs_FORWARD);
   
   //1) process firstly same domain faces and non-interference faces
   for (exFace.Init(SH1,TopAbs_FACE); exFace.More(); exFace.Next()) {
@@ -291,7 +289,7 @@ void TopOpeBRepBuild_Builder1::GFillShellSFS (const TopoDS_Shape& SH,
 
   //2 Process all other faces
   for (exFace.Init(SH1,TopAbs_FACE); exFace.More(); exFace.Next()) {
-    TopoDS_Shape FOR = exFace.Current();
+    const TopoDS_Shape& FOR = exFace.Current();
     if(!myDataStructure -> HasShape(FOR)
        ||
        myDataStructure->HasSameDomain(FOR))
@@ -423,7 +421,7 @@ void TopOpeBRepBuild_Builder1::GFillWireNotSameDomWES(const TopoDS_Shape& W,
   TopAbs_State TB1,TB2; G1.StatesON(TB1,TB2);
   Standard_Boolean RevOri1 = G1.IsToReverse1();
 
-  TopoDS_Shape WW = W; //WW.Orientation(TopAbs_FORWARD);
+  const TopoDS_Shape& WW = W; //WW.Orientation(TopAbs_FORWARD);
 
   TopOpeBRepTool_ShapeExplorer exEdge(WW,TopAbs_EDGE);
   for (; exEdge.More(); exEdge.Next()) {
@@ -520,7 +518,7 @@ void TopOpeBRepBuild_Builder1::GFillFaceSameDomSFS(const TopoDS_Shape& FOR,
   if(myDataStructure -> DS().AncestorRank(FOR) != 1)
     return;
 
-  TopOpeBRepBuild_GTopo G1 = Gin;
+  const TopOpeBRepBuild_GTopo& G1 = Gin;
 
   TopAbs_State TB1,TB2; G1.StatesON(TB1,TB2);
 
@@ -698,7 +696,7 @@ void TopOpeBRepBuild_Builder1::GFillWireSameDomWES(const TopoDS_Shape& W,
 {
   TopAbs_State TB1,TB2; G1.StatesON(TB1,TB2);
 
-  TopoDS_Shape WW = W; //WW.Orientation(TopAbs_FORWARD);
+  const TopoDS_Shape& WW = W; //WW.Orientation(TopAbs_FORWARD);
 
   Standard_Integer iref = myDataStructure -> DS().AncestorRank(W);
 
@@ -880,7 +878,7 @@ void TopOpeBRepBuild_Builder1::GFillEdgeSameDomWES(const TopoDS_Shape& EOR,
     }
 
     //we should process all same domain edges (ON2D) in the code above
-    //and we can not proceess edges with UNKNOWN state
+    //and we can not process edges with UNKNOWN state
     if(aState == TopAbs_ON || aState == TopAbs_UNKNOWN) 
       continue;
 
@@ -1371,7 +1369,7 @@ Standard_Integer TopOpeBRepBuild_Builder1::PerformPieceOn2D (const TopoDS_Shape&
 	    // we are looking for the same piece as aPieceObj among aPartOnTool
 	    TopTools_ListIteratorOfListOfShape anItTool(aPartOnTool);
 	    for (k=1; anItTool.More(); anItTool.Next(), k++) {
-	      TopoDS_Shape& aPieceTool=anItTool.Value();
+	      TopoDS_Shape& aPieceTool=anItTool.ChangeValue();
 	      aPieceTool.Orientation(anEdgeTool.Orientation());
 
 	      Standard_Boolean aIsSameCnd, IsDegFlag;
@@ -1588,7 +1586,7 @@ Standard_Integer TopOpeBRepBuild_Builder1::TwoPiecesON (const TopTools_SequenceO
       if(!anAd1 || !anAd2)
 	return 12;
       else
-	return 10; //10 doesn't mean anything just to retutn something
+	return 10; //10 doesn't mean anything just to return something
     }
     
     // case c.  No==Nt , To==Tt
@@ -1642,7 +1640,7 @@ Standard_Integer TopOpeBRepBuild_Builder1::TwoPiecesON (const TopTools_SequenceO
       if(!anAd1 || !anAd2) 
 	 return 14;
        else
-	 return 10; //10 doesn't mean anything just to retutn something
+	 return 10; //10 doesn't mean anything just to return something
     }
     return 10;
   } // end of if (!anAd1 || !anAd2 || !aScPrFlag1 || !aScPrFlag2)

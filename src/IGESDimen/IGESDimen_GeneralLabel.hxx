@@ -18,13 +18,11 @@
 #define _IGESDimen_GeneralLabel_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <IGESDimen_HArray1OfLeaderArrow.hxx>
 #include <IGESData_IGESEntity.hxx>
 #include <Standard_Integer.hxx>
 class IGESDimen_GeneralNote;
-class Standard_OutOfRange;
 class IGESDimen_LeaderArrow;
 
 

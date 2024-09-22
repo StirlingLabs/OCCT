@@ -18,10 +18,9 @@
 #define Draw_MapOfAsciiString_HeaderFile
 
 #include <TCollection_AsciiString.hxx>
-#include <TCollection_AsciiString.hxx>
 #include <NCollection_IndexedMap.hxx>
 
-typedef NCollection_IndexedMap<TCollection_AsciiString,TCollection_AsciiString> Draw_MapOfAsciiString;
+typedef NCollection_IndexedMap<TCollection_AsciiString> Draw_MapOfAsciiString;
 
 
 #endif

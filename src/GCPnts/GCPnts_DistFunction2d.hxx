@@ -14,12 +14,10 @@
 #ifndef _GCPnts_DistFunction2d_HeaderFile
 #define _GCPnts_DistFunction2d_HeaderFile
 
-#include <gp_Lin2d.hxx>
 #include <math_Function.hxx>
 #include <math_MultipleVarFunction.hxx>
 #include <Adaptor2d_Curve2d.hxx>
 
-class gp_Pnt2d;
 
 //! Class to define function, which calculates square distance between point on curve
 //! C(u), U1 <= u <= U2 and line passing through points C(U1) and C(U2)

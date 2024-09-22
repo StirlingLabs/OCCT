@@ -23,26 +23,14 @@
 
 #include <AppDef_MultiLine.hxx>
 #include <Standard_Integer.hxx>
-#include <TColStd_HArray1OfReal.hxx>
 #include <AppParCurves_HArray1OfConstraintCouple.hxx>
-#include <TColStd_HArray1OfInteger.hxx>
-#include <Standard_Real.hxx>
 #include <GeomAbs_Shape.hxx>
-#include <Standard_Boolean.hxx>
 #include <AppParCurves_MultiBSpCurve.hxx>
 #include <Standard_OStream.hxx>
 #include <TColStd_Array1OfReal.hxx>
 #include <math_Vector.hxx>
 #include <AppParCurves_Constraint.hxx>
 class AppDef_SmoothCriterion;
-class Standard_OutOfRange;
-class Standard_DimensionError;
-class Standard_DomainError;
-class Standard_ConstructionError;
-class StdFail_NotDone;
-class gp_VectorWithNullMagnitude;
-class AppDef_MultiLine;
-class AppParCurves_MultiBSpCurve;
 class math_Matrix;
 class FEmTool_Curve;
 class FEmTool_Assembly;

@@ -18,7 +18,6 @@
 #include <OSD_OpenFile.hxx>
 #include <OSD_Path.hxx>
 #include <RWMesh_FaceIterator.hxx>
-#include <RWMesh_MaterialMap.hxx>
 #include <RWObj_ObjMaterialMap.hxx>
 #include <RWObj_ObjWriterContext.hxx>
 #include <Standard_CLocaleSentry.hxx>
@@ -113,6 +112,12 @@ bool RWObj_CafWriter::Perform (const Handle(TDocStd_Document)& theDocument,
   TCollection_AsciiString aFolder, aFileName, aFullFileNameBase, aShortFileNameBase, aFileExt;
   OSD_Path::FolderAndFileFromPath (myFile, aFolder, aFileName);
   OSD_Path::FileNameAndExtension (aFileName, aShortFileNameBase, aFileExt);
+
+  Standard_Real aLengthUnit = 1.;
+  if (XCAFDoc_DocumentTool::GetLengthUnit(theDocument, aLengthUnit))
+  {
+    myCSTrsf.SetInputLengthUnit(aLengthUnit);
+  }
 
   if (theRootLabels.IsEmpty()
   || (theLabelFilter != NULL && theLabelFilter->IsEmpty()))

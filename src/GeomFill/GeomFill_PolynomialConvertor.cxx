@@ -22,10 +22,10 @@
 #include <gp_Vec.hxx>
 #include <PLib.hxx>
 #include <StdFail_NotDone.hxx>
-#include <TColStd_Array1OfReal.hxx>
 #include <TColStd_HArray1OfInteger.hxx>
 #include <TColStd_HArray1OfReal.hxx>
 #include <TColStd_HArray2OfReal.hxx>
+#include <math_Vector.hxx>
 
 GeomFill_PolynomialConvertor::GeomFill_PolynomialConvertor(): 
 		    Ordre(8),

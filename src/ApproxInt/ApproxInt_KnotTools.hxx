@@ -14,35 +14,22 @@
 #ifndef _ApproxInt_KnotTools_HeaderFile
 #define _ApproxInt_KnotTools_HeaderFile
 
-#ifndef _Standard_HeaderFile
-#include <Standard.hxx>
-#endif
-#ifndef _Standard_DefineAlloc_HeaderFile
 #include <Standard_DefineAlloc.hxx>
-#endif
-#ifndef _Standard_Macro_HeaderFile
 #include <Standard_Macro.hxx>
-#endif
-
-#ifndef _Standard_Boolean_HeaderFile
 #include <Standard_Boolean.hxx>
-#endif
-#ifndef _Standard_Real_HeaderFile
 #include <Standard_Real.hxx>
-#endif
-#ifndef _Standard_Integer_HeaderFile
 #include <Standard_Integer.hxx>
-#endif
-
 #include <TColgp_Array1OfPnt2d.hxx>
+#include <NCollection_Sequence.hxx>
+#include <NCollection_List.hxx>
+#include <math_Vector.hxx>
 #include <TColgp_Array1OfPnt.hxx>
 #include <TColStd_Array1OfReal.hxx>
 #include <NCollection_LocalArray.hxx>
+#include <NCollection_Vector.hxx>
+#include <Approx_ParametrizationType.hxx>
 
-class math_Vector;
-template <class A> class NCollection_Sequence;
-template <class A> class NCollection_List;
-template <class A> class NCollection_Vector;
+class IntPatch_WLine;
 
 // Corresponds for debug information output.
 // Debug information is also printed when OCCT_DEBUG defined.
@@ -83,6 +70,22 @@ public:
                                          const Standard_Boolean theApproxU2V2,
                                          const Standard_Integer theMinNbPnts,
                                          NCollection_Vector<Standard_Integer>& theKnots);
+
+  //! Builds discrete curvature
+  Standard_EXPORT static void BuildCurvature(
+    const NCollection_LocalArray<Standard_Real>& theCoords,
+    const Standard_Integer theDim,
+    const math_Vector& thePars,
+    TColStd_Array1OfReal& theCurv,
+    Standard_Real& theMaxCurv);
+
+  //! Defines preferable parametrization type for theWL 
+  Standard_EXPORT static Approx_ParametrizationType DefineParType(const Handle(IntPatch_WLine)& theWL,
+    const Standard_Integer theFpar, const Standard_Integer theLpar,
+    const Standard_Boolean theApproxXYZ,
+    const Standard_Boolean theApproxU1V1,
+    const Standard_Boolean theApproxU2V2);
+
 
 private:
 

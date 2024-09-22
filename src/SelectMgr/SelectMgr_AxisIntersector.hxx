@@ -52,6 +52,11 @@ public:
                                                                                const gp_GTrsf& theTrsf,
                                                                                const Handle(SelectMgr_FrustumBuilder)& theBuilder) const Standard_OVERRIDE;
 
+  //! Returns a copy of the intersector transformed using the builder configuration given.
+  //! Builder is an argument that represents corresponding settings for re-constructing transformed frustum from scratch.
+  //! In this class, builder is not used and theBuilder parameter is ignored.
+  Standard_EXPORT virtual Handle(SelectMgr_BaseIntersector) CopyWithBuilder (const Handle(SelectMgr_FrustumBuilder)& theBuilder) const Standard_OVERRIDE;
+
 public:
 
   //! Intersection test between defined axis and given axis-aligned box
@@ -110,6 +115,44 @@ public:
                                                            const Standard_Real theRadius,
                                                            const SelectMgr_ViewClipRange& theClipRange,
                                                            SelectBasics_PickResult& thePickResult) const Standard_OVERRIDE;
+
+  //! Returns true if selecting volume is overlapped by cylinder (or cone) with radiuses theBottomRad
+  //! and theTopRad, height theHeight and transformation to apply theTrsf.
+  Standard_EXPORT virtual Standard_Boolean OverlapsCylinder (const Standard_Real theBottomRad,
+                                                             const Standard_Real theTopRad,
+                                                             const Standard_Real theHeight,
+                                                             const gp_Trsf& theTrsf,
+                                                             const Standard_Boolean theIsHollow,
+                                                             const SelectMgr_ViewClipRange& theClipRange,
+                                                             SelectBasics_PickResult& thePickResult) const Standard_OVERRIDE;
+
+  //! Returns true if selecting volume is overlapped by cylinder (or cone) with radiuses theBottomRad
+  //! and theTopRad, height theHeight and transformation to apply theTrsf.
+  Standard_EXPORT virtual Standard_Boolean OverlapsCylinder (const Standard_Real theBottomRad,
+                                                             const Standard_Real theTopRad,
+                                                             const Standard_Real theHeight,
+                                                             const gp_Trsf& theTrsf,
+                                                             const Standard_Boolean theIsHollow,
+                                                             Standard_Boolean* theInside = NULL) const Standard_OVERRIDE;
+
+  //! Returns true if selecting volume is overlapped by circle with radius theRadius,
+  //! boolean theIsFilled and transformation to apply theTrsf.
+  //! The position and orientation of the circle are specified
+  //! via theTrsf transformation for gp::XOY() with center in gp::Origin().
+  Standard_EXPORT virtual Standard_Boolean OverlapsCircle (const Standard_Real theRadius,
+                                                           const gp_Trsf& theTrsf,
+                                                           const Standard_Boolean theIsFilled,
+                                                           const SelectMgr_ViewClipRange& theClipRange,
+                                                           SelectBasics_PickResult& thePickResult) const Standard_OVERRIDE;
+
+  //! Returns true if selecting volume is overlapped by circle with radius theRadius,
+  //! boolean theIsFilled and transformation to apply theTrsf.
+  //! The position and orientation of the circle are specified
+  //! via theTrsf transformation for gp::XOY() with center in gp::Origin().
+  Standard_EXPORT virtual Standard_Boolean OverlapsCircle (const Standard_Real theRadius,
+                                                           const gp_Trsf& theTrsf,
+                                                           const Standard_Boolean theIsFilled,
+                                                           Standard_Boolean* theInside = NULL) const Standard_OVERRIDE;
 
 public:
 

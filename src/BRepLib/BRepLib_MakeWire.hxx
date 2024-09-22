@@ -19,7 +19,6 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
 #include <BRepLib_WireError.hxx>
 #include <TopoDS_Edge.hxx>
@@ -31,10 +30,7 @@
 #include <Bnd_Box.hxx>
 #include <NCollection_UBTree.hxx>
 
-class StdFail_NotDone;
-class TopoDS_Edge;
 class TopoDS_Wire;
-class TopoDS_Vertex;
 
 //! Provides methods to build wires.
 //!

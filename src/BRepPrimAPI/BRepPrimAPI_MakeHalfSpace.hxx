@@ -19,15 +19,12 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
 #include <TopoDS_Solid.hxx>
 #include <BRepBuilderAPI_MakeShape.hxx>
-class StdFail_NotDone;
 class TopoDS_Face;
 class gp_Pnt;
 class TopoDS_Shell;
-class TopoDS_Solid;
 
 
 //! Describes functions to build half-spaces.

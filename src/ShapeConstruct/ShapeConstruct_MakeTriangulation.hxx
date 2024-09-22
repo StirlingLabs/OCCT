@@ -19,15 +19,10 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
-#include <Standard_Real.hxx>
 #include <TopoDS_Wire.hxx>
 #include <BRepBuilderAPI_MakeShape.hxx>
 #include <TColgp_Array1OfPnt.hxx>
-#include <Standard_Boolean.hxx>
-class TopoDS_Wire;
-
 
 
 class ShapeConstruct_MakeTriangulation  : public BRepBuilderAPI_MakeShape
@@ -41,7 +36,7 @@ public:
   
   Standard_EXPORT ShapeConstruct_MakeTriangulation(const TopoDS_Wire& wire, const Standard_Real prec = 0.0);
   
-  Standard_EXPORT virtual void Build() Standard_OVERRIDE;
+  Standard_EXPORT virtual void Build(const Message_ProgressRange& theRange = Message_ProgressRange()) Standard_OVERRIDE;
   
   Standard_EXPORT virtual Standard_Boolean IsDone() const Standard_OVERRIDE;
 

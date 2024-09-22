@@ -11,13 +11,11 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef _StdPrs_Point_H__
-#define _StdPrs_Point_H__
+#ifndef StdPrs_Point_HeaderFile
+#define StdPrs_Point_HeaderFile
 
 #include <Geom_Point.hxx>
 #include <Prs3d_Point.hxx>
-#include <Prs3d_Drawer.hxx>
-#include <Prs3d_Presentation.hxx>
 #include <StdPrs_ToolPoint.hxx>
 //computes the presentation of objects to be seen as points.
 typedef Prs3d_Point<Handle(Geom_Point), StdPrs_ToolPoint> StdPrs_Point;

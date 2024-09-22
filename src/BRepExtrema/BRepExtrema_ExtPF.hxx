@@ -14,9 +14,7 @@
 #ifndef _BRepExtrema_ExtPF_HeaderFile
 #define _BRepExtrema_ExtPF_HeaderFile
 
-#include <Standard_DefineAlloc.hxx>
 #include <Extrema_ExtPS.hxx>
-#include <Standard_Integer.hxx>
 #include <TColStd_SequenceOfReal.hxx>
 #include <Extrema_SequenceOfPOnSurf.hxx>
 #include <BRepAdaptor_Surface.hxx>
@@ -25,7 +23,6 @@
 
 class TopoDS_Vertex;
 class TopoDS_Face;
-class gp_Pnt;
 
 
 class BRepExtrema_ExtPF

@@ -22,8 +22,8 @@
 #include <Standard_Handle.hxx>
 
 #include <GeomToStep_Root.hxx>
+
 class StepGeom_SurfaceOfLinearExtrusion;
-class StdFail_NotDone;
 class Geom_SurfaceOfLinearExtrusion;
 
 
@@ -38,7 +38,8 @@ public:
   DEFINE_STANDARD_ALLOC
 
   
-  Standard_EXPORT GeomToStep_MakeSurfaceOfLinearExtrusion(const Handle(Geom_SurfaceOfLinearExtrusion)& CSurf);
+  Standard_EXPORT GeomToStep_MakeSurfaceOfLinearExtrusion(const Handle(Geom_SurfaceOfLinearExtrusion)& CSurf,
+                                                          const StepData_Factors& theLocalFactors = StepData_Factors());
   
   Standard_EXPORT const Handle(StepGeom_SurfaceOfLinearExtrusion)& Value() const;
 

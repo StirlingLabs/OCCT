@@ -13,21 +13,15 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef OpenGl_Text_Header
-#define OpenGl_Text_Header
+#ifndef OpenGl_Text_HeaderFile
+#define OpenGl_Text_HeaderFile
 
 #include <OpenGl_Element.hxx>
 
-#include <OpenGl_Aspects.hxx>
 #include <OpenGl_TextBuilder.hxx>
 
-#include <TCollection_ExtendedString.hxx>
-#include <Graphic3d_HorizontalTextAlignment.hxx>
 #include <Graphic3d_RenderingParams.hxx>
 #include <Graphic3d_Text.hxx>
-#include <Graphic3d_VerticalTextAlignment.hxx>
-
-#include <gp_Ax2.hxx>
 
 //! Text rendering
 class OpenGl_Text : public OpenGl_Element

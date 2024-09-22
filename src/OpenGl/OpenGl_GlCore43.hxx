@@ -13,8 +13,8 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef _OpenGl_GlCore43_Header
-#define _OpenGl_GlCore43_Header
+#ifndef OpenGl_GlCore43_HeaderFile
+#define OpenGl_GlCore43_HeaderFile
 
 #include <OpenGl_GlCore42.hxx>
 
@@ -25,8 +25,6 @@ private:
   typedef OpenGl_GlCore42 theBaseClass_t;
 
 public: //! @name OpenGL 4.3 additives to 4.2
-
-#if !defined(GL_ES_VERSION_2_0)
 
   using theBaseClass_t::glClearBufferData;
   using theBaseClass_t::glClearBufferSubData;
@@ -71,8 +69,6 @@ public: //! @name OpenGL 4.3 additives to 4.2
   using theBaseClass_t::glGetObjectLabel;
   using theBaseClass_t::glObjectPtrLabel;
   using theBaseClass_t::glGetObjectPtrLabel;
-
-#endif
 
 };
 

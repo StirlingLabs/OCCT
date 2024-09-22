@@ -16,10 +16,8 @@
 
 #include <AIS_InteractiveContext.hxx>
 #include <Media_PlayerContext.hxx>
-#include <Message.hxx>
 #include <Message_Messenger.hxx>
 #include <Graphic3d_ArrayOfTriangles.hxx>
-#include <Graphic3d_MediaTexture.hxx>
 #include <SelectMgr_EntityOwner.hxx>
 #include <Select3D_SensitivePrimitiveArray.hxx>
 #include <V3d_Viewer.hxx>
@@ -56,7 +54,7 @@ AIS_MediaPlayer::AIS_MediaPlayer()
 
   Graphic3d_MaterialAspect aMat;
   myFrameAspect = new Graphic3d_AspectFillArea3d (Aspect_IS_SOLID, Quantity_NOC_WHITE, Quantity_NOC_BLACK, Aspect_TOL_SOLID, 1.0f, aMat, aMat);
-  myFrameAspect->SetShadingModel (Graphic3d_TOSM_UNLIT);
+  myFrameAspect->SetShadingModel (Graphic3d_TypeOfShadingModel_Unlit);
   myFrameAspect->SetTextureMapOn (true);
   myFrameAspect->SetTextureSet (myFramePair);
 }

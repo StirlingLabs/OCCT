@@ -21,7 +21,6 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
-#include <Standard_Character.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_Real.hxx>
 #include <Standard_Boolean.hxx>
@@ -105,6 +104,9 @@ public:
   
   //! Returns the scale used in the IGES file.
   Standard_EXPORT Standard_Real Scale() const;
+
+  //! Returns the system length unit
+  Standard_EXPORT Standard_Real CascadeUnit() const;
   
   //! Returns the unit flag that was used to write the IGES file.
   Standard_EXPORT Standard_Integer UnitFlag() const;
@@ -203,6 +205,8 @@ public:
   
   Standard_EXPORT void SetReceiveName (const Handle(TCollection_HAsciiString)& val);
   
+  Standard_EXPORT void SetCascadeUnit(const Standard_Real theUnit);
+
   Standard_EXPORT void SetScale (const Standard_Real val);
   
   Standard_EXPORT void SetUnitFlag (const Standard_Integer val);
@@ -250,6 +254,7 @@ private:
   Standard_Integer theMaxDigitsDouble;
   Handle(TCollection_HAsciiString) theReceiveName;
   Standard_Real theScale;
+  Standard_Real theCascadeUnit;
   Standard_Integer theUnitFlag;
   Handle(TCollection_HAsciiString) theUnitName;
   Standard_Integer theLineWeightGrad;

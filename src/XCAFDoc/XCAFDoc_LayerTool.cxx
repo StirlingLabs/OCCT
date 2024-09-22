@@ -15,7 +15,6 @@
 
 #include <XCAFDoc_LayerTool.hxx>
 
-#include <Standard_GUID.hxx>
 #include <Standard_Type.hxx>
 #include <TCollection_ExtendedString.hxx>
 #include <TDataStd_Name.hxx>
@@ -242,11 +241,9 @@ void XCAFDoc_LayerTool::SetLayer(const TDF_Label& L,
   Handle(XCAFDoc_GraphNode) FGNode;
   Handle(XCAFDoc_GraphNode) ChGNode;
   if (! LayerL.FindAttribute( XCAFDoc::LayerRefGUID(), FGNode) ) {
-    FGNode = new XCAFDoc_GraphNode;
     FGNode = XCAFDoc_GraphNode::Set(LayerL);
   }
   if (! L.FindAttribute( XCAFDoc::LayerRefGUID(), ChGNode) ) {
-    ChGNode = new XCAFDoc_GraphNode;
     ChGNode = XCAFDoc_GraphNode::Set(L);
   }
   FGNode->SetGraphID( XCAFDoc::LayerRefGUID() );
@@ -417,19 +414,19 @@ Handle(TColStd_HSequenceOfExtendedString) XCAFDoc_LayerTool::GetLayers(const TDF
 //function : GetShapesOfLayer
 //purpose  : 
 //=======================================================================
-
-void XCAFDoc_LayerTool::GetShapesOfLayer(const TDF_Label& layerL,
-					 TDF_LabelSequence& ShLabels) const
+void XCAFDoc_LayerTool::GetShapesOfLayer(const TDF_Label& theLayerL,
+                                         TDF_LabelSequence& theShLabels)
 {
-  ShLabels.Clear();
+  theShLabels.Clear();
   Handle(XCAFDoc_GraphNode) aGNode;
-  if ( layerL.FindAttribute( XCAFDoc::LayerRefGUID(), aGNode) ) {
-    for (Standard_Integer i = 1; i <= aGNode->NbChildren(); i++) {
-      ShLabels.Append( aGNode->GetChild(i)->Label() );
+  if (theLayerL.FindAttribute(XCAFDoc::LayerRefGUID(), aGNode))
+  {
+    for (Standard_Integer aChildInd = 1; aChildInd <= aGNode->NbChildren(); aChildInd++)
+    {
+      theShLabels.Append(aGNode->GetChild(aChildInd)->Label());
     }
   }
 }
-
 
 //=======================================================================
 //function : IsVisible

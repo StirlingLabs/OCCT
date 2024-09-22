@@ -20,13 +20,10 @@
 #include <Standard.hxx>
 #include <Standard_Type.hxx>
 
-#include <Standard_Real.hxx>
 #include <gp_XY.hxx>
 #include <TColgp_HArray1OfXY.hxx>
 #include <IGESData_IGESEntity.hxx>
 #include <Standard_Integer.hxx>
-class Standard_OutOfRange;
-class gp_XY;
 class gp_Pnt2d;
 class gp_Pnt;
 

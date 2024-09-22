@@ -13,34 +13,47 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
+#include <XSDRAW.hxx>
 
 #include <AIS_InteractiveContext.hxx>
 #include <AIS_InteractiveObject.hxx>
 #include <AIS_Trihedron.hxx>
 #include <Aspect_TypeOfLine.hxx>
+#include <BRepBuilderAPI_Transform.hxx>
 #include <DBRep.hxx>
 #include <DDF_Browser.hxx>
 #include <DDocStd.hxx>
 #include <DDocStd_DrawDocument.hxx>
+#include <DE_Wrapper.hxx>
+#include <DEBRepCascade_ConfigurationNode.hxx>
+#include <DEXCAFCascade_ConfigurationNode.hxx>
 #include <Draw.hxx>
 #include <Draw_PluginMacro.hxx>
 #include <Draw_ProgressIndicator.hxx>
 #include <Geom_Axis2Placement.hxx>
+#include <IGESCAFControl_ConfigurationNode.hxx>
 #include <Prs3d_Drawer.hxx>
 #include <Prs3d_LineAspect.hxx>
 #include <Quantity_Color.hxx>
+#include <RWStl_ConfigurationNode.hxx>
+#include <RWGltf_ConfigurationNode.hxx>
+#include <RWObj_ConfigurationNode.hxx>
+#include <RWPly_ConfigurationNode.hxx>
 #include <STEPCAFControl_Controller.hxx>
+#include <STEPCAFControl_ConfigurationNode.hxx>
 #include <TCollection_AsciiString.hxx>
 #include <TCollection_ExtendedString.hxx>
 #include <TCollection_HAsciiString.hxx>
 #include <TColStd_HArray1OfInteger.hxx>
 #include <TColStd_HArray1OfReal.hxx>
 #include <TColStd_HSequenceOfExtendedString.hxx>
+#include <TColStd_MapIteratorOfPackedMapOfInteger.hxx>
 #include <TDataStd_AsciiString.hxx>
 #include <TDataStd_ByteArray.hxx>
 #include <TDataStd_Comment.hxx>
 #include <TDataStd_Integer.hxx>
 #include <TDataStd_IntegerArray.hxx>
+#include <XCAFDoc_LengthUnit.hxx>
 #include <TDataStd_Name.hxx>
 #include <TDataStd_Real.hxx>
 #include <TDataStd_RealArray.hxx>
@@ -66,7 +79,11 @@
 #include <V3d_Viewer.hxx>
 #include <ViewerTest.hxx>
 #include <ViewerTest_AutoUpdater.hxx>
+#include <Vrml_ConfigurationNode.hxx>
 #include <XCAFDoc.hxx>
+#include <XCAFDoc_AssemblyIterator.hxx>
+#include <XCAFDoc_AssemblyGraph.hxx>
+#include <XCAFDoc_AssemblyTool.hxx>
 #include <XCAFDoc_Area.hxx>
 #include <XCAFDoc_Centroid.hxx>
 #include <XCAFDoc_Color.hxx>
@@ -74,12 +91,14 @@
 #include <XCAFDoc_DimTol.hxx>
 #include <XCAFDoc_Dimension.hxx>
 #include <XCAFDoc_Datum.hxx>
+#include <XCAFDoc_Editor.hxx>
 #include <XCAFDoc_GeomTolerance.hxx>
 #include <XCAFDoc_DocumentTool.hxx>
 #include <XCAFDoc_GraphNode.hxx>
 #include <XCAFDoc_LayerTool.hxx>
 #include <XCAFDoc_Material.hxx>
 #include <XCAFDoc_ShapeTool.hxx>
+#include <XCAFDoc_VisMaterialTool.hxx>
 #include <XCAFDoc_Volume.hxx>
 #include <XCAFPrs.hxx>
 #include <XCAFPrs_AISObject.hxx>
@@ -93,9 +112,9 @@
 #include <XDEDRAW_GDTs.hxx>
 #include <XDEDRAW_Views.hxx>
 #include <XDEDRAW_Notes.hxx>
-#include <XSDRAW.hxx>
 #include <XSDRAWIGES.hxx>
 #include <XSDRAWSTEP.hxx>
+#include <UnitsMethods.hxx>
 
 #include <BinXCAFDrivers.hxx>
 #include <XmlXCAFDrivers.hxx>
@@ -191,6 +210,9 @@ static Standard_Integer saveDoc (Draw_Interpretor& di, Standard_Integer argc, co
       break;
     case PCDM_SS_UserBreak:
       di << "Storage error: user break\n";
+      break;
+    case PCDM_SS_UnrecognizedFormat:
+      di << "Storage error: unrecognized document storage format " << D->StorageFormat() << "\n";
       break;
   }
 
@@ -302,7 +324,7 @@ static Standard_Integer dump (Draw_Interpretor& di, Standard_Integer argc, const
 //=======================================================================
 
 static void StatAssembly(const TDF_Label L,
-			 const Standard_Integer level,
+                         const Standard_Integer level,
                          Handle(TColStd_HArray1OfInteger) &HAI,
                          Standard_Integer &NbCentroidProp,
                          Standard_Integer &NbVolumeProp,
@@ -310,9 +332,10 @@ static void StatAssembly(const TDF_Label L,
                          Standard_Integer &NbShapesWithName,
                          Standard_Integer &NbShapesWithColor,
                          Standard_Integer &NbShapesWithLayer,
+                         Standard_Integer &NbShapesWithVisMaterial,
                          Handle(TDocStd_Document) &aDoc,
                          Standard_Boolean &PrintStructMode,
-			 Draw_Interpretor& di)
+                         Draw_Interpretor& di)
 {
   if(PrintStructMode) {
     for(Standard_Integer j=0; j<=level; j++)
@@ -349,6 +372,7 @@ static void StatAssembly(const TDF_Label L,
   }
   Handle(XCAFDoc_ColorTool) CTool = XCAFDoc_DocumentTool::ColorTool(aDoc->Main());
   Handle(XCAFDoc_LayerTool) LTool = XCAFDoc_DocumentTool::LayerTool(aDoc->Main());
+  Handle(XCAFDoc_VisMaterialTool) VMTool = XCAFDoc_DocumentTool::VisMaterialTool(aDoc->Main());
   Quantity_ColorRGBA col;
   Standard_Boolean IsColor = Standard_False;
   Standard_Boolean IsByLayer = Standard_False;
@@ -365,7 +389,7 @@ static void StatAssembly(const TDF_Label L,
     {
       Handle(TColStd_HSequenceOfExtendedString) aLayerS;
       LTool->GetLayers(L, aLayerS);
-      // Currently for DXF pnly, thus
+      // Currently for DXF only, thus
       // only 1 Layer should be.
       if(aLayerS->Length() == 1)
       {
@@ -407,14 +431,29 @@ static void StatAssembly(const TDF_Label L,
     }
     NbShapesWithLayer++;
   }
-  if(PrintStructMode) di<<"\n";
-  
+
+  TDF_Label aVMat;
+  if (VMTool->GetShapeMaterial(L, aVMat))
+  {
+    if (PrintStructMode) {
+      di << "VisMaterial(";
+      Handle(TDataStd_Name) aNodeName;
+      if (aVMat.FindAttribute(TDataStd_Name::GetID(), aNodeName))
+      {
+        di << "\"" << aNodeName->Get() << "\"";
+      }
+      di << ") ";
+    }
+    NbShapesWithVisMaterial++;
+  }
+  if (PrintStructMode) di << "\n";
+
   HAI->SetValue(level, HAI->Value(level)+1 );
   if(L.HasChild()) {
     for(Standard_Integer i=1; i<=L.NbChildren(); i++) {
       StatAssembly(L.FindChild(i), level+1, HAI, NbCentroidProp, NbVolumeProp,
                    NbAreaProp, NbShapesWithName, NbShapesWithColor,
-                   NbShapesWithLayer, aDoc, PrintStructMode, di);
+                   NbShapesWithLayer, NbShapesWithVisMaterial, aDoc, PrintStructMode, di);
     }
   }
 
@@ -444,14 +483,14 @@ static Standard_Integer statdoc (Draw_Interpretor& di, Standard_Integer argc, co
   if(PrintStructMode) di<<"\nStructure of shapes in the document:\n";
   Standard_Integer level=0;
   Standard_Integer NbCentroidProp=0, NbVolumeProp=0, NbAreaProp=0;
-  Standard_Integer NbShapesWithName=0, NbShapesWithColor=0, NbShapesWithLayer=0;
+  Standard_Integer NbShapesWithName=0, NbShapesWithColor=0, NbShapesWithLayer=0, NbShapesWithVisMaterial = 0;
   Handle(TColStd_HArray1OfInteger) HAI = new TColStd_HArray1OfInteger(0,20);
   Standard_Integer i=0;
   for(i=0; i<=20; i++) HAI->SetValue(i,0);
   for(i=1; i<=SeqLabels.Length(); i++) {
     StatAssembly(SeqLabels.Value(i), level, HAI, NbCentroidProp, NbVolumeProp,
                  NbAreaProp, NbShapesWithName, NbShapesWithColor,
-                 NbShapesWithLayer, Doc, PrintStructMode, di);
+                 NbShapesWithLayer, NbShapesWithVisMaterial, Doc, PrintStructMode, di);
   }
   Standard_Integer NbLabelsShape = 0;
   di<<"\nStatistis of shapes in the document:\n";
@@ -465,6 +504,7 @@ static Standard_Integer statdoc (Draw_Interpretor& di, Standard_Integer argc, co
   di<<"Number of labels with name = "<<NbShapesWithName<<"\n";
   di<<"Number of labels with color link = "<<NbShapesWithColor<<"\n";
   di<<"Number of labels with layer link = "<<NbShapesWithLayer<<"\n";
+  di << "Number of labels with vis material link = " << NbShapesWithVisMaterial << "\n";
 
   di<<"\nStatistis of Props in the document:\n";
   di<<"Number of Centroid Props = "<<NbCentroidProp<<"\n";
@@ -497,6 +537,23 @@ static Standard_Integer statdoc (Draw_Interpretor& di, Standard_Integer argc, co
       di << "\"" << layerName << "\" ";
     }
     di<<"\n";
+  }
+
+  Handle(XCAFDoc_VisMaterialTool) VMTool = XCAFDoc_DocumentTool::VisMaterialTool(Doc->Main());
+  TDF_LabelSequence aVMats;
+  VMTool->GetMaterials(aVMats);
+  di << "\nNumber of vis materials = " << aVMats.Length() << "\n";
+  if (!aVMats.IsEmpty())
+  {
+    for (TDF_LabelSequence::Iterator aVMIter(aVMats); aVMIter.More(); aVMIter.Next())
+    {
+      Handle(TDataStd_Name) aNodeName;
+      if (aVMIter.Value().FindAttribute(TDataStd_Name::GetID(), aNodeName))
+      {
+        di << "\"" << aNodeName->Get() << "\" ";
+      }
+    }
+    di << "\n";
   }
 
   di<<"\n";
@@ -580,7 +637,7 @@ static Standard_Integer show (Draw_Interpretor& di, Standard_Integer argc, const
   TCollection_AsciiString   aViewName = TCollection_AsciiString ("Driver1/Document_") + argv[1] + "/View1";
   if (!TPrsStd_AISViewer::Find (aRoot, aDocViewer))
   {
-    ViewerTest::ViewerInit (0, 0, 0, 0, aViewName.ToCString(), "");
+    ViewerTest::ViewerInit (aViewName);
     aDocViewer = TPrsStd_AISViewer::New (aRoot, ViewerTest::GetAISContext());
   }
 
@@ -639,12 +696,14 @@ private:
   XDEDRAW_XDisplayTool()
   : myDispMode(-2),
     myHiMode  (-2),
+    myIsAutoTriang (-1),
     myToPrefixDocName (Standard_True),
     myToGetNames (Standard_True),
     myToExplore  (Standard_False) {}
 
   //! Display single label.
-  Standard_Integer displayLabel (const TDF_Label& theLabel,
+  Standard_Integer displayLabel (Draw_Interpretor& theDI,
+                                 const TDF_Label& theLabel,
                                  const TCollection_AsciiString& theNamePrefix,
                                  const TopLoc_Location& theLoc,
                                  TCollection_AsciiString& theOutDispList)
@@ -696,7 +755,7 @@ private:
         const TopLoc_Location aLoc = theLoc * XCAFDoc_ShapeTool::GetLocation (theLabel);
         for (TDF_ChildIterator aChildIter (aRefLabel); aChildIter.More(); aChildIter.Next())
         {
-          if (displayLabel (aChildIter.Value(), aName, aLoc, theOutDispList) == 1)
+          if (displayLabel (theDI, aChildIter.Value(), aName, aLoc, theOutDispList) == 1)
           {
             return 1;
           }
@@ -718,7 +777,7 @@ private:
       }
       if (!aPrs->AcceptDisplayMode (myDispMode))
       {
-        std::cout << "Syntax error: " << aPrs->DynamicType()->Name() << " rejects " << myDispMode << " display mode\n";
+        theDI << "Syntax error: " << aPrs->DynamicType()->Name() << " rejects " << myDispMode << " display mode";
         return 1;
       }
       else
@@ -731,10 +790,14 @@ private:
       if (myHiMode != -1
       && !aPrs->AcceptDisplayMode (myHiMode))
       {
-        std::cout << "Syntax error: " << aPrs->DynamicType()->Name() << " rejects " << myHiMode << " display mode\n";
+        theDI << "Syntax error: " << aPrs->DynamicType()->Name() << " rejects " << myHiMode << " display mode";
         return 1;
       }
       aPrs->SetHilightMode (myHiMode);
+    }
+    if (myIsAutoTriang != -1)
+    {
+      aPrs->Attributes()->SetAutoTriangulation (myIsAutoTriang == 1);
     }
 
     ViewerTest::Display (aName, aPrs, false);
@@ -750,7 +813,7 @@ private:
     Handle(AIS_InteractiveContext) aContext = ViewerTest::GetAISContext();
     if (aContext.IsNull())
     {
-      std::cout << "Error: no active view!\n";
+      theDI << "Error: no active viewer";
       return 1;
     }
 
@@ -779,6 +842,17 @@ private:
             && TCollection_AsciiString (theArgVec[anArgIter + 1]).IsIntegerValue())
       {
         myHiMode = TCollection_AsciiString (theArgVec[++anArgIter]).IntegerValue();
+      }
+      else if (anArgCase == "-autotr"
+            || anArgCase == "-autotrian"
+            || anArgCase == "-autotriang"
+            || anArgCase == "-autotriangulation"
+            || anArgCase == "-noautotr"
+            || anArgCase == "-noautotrian"
+            || anArgCase == "-noautotriang"
+            || anArgCase == "-noautotriangulation")
+      {
+        myIsAutoTriang = Draw::ParseOnOffNoIterator (theNbArgs, theArgVec, anArgIter) ? 1 : 0;
       }
       else if (anArgCase == "-docprefix"
             || anArgCase == "-nodocprefix")
@@ -852,7 +926,7 @@ private:
             if (!myDoc.IsNull()
               && myDoc != aDoc)
             {
-              std::cout << "Syntax error at '" << theArgVec[anArgIter] << "'\n";
+              theDI << "Syntax error at '" << theArgVec[anArgIter] << "'";
               return 1;
             }
             myDoc = aDoc;
@@ -861,7 +935,7 @@ private:
         }
         if (myDoc.IsNull())
         {
-          std::cout << "Syntax error at '" << theArgVec[anArgIter] << "'\n";
+          theDI << "Syntax error at '" << theArgVec[anArgIter] << "'";
           return 1;
         }
 
@@ -870,7 +944,7 @@ private:
         if (aLabel.IsNull()
         || !XCAFDoc_ShapeTool::IsShape (aLabel))
         {
-          std::cout << "Syntax error: " << aValue << " is not a valid shape label\n";
+          theDI << "Syntax error: " << aValue << " is not a valid shape label";
           return 1;
         }
         myLabels.Append (aLabel);
@@ -878,7 +952,7 @@ private:
     }
     if (myDoc.IsNull())
     {
-      std::cout << "Syntax error: not enough arguments\n";
+      theDI << "Syntax error: not enough arguments";
       return 1;
     }
     if (myLabels.IsEmpty())
@@ -889,7 +963,7 @@ private:
     for (TDF_LabelSequence::Iterator aLabIter (myLabels); aLabIter.More(); aLabIter.Next())
     {
       const TDF_Label& aLabel = aLabIter.Value();
-      if (displayLabel (aLabel, myToPrefixDocName ? myDocName + ":" : "", TopLoc_Location(), myOutDispList) == 1)
+      if (displayLabel (theDI, aLabel, myToPrefixDocName ? myDocName + ":" : "", TopLoc_Location(), myOutDispList) == 1)
       {
         return 1;
       }
@@ -906,7 +980,7 @@ private:
   }
 
 private:
-  NCollection_Map<TCollection_AsciiString, TCollection_AsciiString>
+  NCollection_Map<TCollection_AsciiString>
                            myNameMap;         //!< names map to handle collisions
   Handle(TDocStd_Document) myDoc;             //!< document
   TCollection_AsciiString  myDocName;         //!< document name
@@ -915,6 +989,7 @@ private:
   TDF_LabelSequence        myLabels;          //!< labels to display
   Standard_Integer         myDispMode;        //!< shape display mode
   Standard_Integer         myHiMode;          //!< shape highlight mode
+  Standard_Integer         myIsAutoTriang;    //!< auto-triangulation mode
   Standard_Boolean         myToPrefixDocName; //!< flag to prefix objects with document name
   Standard_Boolean         myToGetNames;      //!< flag to use label names or tags
   Standard_Boolean         myToExplore;       //!< flag to explore assembles
@@ -1064,6 +1139,93 @@ static Standard_Integer XSetTransparency (Draw_Interpretor& di, Standard_Integer
 }
 
 //=======================================================================
+//function : setLengthUnit
+//purpose  :
+//=======================================================================
+static Standard_Integer setLengthUnit(Draw_Interpretor& di,
+                                      Standard_Integer argc,
+                                      const char** argv)
+{
+  if (argc != 3)
+  {
+    di << "Use: " << argv[0] << " Doc {unitName|scaleFactor} \n";
+    return 1;
+  }
+
+  Handle(TDocStd_Document) aDoc;
+  DDocStd::GetDocument(argv[1], aDoc);
+  if (aDoc.IsNull())
+  {
+    di << "Error: " << argv[1] << " is not a document\n"; return 1;
+  }
+
+  TCollection_AsciiString anUnit(argv[2]);
+  Standard_Real anUnitValue = 1.;
+  TCollection_AsciiString anUnitName;
+  if (!anUnit.IsRealValue(true))
+  {
+    UnitsMethods_LengthUnit aTypeUnit = UnitsMethods::LengthUnitFromString(anUnit.ToCString(), Standard_False);
+    if (aTypeUnit == UnitsMethods_LengthUnit_Undefined)
+    {
+      di << "Error: " << anUnit
+         << " is incorrect unit, use m, mm, km, cm, micron, mille, in, min, nin, ft, stat.mile\n";
+      return 1;
+    }
+    anUnitName = anUnit;
+    anUnitValue = UnitsMethods::GetLengthFactorValue(aTypeUnit) * 0.001;
+  }
+  else
+  {
+    anUnitValue = anUnit.RealValue();
+    anUnitName = UnitsMethods::DumpLengthUnit(anUnitValue, UnitsMethods_LengthUnit_Meter);
+  }
+  XCAFDoc_LengthUnit::Set(aDoc->Main().Root(), anUnitName, anUnitValue);
+  return 0;
+}
+
+//=======================================================================
+//function : dumpLengthUnit
+//purpose  :
+//=======================================================================
+static Standard_Integer dumpLengthUnit(Draw_Interpretor& di, Standard_Integer argc, const char** argv)
+{
+  if (argc != 2 && argc != 3) {
+    di << "Use: " << argv[0] << " Doc [-scale]\n";
+    return 1;
+  }
+
+  Handle(TDocStd_Document) aDoc;
+  DDocStd::GetDocument(argv[1], aDoc);
+  if (aDoc.IsNull()) 
+  { 
+    di << "Error: " << argv[1] << " is not a document\n"; return 1;
+  }
+  Handle(XCAFDoc_LengthUnit) aUnits;
+  if (!aDoc->Main().Root().FindAttribute(XCAFDoc_LengthUnit::GetID(), aUnits))
+  {
+    di << "Error: Document doesn't contain a Length Unit\n";
+    return 1;
+  }
+  if (argc == 3)
+  {
+    TCollection_AsciiString anOption(argv[2]);
+    anOption.LowerCase();
+    if (anOption.IsEqual("-scale"))
+    {
+      di << aUnits->GetUnitValue();
+      return 0;
+    }
+    else
+    {
+      di << "Error: Incorrect option, use -scale\n";
+      return 1;
+    }
+  }
+  di << aUnits->GetUnitName();
+  return 0;
+}
+
+//=======================================================================
 //function : XShowFaceBoundary
 //purpose  : Set face boundaries on/off
 //=======================================================================
@@ -1190,6 +1352,360 @@ static Standard_Integer XShowFaceBoundary (Draw_Interpretor& di,
 }
 
 //=======================================================================
+//function : XAssemblyTreeDump
+//purpose  : Prints assembly tree structure up to the specified level
+//=======================================================================
+
+static Standard_Integer XDumpAssemblyTree(Draw_Interpretor& di,
+                                          Standard_Integer argc,
+                                          const char ** argv)
+{
+  if (argc < 2)
+  {
+    di << "Usage :\n " << argv[0] << " Doc [-root label] [-level l] [-names]\n"
+      << "   Doc         - document name. \n"
+      << "   -root label - starting root label. \n"
+      << "   -level l    - depth level (infinite by default). \n"
+      << "   -names      - prints names instead of entries. \n";
+
+    return 1;
+  }
+
+  // get specified document
+  Handle(TDocStd_Document) aDoc;
+  DDocStd::GetDocument(argv[1], aDoc);
+  if (aDoc.IsNull())
+  {
+    di << argv[1] << " is not a document\n";
+    return 1;
+  }
+
+  XCAFDoc_AssemblyItemId aRoot;
+  Standard_Integer aLevel = INT_MAX;
+  Standard_Boolean aPrintNames = Standard_False;
+  for (Standard_Integer iarg = 2; iarg < argc; ++iarg)
+  {
+    if (strcmp(argv[iarg], "-root") == 0)
+    {
+      Standard_ProgramError_Raise_if(iarg + 1 >= argc, "Root is expected!");
+      aRoot.Init(argv[++iarg]);
+    }
+    else if (strcmp(argv[iarg], "-level") == 0)
+    {
+      Standard_ProgramError_Raise_if(iarg + 1 >= argc, "Level is expected!");
+      TCollection_AsciiString anArg = argv[++iarg];
+      Standard_ProgramError_Raise_if(!anArg.IsIntegerValue(), "Integer value is expected!");
+      aLevel = anArg.IntegerValue();
+    }
+    else if (strcmp(argv[iarg], "-names") == 0)
+    {
+      aPrintNames = Standard_True;
+    }
+  }
+
+  Standard_SStream aSS;
+
+  XCAFDoc_AssemblyIterator anIt = aRoot.IsNull() ? XCAFDoc_AssemblyIterator(aDoc, aLevel) 
+                                                 : XCAFDoc_AssemblyIterator(aDoc, aRoot, aLevel);
+  XCAFDoc_AssemblyTool::Traverse(anIt, [&](const XCAFDoc_AssemblyItemId& theItem) -> Standard_Boolean
+  {
+    if (aPrintNames)
+    {
+      Standard_Boolean aFirst = Standard_True;
+      for (TColStd_ListOfAsciiString::Iterator anIt(theItem.GetPath()); anIt.More(); 
+           anIt.Next(), aFirst = Standard_False)
+      {
+        if (!aFirst) aSS << "/";
+        TDF_Label aL;
+        TDF_Tool::Label(aDoc->GetData(), anIt.Value(), aL, Standard_False);
+        if (!aL.IsNull())
+        {
+          TCollection_ExtendedString aName;
+          Handle(TDataStd_Name) aNameAttr;
+          if (aL.FindAttribute(TDataStd_Name::GetID(), aNameAttr))
+          {
+            aName = aNameAttr->Get();
+            aSS << aName;
+            continue;
+          }
+        }
+        aSS << anIt.Value();
+      }
+      aSS << std::endl;
+    }
+    else
+    {
+      aSS << theItem.ToString() << std::endl;
+    }
+    return Standard_True;
+  });
+
+  di << aSS.str().c_str();
+  return 0;
+}
+
+//=======================================================================
+//function : graphNodeTypename
+//purpose  : Returns node type name
+//=======================================================================
+
+static 
+const char* graphNodeTypename(const XCAFDoc_AssemblyGraph::NodeType theNodeType)
+{
+  switch (theNodeType)
+  {
+  case XCAFDoc_AssemblyGraph::NodeType_AssemblyRoot: return "R";
+  case XCAFDoc_AssemblyGraph::NodeType_Subassembly:  return "A";
+  case XCAFDoc_AssemblyGraph::NodeType_Occurrence:   return "O";
+  case XCAFDoc_AssemblyGraph::NodeType_Part:         return "P";
+  case XCAFDoc_AssemblyGraph::NodeType_Subshape:     return "S";
+  default:                                           return "?";
+  }
+}
+
+//=======================================================================
+//function : XAssemblyGraphDump
+//purpose  : Prints assembly graph structure
+//=======================================================================
+
+static Standard_Integer XDumpAssemblyGraph(Draw_Interpretor& di,
+                                           Standard_Integer argc,
+                                           const char ** argv)
+{
+  if (argc < 2)
+  {
+    di << "Usage :\n " << argv[0] << " Doc [-root label] [-verbose] \n"
+      << "   Doc         - is the document name. \n"
+      << "   -root label - is the optional starting label. \n"
+      << "   -names      - prints names instead of entries. \n";
+
+    return 1;
+  }
+
+  // get specified document
+  Handle(TDocStd_Document) aDoc;
+  DDocStd::GetDocument(argv[1], aDoc);
+  if (aDoc.IsNull())
+  {
+    di << argv[1] << " is not a document\n";
+    return 1;
+  }
+
+  Standard_Boolean aPrintNames = Standard_False;
+  TDF_Label aLabel = XCAFDoc_DocumentTool::ShapesLabel(aDoc->Main());
+  for (Standard_Integer iarg = 2; iarg < argc; ++iarg)
+  {
+    if (strcmp(argv[iarg], "-root") == 0)
+    {
+      Standard_ProgramError_Raise_if(iarg + 1 >= argc, "Root is expected!");
+      TDF_Tool::Label(aDoc->GetData(), argv[++iarg], aLabel, Standard_False);
+    }
+    else if (strcmp(argv[iarg], "-names") == 0)
+    {
+      aPrintNames = Standard_True;
+    }
+  }
+
+  Handle(XCAFDoc_AssemblyGraph) aG = new XCAFDoc_AssemblyGraph(aLabel);
+
+  Standard_SStream aSS;
+
+  XCAFDoc_AssemblyTool::Traverse(aG, 
+    [](const Handle(XCAFDoc_AssemblyGraph)& /*theGraph*/,
+       const Standard_Integer               /*theNode*/) -> Standard_Boolean
+    {
+      return Standard_True;
+    },
+    [&](const Handle(XCAFDoc_AssemblyGraph)& theGraph,
+        const Standard_Integer               theNode) -> Standard_Boolean
+    {
+      const TDF_Label& aLabel = theGraph->GetNode(theNode);
+
+      const XCAFDoc_AssemblyGraph::NodeType aNodeType = theGraph->GetNodeType(theNode);
+
+      TCollection_AsciiString aNodeEntry;
+      if (aPrintNames)
+      {
+        Handle(TDataStd_Name) aNameAttr;
+        if (aLabel.FindAttribute(TDataStd_Name::GetID(), aNameAttr))
+        {
+          aNodeEntry.AssignCat("'");
+          aNodeEntry.AssignCat(aNameAttr->Get());
+          aNodeEntry.AssignCat("'");
+        }
+      }
+      if (aNodeEntry.IsEmpty())
+      {
+        TDF_Tool::Entry(aLabel, aNodeEntry);
+      }
+
+      aSS << theNode << " " << graphNodeTypename(aNodeType) << " " << aNodeEntry;
+      const XCAFDoc_AssemblyGraph::AdjacencyMap& anAdjacencyMap = theGraph->GetLinks();
+      const TColStd_PackedMapOfInteger* aLinksPtr = anAdjacencyMap.Seek(theNode);
+      if (aLinksPtr != NULL)
+      {
+        for (TColStd_MapIteratorOfPackedMapOfInteger anIt1(*aLinksPtr); anIt1.More(); anIt1.Next())
+        {
+          aSS << " " << anIt1.Key();
+        }
+      }
+      aSS << std::endl;
+
+      return Standard_True;
+    }
+  );
+
+  di << aSS.str().c_str();
+  return 0;
+}
+
+//=======================================================================
+//function : XDumpNomenclature
+//purpose  : Prints number of assembly instances
+//=======================================================================
+
+static Standard_Integer XDumpNomenclature(Draw_Interpretor& di,
+                                          Standard_Integer argc,
+                                          const char ** argv)
+{
+  if (argc < 2)
+  {
+    di << "Usage :\n " << argv[0] << " Doc [-names] \n"
+      << "   Doc    - is the document name. \n"
+      << "   -names - prints names instead of entries. \n";
+
+    return 1;
+  }
+
+  // get specified document
+  Handle(TDocStd_Document) aDoc;
+  DDocStd::GetDocument(argv[1], aDoc);
+  if (aDoc.IsNull())
+  {
+    di << argv[1] << " is not a document\n";
+    return 1;
+  }
+
+  Standard_Boolean aPrintNames = Standard_False;
+  for (Standard_Integer iarg = 2; iarg < argc; ++iarg)
+  {
+    if (strcmp(argv[iarg], "-names") == 0)
+    {
+      aPrintNames = Standard_True;
+    }
+  }
+
+  Handle(XCAFDoc_AssemblyGraph) aG = new XCAFDoc_AssemblyGraph(aDoc);
+
+  Standard_SStream aSS;
+
+  XCAFDoc_AssemblyTool::Traverse(aG, 
+    [](const Handle(XCAFDoc_AssemblyGraph)& theGraph,
+       const Standard_Integer               theNode) -> Standard_Boolean
+    {
+      const XCAFDoc_AssemblyGraph::NodeType aNodeType = theGraph->GetNodeType(theNode);
+      return (aNodeType == XCAFDoc_AssemblyGraph::NodeType_AssemblyRoot) ||
+             (aNodeType == XCAFDoc_AssemblyGraph::NodeType_Subassembly) ||
+             (aNodeType == XCAFDoc_AssemblyGraph::NodeType_Part);
+    },
+    [&](const Handle(XCAFDoc_AssemblyGraph)& theGraph,
+        const Standard_Integer               theNode) -> Standard_Boolean
+    {
+      const TDF_Label& aLabel = theGraph->GetNode(theNode);
+
+      const XCAFDoc_AssemblyGraph::NodeType aNodeType = theGraph->GetNodeType(theNode);
+
+      TCollection_AsciiString aNodeEntry;
+      if (aPrintNames)
+      {
+        Handle(TDataStd_Name) aNameAttr;
+        if (aLabel.FindAttribute(TDataStd_Name::GetID(), aNameAttr))
+        {
+          aNodeEntry.AssignCat("'");
+          aNodeEntry.AssignCat(aNameAttr->Get());
+          aNodeEntry.AssignCat("'");
+        }
+      }
+      if (aNodeEntry.IsEmpty())
+      {
+        TDF_Tool::Entry(aLabel, aNodeEntry);
+      }
+
+      aSS << theNode << " " << graphNodeTypename(aNodeType) << " " << aNodeEntry << " "
+          << theGraph->NbOccurrences(theNode) << std::endl;
+
+      return Standard_True;
+    }
+  );
+
+  di << aSS.str().c_str();
+
+  return 0;
+}
+
+//=======================================================================
+//function : XRescaleGeometry
+//purpose  : Applies geometrical scale to all assembly components
+//=======================================================================
+
+static Standard_Integer XRescaleGeometry(Draw_Interpretor& di,
+                                         Standard_Integer argc,
+                                         const char ** argv)
+{
+  if (argc < 3)
+  {
+    di << "Usage :\n " << argv[0] << " Doc factor [-root label] [-force]\n"
+      << "   Doc         - is the document name. \n"
+      << "   factor      - is the scale factor. \n"
+      << "   -root label - is the starting label to apply rescaling. \n"
+      << "   -force      - forces rescaling even if the starting label\n"
+      << "                 is not a root. \n";
+
+    return 1;
+  }
+
+  // get specified document
+  Handle(TDocStd_Document) aDoc;
+  DDocStd::GetDocument(argv[1], aDoc);
+  if (aDoc.IsNull())
+  {
+    di << argv[1] << " is not a document\n";
+    return 1;
+  }
+
+  // get scale factor
+  Standard_Real aScaleFactor = Draw::Atof(argv[2]);
+  if (aScaleFactor <= 0)
+  {
+    di << "Scale factor must be positive\n";
+    return 1;
+  }
+
+  Standard_Boolean aForce = Standard_False;
+  TDF_Label aLabel = XCAFDoc_DocumentTool::ShapesLabel(aDoc->Main());
+  for (Standard_Integer iarg = 3; iarg < argc; ++iarg)
+  {
+    if (strcmp(argv[iarg], "-root") == 0)
+    {
+      Standard_ProgramError_Raise_if(iarg + 1 >= argc, "Root is expected!");
+      TDF_Tool::Label(aDoc->GetData(), argv[++iarg], aLabel, Standard_False);
+    }
+    else if (strcmp(argv[iarg], "-force") == 0)
+    {
+      aForce = Standard_True;
+    }
+  }
+
+  if (!XCAFDoc_Editor::RescaleGeometry(aLabel, aScaleFactor, aForce))
+  {
+    di << "Geometry rescale failed\n";
+    return 1;
+  }
+
+  return 0;
+}
+
+//=======================================================================
 //function : testDoc
 //purpose  : Method to test destruction of document
 //=======================================================================
@@ -1212,7 +1728,7 @@ static Standard_Integer testDoc (Draw_Interpretor&,
   aD1->Open(anApp);
   
   TCollection_AsciiString  aViewName ("Driver1/DummyDocument/View1");
-  ViewerTest::ViewerInit (0, 0, 0, 0, aViewName.ToCString(), "");
+  ViewerTest::ViewerInit (aViewName);
   TPrsStd_AISViewer::New (aD1->GetData()->Root(), ViewerTest::GetAISContext());
 
   // get shape tool for shape verification
@@ -1302,7 +1818,7 @@ void XDEDRAW::Init(Draw_Interpretor& di)
 
   di.Add ("XDisplay",
           "XDisplay Doc [label1 [label2 [...]]] [-explore {on|off}] [-docPrefix {on|off}] [-names {on|off}]"
-          "\n\t\t:      [-noupdate] [-dispMode Mode] [-highMode Mode]"
+          "\n\t\t:      [-noupdate] [-dispMode Mode] [-highMode Mode] [-autoTriangulation {0|1}]"
           "\n\t\t: Displays document (parts) in 3D Viewer."
           "\n\t\t:  -dispMode    Presentation display mode."
           "\n\t\t:  -highMode    Presentation highlight mode."
@@ -1310,7 +1826,8 @@ void XDEDRAW::Init(Draw_Interpretor& di)
           "\n\t\t:  -names       Use object names instead of label tag; TRUE by default."
           "\n\t\t:  -explore     Explode labels to leaves; FALSE by default."
           "\n\t\t:  -outDispList Set the TCL variable to the list of displayed object names."
-          "\n\t\t:               (instead of printing them to draw interpreter)",
+          "\n\t\t:               (instead of printing them to draw interpreter)"
+          "\n\t\t:  -autoTriang  Enable/disable auto-triangulation for displayed shapes.",
           __FILE__, XDEDRAW_XDisplayTool::XDisplay, g);
 
   di.Add ("XWdump","Doc filename.{gif|xwd|bmp} \t: Dump contents of viewer window to XWD, GIF or BMP file",
@@ -1328,11 +1845,35 @@ void XDEDRAW::Init(Draw_Interpretor& di)
   di.Add ("XSetTransparency", "Doc Transparency [label1 label2 ...]\t: Set transparency for given label(s) or whole doc",
 		   __FILE__, XSetTransparency, g);
 
-  di.Add ("XShowFaceBoundary", 
+  di.Add("XSetLengthUnit",
+    "Doc {unit_name|scale_factor}\t: Set value of length unit"
+    "\n\t\t: Possible unit_name: m, mm, km, cm, micron, mille, in(inch), min(microinch), nin(nano inch), ft, stat.mile"
+    "\n\t\t: Possible scale factor: any real value more then 0. Factor to meter.",
+    __FILE__, setLengthUnit, g);
+
+  di.Add("XGetLengthUnit",
+    "Doc [-scale]\t: Print name of length unit"
+    "\n\t\t: -scale : print value of the scaling factor to meter of length unit",
+    __FILE__, dumpLengthUnit, g);
+
+  di.Add ("XShowFaceBoundary",
           "Doc Label IsOn [R G B [LineWidth [LineStyle]]]:"
           "- turns on/off drawing of face boundaries and defines boundary line style",
           __FILE__, XShowFaceBoundary, g);
    di.Add ("XTestDoc", "XTestDoc shape", __FILE__, testDoc, g);
+
+  di.Add("XDumpAssemblyTree",
+         "Doc [-root label] [-level l] [-names]: Iterates through the assembly tree in depth up to the specified level, if any",
+         __FILE__, XDumpAssemblyTree, g);
+  di.Add("XDumpAssemblyGraph",
+         "Doc [-root label] [-names]: Prints assembly graph structure",
+         __FILE__, XDumpAssemblyGraph, g);
+  di.Add("XDumpNomenclature",
+         "Doc [-names]: Prints number of assembly instances",
+         __FILE__, XDumpNomenclature, g);
+  di.Add("XRescaleGeometry",
+         "Doc factor [-root label] [-force]: Applies geometrical scale to assembly",
+         __FILE__, XRescaleGeometry, g);
 
   // Specialized commands
   XDEDRAW_Shapes::InitCommands ( di );
@@ -1343,23 +1884,13 @@ void XDEDRAW::Init(Draw_Interpretor& di)
   XDEDRAW_Views::InitCommands(di);
   XDEDRAW_Notes::InitCommands(di);
   XDEDRAW_Common::InitCommands ( di );//moved from EXE
-
 }
-
 
 //==============================================================================
 // XDEDRAW::Factory
 //==============================================================================
 void XDEDRAW::Factory(Draw_Interpretor& theDI)
 {
-  XSDRAWIGES::InitSelect();
-  XSDRAWIGES::InitToBRep(theDI);
-  XSDRAWIGES::InitFromBRep(theDI);
-
-  XSDRAWSTEP::InitCommands(theDI);
-
-  XSDRAW::LoadDraw(theDI);
-
   XDEDRAW::Init(theDI);
 
 #ifdef OCCT_DEBUG

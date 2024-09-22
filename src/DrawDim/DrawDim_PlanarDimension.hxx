@@ -18,11 +18,9 @@
 #define _DrawDim_PlanarDimension_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <TopoDS_Face.hxx>
 #include <DrawDim_Dimension.hxx>
-class TopoDS_Face;
 
 
 class DrawDim_PlanarDimension;

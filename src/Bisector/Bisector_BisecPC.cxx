@@ -18,30 +18,17 @@
 #include <Bisector.hxx>
 #include <Bisector_BisecPC.hxx>
 #include <ElCLib.hxx>
-#include <GccEnt_Position.hxx>
-#include <Geom2d_CartesianPoint.hxx>
 #include <Geom2d_Curve.hxx>
 #include <Geom2d_Geometry.hxx>
-#include <Geom2d_Line.hxx>
-#include <Geom2d_TrimmedCurve.hxx>
-#include <Geom2dAdaptor_Curve.hxx>
 #include <Geom2dAPI_ProjectPointOnCurve.hxx>
-#include <Geom2dGcc.hxx>
-#include <Geom2dGcc_Circ2d2TanRad.hxx>
-#include <Geom2dGcc_QualifiedCurve.hxx>
-#include <Geom2dInt_GInter.hxx>
 #include <Geom2dLProp_CLProps2d.hxx>
 #include <gp.hxx>
 #include <gp_Ax2d.hxx>
 #include <gp_Pnt2d.hxx>
 #include <gp_Trsf2d.hxx>
 #include <gp_Vec2d.hxx>
-#include <IntRes2d_IntersectionPoint.hxx>
 #include <Precision.hxx>
-#include <Standard_DivideByZero.hxx>
-#include <Standard_DomainError.hxx>
 #include <Standard_NotImplemented.hxx>
-#include <Standard_RangeError.hxx>
 #include <Standard_Type.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(Bisector_BisecPC,Bisector_Curve)
@@ -623,7 +610,7 @@ Standard_Real Bisector_BisecPC::SearchBound (const Standard_Real U1,
 {
   Standard_Real Dist1,DistMid,U11,U22; 
   Standard_Real UMid = 0.;
-  Standard_Real Tol      = Precision::PConfusion();
+  constexpr Standard_Real Tol = Precision::PConfusion();
   Standard_Real DistMax2 = distMax*distMax;
   U11 = U1; U22 = U2;
   Dist1 = Distance(U11);
@@ -771,7 +758,7 @@ Standard_Boolean Bisector_BisecPC::IsEmpty() const
 //==========================================================================
 Standard_Real Bisector_BisecPC::Parameter(const gp_Pnt2d& P) const
 {
-  Standard_Real    Tol     = Precision::Confusion();
+  constexpr Standard_Real Tol = Precision::Confusion();
 
   if (P.IsEqual(pointStartBis,Tol)) {return startIntervals.Value(bisInterval);}
   if (P.IsEqual(pointEndBis  ,Tol)) {return endIntervals  .Value(bisInterval);}

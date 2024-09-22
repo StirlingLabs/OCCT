@@ -23,7 +23,6 @@
 
 #include <BRepOffsetAPI_MakeOffsetShape.hxx>
 #include <TopTools_ListOfShape.hxx>
-#include <Standard_Real.hxx>
 #include <BRepOffset_Mode.hxx>
 #include <Standard_Boolean.hxx>
 #include <GeomAbs_JoinType.hxx>
@@ -110,10 +109,11 @@ public:
                                             const Standard_Boolean Intersection = Standard_False,
                                             const Standard_Boolean SelfInter = Standard_False,
                                             const GeomAbs_JoinType Join = GeomAbs_Arc,
-                                            const Standard_Boolean RemoveIntEdges = Standard_False);
+                                            const Standard_Boolean RemoveIntEdges = Standard_False,
+                                            const Message_ProgressRange& theRange = Message_ProgressRange());
 
   // Does nothing.
-  Standard_EXPORT virtual void Build() Standard_OVERRIDE;
+  Standard_EXPORT virtual void Build(const Message_ProgressRange& theRange = Message_ProgressRange()) Standard_OVERRIDE;
   
   //! Returns the list  of shapes modified from the shape
   //! <S>.

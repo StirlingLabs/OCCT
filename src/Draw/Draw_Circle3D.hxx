@@ -18,14 +18,11 @@
 #define _Draw_Circle3D_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <gp_Circ.hxx>
 #include <Standard_Real.hxx>
 #include <Draw_Color.hxx>
 #include <Draw_Drawable3D.hxx>
-class gp_Circ;
-class Draw_Color;
 class Draw_Display;
 
 

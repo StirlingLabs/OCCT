@@ -22,12 +22,8 @@
 #include <Standard_Handle.hxx>
 
 #include <Standard_Boolean.hxx>
-#include <Standard_Real.hxx>
 #include <Extrema_POnCurv2d.hxx>
-class Standard_DomainError;
-class StdFail_NotDone;
 class Adaptor2d_Curve2d;
-class Extrema_POnCurv2d;
 
 
 //! It calculates the distance between two curves with

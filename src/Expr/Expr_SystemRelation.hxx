@@ -22,13 +22,7 @@
 
 #include <Expr_SequenceOfGeneralRelation.hxx>
 #include <Expr_GeneralRelation.hxx>
-#include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
-class Standard_OutOfRange;
-class Standard_NoSuchObject;
-class Standard_DimensionMismatch;
-class Standard_NumericError;
-class Expr_GeneralRelation;
 class Expr_GeneralExpression;
 class Expr_NamedUnknown;
 class TCollection_AsciiString;

@@ -19,13 +19,8 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
-#include <Standard_Boolean.hxx>
-#include <Standard_Real.hxx>
 #include <CPnts_MyRootFunction.hxx>
-class StdFail_NotDone;
-class Standard_ConstructionError;
 class Adaptor3d_Curve;
 class Adaptor2d_Curve2d;
 

@@ -23,14 +23,9 @@
 #include <TColStd_HArray2OfTransient.hxx>
 #include <IGESData_IGESEntity.hxx>
 #include <Standard_Integer.hxx>
-#include <Standard_Real.hxx>
-#include <Standard_Boolean.hxx>
-class Standard_OutOfRange;
-class Standard_NullObject;
 class IGESDefs_AttributeDef;
 class Standard_Transient;
 class TCollection_HAsciiString;
-class IGESData_IGESEntity;
 
 
 class IGESDefs_AttributeTable;

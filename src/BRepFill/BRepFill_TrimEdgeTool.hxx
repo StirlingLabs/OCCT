@@ -21,20 +21,16 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
-#include <Standard_Boolean.hxx>
 #include <gp_Pnt2d.hxx>
-#include <Standard_Real.hxx>
 #include <Bisector_Bisec.hxx>
 #include <Geom2dAdaptor_Curve.hxx>
 #include <GeomAbs_JoinType.hxx>
 #include <TColgp_SequenceOfPnt.hxx>
 class Geom2d_Curve;
-class Bisector_Bisec;
 class Geom2d_Geometry;
 class TopoDS_Edge;
 class TopoDS_Shape;
 class TopoDS_Vertex;
-class gp_Pnt2d;
 
 
 //! Geometric Tool using to construct Offset Wires.

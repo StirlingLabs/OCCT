@@ -16,19 +16,15 @@
 
 #include <BRep_Builder.hxx>
 #include <BRepTools_Modifier.hxx>
-#include <Message_ListIteratorOfListOfMsg.hxx>
-#include <Message_ListOfMsg.hxx>
 #include <Message_Messenger.hxx>
 #include <Message_Msg.hxx>
 #include <ShapeBuild_ReShape.hxx>
-#include <ShapeExtend_DataMapOfShapeListOfMsg.hxx>
 #include <ShapeExtend_MsgRegistrator.hxx>
 #include <ShapeProcess_ShapeContext.hxx>
 #include <Standard_Type.hxx>
 #include <TCollection_AsciiString.hxx>
 #include <TopoDS_Iterator.hxx>
 #include <TopoDS_Shape.hxx>
-#include <TopTools_DataMapIteratorOfDataMapOfShapeShape.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(ShapeProcess_ShapeContext,ShapeProcess_Context)
 
@@ -181,7 +177,7 @@ static void RecModif (const TopoDS_Shape &S,
 {
   TopoDS_Shape r = S;
   //gka  -modification to keep history for shape with location (OCC21617)
-  TopLoc_Location aShLoc = S.Location();
+  const TopLoc_Location& aShLoc = S.Location();
   TopLoc_Location aNullLoc;
   r.Location(aNullLoc);
 
@@ -190,8 +186,8 @@ static void RecModif (const TopoDS_Shape &S,
   if ( ! r.IsNull() ) {
     TopoDS_Shape res = r;
     
-    if ( repl.IsBound ( r.Located(aShLoc) ) ) {
-      res = repl.Find (  r.Located(aShLoc) );
+    if ( repl.IsBound ( r.Located(aShLoc, Standard_False) ) ) {
+      res = repl.Find (  r.Located(aShLoc, Standard_False) );
       // it is supposed that map is created for r having FORWARD orientation
       // hence, if it is reversed, result should be reversed too
       // INTERNAL or EXTERNAL orientations are not allowed
@@ -208,9 +204,9 @@ static void RecModif (const TopoDS_Shape &S,
       Standard_Boolean modif = Standard_False;
       BRep_Builder B;
       for ( TopoDS_Iterator it(r,Standard_False); it.More(); it.Next() ) {
-	TopoDS_Shape sh = it.Value();
+	const TopoDS_Shape& sh = it.Value();
 	if ( repl.IsBound(sh) ) {
-	  TopoDS_Shape newsh = repl.Find(sh);
+	  const TopoDS_Shape& newsh = repl.Find(sh);
 	  if ( ! newsh.IsNull() ) B.Add ( result, newsh );
 	  modif = Standard_True;
 	}
@@ -330,7 +326,7 @@ void ShapeProcess_ShapeContext::RecordModification (const Handle(ShapeBuild_ReSh
   if ( myMap.IsBound(myShape) ) 
   {
     myResult = myMap.Find ( myShape );
-    myResult.Location(myShape.Location());
+    myResult.Location(myShape.Location(), Standard_False);
   }
 #ifdef OCCT_DEBUG
 //  std::cout << "ReShape: " << std::endl; DumpMap (myMap);
@@ -370,7 +366,7 @@ static void ExplodeModifier (const TopoDS_Shape &S,
 			     TopTools_DataMapOfShapeShape &map,
 			     const TopAbs_ShapeEnum until)
 {
-  TopoDS_Shape res = repl.ModifiedShape ( S );
+  const TopoDS_Shape& res = repl.ModifiedShape ( S );
   
   if ( res != S ) 
   {

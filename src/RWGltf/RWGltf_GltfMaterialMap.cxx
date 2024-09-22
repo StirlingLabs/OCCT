@@ -207,7 +207,7 @@ void RWGltf_GltfMaterialMap::FlushGlbBufferViews (RWGltf_GltfOStreamWriter* theW
                                                   Standard_Integer& theBuffViewId)
 {
 #ifdef HAVE_RAPIDJSON
-  for (NCollection_IndexedDataMap<Handle(Image_Texture), RWGltf_GltfBufferView, Image_Texture>::Iterator aBufViewIter (myImageMap);
+  for (NCollection_IndexedDataMap<Handle(Image_Texture), RWGltf_GltfBufferView>::Iterator aBufViewIter (myImageMap);
        aBufViewIter.More(); aBufViewIter.Next())
   {
     RWGltf_GltfBufferView& aBuffView = aBufViewIter.ChangeValue();
@@ -241,7 +241,7 @@ void RWGltf_GltfMaterialMap::FlushGlbImages (RWGltf_GltfOStreamWriter* theWriter
 {
 #ifdef HAVE_RAPIDJSON
   bool isStarted = false;
-  for (NCollection_IndexedDataMap<Handle(Image_Texture), RWGltf_GltfBufferView, Image_Texture>::Iterator aBufViewIter (myImageMap);
+  for (NCollection_IndexedDataMap<Handle(Image_Texture), RWGltf_GltfBufferView>::Iterator aBufViewIter (myImageMap);
        aBufViewIter.More(); aBufViewIter.Next())
   {
     const Handle(Image_Texture)& aTexture  = aBufViewIter.Key();
@@ -420,6 +420,7 @@ void RWGltf_GltfMaterialMap::DefineMaterial (const XCAFPrs_Style& theStyle,
     aPbrMat.BaseColor.SetRGB (theStyle.GetColorSurf());
     if (theStyle.GetColorSurfRGBA().Alpha() < 1.0f)
     {
+      aPbrMat.Metallic = 0.0f;
       aPbrMat.BaseColor.SetAlpha (theStyle.GetColorSurfRGBA().Alpha());
     }
   }
@@ -492,7 +493,8 @@ void RWGltf_GltfMaterialMap::DefineMaterial (const XCAFPrs_Style& theStyle,
     // as both may share the same material having "auto" flag
     if (theStyle.Material().IsNull()
      || theStyle.Material()->FaceCulling() == Graphic3d_TypeOfBackfacingModel_Auto
-     || theStyle.Material()->FaceCulling() == Graphic3d_TypeOfBackfacingModel_DoubleSided)
+     || theStyle.Material()->FaceCulling() == Graphic3d_TypeOfBackfacingModel_DoubleSided
+     || theStyle.Material()->FaceCulling() == Graphic3d_TypeOfBackfacingModel_FrontCulled) // front culling flag cannot be exported to glTF
     {
       myWriter->Key ("doubleSided");
       myWriter->Bool (true);

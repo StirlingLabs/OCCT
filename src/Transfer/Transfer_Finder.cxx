@@ -21,10 +21,10 @@
 
 IMPLEMENT_STANDARD_RTTIEXT(Transfer_Finder,Standard_Transient)
 
-void  Transfer_Finder::SetHashCode (const Standard_Integer code)
+void  Transfer_Finder::SetHashCode (const size_t code)
       {  thecode = code;  }
 
-    Standard_Integer  Transfer_Finder::GetHashCode () const
+    size_t  Transfer_Finder::GetHashCode () const
       {  return thecode;  }
 
     Handle(Standard_Type)  Transfer_Finder::ValueType () const
@@ -179,9 +179,9 @@ NCollection_DataMap<TCollection_AsciiString, Handle(Standard_Transient)>& Transf
 
   NCollection_DataMap<TCollection_AsciiString, Handle(Standard_Transient)>::Iterator iter(list);
   for (; iter.More(); iter.Next()) {
-    TCollection_AsciiString name = iter.Key();
+    const TCollection_AsciiString& name = iter.Key();
     if (!name.StartsWith(fromname)) continue;
-    Handle(Standard_Transient) atr = iter.Value();
+    const Handle(Standard_Transient)& atr = iter.Value();
     Handle(Standard_Transient) newatr = atr;
 
 //    Copy ? according type

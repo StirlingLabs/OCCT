@@ -13,13 +13,9 @@
 
 
 #include <Adaptor3d_Curve.hxx>
-#include <gp_Circ.hxx>
-#include <gp_Dir.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_Vec.hxx>
 #include <Precision.hxx>
-#include <TColgp_HArray1OfVec.hxx>
-#include <TColStd_HArray1OfInteger.hxx>
 #include <Vrml_Coordinate3.hxx>
 #include <Vrml_IndexedLineSet.hxx>
 #include <Vrml_Material.hxx>
@@ -82,7 +78,7 @@ static void DrawCurve (const Adaptor3d_Curve&          aCurve,
 		       const Standard_Integer        NbP,
                        const Standard_Real           U1,
                        const Standard_Real           U2,
-		       const Handle(VrmlConverter_Drawer)& aDrawer, // for passsing of LineAspect
+		       const Handle(VrmlConverter_Drawer)& aDrawer, // for passing of LineAspect
                        Standard_OStream&             anOStream) 
 {
   Standard_Integer nbintervals = 1, i;

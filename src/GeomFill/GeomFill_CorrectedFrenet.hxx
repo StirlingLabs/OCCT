@@ -18,10 +18,7 @@
 #define _GeomFill_CorrectedFrenet_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
-#include <gp_Vec.hxx>
-#include <Standard_Boolean.hxx>
 #include <TColStd_HArray1OfReal.hxx>
 #include <TColgp_HArray1OfVec.hxx>
 #include <GeomFill_TrihedronLaw.hxx>
@@ -34,10 +31,6 @@
 #include <GeomFill_Trihedron.hxx>
 class GeomFill_Frenet;
 class Law_Function;
-class Standard_OutOfRange;
-class Standard_ConstructionError;
-class GeomFill_TrihedronLaw;
-class gp_Vec;
 
 class GeomFill_CorrectedFrenet;
 DEFINE_STANDARD_HANDLE(GeomFill_CorrectedFrenet, GeomFill_TrihedronLaw)
@@ -56,7 +49,9 @@ public:
   
   Standard_EXPORT virtual Handle(GeomFill_TrihedronLaw) Copy() const Standard_OVERRIDE;
   
-  Standard_EXPORT virtual void SetCurve (const Handle(Adaptor3d_Curve)& C) Standard_OVERRIDE;
+  //! initialize curve of frenet law
+  //! @return Standard_True in case if execution end correctly
+  Standard_EXPORT virtual Standard_Boolean SetCurve (const Handle(Adaptor3d_Curve)& C) Standard_OVERRIDE;
   
   Standard_EXPORT virtual void SetInterval (const Standard_Real First, const Standard_Real Last) Standard_OVERRIDE;
   

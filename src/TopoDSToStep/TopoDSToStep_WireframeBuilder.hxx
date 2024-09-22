@@ -24,9 +24,7 @@
 #include <TColStd_HSequenceOfTransient.hxx>
 #include <TopoDSToStep_BuilderError.hxx>
 #include <TopoDSToStep_Root.hxx>
-#include <Standard_Boolean.hxx>
 #include <MoniTool_DataMapOfShapeTransient.hxx>
-class StdFail_NotDone;
 class TopoDS_Shape;
 class TopoDSToStep_Tool;
 class Transfer_FinderProcess;
@@ -45,9 +43,13 @@ public:
   
   Standard_EXPORT TopoDSToStep_WireframeBuilder();
   
-  Standard_EXPORT TopoDSToStep_WireframeBuilder(const TopoDS_Shape& S, TopoDSToStep_Tool& T, const Handle(Transfer_FinderProcess)& FP);
+  Standard_EXPORT TopoDSToStep_WireframeBuilder(const TopoDS_Shape& S,
+                                                TopoDSToStep_Tool& T,
+                                                const StepData_Factors& theLocalFactors = StepData_Factors());
   
-  Standard_EXPORT void Init (const TopoDS_Shape& S, TopoDSToStep_Tool& T, const Handle(Transfer_FinderProcess)& FP);
+  Standard_EXPORT void Init (const TopoDS_Shape& S,
+                             TopoDSToStep_Tool& T,
+                             const StepData_Factors& theLocalFactors = StepData_Factors());
   
   Standard_EXPORT TopoDSToStep_BuilderError Error() const;
   
@@ -55,15 +57,25 @@ public:
   
   //! Extraction of Trimmed Curves from TopoDS_Edge for the
   //! Creation of a GeometricallyBoundedWireframeRepresentation
-  Standard_EXPORT Standard_Boolean GetTrimmedCurveFromEdge (const TopoDS_Edge& E, const TopoDS_Face& F, MoniTool_DataMapOfShapeTransient& M, Handle(TColStd_HSequenceOfTransient)& L) const;
+  Standard_EXPORT Standard_Boolean GetTrimmedCurveFromEdge (const TopoDS_Edge& E,
+                                                            const TopoDS_Face& F,
+                                                            MoniTool_DataMapOfShapeTransient& M,
+                                                            Handle(TColStd_HSequenceOfTransient)& L,
+                                                            const StepData_Factors& theLocalFactors = StepData_Factors()) const;
   
   //! Extraction of Trimmed Curves from TopoDS_Face for the
   //! Creation of a GeometricallyBoundedWireframeRepresentation
-  Standard_EXPORT Standard_Boolean GetTrimmedCurveFromFace (const TopoDS_Face& F, MoniTool_DataMapOfShapeTransient& M, Handle(TColStd_HSequenceOfTransient)& L) const;
+  Standard_EXPORT Standard_Boolean GetTrimmedCurveFromFace (const TopoDS_Face& F,
+                                                            MoniTool_DataMapOfShapeTransient& M,
+                                                            Handle(TColStd_HSequenceOfTransient)& L,
+                                                            const StepData_Factors& theLocalFactors = StepData_Factors()) const;
   
   //! Extraction of Trimmed Curves from any TopoDS_Shape for the
   //! Creation of a GeometricallyBoundedWireframeRepresentation
-  Standard_EXPORT Standard_Boolean GetTrimmedCurveFromShape (const TopoDS_Shape& S, MoniTool_DataMapOfShapeTransient& M, Handle(TColStd_HSequenceOfTransient)& L) const;
+  Standard_EXPORT Standard_Boolean GetTrimmedCurveFromShape (const TopoDS_Shape& S,
+                                                             MoniTool_DataMapOfShapeTransient& M,
+                                                             Handle(TColStd_HSequenceOfTransient)& L,
+                                                             const StepData_Factors& theLocalFactors = StepData_Factors()) const;
 
 
 

@@ -19,10 +19,8 @@
 #define TObj_Application_HeaderFile
 
 #include <TDocStd_Application.hxx>
-#include <TObj_Common.hxx>
 #include <Message_Gravity.hxx>
 #include <Message_Messenger.hxx>
-#include <TColStd_SequenceOfExtendedString.hxx>
 
 //!
 //! This is a base class for OCAF based TObj models

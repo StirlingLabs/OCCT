@@ -16,19 +16,11 @@
 
 
 #include <Blend_AppFunction.hxx>
-#include <Blend_Point.hxx>
 #include <BRepBlend_AppFuncRoot.hxx>
 #include <BRepBlend_Line.hxx>
 #include <gp_Pnt.hxx>
 #include <math_FunctionSetRoot.hxx>
-#include <Standard_OutOfRange.hxx>
 #include <Standard_Type.hxx>
-#include <TColgp_HArray1OfPnt.hxx>
-#include <TColgp_HArray1OfPnt2d.hxx>
-#include <TColgp_HArray1OfVec.hxx>
-#include <TColgp_HArray1OfVec2d.hxx>
-#include <TColStd_HArray1OfInteger.hxx>
-#include <TColStd_HArray1OfReal.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(BRepBlend_AppFuncRoot,Approx_SweepFunction)
 
@@ -57,7 +49,7 @@ BRepBlend_AppFuncRoot::BRepBlend_AppFuncRoot(Handle(BRepBlend_Line)& Line,
   //  Tables
   Func.GetShape( NbPoles, NbKnots, Degree, NbPoles2d);
   
-  // Calculation of BaryCentre (rationnal case).
+  // Calculation of BaryCentre (rational case).
   if (Func.IsRational()) {
     Standard_Real Xmax =-1.e100, Xmin = 1.e100, 
     Ymax =-1.e100, Ymin = 1.e100, 

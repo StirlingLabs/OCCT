@@ -22,16 +22,12 @@
 #include <Standard_Handle.hxx>
 
 #include <BRepPrimAPI_MakeSweep.hxx>
-#include <Standard_Boolean.hxx>
 #include <BRepFill_PipeShell.hxx>
 #include <BRepFill_TypeOfContact.hxx>
 #include <BRepBuilderAPI_PipeError.hxx>
-#include <Standard_Real.hxx>
 #include <Standard_Integer.hxx>
 #include <BRepBuilderAPI_TransitionMode.hxx>
 #include <TopTools_ListOfShape.hxx>
-class Standard_DomainError;
-class StdFail_NotDone;
 class TopoDS_Wire;
 class gp_Ax2;
 class gp_Dir;
@@ -116,7 +112,7 @@ public:
   //! along the path.
   //! Give section to sweep.
   //! Possibilities are :
-  //! - Give one or sevral section
+  //! - Give one or several section
   //! - Give one profile and an homotetic law.
   //! - Automatic compute of correspondence between spine, and section
   //! on the sweeped shape
@@ -241,7 +237,7 @@ public:
   Standard_EXPORT void Simulate (const Standard_Integer NumberOfSection, TopTools_ListOfShape& Result);
   
   //! Builds the resulting shape (redefined from MakeShape).
-  Standard_EXPORT virtual void Build() Standard_OVERRIDE;
+  Standard_EXPORT virtual void Build(const Message_ProgressRange& theRange = Message_ProgressRange()) Standard_OVERRIDE;
   
   //! Transforms the sweeping Shell in Solid.
   //! If a propfile is not closed returns False

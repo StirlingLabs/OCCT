@@ -337,7 +337,7 @@ int mma1cdi_(integer *ndimen,
 /*     HERMIT: Table of coeff. 2*(IORDRE+1) Hermite polynoms */
 /*             of degree 2*IORDRE+1. */
 /*     IERCOD: Error code, */
-/*             = 0, Everythig is OK */
+/*             = 0, Everything is OK */
 /*             = 1, The value of IORDRE is out of (0,2) */
 /*     COMMON USED   : */
 /*     ---------------- */
@@ -732,7 +732,6 @@ int mma1fdi_(integer *ndimen,
 
 
     /* Parameter adjustments */
-    uvfonc -= 3;
     diftab_dim1 = *nbroot / 2 + 1;
     diftab_offset = diftab_dim1;
     diftab -= diftab_offset;
@@ -778,13 +777,13 @@ int mma1fdi_(integer *ndimen,
     if (*isofav == 1) {
 	ideru = *ideriv;
 	iderv = 0;
-	d__1 = (uvfonc[4] - uvfonc[3]) / 2.;
+	d__1 = (uvfonc[1] - uvfonc[0]) / 2.;
 	renor = AdvApp2Var_MathBase::pow__di(&d__1, ideriv);
 /*    if Iso-V, derive by V of order IDERIV */
     } else {
 	ideru = 0;
 	iderv = *ideriv;
-	d__1 = (uvfonc[6] - uvfonc[5]) / 2.;
+	d__1 = (uvfonc[3] - uvfonc[2]) / 2.;
 	renor = AdvApp2Var_MathBase::pow__di(&d__1, ideriv);
     }
 
@@ -794,8 +793,8 @@ int mma1fdi_(integer *ndimen,
 */
 
     (*const_cast <AdvApp2Var_EvaluatorFunc2Var*> (&foncnp)).Evaluate (ndimen, 
-	      &uvfonc[3], 
-	      &uvfonc[5], 
+	      &uvfonc[0],
+	      &uvfonc[2],
 	      isofav, 
 	      tconst, 
 	      &nbp, 
@@ -862,11 +861,11 @@ int mma1fdi_(integer *ndimen,
 /*    If Iso-U, derive by V till order IORDRE */
 	if (*isofav == 1) {
 /* --> Factor of normalisation 1st derivative. */
-	    bid1 = (uvfonc[6] - uvfonc[5]) / 2.;
+	    bid1 = (uvfonc[3] - uvfonc[2]) / 2.;
 	    i__1 = *iordre;
 	    for (iderv = 1; iderv <= i__1; ++iderv) {
 		(*const_cast <AdvApp2Var_EvaluatorFunc2Var*> (&foncnp)).Evaluate (
-            ndimen, &uvfonc[3], &uvfonc[5], isofav, tconst, &
+            ndimen, &uvfonc[0], &uvfonc[2], isofav, tconst, &
 			nbp, ttable, &ideru, &iderv, &contr1[(iderv + 1) * 
 			contr1_dim1 + 1], iercod);
 		if (*iercod > 0) {
@@ -877,7 +876,7 @@ int mma1fdi_(integer *ndimen,
 	    i__1 = *iordre;
 	    for (iderv = 1; iderv <= i__1; ++iderv) {
 		(*const_cast <AdvApp2Var_EvaluatorFunc2Var*> (&foncnp)).Evaluate (
-            ndimen, &uvfonc[3], &uvfonc[5], isofav, tconst, &
+            ndimen, &uvfonc[0], &uvfonc[2], isofav, tconst, &
 			nbp, &ttable[*nbroot + 1], &ideru, &iderv, &contr2[(
 			iderv + 1) * contr2_dim1 + 1], iercod);
 		if (*iercod > 0) {
@@ -888,11 +887,11 @@ int mma1fdi_(integer *ndimen,
 /*    If Iso-V, derive by U till order IORDRE */
 	} else {
 /* --> Factor of normalization  1st derivative. */
-	    bid1 = (uvfonc[4] - uvfonc[3]) / 2.;
+	    bid1 = (uvfonc[1] - uvfonc[0]) / 2.;
 	    i__1 = *iordre;
 	    for (ideru = 1; ideru <= i__1; ++ideru) {
 		(*const_cast <AdvApp2Var_EvaluatorFunc2Var*> (&foncnp)).Evaluate (
-            ndimen, &uvfonc[3], &uvfonc[5], isofav, tconst, &
+            ndimen, &uvfonc[0], &uvfonc[2], isofav, tconst, &
 			nbp, ttable, &ideru, &iderv, &contr1[(ideru + 1) * 
 			contr1_dim1 + 1], iercod);
 		if (*iercod > 0) {
@@ -903,7 +902,7 @@ int mma1fdi_(integer *ndimen,
 	    i__1 = *iordre;
 	    for (ideru = 1; ideru <= i__1; ++ideru) {
 		(*const_cast <AdvApp2Var_EvaluatorFunc2Var*> (&foncnp)).Evaluate (
-            ndimen, &uvfonc[3], &uvfonc[5], isofav, tconst, &
+            ndimen, &uvfonc[0], &uvfonc[2], isofav, tconst, &
 			nbp, &ttable[*nbroot + 1], &ideru, &iderv, &contr2[(
 			ideru + 1) * contr2_dim1 + 1], iercod);
 		if (*iercod > 0) {
@@ -990,8 +989,8 @@ int mma1fer_(integer *,//ndimen,
 /*     IORDRE: Order of constraint at the extremities of the border */
 /*              -1 = no constraints, */
 /*               0 = constraints of passage to limits (i.e. C0), */
-/*               1 = C0 + constraintes of 1st derivatives (i.e. C1), */
-/*               2 = C1 + constraintes of 2nd derivatives (i.e. C2). */
+/*               1 = C0 + constraints of 1st derivatives (i.e. C1), */
+/*               2 = C1 + constraints of 2nd derivatives (i.e. C2). */
 /*     NDGJAC: Degree of development in series to use for the calculation  */
 /*             in the base of Jacobi. */
 /*     CRVJAC: Table of coeff. of the curve of approximation in the */
@@ -1132,7 +1131,7 @@ int mma1fer_(integer *,//ndimen,
 
 /* ------------------------------ The end ------------------------------- 
 */
-/* --> The order of constraints is not within autorized values. */
+/* --> The order of constraints is not within authorized values. */
 L9100:
     *iercod = 1;
     goto L9999;
@@ -3316,10 +3315,11 @@ int AdvApp2Var_ApproxF2var::mma2cdi_( integer *ndimen,
     integer ilong;
     intptr_t iofwr;
     doublereal* wrkar = 0;
+    doublereal* wrkar_off;
     integer iszwr;
     integer ibb, ier = 0;
     integer isz1, isz2, isz3, isz4;
-    intptr_t ipt1, ipt2, ipt3, ipt4;
+    intptr_t ipt1, ipt2, ipt3;
 
 
 
@@ -3505,28 +3505,28 @@ int AdvApp2Var_ApproxF2var::mma2cdi_( integer *ndimen,
     if (ier > 0) {
 	goto L9013;
     }
-    ipt1 = iofwr;
-    ipt2 = ipt1 + isz1;
-    ipt3 = ipt2 + isz2;
-    ipt4 = ipt3 + isz3;
+    wrkar_off = reinterpret_cast<double*>(iofwr * sizeof(double));
+    ipt1 = isz1;
+    ipt2 = ipt1 + isz2;
+    ipt3 = ipt2 + isz3;
 
     if (*iordru >= 0 && *iordru <= 2) {
 
 /* --- Return 2*(IORDRU+1) coeff of 2*(IORDRU+1) polynoms of Hermite 
 --- */
 
-	AdvApp2Var_ApproxF2var::mma1her_(iordru, &wrkar[ipt1], iercod);
+	AdvApp2Var_ApproxF2var::mma1her_(iordru, wrkar_off, iercod);
 	if (*iercod > 0) {
 	    goto L9100;
 	}
 
-/* ---- Subract discretizations of polynoms of constraints 
+/* ---- Subtract discretizations of polynoms of constraints 
 ---- */
 
-	mma2cd3_(ndimen, nbpntu, &urootl[1], nbpntv, iordru, &sotbu1[1], &
-		sotbu2[1], &ditbu1[1], &ditbu2[1], &wrkar[ipt3], &wrkar[ipt1],
-		 &sosotb[sosotb_offset], &soditb[soditb_offset], &disotb[
-		disotb_offset], &diditb[diditb_offset]);
+	mma2cd3_(ndimen, nbpntu, &urootl[1], nbpntv, iordru, &sotbu1[1],
+		&sotbu2[1], &ditbu1[1], &ditbu2[1], &wrkar_off[ipt2], wrkar_off,
+		&sosotb[sosotb_offset], &soditb[soditb_offset],
+		&disotb[disotb_offset], &diditb[diditb_offset]);
     }
 
     if (*iordrv >= 0 && *iordrv <= 2) {
@@ -3534,7 +3534,7 @@ int AdvApp2Var_ApproxF2var::mma2cdi_( integer *ndimen,
 /* --- Return 2*(IORDRV+1) coeff of 2*(IORDRV+1) polynoms of Hermite 
 --- */
 
-	AdvApp2Var_ApproxF2var::mma1her_(iordrv, &wrkar[ipt2], iercod);
+	AdvApp2Var_ApproxF2var::mma1her_(iordrv, &wrkar_off[ipt1], iercod);
 	if (*iercod > 0) {
 	    goto L9100;
 	}
@@ -3542,10 +3542,10 @@ int AdvApp2Var_ApproxF2var::mma2cdi_( integer *ndimen,
 /* ---- Subtract discretisations of polynoms of constraint 
 ---- */
 
-	mma2cd2_(ndimen, nbpntu, nbpntv, &vrootl[1], iordrv, &sotbv1[1], &
-		sotbv2[1], &ditbv1[1], &ditbv2[1], &wrkar[ipt4], &wrkar[ipt2],
-		 &sosotb[sosotb_offset], &soditb[soditb_offset], &disotb[
-		disotb_offset], &diditb[diditb_offset]);
+	mma2cd2_(ndimen, nbpntu, nbpntv, &vrootl[1], iordrv, &sotbv1[1],
+		&sotbv2[1], &ditbv1[1], &ditbv2[1], &wrkar_off[ipt3], &wrkar_off[ipt1],
+		&sosotb[sosotb_offset], &soditb[soditb_offset],
+		&disotb[disotb_offset], &diditb[diditb_offset]);
     }
 
 /* --------------- Subtract constraints of corners ---------------- 
@@ -3553,11 +3553,11 @@ int AdvApp2Var_ApproxF2var::mma2cdi_( integer *ndimen,
 
     if (*iordru >= 0 && *iordrv >= 0) {
 	mma2cd1_(ndimen, nbpntu, &urootl[1], nbpntv, &vrootl[1], iordru, 
-		iordrv, &contr1[contr1_offset], &contr2[contr2_offset], &
-		contr3[contr3_offset], &contr4[contr4_offset], &wrkar[ipt3], &
-		wrkar[ipt4], &wrkar[ipt1], &wrkar[ipt2], &sosotb[
-		sosotb_offset], &soditb[soditb_offset], &disotb[disotb_offset]
-		, &diditb[diditb_offset]);
+		iordrv, &contr1[contr1_offset], &contr2[contr2_offset],
+		&contr3[contr3_offset], &contr4[contr4_offset], &wrkar_off[ipt2],
+		&wrkar_off[ipt3], wrkar_off, &wrkar_off[ipt1],
+		&sosotb[sosotb_offset], &soditb[soditb_offset],
+		&disotb[disotb_offset], &diditb[diditb_offset]);
     }
     goto L9999;
 
@@ -3630,10 +3630,11 @@ int AdvApp2Var_ApproxF2var::mma2ce1_(integer *numdec,
     logical ldbg;
     intptr_t iofwr;
     doublereal* wrkar = 0;
+    doublereal* wrkar_off;
     integer iszwr;
     integer ier;
     integer isz1, isz2, isz3, isz4, isz5, isz6, isz7;
-    intptr_t ipt1, ipt2, ipt3, ipt4, ipt5, ipt6, ipt7;
+    intptr_t ipt1, ipt2, ipt3, ipt4, ipt5, ipt6;
 
 
 
@@ -3796,25 +3797,25 @@ int AdvApp2Var_ApproxF2var::mma2ce1_(integer *numdec,
     iszwr = isz1 + isz2 + isz3 + isz4 + isz5 + isz6 + isz7;
     AdvApp2Var_SysBase anAdvApp2Var_SysBase;
     anAdvApp2Var_SysBase.mcrrqst_(&c__8, &iszwr, wrkar, &iofwr, &ier);
+    wrkar_off = reinterpret_cast<double*> (iofwr * sizeof(double));
     if (ier > 0) {
 	goto L9013;
     }
-    ipt1 = iofwr;
-    ipt2 = ipt1 + isz1;
-    ipt3 = ipt2 + isz2;
-    ipt4 = ipt3 + isz3;
-    ipt5 = ipt4 + isz4;
-    ipt6 = ipt5 + isz5;
-    ipt7 = ipt6 + isz6;
+    ipt1 = isz1;
+    ipt2 = ipt1 + isz2;
+    ipt3 = ipt2 + isz3;
+    ipt4 = ipt3 + isz4;
+    ipt5 = ipt4 + isz5;
+    ipt6 = ipt5 + isz6;
 
 /* ----------------- Return Gauss coefficients of integration ---------------- 
 */
 
-    AdvApp2Var_ApproxF2var::mmapptt_(ndjacu, nbpntu, iordru, &wrkar[ipt1], iercod);
+    AdvApp2Var_ApproxF2var::mmapptt_(ndjacu, nbpntu, iordru, wrkar_off, iercod);
     if (*iercod > 0) {
 	goto L9999;
     }
-    AdvApp2Var_ApproxF2var::mmapptt_(ndjacv, nbpntv, iordrv, &wrkar[ipt2], iercod);
+    AdvApp2Var_ApproxF2var::mmapptt_(ndjacv, nbpntv, iordrv, &wrkar_off[ipt1], iercod);
     if (*iercod > 0) {
 	goto L9999;
     }
@@ -3822,18 +3823,18 @@ int AdvApp2Var_ApproxF2var::mma2ce1_(integer *numdec,
 /* ------------------- Return max polynoms of  Jacobi ------------ 
 */
 
-    AdvApp2Var_ApproxF2var::mma2jmx_(ndjacu, iordru, &wrkar[ipt5]);
-    AdvApp2Var_ApproxF2var::mma2jmx_(ndjacv, iordrv, &wrkar[ipt6]);
+    AdvApp2Var_ApproxF2var::mma2jmx_(ndjacu, iordru, &wrkar_off[ipt5]);
+    AdvApp2Var_ApproxF2var::mma2jmx_(ndjacv, iordrv, &wrkar_off[ipt5]);
 
 /* ------ Calculate the coefficients and their contribution to the error ---- 
 */
 
     mma2ce2_(numdec, ndimen, nbsesp, &ndimse[1], ndminu, ndminv, ndguli, 
-	    ndgvli, ndjacu, ndjacv, iordru, iordrv, nbpntu, nbpntv, &epsapr[1]
-	    , &sosotb[sosotb_offset], &disotb[disotb_offset], &soditb[
-	    soditb_offset], &diditb[diditb_offset], &wrkar[ipt1], &wrkar[ipt2]
-	    , &wrkar[ipt5], &wrkar[ipt6], &wrkar[ipt7], &wrkar[ipt3], &wrkar[
-	    ipt4], &patjac[patjac_offset], &errmax[1], &errmoy[1], ndegpu, 
+	    ndgvli, ndjacu, ndjacv, iordru, iordrv, nbpntu, nbpntv, &epsapr[1],
+	    &sosotb[sosotb_offset], &disotb[disotb_offset], &soditb[soditb_offset],
+	    &diditb[diditb_offset], wrkar_off, &wrkar_off[ipt1],
+	    &wrkar_off[ipt4], &wrkar_off[ipt5], &wrkar_off[ipt6], &wrkar_off[ipt2],
+	    &wrkar_off[ipt3], &patjac[patjac_offset], &errmax[1], &errmoy[1], ndegpu, 
 	    ndegpv, itydec, iercod);
     if (*iercod > 0) {
 	goto L9999;
@@ -4918,7 +4919,7 @@ int mma2cfv_(integer *ndvjac,
 /*   MAXDGU: Degree maximum by U of coeff. to calculate. */
 /*   NBPNTV: Degree of the Legendre polynom on the roots which of */
 /*           the coefficients of integration by V are calculated */
-/*           by Gauss method. It is reqired that NBPNTV = 30, 40, 50 or 61 and NDVJAC < NBPNTV. */
+/*           by Gauss method. It is required that NBPNTV = 30, 40, 50 or 61 and NDVJAC < NBPNTV. */
 /*   GSSVTB: Table of coefficients of integration by Gauss method */
 /*           by V for NDVJAC fixed: j varies from 0 to NBPNTV/2. */
 /*   CHPAIR: Table of terms connected to degrees from MINDGU to MAXDGU by U to */
@@ -6167,6 +6168,7 @@ int AdvApp2Var_ApproxF2var::mma2fnc_(integer *ndimen,
     integer  ideb1, ibid1, ibid2, ncfja, ndgre, ilong, 
 	    ndwrk;
     doublereal* wrkar = 0;
+    doublereal* wrkar_off;
     integer nupil;
     intptr_t iofwr;
     doublereal uvpav[4]	/* was [2][2] */;
@@ -6177,7 +6179,7 @@ int AdvApp2Var_ApproxF2var::mma2fnc_(integer *ndimen,
   integer ncb1;
     doublereal eps3;
     integer isz1, isz2, isz3, isz4, isz5;
-    intptr_t ipt1, ipt2, ipt3, ipt4, ipt5,iptt, jptt;
+    intptr_t ipt1, ipt2, ipt3, ipt4,iptt, jptt;
 
 /* ********************************************************************** 
 */
@@ -6427,19 +6429,19 @@ int AdvApp2Var_ApproxF2var::mma2fnc_(integer *ndimen,
 
     ndwrk = isz1 + isz2 + isz3 + isz4 + isz5;
     anAdvApp2Var_SysBase.mcrrqst_(&c__8, &ndwrk, wrkar, &iofwr, &ier);
+    wrkar_off = reinterpret_cast<double*>(iofwr * sizeof(double));
     if (ier > 0) {
 	goto L9013;    }
 /* --> For the parameters of discretisation (NBROOT+2 extremities). */
-    ipt1 = iofwr;
 /* --> For the points of discretisation FPNTAB(NDIMEN,NBROOT+2), */
 /*    FPNTAB(NBROOT,2*(IORDRE+1)) and for WRKAR of MMAPCMP. */
-    ipt2 = ipt1 + isz1;
+    ipt1 = isz1;
 /* --> For the polynoms of Hermit */
-    ipt3 = ipt2 + isz2;
+    ipt2 = ipt1 + isz2;
 /* --> For the Gauss  coeff of integration. */
-    ipt4 = ipt3 + isz3;
+    ipt3 = ipt2 + isz3;
 /* --> For the curve in Jacobi. */
-    ipt5 = ipt4 + isz4;
+    ipt4 = ipt3 + isz4;
 
 /* ------------------ Initialisation of management of cuts --------- 
 */
@@ -6485,15 +6487,15 @@ L1000:
 
 /* -------------------- Normalization of parameters -------------------- */
 
-    mma1nop_(nbroot, &rootlg[1], uvpav, isofav, &wrkar[ipt1], &ier);
+    mma1nop_(nbroot, &rootlg[1], uvpav, isofav, wrkar_off, &ier);
     if (ier > 0) {
 	goto L9100;
     }
 
 /* -------------------- Discretisation of FONCNP ------------------------ */
 
-    mma1fdi_(ndimen, uvpav, foncnp, isofav, tconst, nbroot, &wrkar[ipt1], 
-	    iordre, ideriv, &wrkar[ipt2], &somtab[(ncb1 * somtab_dim2 + 1) * 
+    mma1fdi_(ndimen, uvpav, foncnp, isofav, tconst, nbroot, wrkar_off, 
+	    iordre, ideriv, &wrkar_off[ipt1], &somtab[(ncb1 * somtab_dim2 + 1) *
 	    somtab_dim1], &diftab[(ncb1 * diftab_dim2 + 1) * diftab_dim1], &
 	    contr1[(ncb1 * contr1_dim2 + 1) * contr1_dim1 + 1], &contr2[(ncb1 
 	    * contr2_dim2 + 1) * contr2_dim1 + 1], iercod);
@@ -6508,7 +6510,7 @@ L1000:
 		contr1_dim2 + 1) * contr1_dim1 + 1], &contr2[(ncb1 * 
 		contr2_dim2 + 1) * contr2_dim1 + 1], &somtab[(ncb1 * 
 		somtab_dim2 + 1) * somtab_dim1], &diftab[(ncb1 * diftab_dim2 
-		+ 1) * diftab_dim1], &wrkar[ipt2], &wrkar[ipt3], &ier);
+		+ 1) * diftab_dim1], &wrkar_off[ipt1], &wrkar_off[ipt2], &ier);
 	if (ier > 0) {
 	    goto L9100;
 	}
@@ -6522,8 +6524,8 @@ L1000:
 */
 
     mma1jak_(ndimen, nbroot, iordre, ndgjac, &somtab[(ncb1 * somtab_dim2 + 1) 
-	    * somtab_dim1], &diftab[(ncb1 * diftab_dim2 + 1) * diftab_dim1], &
-	    wrkar[ipt4], &wrkar[ipt5], &ier);
+	    * somtab_dim1], &diftab[(ncb1 * diftab_dim2 + 1) * diftab_dim1],
+	    &wrkar_off[ipt3], &wrkar_off[ipt4], &ier);
     if (ier > 0) {
 	goto L9100;
     }
@@ -6538,7 +6540,7 @@ L1000:
     if (*iordre >= 0) {
 	mma1cnt_(ndimen, iordre, &contr1[(ncb1 * contr1_dim2 + 1) * 
 		contr1_dim1 + 1], &contr2[(ncb1 * contr2_dim2 + 1) * 
-		contr2_dim1 + 1], &wrkar[ipt3], ndgjac, &wrkar[ipt5]);
+		contr2_dim1 + 1], &wrkar_off[ipt2], ndgjac, &wrkar_off[ipt4]);
     }
 
 /* ********************************************************************** 
@@ -6548,8 +6550,8 @@ L1000:
 /* ********************************************************************** 
 */
 
-    mma1fer_(ndimen, nbsesp, &ndimse[1], iordre, ndgjac, &wrkar[ipt5], ncflim,
-	     &epsapr[1], &wrkar[ipt2], &errmax[ncb1 * errmax_dim1 + 1], &
+    mma1fer_(ndimen, nbsesp, &ndimse[1], iordre, ndgjac, &wrkar_off[ipt4], ncflim,
+	     &epsapr[1], &wrkar_off[ipt1], &errmax[ncb1 * errmax_dim1 + 1], &
 	    errmoy[ncb1 * errmoy_dim1 + 1], &ncoeff[ncb1], &ier);
     if (ier > 0) {
 	goto L9100;
@@ -6577,26 +6579,26 @@ L1000:
 	AdvApp2Var_MathBase::mmapcmp_((integer*)ndimen, 
 				      &ncfja, 
 				      &ncoeff[ncb1], 
-				      &wrkar[ipt5], 
-				      &wrkar[ipt2]);
+				      &wrkar_off[ipt4],
+				      &wrkar_off[ipt1]);
 	/*pkv t*/
 	ilong = *ndimen * *ncflim;
-	AdvApp2Var_SysBase::mvriraz_(&ilong, &wrkar[ipt5]);
+	AdvApp2Var_SysBase::mvriraz_(&ilong, &wrkar_off[ipt4]);
 /* -> Passage to canonic base (-1,1) (result in WRKAR(IPT5)). 
 */
 	ndgre = ncoeff[ncb1] - 1;
 	i__1 = *ndimen;
 	for (nd = 1; nd <= i__1; ++nd) {
-	    iptt = ipt2 + ((nd - 1) << 1) * (ndgre / 2 + 1);
-	    jptt = ipt5 + (nd - 1) * ncoeff[ncb1];
-	    AdvApp2Var_MathBase::mmjacan_(iordre, &ndgre, &wrkar[iptt], &wrkar[jptt]);
+	    iptt = ipt1 + ((nd - 1) << 1) * (ndgre / 2 + 1);
+	    jptt = ipt4 + (nd - 1) * ncoeff[ncb1];
+	    AdvApp2Var_MathBase::mmjacan_(iordre, &ndgre, &wrkar_off[iptt], &wrkar_off[jptt]);
 /* L400: */
 	}
 
 /* -> Store the calculated curve */
 	ibid1 = 1;
-	AdvApp2Var_MathBase::mmfmca8_(&ncoeff[ncb1], ndimen, &ibid1, ncflim, ndimen, &ibid1, &
-		wrkar[ipt5], &courbe[(ncb1 * courbe_dim2 + 1) * courbe_dim1 + 
+	AdvApp2Var_MathBase::mmfmca8_(&ncoeff[ncb1], ndimen, &ibid1, ncflim, ndimen, &ibid1,
+		&wrkar_off[ipt4], &courbe[(ncb1 * courbe_dim2 + 1) * courbe_dim1 +
 		1]);
 
 /* -> Before normalization of constraints on (-1,1), recalculate */
@@ -7509,7 +7511,7 @@ int mmmapcoe_(integer *ndim,
 
 /*     FUNCTION : */
 /*     ---------- */
-/*     Calculate the coefficients of polinomial approximation curve */
+/*     Calculate the coefficients of polynomial approximation curve */
 /*     of degree NDGJAC by the method of smallest squares starting from */
 /*     the discretization of function on the roots of Legendre polynom */
 /*     of degree NBPNTS. */
@@ -8100,7 +8102,7 @@ int mmjacpt_(const integer *ndimen,
 
 /*     OUTPUT ARGUMENTS : */
 /*     ------------------- */
-/*        PTCAUX : Auxilliary space. */
+/*        PTCAUX : Auxiliary space. */
 /*        PTCCAN : The square in the canonic base (-1,1) */
 
 /*     COMMONS USED   : */

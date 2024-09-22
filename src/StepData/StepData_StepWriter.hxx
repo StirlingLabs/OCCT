@@ -23,19 +23,15 @@
 
 #include <TColStd_HSequenceOfHAsciiString.hxx>
 #include <Interface_LineBuffer.hxx>
-#include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
 #include <Interface_FloatWriter.hxx>
 #include <Interface_CheckIterator.hxx>
 #include <TColStd_HArray1OfInteger.hxx>
 #include <Standard_CString.hxx>
-#include <Standard_Real.hxx>
 #include <StepData_Logical.hxx>
 #include <TColStd_HArray1OfReal.hxx>
 #include <Standard_OStream.hxx>
 class StepData_StepModel;
-class Interface_InterfaceMismatch;
-class Interface_FloatWriter;
 class StepData_Protocol;
 class StepData_WriterLib;
 class TCollection_AsciiString;
@@ -46,7 +42,6 @@ class StepData_SelectMember;
 class StepData_FieldList;
 class StepData_ESDescr;
 class Standard_Transient;
-class Interface_CheckIterator;
 
 
 //! manages atomic file writing, under control of StepModel (for
@@ -155,7 +150,7 @@ public:
   //! same as above but accepts a CString (ex.: "..." directly)
   Standard_EXPORT void SendComment (const Standard_CString text);
   
-  //! sets entity's StepType, opens brakets, starts param no to 0
+  //! sets entity's StepType, opens brackets, starts param no to 0
   //! params are separated by comma
   //! Remark : for a Multiple Type Entity (see Express ANDOR clause)
   //! StartComplex must be called before sending components, then
@@ -166,7 +161,7 @@ public:
   Standard_EXPORT void StartEntity (const TCollection_AsciiString& atype);
   
   //! sends the start of a complex entity, which is a simple open
-  //! bracket (without increasing braket level)
+  //! bracket (without increasing bracket level)
   //! It must be called JUST AFTER SendEntity and BEFORE sending
   //! components, each one begins by StartEntity
   Standard_EXPORT void StartComplex();

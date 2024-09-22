@@ -21,10 +21,10 @@
 #include <TColStd_HArray1OfInteger.hxx>
 #include <Interface_InterfaceModel.hxx>
 #include <Resource_FormatType.hxx>
+#include <StepData_Factors.hxx>
+#include <StepData_ConfParameters.hxx>
 
-class Standard_NoSuchObject;
 class Standard_Transient;
-class Interface_InterfaceModel;
 class Interface_EntityIterator;
 class Interface_Check;
 class TCollection_HAsciiString;
@@ -100,11 +100,31 @@ public:
 
   //! Return the encoding of STEP file for converting names into UNICODE.
   //! Initialized from "read.step.codepage" variable by constructor, which is Resource_UTF8 by default.
-  Resource_FormatType SourceCodePage() const { return mySourceCodePage; }
+  Resource_FormatType SourceCodePage() const { return InternalParameters.ReadCodePage; }
 
   //! Return the encoding of STEP file for converting names into UNICODE.
-  void SetSourceCodePage (Resource_FormatType theCode) { mySourceCodePage = theCode; }
+  void SetSourceCodePage (Resource_FormatType theCode) { InternalParameters.ReadCodePage = theCode; }
 
+  //! Sets local length unit using for transfer process
+  Standard_EXPORT void SetLocalLengthUnit(const Standard_Real theUnit);
+
+  //! Returns local length unit using for transfer process (1 by default)
+  Standard_EXPORT Standard_Real LocalLengthUnit() const;
+
+  //! Sets length unit using for writing process
+  Standard_EXPORT void SetWriteLengthUnit(const Standard_Real theUnit);
+
+  //! Returns length unit using for writing process (1 by default)
+  Standard_EXPORT Standard_Real WriteLengthUnit() const;
+
+  //! Returns the unit initialization flag
+  //! True - the unit was initialized
+  //! False - the unit value was not initialized, the default value is used
+  Standard_Boolean IsInitializedUnit() const { return myReadUnitIsInitialized; }
+
+public:
+
+  StepData_ConfParameters InternalParameters;
 
   DEFINE_STANDARD_RTTIEXT(StepData_StepModel,Interface_InterfaceModel)
 
@@ -118,9 +138,9 @@ private:
 
   Interface_EntityList theheader;
   Handle(TColStd_HArray1OfInteger) theidnums;
-  Resource_FormatType mySourceCodePage;
-
-
+  Standard_Boolean myReadUnitIsInitialized;
+  Standard_Real myWriteUnit;
+  Standard_Real myLocalLengthUnit;
 };
 
 

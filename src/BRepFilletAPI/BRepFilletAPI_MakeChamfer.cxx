@@ -17,7 +17,6 @@
 
 #include <BRepFilletAPI_MakeChamfer.hxx>
 #include <ChFiDS_Spine.hxx>
-#include <StdFail_NotDone.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
@@ -25,7 +24,6 @@
 #include <TopoDS_Vertex.hxx>
 #include <TopOpeBRepBuild_HBuilder.hxx>
 #include <TopOpeBRepDS_HDataStructure.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
 
 //=======================================================================
 //function : BRepFilletAPI_MakeChamfer
@@ -391,7 +389,7 @@ Handle(TopOpeBRepBuild_HBuilder) BRepFilletAPI_MakeChamfer::Builder()const
 //purpose  : 
 //=======================================================================
 
-void BRepFilletAPI_MakeChamfer::Build()
+void BRepFilletAPI_MakeChamfer::Build(const Message_ProgressRange& /*theRange*/)
 {
   myBuilder.Compute();
   if (myBuilder.IsDone()){

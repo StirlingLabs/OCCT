@@ -16,9 +16,7 @@
 
 #include <BOPTest.hxx>
 #include <BOPTools_AlgoTools2D.hxx>
-#include <BRep_CurveRepresentation.hxx>
 #include <BRep_GCurve.hxx>
-#include <BRep_ListIteratorOfListOfCurveRepresentation.hxx>
 #include <BRep_TEdge.hxx>
 #include <BRep_Tool.hxx>
 #include <BRepClass3d_SolidClassifier.hxx>
@@ -29,7 +27,6 @@
 #include <gp_Pnt.hxx>
 #include <gp_Pnt2d.hxx>
 #include <IntTools_FClass2d.hxx>
-#include <TCollection_AsciiString.hxx>
 #include <TopAbs_State.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Shape.hxx>
@@ -68,7 +65,11 @@ static  Standard_Integer bhaspc      (Draw_Interpretor& , Standard_Integer , con
   const char* g = "BOPTest commands";
   theCommands.Add("bclassify"    , "use bclassify Solid Point [Tolerance=1.e-7]",
                   __FILE__, bclassify   , g);
-  theCommands.Add("b2dclassify"  , "use b2dclassify Face Point2d [Tol] ",
+  theCommands.Add("b2dclassify"  , "use b2dclassify Face Point2d [Tol] [UseBox] [GapCheckTol]\n" 
+    "Classify  the Point  Point2d  with  Tolerance <Tol> on the face described by <Face>.\n" 
+    "<UseBox> == 1/0 (default <UseBox> = 0): switch on/off the use Bnd_Box in the classification.\n"
+    "<GapCheckTol> (default <GapCheckTol> = 0.1): this is for additional verification of\n" 
+    "the vertex with a tolerance >= <GapCheckTol>.",
                   __FILE__, b2dclassify , g);
   theCommands.Add("b2dclassifx"  , "use b2dclassifx Face Point2d [Tol] ",
                   __FILE__, b2dclassifx , g);
@@ -77,7 +78,7 @@ static  Standard_Integer bhaspc      (Draw_Interpretor& , Standard_Integer , con
 }
 
 
-//
+//lj cd
 //=======================================================================
 //function : b2dclassifx
 //purpose  : 
@@ -124,7 +125,7 @@ Standard_Integer b2dclassify (Draw_Interpretor& theDI,
                               const char**      theArgVec)
 {
   if (theArgNb < 3)  {
-    theDI << " use b2dclassify Face Point2d [Tol]\n";
+    theDI << " use b2dclassify Face Point2d [Tol] [UseBox] [GapCheckTol]\n";
     return 1;
   }
 
@@ -142,11 +143,13 @@ Standard_Integer b2dclassify (Draw_Interpretor& theDI,
   //
   DrawTrSurf::GetPoint2d (theArgVec[2], aP);
   const TopoDS_Face&  aF   = TopoDS::Face(aS);
-  const Standard_Real aTol = (theArgNb == 4) ? 
+  const Standard_Real aTol = (theArgNb >= 4) ? 
     Draw::Atof (theArgVec[3]) : BRep_Tool::Tolerance (aF);
-  
+  const Standard_Boolean anUseBox = (theArgNb >= 5 && Draw::Atof(theArgVec[4]) == 1) ?
+    Standard_True : Standard_False;
+  const Standard_Real aGapCheckTol = (theArgNb == 6) ? Draw::Atof(theArgVec[5]) : 0.1;
   BRepClass_FaceClassifier aClassifier;
-  aClassifier.Perform(aF, aP, aTol);
+  aClassifier.Perform(aF, aP, aTol, anUseBox, aGapCheckTol);
   PrintState (theDI, aClassifier.State());
   //
   return 0;

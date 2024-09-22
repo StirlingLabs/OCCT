@@ -21,9 +21,7 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
-#include <Standard_Real.hxx>
 #include <TopoDS_Shape.hxx>
-class TopoDS_Shape;
 
 
 

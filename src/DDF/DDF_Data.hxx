@@ -17,14 +17,12 @@
 #define _DDF_Data_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <Draw_Drawable3D.hxx>
 #include <Standard_OStream.hxx>
 #include <Draw_Interpretor.hxx>
 class TDF_Data;
 class Draw_Display;
-class Draw_Drawable3D;
 
 
 class DDF_Data;

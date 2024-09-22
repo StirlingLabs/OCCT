@@ -18,12 +18,10 @@
 #define _Draw_Box_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <Bnd_OBB.hxx>
 #include <Draw_Color.hxx>
 #include <Draw_Drawable3D.hxx>
-class Draw_Color;
 class Draw_Display;
 
 

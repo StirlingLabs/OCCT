@@ -13,8 +13,8 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef _OpenGl_GlCore44_Header
-#define _OpenGl_GlCore44_Header
+#ifndef OpenGl_GlCore44_HeaderFile
+#define OpenGl_GlCore44_HeaderFile
 
 #include <OpenGl_GlCore43.hxx>
 
@@ -26,8 +26,6 @@ private:
 
 public: //! @name OpenGL 4.4 additives to 4.3
 
-#if !defined(GL_ES_VERSION_2_0)
-
   using theBaseClass_t::glBufferStorage;
   using theBaseClass_t::glClearTexImage;
   using theBaseClass_t::glClearTexSubImage;
@@ -37,8 +35,6 @@ public: //! @name OpenGL 4.4 additives to 4.3
   using theBaseClass_t::glBindSamplers;
   using theBaseClass_t::glBindImageTextures;
   using theBaseClass_t::glBindVertexBuffers;
-
-#endif
 
 };
 

@@ -21,10 +21,8 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
-#include <Standard_Address.hxx>
 #include <TopOpeBRepBuild_LoopClassifier.hxx>
 #include <TopAbs_State.hxx>
-#include <Standard_Boolean.hxx>
 class TopOpeBRepBuild_BlockBuilder;
 class TopOpeBRepBuild_Loop;
 class TopoDS_Shape;

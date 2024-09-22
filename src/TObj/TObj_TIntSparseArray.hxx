@@ -18,10 +18,8 @@
 #ifndef TObj_TIntSparseArray_HeaderFile
 #define TObj_TIntSparseArray_HeaderFile
 
-#include <TObj_Common.hxx>
 
 #include <NCollection_SparseArray.hxx>
-#include <TDF_Attribute.hxx>
 #include <TDF_Label.hxx>
 
 typedef NCollection_SparseArray<Standard_Integer> TObj_TIntSparseArray_VecOfData;

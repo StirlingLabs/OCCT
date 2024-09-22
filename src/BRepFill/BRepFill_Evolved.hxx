@@ -19,22 +19,15 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
 #include <TopoDS_Face.hxx>
 #include <TopoDS_Wire.hxx>
 #include <TopoDS_Shape.hxx>
-#include <Standard_Boolean.hxx>
 #include <GeomAbs_JoinType.hxx>
 #include <BRepFill_DataMapOfShapeDataMapOfShapeListOfShape.hxx>
 #include <TopTools_ListOfShape.hxx>
 #include <TopTools_DataMapOfShapeShape.hxx>
-class Standard_ConstructionError;
-class Standard_NoSuchObject;
-class TopoDS_Wire;
 class gp_Ax3;
-class TopoDS_Face;
-class TopoDS_Shape;
 class BRepMAT2d_BisectingLocus;
 class BRepMAT2d_LinkTopoBilo;
 class BRepTools_Quilt;

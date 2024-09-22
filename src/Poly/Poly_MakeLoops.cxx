@@ -154,6 +154,7 @@ Standard_Integer Poly_MakeLoops::Perform()
 #ifdef OCCT_DEBUG
   if (doDebug)
     showBoundaryBreaks();
+  Standard_Integer aNbLoopsOnPass2 = 0;
 #endif
 
   Standard_Integer aResult = 0;
@@ -162,8 +163,7 @@ Standard_Integer Poly_MakeLoops::Perform()
   Handle(NCollection_IncAllocator) aTempAlloc1 = new NCollection_IncAllocator(4000);
 
   // two pass loop
-  Standard_Integer aPassNum, nbLoopsOnPass2 = 0;
-  for (aPassNum=0; aPassNum < 2; aPassNum++)
+  for (Standard_Integer aPassNum=0; aPassNum < 2; aPassNum++)
   {
     myHangIndices.Clear();
     // main loop
@@ -171,7 +171,7 @@ Standard_Integer Poly_MakeLoops::Perform()
     {
       Standard_Integer aIndexS = myStartIndices.Top();
 
-      aTempAlloc->Reset();
+      aTempAlloc->Reset(false);
       NCollection_IndexedMap<Standard_Integer> aContour (100, aTempAlloc);
       Standard_Integer aStartNumber = findContour (aIndexS, aContour, aTempAlloc, aTempAlloc1);
 #ifdef OCCT_DEBUG
@@ -192,8 +192,10 @@ Standard_Integer Poly_MakeLoops::Perform()
       if (aStartNumber <= aContour.Extent())
       {
         // there is a closed loop in the contour
+#ifdef OCCT_DEBUG
         if (aPassNum == 1)
-          nbLoopsOnPass2++;
+          aNbLoopsOnPass2++;
+#endif
         acceptContour (aContour, aStartNumber);
       }
       if (aStartNumber > 1)
@@ -222,8 +224,8 @@ Standard_Integer Poly_MakeLoops::Perform()
     }
   }
 #ifdef OCCT_DEBUG
-  if (doDebug && nbLoopsOnPass2)
-    std::cout << "MakeLoops: " << nbLoopsOnPass2
+  if (doDebug && aNbLoopsOnPass2)
+    std::cout << "MakeLoops: " << aNbLoopsOnPass2
       << " contours accepted on the second pass" << std::endl;
 #endif
 
@@ -262,7 +264,7 @@ Standard_Integer Poly_MakeLoops::findContour
 
     // collect the list of links from this node able to participate
     // in this contour
-    theTempAlloc1->Reset();
+    theTempAlloc1->Reset(false);
     NCollection_List<Standard_Integer> aLstIndS (theTempAlloc1);
     const ListOfLink& aLinks = myHelper->GetAdjacentLinks (aLastNode);
     Poly_MakeLoops::ListOfLink::Iterator itLinks (aLinks);

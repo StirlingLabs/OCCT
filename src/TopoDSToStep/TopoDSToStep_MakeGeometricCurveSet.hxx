@@ -23,7 +23,6 @@
 
 #include <TopoDSToStep_Root.hxx>
 class StepShape_GeometricCurveSet;
-class StdFail_NotDone;
 class TopoDS_Shape;
 class Transfer_FinderProcess;
 
@@ -38,7 +37,9 @@ public:
   DEFINE_STANDARD_ALLOC
 
   
-  Standard_EXPORT TopoDSToStep_MakeGeometricCurveSet(const TopoDS_Shape& SH, const Handle(Transfer_FinderProcess)& FP);
+  Standard_EXPORT TopoDSToStep_MakeGeometricCurveSet(const TopoDS_Shape& SH,
+                                                     const Handle(Transfer_FinderProcess)& FP,
+                                                     const StepData_Factors& theLocalFactors = StepData_Factors());
   
   Standard_EXPORT const Handle(StepShape_GeometricCurveSet)& Value() const;
 

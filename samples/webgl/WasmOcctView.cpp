@@ -114,7 +114,7 @@ WasmOcctView& WasmOcctView::Instance()
 // ================================================================
 WasmOcctView::WasmOcctView()
 : myDevicePixelRatio (1.0f),
-  myUpdateRequests (0)
+  myNbUpdateRequests (0)
 {
   addActionHotKeys (Aspect_VKey_NavForward,        Aspect_VKey_W, Aspect_VKey_W | Aspect_VKeyFlags_SHIFT);
   addActionHotKeys (Aspect_VKey_NavBackward ,      Aspect_VKey_S, Aspect_VKey_S | Aspect_VKeyFlags_SHIFT);
@@ -185,12 +185,16 @@ void WasmOcctView::initWindow()
   emscripten_set_resize_callback     (EMSCRIPTEN_EVENT_TARGET_WINDOW, this, toUseCapture, onResizeCallback);
 
   emscripten_set_mousedown_callback  (aTargetId, this, toUseCapture, onMouseCallback);
-  emscripten_set_mouseup_callback    (aTargetId, this, toUseCapture, onMouseCallback);
-  emscripten_set_mousemove_callback  (aTargetId, this, toUseCapture, onMouseCallback);
+  // bind these events to window to track mouse movements outside of canvas
+  //emscripten_set_mouseup_callback    (aTargetId, this, toUseCapture, onMouseCallback);
+  //emscripten_set_mousemove_callback  (aTargetId, this, toUseCapture, onMouseCallback);
+  //emscripten_set_mouseleave_callback (aTargetId, this, toUseCapture, onMouseCallback);
+  emscripten_set_mouseup_callback    (EMSCRIPTEN_EVENT_TARGET_WINDOW, this, toUseCapture, onMouseCallback);
+  emscripten_set_mousemove_callback  (EMSCRIPTEN_EVENT_TARGET_WINDOW, this, toUseCapture, onMouseCallback);
+
   emscripten_set_dblclick_callback   (aTargetId, this, toUseCapture, onMouseCallback);
   emscripten_set_click_callback      (aTargetId, this, toUseCapture, onMouseCallback);
   emscripten_set_mouseenter_callback (aTargetId, this, toUseCapture, onMouseCallback);
-  emscripten_set_mouseleave_callback (aTargetId, this, toUseCapture, onMouseCallback);
   emscripten_set_wheel_callback      (aTargetId, this, toUseCapture, onWheelCallback);
 
   emscripten_set_touchstart_callback (aTargetId, this, toUseCapture, onTouchCallback);
@@ -198,9 +202,12 @@ void WasmOcctView::initWindow()
   emscripten_set_touchmove_callback  (aTargetId, this, toUseCapture, onTouchCallback);
   emscripten_set_touchcancel_callback(aTargetId, this, toUseCapture, onTouchCallback);
 
-  //emscripten_set_keypress_callback   (EMSCRIPTEN_EVENT_TARGET_WINDOW, this, toUseCapture, onKeyCallback);
-  emscripten_set_keydown_callback    (EMSCRIPTEN_EVENT_TARGET_WINDOW, this, toUseCapture, onKeyDownCallback);
-  emscripten_set_keyup_callback      (EMSCRIPTEN_EVENT_TARGET_WINDOW, this, toUseCapture, onKeyUpCallback);
+  //emscripten_set_keypress_callback   (aTargetId, this, toUseCapture, onKeyCallback);
+  emscripten_set_keydown_callback    (aTargetId, this, toUseCapture, onKeyDownCallback);
+  emscripten_set_keyup_callback      (aTargetId, this, toUseCapture, onKeyUpCallback);
+  //emscripten_set_focus_callback    (aTargetId, this, toUseCapture, onFocusCallback);
+  //emscripten_set_focusin_callback  (aTargetId, this, toUseCapture, onFocusCallback);
+  emscripten_set_focusout_callback   (aTargetId, this, toUseCapture, onFocusCallback);
 }
 
 // ================================================================
@@ -307,7 +314,7 @@ bool WasmOcctView::initViewer()
 
   Handle(V3d_Viewer) aViewer = new V3d_Viewer (aDriver);
   aViewer->SetComputedMode (false);
-  aViewer->SetDefaultShadingModel (Graphic3d_TOSM_FRAGMENT);
+  aViewer->SetDefaultShadingModel (Graphic3d_TypeOfShadingModel_Phong);
   aViewer->SetDefaultLights();
   aViewer->SetLightOn();
   for (V3d_ListOfLight::Iterator aLightIter (aViewer->ActiveLights()); aLightIter.More(); aLightIter.Next())
@@ -388,9 +395,11 @@ void WasmOcctView::ProcessInput()
     // Queue onRedrawView()/redrawView callback to redraw canvas after all user input is flushed by browser.
     // Redrawing viewer on every single message would be a pointless waste of resources,
     // as user will see only the last drawn frame due to WebGL implementation details.
-    if (++myUpdateRequests == 1)
+    // -1 in emscripten_async_call() redirects to requestAnimationFrame();
+    // requestPostAnimationFrame() is a better under development alternative.
+    if (++myNbUpdateRequests == 1)
     {
-      emscripten_async_call (onRedrawView, this, 0);
+      emscripten_async_call (onRedrawView, this, -1);
     }
   }
 }
@@ -417,6 +426,7 @@ void WasmOcctView::redrawView()
 {
   if (!myView.IsNull())
   {
+    myNbUpdateRequests = 0;
     FlushViewEvents (myContext, myView, true);
   }
 }
@@ -428,13 +438,14 @@ void WasmOcctView::redrawView()
 void WasmOcctView::handleViewRedraw (const Handle(AIS_InteractiveContext)& theCtx,
                                      const Handle(V3d_View)& theView)
 {
-  myUpdateRequests = 0;
   AIS_ViewController::handleViewRedraw (theCtx, theView);
   if (myToAskNextFrame)
   {
     // ask more frames
-    ++myUpdateRequests;
-    emscripten_async_call (onRedrawView, this, 0);
+    if (++myNbUpdateRequests == 1)
+    {
+      emscripten_async_call (onRedrawView, this, -1);
+    }
   }
 }
 
@@ -474,6 +485,21 @@ EM_BOOL WasmOcctView::onResizeEvent (int theEventType, const EmscriptenUiEvent* 
   return EM_TRUE;
 }
 
+//! Update canvas bounding rectangle.
+EM_JS(void, jsUpdateBoundingClientRect, (), {
+  Module._myCanvasRect = Module.canvas.getBoundingClientRect();
+});
+
+//! Get canvas bounding top.
+EM_JS(int, jsGetBoundingClientTop, (), {
+  return Math.round(Module._myCanvasRect.top);
+});
+
+//! Get canvas bounding left.
+EM_JS(int, jsGetBoundingClientLeft, (), {
+  return Math.round(Module._myCanvasRect.left);
+});
+
 // ================================================================
 // Function : onMouseEvent
 // Purpose  :
@@ -486,6 +512,18 @@ EM_BOOL WasmOcctView::onMouseEvent (int theEventType, const EmscriptenMouseEvent
   }
 
   Handle(Wasm_Window) aWindow = Handle(Wasm_Window)::DownCast (myView->Window());
+  if (theEventType == EMSCRIPTEN_EVENT_MOUSEMOVE
+   || theEventType == EMSCRIPTEN_EVENT_MOUSEUP)
+  {
+    // these events are bound to EMSCRIPTEN_EVENT_TARGET_WINDOW, and coordinates should be converted
+    jsUpdateBoundingClientRect();
+    EmscriptenMouseEvent anEvent = *theEvent;
+    anEvent.targetX -= jsGetBoundingClientLeft();
+    anEvent.targetY -= jsGetBoundingClientTop();
+    aWindow->ProcessMouseEvent (*this, theEventType, &anEvent);
+    return EM_FALSE;
+  }
+
   return aWindow->ProcessMouseEvent (*this, theEventType, theEvent) ? EM_TRUE : EM_FALSE;
 }
 
@@ -555,6 +593,24 @@ bool WasmOcctView::navigationKeyModifierSwitch (unsigned int theModifOld,
     }
   }
   return hasActions;
+}
+
+// ================================================================
+// Function : onFocusEvent
+// Purpose  :
+// ================================================================
+EM_BOOL WasmOcctView::onFocusEvent (int theEventType, const EmscriptenFocusEvent* theEvent)
+{
+  if (myView.IsNull()
+   || (theEventType != EMSCRIPTEN_EVENT_FOCUS
+    && theEventType != EMSCRIPTEN_EVENT_FOCUSIN // about to receive focus
+    && theEventType != EMSCRIPTEN_EVENT_FOCUSOUT))
+  {
+    return EM_FALSE;
+  }
+
+  Handle(Wasm_Window) aWindow = Handle(Wasm_Window)::DownCast (myView->Window());
+  return aWindow->ProcessFocusEvent (*this, theEventType, theEvent) ? EM_TRUE : EM_FALSE;
 }
 
 // ================================================================

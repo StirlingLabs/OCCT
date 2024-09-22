@@ -19,14 +19,9 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
 #include <TopoDS_Wire.hxx>
 #include <TopoDS_Vertex.hxx>
-#include <Standard_Boolean.hxx>
-class TopoDS_Shape;
-class TopoDS_Vertex;
-class TopoDS_Wire;
 
 
 //! To store section definition

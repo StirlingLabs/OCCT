@@ -15,8 +15,6 @@
 
 #include <OpenGl_Caps.hxx>
 
-#include <OpenGl_GlCore20.hxx>
-
 IMPLEMENT_STANDARD_RTTIEXT(OpenGl_Caps,Standard_Transient)
 
 // =======================================================================
@@ -35,16 +33,13 @@ OpenGl_Caps::OpenGl_Caps()
   swapInterval      (1),
   useZeroToOneDepth (Standard_False),
   buffersNoSwap     (Standard_False),
-  buffersOpaqueAlpha(Standard_False),
+  buffersOpaqueAlpha(Standard_True),
+  buffersDeepColor  (Standard_False),
   contextStereo     (Standard_False),
   contextDebug      (Standard_False),
   contextSyncDebug  (Standard_False),
   contextNoAccel    (Standard_False),
-#if !defined(GL_ES_VERSION_2_0)
   contextCompatible (Standard_True),
-#else
-  contextCompatible (Standard_False),
-#endif
   contextNoExtensions (Standard_False),
   contextMajorVersionUpper (-1),
   contextMinorVersionUpper (-1),
@@ -54,8 +49,7 @@ OpenGl_Caps::OpenGl_Caps()
   glslDumpLevel     (OpenGl_ShaderProgramDumpLevel_Off)
 {
 #if defined(__EMSCRIPTEN__)
-  buffersNoSwap      = true; // swap has no effect in WebGL
-  buffersOpaqueAlpha = true; // avoid unexpected blending of canvas with page background
+  buffersNoSwap    = true; // swap has no effect in WebGL
 #endif
 #ifdef OCCT_DEBUG
   contextDebug     = true;
@@ -80,6 +74,7 @@ OpenGl_Caps& OpenGl_Caps::operator= (const OpenGl_Caps& theCopy)
   useZeroToOneDepth = theCopy.useZeroToOneDepth;
   buffersNoSwap     = theCopy.buffersNoSwap;
   buffersOpaqueAlpha= theCopy.buffersOpaqueAlpha;
+  buffersDeepColor  = theCopy.buffersDeepColor;
   contextStereo     = theCopy.contextStereo;
   contextDebug      = theCopy.contextDebug;
   contextSyncDebug  = theCopy.contextSyncDebug;

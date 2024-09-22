@@ -31,7 +31,6 @@
 #include <Geom_Plane.hxx>
 #include <Precision.hxx>
 class ShapeBuild_ReShape;
-class TopoDS_Shape;
 
 
 class ShapeUpgrade_UnifySameDomain;
@@ -65,19 +64,13 @@ DEFINE_STANDARD_HANDLE(ShapeUpgrade_UnifySameDomain, Standard_Transient)
 //! The algorithm provides a place holder for the history and collects the
 //! history by default.
 //! To avoid collecting of the history the place holder should be set to null handle.
-
-struct SubSequenceOfEdges
-{
-  TopTools_SequenceOfShape SeqsEdges;
-  TopoDS_Edge UnionEdges;
-};
-
 class ShapeUpgrade_UnifySameDomain : public Standard_Transient
 {
 
 public:
 
   typedef NCollection_DataMap<TopoDS_Shape, Handle(Geom_Plane), TopTools_ShapeMapHasher> DataMapOfFacePlane;
+  typedef NCollection_DataMap<TopoDS_Shape, TopTools_MapOfShape, TopTools_ShapeMapHasher> DataMapOfShapeMapOfShape;
   
   //! Empty constructor
   Standard_EXPORT ShapeUpgrade_UnifySameDomain();
@@ -163,6 +156,10 @@ public:
 
 protected:
 
+  struct SubSequenceOfEdges;
+
+protected:
+
   //! This method makes if possible a common face from each
   //! group of faces lying on coincident surfaces
   Standard_EXPORT void UnifyFaces();
@@ -172,7 +169,9 @@ protected:
   Standard_EXPORT void UnifyEdges();
 
   void IntUnifyFaces(const TopoDS_Shape& theInpShape,
-                     TopTools_IndexedDataMapOfShapeListOfShape& theGMapEdgeFaces);
+                     const TopTools_IndexedDataMapOfShapeListOfShape& theGMapEdgeFaces,
+                     const DataMapOfShapeMapOfShape& theGMapFaceShells,
+                     const TopTools_MapOfShape& theFreeBoundMap);
 
   //! Splits the sequence of edges into the sequence of chains
   Standard_Boolean MergeEdges(TopTools_SequenceOfShape& SeqEdges,
@@ -197,6 +196,16 @@ protected:
 
   //! Fills the history of the modifications during the operation.
   Standard_EXPORT void FillHistory();
+
+private:
+
+  //! Generates sub-sequences of edges from sequence of edges.
+  //! Edges from each subsequences can be merged into the one edge.
+  static void generateSubSeq (const TopTools_SequenceOfShape& anInpEdgeSeq,
+                              NCollection_Sequence<SubSequenceOfEdges>& SeqOfSubSeqOfEdges,
+                              Standard_Boolean IsClosed, double theAngTol, double theLinTol,
+                              const TopTools_MapOfShape& AvoidEdgeVrt,
+                              const TopTools_IndexedDataMapOfShapeListOfShape& theVFmap);
 
 private:
 

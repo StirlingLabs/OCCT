@@ -22,10 +22,7 @@
 
 #include <GeomFill_NSections.hxx>
 
-#include <BSplCLib.hxx>
-#include <Convert_ParameterisationType.hxx>
 #include <GCPnts_AbscissaPoint.hxx>
-#include <Geom_BSplineCurve.hxx>
 #include <Geom_BSplineSurface.hxx>
 #include <Geom_Circle.hxx>
 #include <Geom_Curve.hxx>
@@ -42,9 +39,7 @@
 #include <gp_Lin.hxx>
 #include <gp_Pnt.hxx>
 #include <Precision.hxx>
-#include <Standard_OutOfRange.hxx>
 #include <TColGeom_Array1OfCurve.hxx>
-#include <TColgp_Array2OfPnt.hxx>
 #include <TColStd_Array1OfInteger.hxx>
 #include <TColStd_Array1OfReal.hxx>
 
@@ -361,7 +356,8 @@ GeomFill_NSections::GeomFill_NSections(const TColGeom_SequenceOfCurve& NC,
   }
 
 
-  Standard_Real ww, EpsW = 10*Precision::PConfusion();
+  Standard_Real ww;
+  constexpr Standard_Real EpsW = 10*Precision::PConfusion();
   Standard_Boolean NullWeight = Standard_False;
   if (!rational) DWeights.Init(0.);
   Standard_Integer indice = 1, ii;
@@ -454,7 +450,8 @@ GeomFill_NSections::GeomFill_NSections(const TColGeom_SequenceOfCurve& NC,
   }
 
 
-  Standard_Real ww, EpsW = 10*Precision::PConfusion();
+  Standard_Real ww;
+  constexpr Standard_Real EpsW = 10*Precision::PConfusion();
   Standard_Boolean NullWeight = Standard_False;
   if (!rational) D2Weights.Init(0.);
   Standard_Integer indice = 1, ii;

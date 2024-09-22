@@ -15,13 +15,11 @@
 
 #include <BRepAlgoAPI_Defeaturing.hxx>
 
-#include <BRepTools_History.hxx>
-
 //=======================================================================
 //function : Build
 //purpose  : 
 //=======================================================================
-void BRepAlgoAPI_Defeaturing::Build()
+void BRepAlgoAPI_Defeaturing::Build(const Message_ProgressRange& theRange)
 {
   // Set not done state for the operation
   NotDone();
@@ -36,7 +34,7 @@ void BRepAlgoAPI_Defeaturing::Build()
   myFeatureRemovalTool.SetRunParallel(myRunParallel);
 
   // Perform the features removal
-  myFeatureRemovalTool.Perform();
+  myFeatureRemovalTool.Perform(theRange);
 
   // Merge the Errors/Warnings from the features removal tool
   GetReport()->Merge(myFeatureRemovalTool.GetReport());

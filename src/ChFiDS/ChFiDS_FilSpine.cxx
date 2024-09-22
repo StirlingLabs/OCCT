@@ -24,7 +24,6 @@
 #include <Law_Constant.hxx>
 #include <Law_Function.hxx>
 #include <Law_Interpol.hxx>
-#include <Law_ListIteratorOfLaws.hxx>
 #include <Law_S.hxx>
 #include <Precision.hxx>
 #include <Standard_DomainError.hxx>
@@ -187,14 +186,14 @@ void  ChFiDS_FilSpine::SetRadius(const gp_XY&           UandR,
     ChFiDS_ListIteratorOfListOfHElSpine It(elspines);
     Law_ListIteratorOfLaws Itl(laws);
     Handle(ChFiDS_ElSpine) Els = It.Value();
-    if (Els->IsPeriodic()) Itl.Value() = ComputeLaw(Els);
+    if (Els->IsPeriodic()) Itl.ChangeValue() = ComputeLaw(Els);
     else{
       for (; It.More(); It.Next(), Itl.Next()) {
 	Els = It.Value();
 	Standard_Real uf = Els->FirstParameter();
 	Standard_Real ul = Els->LastParameter();
 	if(uf <= W && W <= ul) {
-	  Itl.Value() = ComputeLaw(Els);
+	  Itl.ChangeValue() = ComputeLaw(Els);
 	}
       }  
     }

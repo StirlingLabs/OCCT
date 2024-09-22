@@ -20,7 +20,6 @@
 #include <AIS_DataMapOfIOStatus.hxx>
 #include <AIS_DisplayMode.hxx>
 #include <AIS_DisplayStatus.hxx>
-#include <AIS_ClearMode.hxx>
 #include <AIS_KindOfInteractive.hxx>
 #include <AIS_ListOfInteractive.hxx>
 #include <AIS_Selection.hxx>
@@ -38,14 +37,14 @@
 #include <SelectMgr_IndexedMapOfOwner.hxx>
 #include <SelectMgr_ListOfFilter.hxx>
 #include <SelectMgr_PickingStrategy.hxx>
+#include <SelectMgr_SelectionManager.hxx>
 #include <StdSelect_ViewerSelector3d.hxx>
 #include <TCollection_AsciiString.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
 #include <TColStd_ListOfInteger.hxx>
-#include <TopAbs_ShapeEnum.hxx>
+#include <TColStd_SequenceOfInteger.hxx>
 #include <Quantity_Color.hxx>
 
-class SelectMgr_SelectionManager;
 class V3d_Viewer;
 class V3d_View;
 class TopLoc_Location;
@@ -53,7 +52,6 @@ class TCollection_ExtendedString;
 class Prs3d_LineAspect;
 class Prs3d_BasicAspect;
 class TopoDS_Shape;
-class SelectMgr_EntityOwner;
 class SelectMgr_Filter;
 
 //! The Interactive Context allows you to manage graphic behavior and selection of Interactive Objects in one or more viewers.
@@ -217,7 +215,14 @@ public: //! @name highlighting management
   //! If a new highlight style is created, its presentation Zlayer should be checked,
   //! otherwise highlighting might not work as expected.
   void SetHighlightStyle (const Prs3d_TypeOfHighlight theStyleType,
-                          const Handle(Prs3d_Drawer)& theStyle) { myStyles[theStyleType] = theStyle; }
+                          const Handle(Prs3d_Drawer)& theStyle)
+  {
+    myStyles[theStyleType] = theStyle;
+    if (theStyleType == Prs3d_TypeOfHighlight_None)
+    {
+      myDefaultDrawer = theStyle;
+    }
+  }
 
   //! Returns current dynamic highlight style settings corresponding to Prs3d_TypeOfHighlight_Dynamic.
   //! This is just a short-cut to HighlightStyle(Prs3d_TypeOfHighlight_Dynamic).
@@ -271,10 +276,15 @@ public: //! @name highlighting management
 public: //! @name object presence management (View affinity, Layer, Priority)
 
   //! Returns the display priority of the Object.
-  Standard_EXPORT Standard_Integer DisplayPriority (const Handle(AIS_InteractiveObject)& theIObj) const;
+  Standard_EXPORT Graphic3d_DisplayPriority DisplayPriority (const Handle(AIS_InteractiveObject)& theIObj) const;
 
   //! Sets the display priority of the seen parts presentation of the Object.
-  Standard_EXPORT void SetDisplayPriority (const Handle(AIS_InteractiveObject)& theIObj, const Standard_Integer thePriority);
+  Standard_EXPORT void SetDisplayPriority (const Handle(AIS_InteractiveObject)& theIObj,
+                                           const Graphic3d_DisplayPriority thePriority);
+
+  Standard_DEPRECATED("Deprecated since OCCT7.7, Graphic3d_DisplayPriority should be passed instead of integer number to SetDisplayPriority()")
+  void SetDisplayPriority (const Handle(AIS_InteractiveObject)& theIObj,
+                           const Standard_Integer thePriority) { SetDisplayPriority (theIObj, (Graphic3d_DisplayPriority )thePriority); }
 
   //! Get Z layer id set for displayed interactive object.
   Standard_EXPORT Graphic3d_ZLayerId GetZLayer (const Handle(AIS_InteractiveObject)& theIObj) const;
@@ -493,7 +503,10 @@ public: //! @name Selection management
   Standard_EXPORT AIS_StatusOfPick SelectDetected (const AIS_SelectionScheme theSelScheme = AIS_SelectionScheme_Replace);
 
   //! Returns bounding box of selected objects.
-  Standard_EXPORT Bnd_Box BoundingBoxOfSelection() const;
+  Standard_EXPORT Bnd_Box BoundingBoxOfSelection (const Handle(V3d_View)& theView) const;
+
+  Standard_DEPRECATED ("BoundingBoxOfSelection() should be called with View argument")
+  Bnd_Box BoundingBoxOfSelection() const { return BoundingBoxOfSelection (Handle(V3d_View)()); }
 
   //! Sets list of owner selected/deselected using specified selection scheme.
   //! @param theOwners owners to change selection state
@@ -778,6 +791,14 @@ public: //! @name common properties
   //! This contains all the color and line attributes which can be used by interactive objects which do not have their own attributes.
   const Handle(Prs3d_Drawer)& DefaultDrawer() const { return myDefaultDrawer; }
 
+  //! Sets the default attribute manager; should be set at context creation time.
+  //! Warning - this setter doesn't update links to the default drawer of already displayed objects!
+  void SetDefaultDrawer (const Handle(Prs3d_Drawer)& theDrawer)
+  {
+    myDefaultDrawer = theDrawer;
+    myStyles[Prs3d_TypeOfHighlight_None] = myDefaultDrawer;
+  }
+
   //! Returns the current viewer.
   const Handle(V3d_Viewer)& CurrentViewer() const { return myMainVwr; }
 
@@ -785,7 +806,7 @@ public: //! @name common properties
 
   const Handle(PrsMgr_PresentationManager)& MainPrsMgr() const { return myMainPM; }
 
-  const Handle(StdSelect_ViewerSelector3d)& MainSelector() const { return myMainSel; }
+  const Handle(StdSelect_ViewerSelector3d)& MainSelector() const { return mgrSelector->Selector(); }
 
   //! Updates the current viewer.
   Standard_EXPORT void UpdateCurrentViewer();
@@ -996,7 +1017,7 @@ public: //! @name tessellation deviation properties for automatic triangulation
   //! The default value is 0.001.
   //! In drawing shapes, however, you are allowed to ask for a relative deviation.
   //! This deviation will be: SizeOfObject * DeviationCoefficient.
-  Standard_EXPORT void SetDeviationCoefficient (const Standard_Real theCoefficient);
+  void SetDeviationCoefficient (const Standard_Real theCoefficient) { myDefaultDrawer->SetDeviationCoefficient (theCoefficient); }
   
   //! Returns the deviation coefficient.
   //! Drawings of curves or patches are made with respect to a maximal chordal deviation.
@@ -1010,12 +1031,12 @@ public: //! @name tessellation deviation properties for automatic triangulation
   //! The default value is 0.001.
   //! In drawing shapes, however, you are allowed to ask for a relative deviation.
   //! This deviation will be: SizeOfObject * DeviationCoefficient.
-  Standard_EXPORT Standard_Real DeviationCoefficient() const;
+  Standard_Real DeviationCoefficient() const { return myDefaultDrawer->DeviationCoefficient(); }
 
   //! default 20 degrees
-  Standard_EXPORT void SetDeviationAngle (const Standard_Real anAngle);
+  void SetDeviationAngle (const Standard_Real theAngle) { myDefaultDrawer->SetDeviationAngle (theAngle); }
 
-  Standard_EXPORT Standard_Real DeviationAngle() const;
+  Standard_Real DeviationAngle() const { return myDefaultDrawer->DeviationAngle(); }
 
 public: //! @name HLR (Hidden Line Removal) display attributes
 
@@ -1024,19 +1045,19 @@ public: //! @name HLR (Hidden Line Removal) display attributes
   //! Color: Quantity_NOC_YELLOW
   //! Type of line: Aspect_TOL_DASH
   //! Width: 1.
-  Standard_EXPORT Handle(Prs3d_LineAspect) HiddenLineAspect() const;
+  const Handle(Prs3d_LineAspect)& HiddenLineAspect() const { return myDefaultDrawer->HiddenLineAspect(); }
 
   //! Sets the hidden line aspect anAspect.
   //! Aspect defines display attributes for hidden lines in HLR projections.
-  Standard_EXPORT void SetHiddenLineAspect (const Handle(Prs3d_LineAspect)& anAspect) const;
+  void SetHiddenLineAspect (const Handle(Prs3d_LineAspect)& theAspect) const { myDefaultDrawer->SetHiddenLineAspect (theAspect); }
 
   //! returns Standard_True if the hidden lines are to be drawn.
   //! By default the hidden lines are not drawn.
-  Standard_EXPORT Standard_Boolean DrawHiddenLine() const;
+  Standard_Boolean DrawHiddenLine() const { return myDefaultDrawer->DrawHiddenLine(); }
 
-  Standard_EXPORT void EnableDrawHiddenLine() const;
+  void EnableDrawHiddenLine() const { myDefaultDrawer->EnableDrawHiddenLine(); }
 
-  Standard_EXPORT void DisableDrawHiddenLine() const;
+  void DisableDrawHiddenLine() const { myDefaultDrawer->DisableDrawHiddenLine(); }
 
 public: //! @name iso-line display attributes
 
@@ -1047,11 +1068,11 @@ public: //! @name iso-line display attributes
   Standard_EXPORT Standard_Integer IsoNumber (const AIS_TypeOfIso WhichIsos = AIS_TOI_Both);
   
   //! Returns True if drawing isoparameters on planes is enabled.
-  Standard_EXPORT void IsoOnPlane (const Standard_Boolean SwitchOn);
+  void IsoOnPlane (const Standard_Boolean theToSwitchOn) { myDefaultDrawer->SetIsoOnPlane (theToSwitchOn); }
   
   //! Returns True if drawing isoparameters on planes is enabled.
   //! if <forUIsos> = False,
-  Standard_EXPORT Standard_Boolean IsoOnPlane() const;
+  Standard_Boolean IsoOnPlane() const { return myDefaultDrawer->IsoOnPlane(); }
 
   //! Enables or disables on-triangulation build for isolines for a particular object.
   //! In case if on-triangulation builder is disabled, default on-plane builder will compute isolines for the object given.
@@ -1060,10 +1081,10 @@ public: //! @name iso-line display attributes
 
   //! Enables or disables on-triangulation build for isolines for default drawer.
   //! In case if on-triangulation builder is disabled, default on-plane builder will compute isolines for the object given.
-  Standard_EXPORT void IsoOnTriangulation (const Standard_Boolean theToSwitchOn);
+  void IsoOnTriangulation (const Standard_Boolean theToSwitchOn) { myDefaultDrawer->SetIsoOnTriangulation (theToSwitchOn); }
 
   //! Returns true if drawing isolines on triangulation algorithm is enabled.
-  Standard_EXPORT Standard_Boolean IsoOnTriangulation() const;
+  Standard_Boolean IsoOnTriangulation() const { return myDefaultDrawer->IsoOnTriangulation(); }
 
 //! @name obsolete methods
 public:
@@ -1281,6 +1302,9 @@ protected: //! @name internal methods
   Standard_EXPORT AIS_StatusOfDetection moveTo (const Handle(V3d_View)& theView,
                                                 const Standard_Boolean  theToRedrawOnUpdate);
 
+  //! Returns True if the object is detected.
+  Standard_EXPORT Standard_Boolean isDetected (const Handle(AIS_InteractiveObject)& theObject);
+
   //! Helper function to unhighlight all entity owners currently highlighted with seleciton color.
   Standard_EXPORT void unselectOwners (const Handle(AIS_InteractiveObject)& theObject);
 
@@ -1382,20 +1406,7 @@ protected: //! @name internal methods
   }
 
   //! Assign the context to the object or throw exception if object was already assigned to another context.
-  void setContextToObject (const Handle(AIS_InteractiveObject)& theObj)
-  {
-    if (theObj->HasInteractiveContext())
-    {
-      if (theObj->myCTXPtr != this)
-      {
-        throw Standard_ProgramError("AIS_InteractiveContext - object has been already displayed in another context!");
-      }
-    }
-    else
-    {
-      theObj->SetContext (this);
-    }
-  }
+  Standard_EXPORT void setContextToObject (const Handle(AIS_InteractiveObject)& theObj);
 
   //! Return display mode for highlighting.
   Standard_Integer getHilightMode (const Handle(AIS_InteractiveObject)& theObj,
@@ -1429,8 +1440,8 @@ protected: //! @name internal methods
   }
 
   //! Bind/Unbind status to object and its children
-  //! @param theObj [in] the object to change status
-  //! @param theStatus status, if NULL, unbind object
+  //! @param[in] theIObj the object to change status
+  //! @param[in] theStatus status, if NULL, unbind object
   Standard_EXPORT void setObjectStatus (const Handle(AIS_InteractiveObject)& theIObj,
                                         const PrsMgr_DisplayStatus theStatus,
                                         const Standard_Integer theDispyMode,
@@ -1442,7 +1453,6 @@ protected: //! @name internal fields
   Handle(SelectMgr_SelectionManager) mgrSelector;
   Handle(PrsMgr_PresentationManager) myMainPM;
   Handle(V3d_Viewer) myMainVwr;
-  Handle(StdSelect_ViewerSelector3d) myMainSel;
   V3d_View* myLastActiveView;
   Handle(SelectMgr_EntityOwner) myLastPicked;
   Standard_Boolean myToHilightSelected;

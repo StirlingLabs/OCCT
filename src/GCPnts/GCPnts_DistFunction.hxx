@@ -14,12 +14,10 @@
 #ifndef _GCPnts_DistFunction_HeaderFile
 #define _GCPnts_DistFunction_HeaderFile
 
-#include <gp_Lin.hxx>
 #include <math_Function.hxx>
 #include <math_MultipleVarFunction.hxx>
 #include <Adaptor3d_Curve.hxx>
 
-class gp_Pnt;
 
 //! Class to define function, which calculates square distance between point on curve
 //! C(u), U1 <= u <= U2 and line passing through points C(U1) and C(U2)

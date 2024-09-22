@@ -18,14 +18,9 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
-#include <Standard_Real.hxx>
 #include <GProp_GProps.hxx>
-#include <Standard_Boolean.hxx>
-#include <Standard_Address.hxx>
 class BRepGProp_Face;
-class gp_Pnt;
 class BRepGProp_Domain;
 class gp_Pln;
 

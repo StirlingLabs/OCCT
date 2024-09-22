@@ -24,16 +24,9 @@
 #include <gp_Pnt.hxx>
 #include <gp_Pnt2d.hxx>
 #include <gp_Vec.hxx>
-#include <Standard_Real.hxx>
 #include <Standard_Integer.hxx>
-#include <Standard_Boolean.hxx>
 #include <Standard_Transient.hxx>
 class Geom_Surface;
-class Standard_ConstructionError;
-class gp_Pnt;
-class gp_Vec;
-class gp_Pnt2d;
-class GeomLProp_SLProps;
 
 
 class GeomPlate_PointConstraint;

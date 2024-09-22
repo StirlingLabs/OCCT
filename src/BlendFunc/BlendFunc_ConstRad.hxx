@@ -21,7 +21,6 @@
 #include <gp_Pnt.hxx>
 #include <gp_Vec.hxx>
 #include <gp_Vec2d.hxx>
-#include <math_Vector.hxx>
 #include <math_Matrix.hxx>
 #include <BlendFunc_Tensor.hxx>
 #include <BlendFunc_SectionShape.hxx>
@@ -35,7 +34,6 @@
 #include <TColgp_Array1OfPnt2d.hxx>
 #include <TColgp_Array1OfVec2d.hxx>
 
-class math_Matrix;
 class gp_Circ;
 class Blend_Point;
 class gp_Ax1;
@@ -118,7 +116,7 @@ public:
   //! Utile pour une visu rapide et approximative de la surface.
   Standard_EXPORT void Section (const Standard_Real Param, const Standard_Real U1, const Standard_Real V1, const Standard_Real U2, const Standard_Real V2, Standard_Real& Pdeb, Standard_Real& Pfin, gp_Circ& C);
   
-  //! Returns  if the section is rationnal
+  //! Returns  if the section is rational
   Standard_EXPORT Standard_Boolean IsRational() const Standard_OVERRIDE;
   
   //! Returns the length of the maximum section
@@ -142,7 +140,7 @@ public:
   Standard_EXPORT void GetShape (Standard_Integer& NbPoles, Standard_Integer& NbKnots, Standard_Integer& Degree, Standard_Integer& NbPoles2d) Standard_OVERRIDE;
   
   //! Returns the tolerance to reach in approximation
-  //! to respecte
+  //! to respect
   //! BoundTol error at the Boundary
   //! AngleTol tangent error at the Boundary
   //! SurfTol error inside the surface.

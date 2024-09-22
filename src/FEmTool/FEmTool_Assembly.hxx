@@ -23,16 +23,12 @@
 
 #include <TColStd_Array2OfInteger.hxx>
 #include <FEmTool_HAssemblyTable.hxx>
-#include <Standard_Boolean.hxx>
 #include <math_Vector.hxx>
 #include <FEmTool_SeqOfLinConstr.hxx>
 #include <TColStd_SequenceOfReal.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_Real.hxx>
 class FEmTool_ProfileMatrix;
-class StdFail_NotDone;
-class Standard_DimensionError;
-class Standard_DomainError;
 class math_Matrix;
 
 

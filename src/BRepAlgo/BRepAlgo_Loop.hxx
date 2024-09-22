@@ -19,15 +19,12 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
 #include <TopoDS_Face.hxx>
 #include <TopTools_ListOfShape.hxx>
 #include <TopTools_DataMapOfShapeListOfShape.hxx>
-#include <TopTools_DataMapOfShapeShape.hxx>
 #include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
 #include <BRepAlgo_Image.hxx>
-class TopoDS_Face;
 class TopoDS_Edge;
 
 
@@ -89,8 +86,17 @@ public:
   
   Standard_EXPORT void VerticesForSubstitute (TopTools_DataMapOfShapeShape& VerVerMap);
 
+  //! Set maximal tolerance used for comparing distances between vertices. 
+  void SetTolConf(const Standard_Real theTolConf)
+  {
+    myTolConf = theTolConf;
+  }
 
-
+  //! Get maximal tolerance used for comparing distances between vertices. 
+  Standard_Real GetTolConf() const
+  {
+    return myTolConf;
+  }
 
 protected:
 
@@ -111,6 +117,7 @@ private:
   TopTools_DataMapOfShapeListOfShape myCutEdges;
   TopTools_DataMapOfShapeShape myVerticesForSubstitute;
   BRepAlgo_Image myImageVV;
+  Standard_Real myTolConf;
 
 
 };

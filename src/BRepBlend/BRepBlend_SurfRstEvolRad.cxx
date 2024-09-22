@@ -16,14 +16,11 @@
 
 
 #include <Adaptor2d_Curve2d.hxx>
-#include <Adaptor3d_Curve.hxx>
-#include <Adaptor3d_Surface.hxx>
 #include <Blend_Point.hxx>
 #include <BlendFunc.hxx>
 #include <BRepBlend_SurfRstEvolRad.hxx>
 #include <ElCLib.hxx>
 #include <GeomFill.hxx>
-#include <gp.hxx>
 #include <gp_Circ.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_Pnt2d.hxx>
@@ -70,7 +67,7 @@ static void FusionneIntervalles(const TColStd_Array1OfReal& I1,
 
 
 //--- TABSOR is filled by parsing TABLE1 and TABLE2 simultaneously ---
-//------------------ and eliminating multiple occurrencies ------------
+//------------------ and eliminating multiple occurrences ------------
 
  while ((ind1<=I1.Upper()) && (ind2<=I2.Upper())) {
       v1 = I1(ind1);

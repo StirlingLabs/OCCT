@@ -19,7 +19,6 @@
 #include <Interface_Check.hxx>
 #include <Interface_CopyTool.hxx>
 #include <Interface_EntityIterator.hxx>
-#include <Interface_GeneralLib.hxx>
 #include <Interface_Macros.hxx>
 #include <Interface_ShareTool.hxx>
 #include <RWStepAP203_RWCcDesignApproval.hxx>
@@ -33,7 +32,6 @@
 #include <RWStepAP203_RWChangeRequest.hxx>
 #include <RWStepAP203_RWStartRequest.hxx>
 #include <RWStepAP203_RWStartWork.hxx>
-#include <RWStepAP214.hxx>
 #include <RWStepAP214_GeneralModule.hxx>
 #include <RWStepAP214_RWAppliedApprovalAssignment.hxx>
 #include <RWStepAP214_RWAppliedDateAndTimeAssignment.hxx>
@@ -60,47 +58,32 @@
 #include <RWStepAP214_RWClass.hxx>
 #include <RWStepAP214_RWExternallyDefinedClass.hxx>
 #include <RWStepAP214_RWExternallyDefinedGeneralProperty.hxx>
-#include <RWStepAP214_RWRepItemGroup.hxx>
 #include <RWStepBasic_RWAction.hxx>
 #include <RWStepBasic_RWActionAssignment.hxx>
 #include <RWStepBasic_RWActionMethod.hxx>
 #include <RWStepBasic_RWActionRequestAssignment.hxx>
 #include <RWStepBasic_RWActionRequestSolution.hxx>
-#include <RWStepBasic_RWAddress.hxx>
-#include <RWStepBasic_RWApplicationContext.hxx>
 #include <RWStepBasic_RWApplicationContextElement.hxx>
 #include <RWStepBasic_RWApplicationProtocolDefinition.hxx>
 #include <RWStepBasic_RWApproval.hxx>
 #include <RWStepBasic_RWApprovalDateTime.hxx>
 #include <RWStepBasic_RWApprovalPersonOrganization.hxx>
 #include <RWStepBasic_RWApprovalRelationship.hxx>
-#include <RWStepBasic_RWApprovalRole.hxx>
-#include <RWStepBasic_RWApprovalStatus.hxx>
-#include <RWStepBasic_RWCalendarDate.hxx>
 #include <RWStepBasic_RWCertification.hxx>
 #include <RWStepBasic_RWCertificationAssignment.hxx>
 #include <RWStepBasic_RWCertificationType.hxx>
-#include <RWStepBasic_RWCharacterizedObject.hxx>
 #include <RWStepBasic_RWContract.hxx>
 #include <RWStepBasic_RWContractAssignment.hxx>
 #include <RWStepBasic_RWContractType.hxx>
 #include <RWStepBasic_RWConversionBasedUnit.hxx>
 #include <RWStepBasic_RWConversionBasedUnitAndAreaUnit.hxx>
 #include <RWStepBasic_RWConversionBasedUnitAndLengthUnit.hxx>
-#include <RWStepBasic_RWConversionBasedUnitAndMassUnit.hxx>
 #include <RWStepBasic_RWConversionBasedUnitAndPlaneAngleUnit.hxx>
-#include <RWStepBasic_RWConversionBasedUnitAndRatioUnit.hxx>
 #include <RWStepBasic_RWConversionBasedUnitAndSolidAngleUnit.hxx>
-#include <RWStepBasic_RWConversionBasedUnitAndTimeUnit.hxx>
 #include <RWStepBasic_RWConversionBasedUnitAndVolumeUnit.hxx>
-#include <RWStepBasic_RWCoordinatedUniversalTimeOffset.hxx>
-#include <RWStepBasic_RWDate.hxx>
 #include <RWStepBasic_RWDateAndTime.hxx>
-#include <RWStepBasic_RWDateRole.hxx>
-#include <RWStepBasic_RWDateTimeRole.hxx>
 #include <RWStepBasic_RWDerivedUnit.hxx>
 #include <RWStepBasic_RWDerivedUnitElement.hxx>
-#include <RWStepBasic_RWDimensionalExponents.hxx>
 #include <RWStepBasic_RWDocument.hxx>
 #include <RWStepBasic_RWDocumentFile.hxx>
 #include <RWStepBasic_RWDocumentProductAssociation.hxx>
@@ -114,34 +97,27 @@
 #include <RWStepBasic_RWEulerAngles.hxx>
 #include <RWStepBasic_RWExternalIdentificationAssignment.hxx>
 #include <RWStepBasic_RWExternallyDefinedItem.hxx>
-#include <RWStepBasic_RWExternalSource.hxx>
 #include <RWStepBasic_RWGeneralProperty.hxx>
-#include <RWStepBasic_RWGroup.hxx>
+#include <RWStepBasic_RWGeneralPropertyAssociation.hxx>
+#include <RWStepBasic_RWGeneralPropertyRelationship.hxx>
 #include <RWStepBasic_RWGroupRelationship.hxx>
 #include <RWStepBasic_RWIdentificationAssignment.hxx>
 #include <RWStepBasic_RWIdentificationRole.hxx>
 #include <RWStepBasic_RWLengthMeasureWithUnit.hxx>
 #include <RWStepBasic_RWLengthUnit.hxx>
 #include <RWStepBasic_RWLocalTime.hxx>
-#include <RWStepBasic_RWMassMeasureWithUnit.hxx>
 #include <RWStepBasic_RWMassUnit.hxx>
 #include <RWStepBasic_RWMeasureWithUnit.hxx>
 #include <RWStepBasic_RWMechanicalContext.hxx>
 #include <RWStepBasic_RWNameAssignment.hxx>
 #include <RWStepBasic_RWNamedUnit.hxx>
 #include <RWStepBasic_RWObjectRole.hxx>
-#include <RWStepBasic_RWOrdinalDate.hxx>
-#include <RWStepBasic_RWOrganization.hxx>
 #include <RWStepBasic_RWOrganizationalAddress.hxx>
-#include <RWStepBasic_RWOrganizationRole.hxx>
-#include <RWStepBasic_RWPerson.hxx>
 #include <RWStepBasic_RWPersonalAddress.hxx>
 #include <RWStepBasic_RWPersonAndOrganization.hxx>
-#include <RWStepBasic_RWPersonAndOrganizationRole.hxx>
 #include <RWStepBasic_RWPlaneAngleMeasureWithUnit.hxx>
 #include <RWStepBasic_RWPlaneAngleUnit.hxx>
 #include <RWStepBasic_RWProduct.hxx>
-#include <RWStepBasic_RWProductCategory.hxx>
 #include <RWStepBasic_RWProductCategoryRelationship.hxx>
 #include <RWStepBasic_RWProductConceptContext.hxx>
 #include <RWStepBasic_RWProductContext.hxx>
@@ -158,21 +134,11 @@
 #include <RWStepBasic_RWRatioMeasureWithUnit.hxx>
 #include <RWStepBasic_RWRoleAssociation.hxx>
 #include <RWStepBasic_RWSecurityClassification.hxx>
-#include <RWStepBasic_RWSecurityClassificationLevel.hxx>
-#include <RWStepBasic_RWSiUnit.hxx>
-#include <RWStepBasic_RWSiUnitAndLengthUnit.hxx>
-#include <RWStepBasic_RWSiUnitAndMassUnit.hxx>
-#include <RWStepBasic_RWSiUnitAndPlaneAngleUnit.hxx>
-#include <RWStepBasic_RWSiUnitAndRatioUnit.hxx>
-#include <RWStepBasic_RWSiUnitAndSolidAngleUnit.hxx>
-#include <RWStepBasic_RWSiUnitAndThermodynamicTemperatureUnit.hxx>
-#include <RWStepBasic_RWSiUnitAndTimeUnit.hxx>
 #include <RWStepBasic_RWSolidAngleMeasureWithUnit.hxx>
 #include <RWStepBasic_RWSolidAngleUnit.hxx>
 #include <RWStepBasic_RWThermodynamicTemperatureUnit.hxx>
 #include <RWStepBasic_RWUncertaintyMeasureWithUnit.hxx>
 #include <RWStepBasic_RWVersionedActionRequest.hxx>
-#include <RWStepBasic_RWWeekOfYearAndDayDate.hxx>
 #include <RWStepDimTol_RWAngularityTolerance.hxx>
 #include <RWStepDimTol_RWCircularRunoutTolerance.hxx>
 #include <RWStepDimTol_RWCoaxialityTolerance.hxx>
@@ -274,15 +240,12 @@
 #include <RWStepGeom_RWBezierSurface.hxx>
 #include <RWStepGeom_RWBezierSurfaceAndRationalBSplineSurface.hxx>
 #include <RWStepGeom_RWBoundaryCurve.hxx>
-#include <RWStepGeom_RWBoundedCurve.hxx>
-#include <RWStepGeom_RWBoundedSurface.hxx>
 #include <RWStepGeom_RWBSplineCurve.hxx>
 #include <RWStepGeom_RWBSplineCurveWithKnots.hxx>
 #include <RWStepGeom_RWBSplineCurveWithKnotsAndRationalBSplineCurve.hxx>
 #include <RWStepGeom_RWBSplineSurface.hxx>
 #include <RWStepGeom_RWBSplineSurfaceWithKnots.hxx>
 #include <RWStepGeom_RWBSplineSurfaceWithKnotsAndRationalBSplineSurface.hxx>
-#include <RWStepGeom_RWCartesianPoint.hxx>
 #include <RWStepGeom_RWCartesianTransformationOperator.hxx>
 #include <RWStepGeom_RWCartesianTransformationOperator3d.hxx>
 #include <RWStepGeom_RWCircle.hxx>
@@ -291,7 +254,6 @@
 #include <RWStepGeom_RWCompositeCurveSegment.hxx>
 #include <RWStepGeom_RWConic.hxx>
 #include <RWStepGeom_RWConicalSurface.hxx>
-#include <RWStepGeom_RWCurve.hxx>
 #include <RWStepGeom_RWCurveBoundedSurface.hxx>
 #include <RWStepGeom_RWCurveReplica.hxx>
 #include <RWStepGeom_RWCylindricalSurface.hxx>
@@ -301,10 +263,8 @@
 #include <RWStepGeom_RWElementarySurface.hxx>
 #include <RWStepGeom_RWEllipse.hxx>
 #include <RWStepGeom_RWEvaluatedDegeneratePcurve.hxx>
-#include <RWStepGeom_RWGeometricRepresentationContext.hxx>
 #include <RWStepGeom_RWGeometricRepresentationContextAndGlobalUnitAssignedContext.hxx>
 #include <RWStepGeom_RWGeometricRepresentationContextAndParametricRepresentationContext.hxx>
-#include <RWStepGeom_RWGeometricRepresentationItem.hxx>
 #include <RWStepGeom_RWGeomRepContextAndGlobUnitAssCtxAndGlobUncertaintyAssCtx.hxx>
 #include <RWStepGeom_RWHyperbola.hxx>
 #include <RWStepGeom_RWIntersectionCurve.hxx>
@@ -317,7 +277,6 @@
 #include <RWStepGeom_RWPcurve.hxx>
 #include <RWStepGeom_RWPlacement.hxx>
 #include <RWStepGeom_RWPlane.hxx>
-#include <RWStepGeom_RWPoint.hxx>
 #include <RWStepGeom_RWPointOnCurve.hxx>
 #include <RWStepGeom_RWPointOnSurface.hxx>
 #include <RWStepGeom_RWPointReplica.hxx>
@@ -333,7 +292,6 @@
 #include <RWStepGeom_RWReparametrisedCompositeCurveSegment.hxx>
 #include <RWStepGeom_RWSeamCurve.hxx>
 #include <RWStepGeom_RWSphericalSurface.hxx>
-#include <RWStepGeom_RWSurface.hxx>
 #include <RWStepGeom_RWSurfaceCurve.hxx>
 #include <RWStepGeom_RWSurfaceCurveAndBoundedCurve.hxx>
 #include <RWStepGeom_RWSurfaceOfLinearExtrusion.hxx>
@@ -348,6 +306,7 @@
 #include <RWStepGeom_RWUniformSurface.hxx>
 #include <RWStepGeom_RWUniformSurfaceAndRationalBSplineSurface.hxx>
 #include <RWStepGeom_RWVector.hxx>
+#include <RWStepGeom_RWSuParameters.hxx>
 #include <RWStepRepr_RWAssemblyComponentUsage.hxx>
 #include <RWStepRepr_RWAssemblyComponentUsageSubstitute.hxx>
 #include <RWStepRepr_RWCompositeShapeAspect.hxx>
@@ -359,9 +318,7 @@
 #include <RWStepRepr_RWDataEnvironment.hxx>
 #include <RWStepRepr_RWDefinitionalRepresentation.hxx>
 #include <RWStepRepr_RWDerivedShapeAspect.hxx>
-#include <RWStepRepr_RWDescriptiveRepresentationItem.hxx>
 #include <RWStepRepr_RWExtension.hxx>
-#include <RWStepRepr_RWFunctionallyDefinedTransformation.hxx>
 #include <RWStepRepr_RWGlobalUncertaintyAssignedContext.hxx>
 #include <RWStepRepr_RWGlobalUnitAssignedContext.hxx>
 #include <RWStepRepr_RWItemDefinedTransformation.hxx>
@@ -370,8 +327,8 @@
 #include <RWStepRepr_RWMaterialDesignation.hxx>
 #include <RWStepRepr_RWMaterialProperty.hxx>
 #include <RWStepRepr_RWMaterialPropertyRepresentation.hxx>
+#include <RWStepRepr_RWMechanicalDesignAndDraughtingRelationship.hxx>
 #include <RWStepRepr_RWMeasureRepresentationItem.hxx>
-#include <RWStepRepr_RWParametricRepresentationContext.hxx>
 #include <RWStepRepr_RWProductConcept.hxx>
 #include <RWStepRepr_RWProductDefinitionShape.hxx>
 #include <RWStepRepr_RWPropertyDefinition.hxx>
@@ -379,12 +336,11 @@
 #include <RWStepRepr_RWPropertyDefinitionRepresentation.hxx>
 #include <RWStepRepr_RWQuantifiedAssemblyComponentUsage.hxx>
 #include <RWStepRepr_RWRepresentation.hxx>
-#include <RWStepRepr_RWRepresentationContext.hxx>
-#include <RWStepRepr_RWRepresentationItem.hxx>
+#include <RWStepRepr_RWRepresentationContextReference.hxx>
+#include <RWStepRepr_RWRepresentationReference.hxx>
 #include <RWStepRepr_RWRepresentationMap.hxx>
 #include <RWStepRepr_RWRepresentationRelationship.hxx>
 #include <RWStepRepr_RWRepresentationRelationshipWithTransformation.hxx>
-#include <RWStepRepr_RWReprItemAndLengthMeasureWithUnit.hxx>
 #include <RWStepRepr_RWShapeAspect.hxx>
 #include <RWStepRepr_RWShapeAspectRelationship.hxx>
 #include <RWStepRepr_RWFeatureForDatumTargetRelationship.hxx>
@@ -417,7 +373,6 @@
 #include <RWStepShape_RWDimensionalLocationWithPath.hxx>
 #include <RWStepShape_RWDimensionalSize.hxx>
 #include <RWStepShape_RWDimensionalSizeWithPath.hxx>
-#include <RWStepShape_RWEdge.hxx>
 #include <RWStepShape_RWEdgeBasedWireframeModel.hxx>
 #include <RWStepShape_RWEdgeBasedWireframeShapeRepresentation.hxx>
 #include <RWStepShape_RWEdgeCurve.hxx>
@@ -437,8 +392,6 @@
 #include <RWStepShape_RWGeometricCurveSet.hxx>
 #include <RWStepShape_RWGeometricSet.hxx>
 #include <RWStepShape_RWHalfSpaceSolid.hxx>
-#include <RWStepShape_RWLimitsAndFits.hxx>
-#include <RWStepShape_RWLoop.hxx>
 #include <RWStepShape_RWLoopAndPath.hxx>
 #include <RWStepShape_RWManifoldSolidBrep.hxx>
 #include <RWStepShape_RWManifoldSurfaceShapeRepresentation.hxx>
@@ -455,7 +408,6 @@
 #include <RWStepShape_RWPlusMinusTolerance.hxx>
 #include <RWStepShape_RWPointRepresentation.hxx>
 #include <RWStepShape_RWPolyLoop.hxx>
-#include <RWStepShape_RWPrecisionQualifier.hxx>
 #include <RWStepShape_RWQualifiedRepresentationItem.hxx>
 #include <RWStepShape_RWRevolvedAreaSolid.hxx>
 #include <RWStepShape_RWRevolvedFaceSolid.hxx>
@@ -468,7 +420,6 @@
 #include <RWStepShape_RWShapeRepresentation.hxx>
 #include <RWStepShape_RWShapeRepresentationWithParameters.hxx>
 #include <RWStepShape_RWShellBasedSurfaceModel.hxx>
-#include <RWStepShape_RWSolidModel.hxx>
 #include <RWStepShape_RWSolidReplica.hxx>
 #include <RWStepShape_RWSphere.hxx>
 #include <RWStepShape_RWSubedge.hxx>
@@ -476,33 +427,23 @@
 #include <RWStepShape_RWSweptAreaSolid.hxx>
 #include <RWStepShape_RWSweptFaceSolid.hxx>
 #include <RWStepShape_RWToleranceValue.hxx>
-#include <RWStepShape_RWTopologicalRepresentationItem.hxx>
 #include <RWStepShape_RWTorus.hxx>
 #include <RWStepShape_RWTransitionalShapeRepresentation.hxx>
-#include <RWStepShape_RWTypeQualifier.hxx>
-#include <RWStepShape_RWVertex.hxx>
 #include <RWStepShape_RWVertexLoop.hxx>
 #include <RWStepShape_RWVertexPoint.hxx>
 #include <RWStepVisual_RWAreaInSet.hxx>
 #include <RWStepVisual_RWBackgroundColour.hxx>
 #include <RWStepVisual_RWCameraImage.hxx>
-#include <RWStepVisual_RWCameraModel.hxx>
 #include <RWStepVisual_RWCameraModelD2.hxx>
 #include <RWStepVisual_RWCameraModelD3.hxx>
 #include <RWStepVisual_RWCameraUsage.hxx>
-#include <RWStepVisual_RWColour.hxx>
-#include <RWStepVisual_RWColourRgb.hxx>
-#include <RWStepVisual_RWColourSpecification.hxx>
 #include <RWStepVisual_RWCompositeText.hxx>
 #include <RWStepVisual_RWCompositeTextWithExtent.hxx>
 #include <RWStepVisual_RWContextDependentInvisibility.hxx>
 #include <RWStepVisual_RWContextDependentOverRidingStyledItem.hxx>
 #include <RWStepVisual_RWCurveStyle.hxx>
 #include <RWStepVisual_RWCurveStyleFont.hxx>
-#include <RWStepVisual_RWCurveStyleFontPattern.hxx>
 #include <RWStepVisual_RWDraughtingModel.hxx>
-#include <RWStepVisual_RWDraughtingPreDefinedColour.hxx>
-#include <RWStepVisual_RWDraughtingPreDefinedCurveFont.hxx>
 #include <RWStepVisual_RWExternallyDefinedCurveFont.hxx>
 #include <RWStepVisual_RWFillAreaStyle.hxx>
 #include <RWStepVisual_RWFillAreaStyleColour.hxx>
@@ -511,21 +452,18 @@
 #include <RWStepVisual_RWMechanicalDesignGeometricPresentationRepresentation.hxx>
 #include <RWStepVisual_RWOverRidingStyledItem.hxx>
 #include <RWStepVisual_RWPlanarBox.hxx>
-#include <RWStepVisual_RWPlanarExtent.hxx>
 #include <RWStepVisual_RWPointStyle.hxx>
-#include <RWStepVisual_RWPreDefinedColour.hxx>
-#include <RWStepVisual_RWPreDefinedCurveFont.hxx>
-#include <RWStepVisual_RWPreDefinedItem.hxx>
 #include <RWStepVisual_RWPresentationArea.hxx>
 #include <RWStepVisual_RWPresentationLayerAssignment.hxx>
 #include <RWStepVisual_RWPresentationLayerUsage.hxx>
 #include <RWStepVisual_RWPresentationRepresentation.hxx>
-#include <RWStepVisual_RWPresentationSet.hxx>
 #include <RWStepVisual_RWPresentationSize.hxx>
 #include <RWStepVisual_RWPresentationStyleAssignment.hxx>
 #include <RWStepVisual_RWPresentationStyleByContext.hxx>
 #include <RWStepVisual_RWPresentationView.hxx>
 #include <RWStepVisual_RWPresentedItemRepresentation.hxx>
+#include <RWStepVisual_RWRepositionedTessellatedGeometricSet.hxx>
+#include <RWStepVisual_RWRepositionedTessellatedItem.hxx>
 #include <RWStepVisual_RWStyledItem.hxx>
 #include <RWStepVisual_RWSurfaceSideStyle.hxx>
 #include <RWStepVisual_RWSurfaceStyleBoundary.hxx>
@@ -581,7 +519,6 @@
 #include <StepAP214_AutoDesignPersonAndOrganizationAssignment.hxx>
 #include <StepAP214_AutoDesignPresentedItem.hxx>
 #include <StepAP214_AutoDesignSecurityClassificationAssignment.hxx>
-#include <StepAP214_Class.hxx>
 #include <StepAP214_ExternallyDefinedClass.hxx>
 #include <StepAP214_ExternallyDefinedGeneralProperty.hxx>
 #include <StepAP214_RepItemGroup.hxx>
@@ -590,9 +527,7 @@
 #include <StepBasic_ActionMethod.hxx>
 #include <StepBasic_ActionRequestAssignment.hxx>
 #include <StepBasic_ActionRequestSolution.hxx>
-#include <StepBasic_Address.hxx>
 #include <StepBasic_ApplicationContext.hxx>
-#include <StepBasic_ApplicationContextElement.hxx>
 #include <StepBasic_ApplicationProtocolDefinition.hxx>
 #include <StepBasic_Approval.hxx>
 #include <StepBasic_ApprovalDateTime.hxx>
@@ -609,10 +544,8 @@
 #include <StepBasic_Contract.hxx>
 #include <StepBasic_ContractAssignment.hxx>
 #include <StepBasic_ContractType.hxx>
-#include <StepBasic_ConversionBasedUnit.hxx>
 #include <StepBasic_ConversionBasedUnitAndAreaUnit.hxx>
 #include <StepBasic_ConversionBasedUnitAndLengthUnit.hxx>
-#include <StepBasic_ConversionBasedUnitAndMassUnit.hxx>
 #include <StepBasic_ConversionBasedUnitAndPlaneAngleUnit.hxx>
 #include <StepBasic_ConversionBasedUnitAndRatioUnit.hxx>
 #include <StepBasic_ConversionBasedUnitAndSolidAngleUnit.hxx>
@@ -630,65 +563,51 @@
 #include <StepBasic_DimensionalExponents.hxx>
 #include <StepBasic_Document.hxx>
 #include <StepBasic_DocumentFile.hxx>
-#include <StepBasic_DocumentProductAssociation.hxx>
 #include <StepBasic_DocumentProductEquivalence.hxx>
 #include <StepBasic_DocumentRelationship.hxx>
 #include <StepBasic_DocumentRepresentationType.hxx>
 #include <StepBasic_DocumentType.hxx>
 #include <StepBasic_DocumentUsageConstraint.hxx>
-#include <StepBasic_Effectivity.hxx>
 #include <StepBasic_EffectivityAssignment.hxx>
 #include <StepBasic_EulerAngles.hxx>
 #include <StepBasic_ExternalIdentificationAssignment.hxx>
-#include <StepBasic_ExternallyDefinedItem.hxx>
 #include <StepBasic_ExternalSource.hxx>
 #include <StepBasic_GeneralProperty.hxx>
+#include <StepBasic_GeneralPropertyAssociation.hxx>
+#include <StepBasic_GeneralPropertyRelationship.hxx>
 #include <StepBasic_Group.hxx>
 #include <StepBasic_GroupRelationship.hxx>
 #include <StepBasic_IdentificationAssignment.hxx>
 #include <StepBasic_IdentificationRole.hxx>
-#include <StepBasic_LengthMeasureWithUnit.hxx>
 #include <StepBasic_LengthUnit.hxx>
 #include <StepBasic_LocalTime.hxx>
-#include <StepBasic_MassMeasureWithUnit.hxx>
 #include <StepBasic_MassUnit.hxx>
-#include <StepBasic_MeasureWithUnit.hxx>
 #include <StepBasic_MechanicalContext.hxx>
 #include <StepBasic_NameAssignment.hxx>
 #include <StepBasic_NamedUnit.hxx>
 #include <StepBasic_ObjectRole.hxx>
 #include <StepBasic_OrdinalDate.hxx>
-#include <StepBasic_Organization.hxx>
 #include <StepBasic_OrganizationalAddress.hxx>
 #include <StepBasic_OrganizationRole.hxx>
-#include <StepBasic_Person.hxx>
 #include <StepBasic_PersonalAddress.hxx>
 #include <StepBasic_PersonAndOrganization.hxx>
 #include <StepBasic_PersonAndOrganizationRole.hxx>
 #include <StepBasic_PhysicallyModeledProductDefinition.hxx>
-#include <StepBasic_PlaneAngleMeasureWithUnit.hxx>
 #include <StepBasic_PlaneAngleUnit.hxx>
-#include <StepBasic_Product.hxx>
-#include <StepBasic_ProductCategory.hxx>
 #include <StepBasic_ProductCategoryRelationship.hxx>
 #include <StepBasic_ProductConceptContext.hxx>
 #include <StepBasic_ProductContext.hxx>
 #include <StepBasic_ProductDefinition.hxx>
 #include <StepBasic_ProductDefinitionContext.hxx>
-#include <StepBasic_ProductDefinitionEffectivity.hxx>
-#include <StepBasic_ProductDefinitionFormation.hxx>
 #include <StepBasic_ProductDefinitionFormationRelationship.hxx>
 #include <StepBasic_ProductDefinitionFormationWithSpecifiedSource.hxx>
-#include <StepBasic_ProductDefinitionRelationship.hxx>
 #include <StepBasic_ProductDefinitionWithAssociatedDocuments.hxx>
-#include <StepBasic_ProductRelatedProductCategory.hxx>
 #include <StepBasic_ProductType.hxx>
 #include <StepBasic_RatioMeasureWithUnit.hxx>
 #include <StepBasic_RatioUnit.hxx>
 #include <StepBasic_RoleAssociation.hxx>
 #include <StepBasic_SecurityClassification.hxx>
 #include <StepBasic_SecurityClassificationLevel.hxx>
-#include <StepBasic_SiUnit.hxx>
 #include <StepBasic_SiUnitAndAreaUnit.hxx>
 #include <StepBasic_SiUnitAndLengthUnit.hxx>
 #include <StepBasic_SiUnitAndMassUnit.hxx>
@@ -703,7 +622,6 @@
 #include <StepBasic_ThermodynamicTemperatureUnit.hxx>
 #include <StepBasic_TimeMeasureWithUnit.hxx>
 #include <StepBasic_TimeUnit.hxx>
-#include <StepBasic_UncertaintyMeasureWithUnit.hxx>
 #include <StepBasic_VersionedActionRequest.hxx>
 #include <StepBasic_VolumeUnit.hxx>
 #include <StepBasic_WeekOfYearAndDayDate.hxx>
@@ -716,7 +634,6 @@
 #include <StepDimTol_Datum.hxx>
 #include <StepDimTol_DatumFeature.hxx>
 #include <StepDimTol_DatumReference.hxx>
-#include <StepDimTol_DatumTarget.hxx>
 #include <StepDimTol_FlatnessTolerance.hxx>
 #include <StepDimTol_GeometricTolerance.hxx>
 #include <StepDimTol_GeometricToleranceRelationship.hxx>
@@ -735,15 +652,11 @@
 #include <StepDimTol_TotalRunoutTolerance.hxx>
 #include <StepElement_AnalysisItemWithinRepresentation.hxx>
 #include <StepElement_Curve3dElementDescriptor.hxx>
-#include <StepElement_CurveElementEndReleasePacket.hxx>
-#include <StepElement_CurveElementSectionDefinition.hxx>
 #include <StepElement_CurveElementSectionDerivedDefinitions.hxx>
 #include <StepElement_ElementDescriptor.hxx>
 #include <StepElement_ElementMaterial.hxx>
 #include <StepElement_Surface3dElementDescriptor.hxx>
 #include <StepElement_SurfaceElementProperty.hxx>
-#include <StepElement_SurfaceSection.hxx>
-#include <StepElement_SurfaceSectionField.hxx>
 #include <StepElement_SurfaceSectionFieldConstant.hxx>
 #include <StepElement_SurfaceSectionFieldVarying.hxx>
 #include <StepElement_UniformSurfaceSection.hxx>
@@ -754,7 +667,6 @@
 #include <StepFEA_ConstantSurface3dElementCoordinateSystem.hxx>
 #include <StepFEA_Curve3dElementProperty.hxx>
 #include <StepFEA_Curve3dElementRepresentation.hxx>
-#include <StepFEA_CurveElementEndCoordinateSystem.hxx>
 #include <StepFEA_CurveElementEndOffset.hxx>
 #include <StepFEA_CurveElementEndRelease.hxx>
 #include <StepFEA_CurveElementInterval.hxx>
@@ -773,7 +685,6 @@
 #include <StepFEA_FeaMassDensity.hxx>
 #include <StepFEA_FeaMaterialPropertyRepresentation.hxx>
 #include <StepFEA_FeaMaterialPropertyRepresentationItem.hxx>
-#include <StepFEA_FeaModel.hxx>
 #include <StepFEA_FeaModel3d.hxx>
 #include <StepFEA_FeaModelDefinition.hxx>
 #include <StepFEA_FeaMoistureAbsorption.hxx>
@@ -789,7 +700,6 @@
 #include <StepFEA_FreedomAndCoefficient.hxx>
 #include <StepFEA_FreedomsList.hxx>
 #include <StepFEA_GeometricNode.hxx>
-#include <StepFEA_Node.hxx>
 #include <StepFEA_NodeDefinition.hxx>
 #include <StepFEA_NodeGroup.hxx>
 #include <StepFEA_NodeRepresentation.hxx>
@@ -800,9 +710,6 @@
 #include <StepFEA_ParametricCurve3dElementCoordinateSystem.hxx>
 #include <StepFEA_ParametricSurface3dElementCoordinateSystem.hxx>
 #include <StepFEA_Surface3dElementRepresentation.hxx>
-#include <StepFEA_SymmetricTensor22d.hxx>
-#include <StepFEA_SymmetricTensor42d.hxx>
-#include <StepFEA_SymmetricTensor43d.hxx>
 #include <StepFEA_Volume3dElementRepresentation.hxx>
 #include <StepGeom_Axis1Placement.hxx>
 #include <StepGeom_Axis2Placement2d.hxx>
@@ -811,7 +718,6 @@
 #include <StepGeom_BezierCurveAndRationalBSplineCurve.hxx>
 #include <StepGeom_BezierSurface.hxx>
 #include <StepGeom_BezierSurfaceAndRationalBSplineSurface.hxx>
-#include <StepGeom_BoundaryCurve.hxx>
 #include <StepGeom_BoundedCurve.hxx>
 #include <StepGeom_BoundedSurface.hxx>
 #include <StepGeom_BSplineCurve.hxx>
@@ -821,22 +727,16 @@
 #include <StepGeom_BSplineSurfaceWithKnots.hxx>
 #include <StepGeom_BSplineSurfaceWithKnotsAndRationalBSplineSurface.hxx>
 #include <StepGeom_CartesianPoint.hxx>
-#include <StepGeom_CartesianTransformationOperator.hxx>
 #include <StepGeom_CartesianTransformationOperator2d.hxx>
 #include <StepGeom_CartesianTransformationOperator3d.hxx>
 #include <StepGeom_Circle.hxx>
-#include <StepGeom_CompositeCurve.hxx>
-#include <StepGeom_CompositeCurveOnSurface.hxx>
-#include <StepGeom_CompositeCurveSegment.hxx>
 #include <StepGeom_Conic.hxx>
 #include <StepGeom_ConicalSurface.hxx>
 #include <StepGeom_Curve.hxx>
 #include <StepGeom_CurveBoundedSurface.hxx>
 #include <StepGeom_CurveReplica.hxx>
 #include <StepGeom_CylindricalSurface.hxx>
-#include <StepGeom_DegeneratePcurve.hxx>
 #include <StepGeom_DegenerateToroidalSurface.hxx>
-#include <StepGeom_Direction.hxx>
 #include <StepGeom_ElementarySurface.hxx>
 #include <StepGeom_Ellipse.hxx>
 #include <StepGeom_EvaluatedDegeneratePcurve.hxx>
@@ -857,8 +757,6 @@
 #include <StepGeom_Placement.hxx>
 #include <StepGeom_Plane.hxx>
 #include <StepGeom_Point.hxx>
-#include <StepGeom_PointOnCurve.hxx>
-#include <StepGeom_PointOnSurface.hxx>
 #include <StepGeom_PointReplica.hxx>
 #include <StepGeom_Polyline.hxx>
 #include <StepGeom_QuasiUniformCurve.hxx>
@@ -868,10 +766,10 @@
 #include <StepGeom_RationalBSplineCurve.hxx>
 #include <StepGeom_RationalBSplineSurface.hxx>
 #include <StepGeom_RectangularCompositeSurface.hxx>
-#include <StepGeom_RectangularTrimmedSurface.hxx>
 #include <StepGeom_ReparametrisedCompositeCurveSegment.hxx>
 #include <StepGeom_SeamCurve.hxx>
 #include <StepGeom_SphericalSurface.hxx>
+#include <StepGeom_SuParameters.hxx>
 #include <StepGeom_Surface.hxx>
 #include <StepGeom_SurfaceCurve.hxx>
 #include <StepGeom_SurfaceCurveAndBoundedCurve.hxx>
@@ -881,32 +779,26 @@
 #include <StepGeom_SurfaceReplica.hxx>
 #include <StepGeom_SweptSurface.hxx>
 #include <StepGeom_ToroidalSurface.hxx>
-#include <StepGeom_TrimmedCurve.hxx>
 #include <StepGeom_UniformCurve.hxx>
 #include <StepGeom_UniformCurveAndRationalBSplineCurve.hxx>
 #include <StepGeom_UniformSurface.hxx>
 #include <StepGeom_UniformSurfaceAndRationalBSplineSurface.hxx>
 #include <StepGeom_Vector.hxx>
-#include <StepRepr_AssemblyComponentUsage.hxx>
 #include <StepRepr_AssemblyComponentUsageSubstitute.hxx>
 #include <StepRepr_CompositeShapeAspect.hxx>
-#include <StepRepr_CompoundRepresentationItem.hxx>
 #include <StepRepr_ConfigurationDesign.hxx>
 #include <StepRepr_ConfigurationEffectivity.hxx>
 #include <StepRepr_ConstructiveGeometryRepresentation.hxx>
 #include <StepRepr_ConstructiveGeometryRepresentationRelationship.hxx>
+#include <StepRepr_MechanicalDesignAndDraughtingRelationship.hxx>
 #include <StepRepr_DataEnvironment.hxx>
-#include <StepRepr_DefinitionalRepresentation.hxx>
-#include <StepRepr_DerivedShapeAspect.hxx>
 #include <StepRepr_DescriptiveRepresentationItem.hxx>
 #include <StepRepr_Extension.hxx>
 #include <StepRepr_ExternallyDefinedRepresentation.hxx>
 #include <StepRepr_FunctionallyDefinedTransformation.hxx>
 #include <StepRepr_GlobalUncertaintyAssignedContext.hxx>
 #include <StepRepr_GlobalUnitAssignedContext.hxx>
-#include <StepRepr_ItemDefinedTransformation.hxx>
 #include <StepRepr_MakeFromUsageOption.hxx>
-#include <StepRepr_MappedItem.hxx>
 #include <StepRepr_MaterialDesignation.hxx>
 #include <StepRepr_MaterialProperty.hxx>
 #include <StepRepr_MaterialPropertyRepresentation.hxx>
@@ -924,16 +816,14 @@
 #include <StepRepr_Representation.hxx>
 #include <StepRepr_RepresentationContext.hxx>
 #include <StepRepr_RepresentationItem.hxx>
-#include <StepRepr_RepresentationMap.hxx>
+#include <StepRepr_RepresentationReference.hxx>
 #include <StepRepr_RepresentationRelationship.hxx>
-#include <StepRepr_RepresentationRelationshipWithTransformation.hxx>
 #include <StepRepr_ReprItemAndLengthMeasureWithUnit.hxx>
 #include <StepRepr_ShapeAspect.hxx>
 #include <StepRepr_ShapeAspectDerivingRelationship.hxx>
 #include <StepRepr_ShapeAspectRelationship.hxx>
 #include <StepRepr_FeatureForDatumTargetRelationship.hxx>
 #include <StepRepr_ShapeAspectTransition.hxx>
-#include <StepRepr_ShapeRepresentationRelationship.hxx>
 #include <StepRepr_ShapeRepresentationRelationshipWithTransformation.hxx>
 #include <StepRepr_SpecifiedHigherUsageOccurrence.hxx>
 #include <StepRepr_StructuralResponseProperty.hxx>
@@ -951,7 +841,6 @@
 #include <StepShape_BrepWithVoids.hxx>
 #include <StepShape_ClosedShell.hxx>
 #include <StepShape_CompoundShapeRepresentation.hxx>
-#include <StepShape_ConnectedEdgeSet.hxx>
 #include <StepShape_ConnectedFaceSet.hxx>
 #include <StepShape_ConnectedFaceShapeRepresentation.hxx>
 #include <StepShape_ConnectedFaceSubSet.hxx>
@@ -965,7 +854,6 @@
 #include <StepShape_DimensionalSize.hxx>
 #include <StepShape_DimensionalSizeWithPath.hxx>
 #include <StepShape_DirectedDimensionalLocation.hxx>
-#include <StepShape_Edge.hxx>
 #include <StepShape_EdgeBasedWireframeModel.hxx>
 #include <StepShape_EdgeBasedWireframeShapeRepresentation.hxx>
 #include <StepShape_EdgeCurve.hxx>
@@ -982,8 +870,6 @@
 #include <StepShape_FacetedBrepShapeRepresentation.hxx>
 #include <StepShape_GeometricallyBoundedSurfaceShapeRepresentation.hxx>
 #include <StepShape_GeometricallyBoundedWireframeShapeRepresentation.hxx>
-#include <StepShape_GeometricCurveSet.hxx>
-#include <StepShape_GeometricSet.hxx>
 #include <StepShape_HalfSpaceSolid.hxx>
 #include <StepShape_LimitsAndFits.hxx>
 #include <StepShape_Loop.hxx>
@@ -993,7 +879,6 @@
 #include <StepShape_MeasureQualification.hxx>
 #include <StepShape_MeasureRepresentationItemAndQualifiedRepresentationItem.hxx>
 #include <StepShape_NonManifoldSurfaceShapeRepresentation.hxx>
-#include <StepShape_OpenShell.hxx>
 #include <StepShape_OrientedClosedShell.hxx>
 #include <StepShape_OrientedEdge.hxx>
 #include <StepShape_OrientedFace.hxx>
@@ -1031,30 +916,23 @@
 #include <StepShape_Vertex.hxx>
 #include <StepShape_VertexLoop.hxx>
 #include <StepShape_VertexPoint.hxx>
-#include <StepVisual_AnnotationOccurrence.hxx>
 #include <StepVisual_AnnotationText.hxx>
 #include <StepVisual_AnnotationTextOccurrence.hxx>
 #include <StepVisual_AreaInSet.hxx>
 #include <StepVisual_BackgroundColour.hxx>
-#include <StepVisual_CameraImage.hxx>
 #include <StepVisual_CameraImage2dWithScale.hxx>
 #include <StepVisual_CameraImage3dWithScale.hxx>
-#include <StepVisual_CameraModel.hxx>
 #include <StepVisual_CameraModelD2.hxx>
-#include <StepVisual_CameraModelD3.hxx>
 #include <StepVisual_CameraUsage.hxx>
 #include <StepVisual_Colour.hxx>
 #include <StepVisual_ColourRgb.hxx>
 #include <StepVisual_ColourSpecification.hxx>
-#include <StepVisual_CompositeText.hxx>
 #include <StepVisual_CompositeTextWithExtent.hxx>
 #include <StepVisual_ContextDependentInvisibility.hxx>
 #include <StepVisual_ContextDependentOverRidingStyledItem.hxx>
 #include <StepVisual_CurveStyle.hxx>
 #include <StepVisual_CurveStyleFont.hxx>
 #include <StepVisual_CurveStyleFontPattern.hxx>
-#include <StepVisual_DraughtingAnnotationOccurrence.hxx>
-#include <StepVisual_DraughtingModel.hxx>
 #include <StepVisual_DraughtingPreDefinedColour.hxx>
 #include <StepVisual_DraughtingPreDefinedCurveFont.hxx>
 #include <StepVisual_ExternallyDefinedCurveFont.hxx>
@@ -1082,6 +960,8 @@
 #include <StepVisual_PresentationStyleByContext.hxx>
 #include <StepVisual_PresentationView.hxx>
 #include <StepVisual_PresentedItemRepresentation.hxx>
+#include <StepVisual_RepositionedTessellatedGeometricSet.hxx>
+#include <StepVisual_RepositionedTessellatedItem.hxx>
 #include <StepVisual_StyledItem.hxx>
 #include <StepVisual_SurfaceSideStyle.hxx>
 #include <StepVisual_SurfaceStyleBoundary.hxx>
@@ -1089,7 +969,6 @@
 #include <StepVisual_SurfaceStyleFillArea.hxx>
 #include <StepVisual_SurfaceStyleParameterLine.hxx>
 #include <StepVisual_SurfaceStyleReflectanceAmbient.hxx>
-#include <StepVisual_SurfaceStyleRendering.hxx>
 #include <StepVisual_SurfaceStyleRenderingWithProperties.hxx>
 #include <StepVisual_SurfaceStyleSegmentationCurve.hxx>
 #include <StepVisual_SurfaceStyleSilhouette.hxx>
@@ -1098,7 +977,6 @@
 #include <StepVisual_Template.hxx>
 #include <StepVisual_TemplateInstance.hxx>
 #include <StepVisual_TextLiteral.hxx>
-#include <StepVisual_TextStyle.hxx>
 #include <StepVisual_TextStyleForDefinedFont.hxx>
 #include <StepVisual_TextStyleWithBoxCharacteristics.hxx>
 #include <StepVisual_ViewVolume.hxx>
@@ -1260,27 +1138,18 @@ IMPLEMENT_STANDARD_RTTIEXT(RWStepAP214_GeneralModule,StepData_GeneralModule)
 #include <RWStepDimTol_RWNonUniformZoneDefinition.hxx>
 #include <RWStepDimTol_RWProjectedZoneDefinition.hxx>
 #include <RWStepDimTol_RWRunoutZoneDefinition.hxx>
-#include <RWStepDimTol_RWRunoutZoneOrientation.hxx>
 #include <RWStepDimTol_RWToleranceZone.hxx>
 #include <RWStepDimTol_RWToleranceZoneDefinition.hxx>
-#include <RWStepDimTol_RWToleranceZoneForm.hxx>
-#include <RWStepShape_RWValueFormatTypeQualifier.hxx>
 #include <RWStepDimTol_RWDatumReferenceCompartment.hxx>
 #include <RWStepDimTol_RWDatumReferenceElement.hxx>
-#include <RWStepDimTol_RWDatumReferenceModifierWithValue.hxx>
 #include <RWStepDimTol_RWDatumSystem.hxx>
 #include <RWStepDimTol_RWGeneralDatumReference.hxx>
-#include <RWStepRepr_RWReprItemAndPlaneAngleMeasureWithUnit.hxx>
-#include <RWStepRepr_RWReprItemAndLengthMeasureWithUnitAndQRI.hxx>
-#include <RWStepRepr_RWReprItemAndPlaneAngleMeasureWithUnitAndQRI.hxx>
 #include <RWStepDimTol_RWGeoTolAndGeoTolWthDatRef.hxx>
 #include <RWStepDimTol_RWGeoTolAndGeoTolWthDatRefAndGeoTolWthMod.hxx>
 #include <RWStepDimTol_RWGeoTolAndGeoTolWthMod.hxx>
 #include <RWStepDimTol_RWGeoTolAndGeoTolWthDatRefAndUneqDisGeoTol.hxx>
 #include <RWStepRepr_RWCompGroupShAspAndCompShAspAndDatumFeatAndShAsp.hxx>
 #include <RWStepRepr_RWCompShAspAndDatumFeatAndShAsp.hxx>
-#include <RWStepRepr_RWIntegerRepresentationItem.hxx>
-#include <RWStepRepr_RWValueRepresentationItem.hxx>
 #include <RWStepAP242_RWDraughtingModelItemAssociation.hxx>
 #include <RWStepDimTol_RWGeoTolAndGeoTolWthDatRefAndGeoTolWthMaxTol.hxx>
 #include <RWStepDimTol_RWGeoTolAndGeoTolWthMaxTol.hxx>
@@ -1315,7 +1184,6 @@ IMPLEMENT_STANDARD_RTTIEXT(RWStepAP214_GeneralModule,StepData_GeneralModule)
 #include <StepDimTol_ToleranceZoneDefinition.hxx>
 #include <StepDimTol_ToleranceZoneForm.hxx>
 #include <StepShape_ValueFormatTypeQualifier.hxx>
-#include <StepDimTol_DatumReferenceCompartment.hxx>
 #include <StepDimTol_DatumReferenceElement.hxx>
 #include <StepDimTol_DatumReferenceModifierWithValue.hxx>
 #include <StepDimTol_DatumSystem.hxx>
@@ -1323,32 +1191,25 @@ IMPLEMENT_STANDARD_RTTIEXT(RWStepAP214_GeneralModule,StepData_GeneralModule)
 #include <StepRepr_ReprItemAndPlaneAngleMeasureWithUnit.hxx>
 #include <StepRepr_ReprItemAndLengthMeasureWithUnitAndQRI.hxx>
 #include <StepRepr_ReprItemAndPlaneAngleMeasureWithUnitAndQRI.hxx>
-#include <StepDimTol_GeoTolAndGeoTolWthDatRef.hxx>
-#include <StepDimTol_GeoTolAndGeoTolWthDatRefAndGeoTolWthMod.hxx>
-#include <StepDimTol_GeoTolAndGeoTolWthMod.hxx>
 #include <StepDimTol_GeoTolAndGeoTolWthDatRefAndUneqDisGeoTol.hxx>
 #include <StepRepr_CompGroupShAspAndCompShAspAndDatumFeatAndShAsp.hxx>
 #include <StepRepr_CompShAspAndDatumFeatAndShAsp.hxx>
+#include <StepRepr_BooleanRepresentationItem.hxx>
 #include <StepRepr_IntegerRepresentationItem.hxx>
+#include <StepRepr_RealRepresentationItem.hxx>
 #include <StepRepr_ValueRepresentationItem.hxx>
 #include <StepAP242_DraughtingModelItemAssociation.hxx>
 #include <StepDimTol_GeoTolAndGeoTolWthDatRefAndGeoTolWthMaxTol.hxx>
 #include <StepDimTol_GeoTolAndGeoTolWthMaxTol.hxx>
-#include <StepVisual_AnnotationCurveOccurrence.hxx>
 #include <StepVisual_AnnotationPlane.hxx>
 #include <StepVisual_DraughtingCallout.hxx>
 
 #include <StepVisual_TessellatedAnnotationOccurrence.hxx>
-#include <StepVisual_TessellatedItem.hxx>
 #include <StepVisual_TessellatedGeometricSet.hxx>
-#include <StepVisual_TessellatedCurveSet.hxx>
-#include <StepVisual_CoordinatesList.hxx>
 
 #include <RWStepVisual_RWTessellatedAnnotationOccurrence.hxx>
-#include <RWStepVisual_RWTessellatedItem.hxx>
 #include <RWStepVisual_RWTessellatedGeometricSet.hxx>
 #include <RWStepVisual_RWTessellatedCurveSet.hxx>
-#include <RWStepVisual_RWCoordinatesList.hxx>
 #include <StepRepr_CharacterizedRepresentation.hxx>
 #include <RWStepRepr_RWCharacterizedRepresentation.hxx>
 #include <StepVisual_CharacterizedObjAndRepresentationAndDraughtingModel.hxx>
@@ -1365,6 +1226,178 @@ IMPLEMENT_STANDARD_RTTIEXT(RWStepAP214_GeneralModule,StepData_GeneralModule)
 #include <RWStepVisual_RWCameraModelD3MultiClippingUnion.hxx>
 #include <StepVisual_AnnotationCurveOccurrenceAndGeomReprItem.hxx>
 #include <RWStepVisual_RWAnnotationCurveOccurrenceAndGeomReprItem.hxx>
+
+// Added for kinematics implementation
+#include <RWStepKinematics_RWActuatedKinPairAndOrderKinPair.hxx>
+#include <RWStepKinematics_RWActuatedKinematicPair.hxx>
+#include <RWStepKinematics_RWContextDependentKinematicLinkRepresentation.hxx>
+#include <RWStepKinematics_RWCylindricalPair.hxx>
+#include <RWStepKinematics_RWCylindricalPairValue.hxx>
+#include <RWStepKinematics_RWCylindricalPairWithRange.hxx>
+#include <RWStepKinematics_RWFullyConstrainedPair.hxx>
+#include <RWStepKinematics_RWGearPair.hxx>
+#include <RWStepKinematics_RWGearPairValue.hxx>
+#include <RWStepKinematics_RWGearPairWithRange.hxx>
+#include <RWStepKinematics_RWHomokineticPair.hxx>
+#include <RWStepKinematics_RWKinematicJoint.hxx>
+#include <RWStepKinematics_RWKinematicLink.hxx>
+#include <RWStepKinematics_RWKinematicLinkRepresentationAssociation.hxx>
+#include <RWStepKinematics_RWKinematicPropertyMechanismRepresentation.hxx>
+#include <RWStepKinematics_RWKinematicTopologyDirectedStructure.hxx>
+#include <RWStepKinematics_RWKinematicTopologyNetworkStructure.hxx>
+#include <RWStepKinematics_RWKinematicTopologyStructure.hxx>
+#include <RWStepKinematics_RWLinearFlexibleAndPinionPair.hxx>
+#include <RWStepKinematics_RWLinearFlexibleAndPlanarCurvePair.hxx>
+#include <RWStepKinematics_RWLinearFlexibleLinkRepresentation.hxx>
+#include <RWStepKinematics_RWLowOrderKinematicPair.hxx>
+#include <RWStepKinematics_RWLowOrderKinematicPairValue.hxx>
+#include <RWStepKinematics_RWLowOrderKinematicPairWithRange.hxx>
+#include <RWStepKinematics_RWMechanismRepresentation.hxx>
+#include <RWStepKinematics_RWMechanismStateRepresentation.hxx>
+#include <RWStepKinematics_RWOrientedJoint.hxx>
+#include <RWStepKinematics_RWPairRepresentationRelationship.hxx>
+#include <RWStepKinematics_RWPlanarCurvePair.hxx>
+#include <RWStepKinematics_RWPlanarCurvePairRange.hxx>
+#include <RWStepKinematics_RWPlanarPair.hxx>
+#include <RWStepKinematics_RWPlanarPairValue.hxx>
+#include <RWStepKinematics_RWPlanarPairWithRange.hxx>
+#include <RWStepKinematics_RWPointOnPlanarCurvePair.hxx>
+#include <RWStepKinematics_RWPointOnPlanarCurvePairValue.hxx>
+#include <RWStepKinematics_RWPointOnPlanarCurvePairWithRange.hxx>
+#include <RWStepKinematics_RWPointOnSurfacePair.hxx>
+#include <RWStepKinematics_RWPointOnSurfacePairValue.hxx>
+#include <RWStepKinematics_RWPointOnSurfacePairWithRange.hxx>
+#include <RWStepKinematics_RWPrismaticPair.hxx>
+#include <RWStepKinematics_RWPrismaticPairValue.hxx>
+#include <RWStepKinematics_RWPrismaticPairWithRange.hxx>
+#include <RWStepKinematics_RWProductDefinitionKinematics.hxx>
+#include <RWStepKinematics_RWProductDefinitionRelationshipKinematics.hxx>
+#include <RWStepKinematics_RWRackAndPinionPair.hxx>
+#include <RWStepKinematics_RWRackAndPinionPairValue.hxx>
+#include <RWStepKinematics_RWRackAndPinionPairWithRange.hxx>
+#include <RWStepKinematics_RWRevolutePair.hxx>
+#include <RWStepKinematics_RWRevolutePairValue.hxx>
+#include <RWStepKinematics_RWRevolutePairWithRange.hxx>
+#include <RWStepKinematics_RWRigidLinkRepresentation.hxx>
+#include <RWStepKinematics_RWRollingCurvePair.hxx>
+#include <RWStepKinematics_RWRollingCurvePairValue.hxx>
+#include <RWStepKinematics_RWRollingSurfacePair.hxx>
+#include <RWStepKinematics_RWRollingSurfacePairValue.hxx>
+#include <RWStepKinematics_RWRotationAboutDirection.hxx>
+#include <RWStepKinematics_RWScrewPair.hxx>
+#include <RWStepKinematics_RWScrewPairValue.hxx>
+#include <RWStepKinematics_RWScrewPairWithRange.hxx>
+#include <RWStepKinematics_RWSlidingCurvePair.hxx>
+#include <RWStepKinematics_RWSlidingCurvePairValue.hxx>
+#include <RWStepKinematics_RWSlidingSurfacePair.hxx>
+#include <RWStepKinematics_RWSlidingSurfacePairValue.hxx>
+#include <RWStepKinematics_RWSphericalPair.hxx>
+#include <RWStepKinematics_RWSphericalPairValue.hxx>
+#include <RWStepKinematics_RWSphericalPairWithPin.hxx>
+#include <RWStepKinematics_RWSphericalPairWithPinAndRange.hxx>
+#include <RWStepKinematics_RWSphericalPairWithRange.hxx>
+#include <RWStepKinematics_RWSurfacePairWithRange.hxx>
+#include <RWStepKinematics_RWUnconstrainedPair.hxx>
+#include <RWStepKinematics_RWUnconstrainedPairValue.hxx>
+#include <RWStepKinematics_RWUniversalPair.hxx>
+#include <RWStepKinematics_RWUniversalPairValue.hxx>
+#include <RWStepKinematics_RWUniversalPairWithRange.hxx>
+
+#include <StepKinematics_ActuatedKinematicPair.hxx>
+#include <StepKinematics_ActuatedKinPairAndOrderKinPair.hxx>
+#include <StepKinematics_ContextDependentKinematicLinkRepresentation.hxx>
+#include <StepKinematics_CylindricalPairValue.hxx>
+#include <StepKinematics_CylindricalPairWithRange.hxx>
+#include <StepKinematics_FullyConstrainedPair.hxx>
+#include <StepKinematics_GearPairValue.hxx>
+#include <StepKinematics_GearPairWithRange.hxx>
+#include <StepKinematics_HomokineticPair.hxx>
+#include <StepKinematics_KinematicJoint.hxx>
+#include <StepKinematics_KinematicLinkRepresentationAssociation.hxx>
+#include <StepKinematics_KinematicPropertyMechanismRepresentation.hxx>
+#include <StepKinematics_KinematicTopologyDirectedStructure.hxx>
+#include <StepKinematics_KinematicTopologyNetworkStructure.hxx>
+#include <StepKinematics_KinematicTopologyStructure.hxx>
+#include <StepKinematics_LinearFlexibleAndPinionPair.hxx>
+#include <StepKinematics_LinearFlexibleAndPlanarCurvePair.hxx>
+#include <StepKinematics_LinearFlexibleLinkRepresentation.hxx>
+#include <StepKinematics_LowOrderKinematicPair.hxx>
+#include <StepKinematics_LowOrderKinematicPairValue.hxx>
+#include <StepKinematics_LowOrderKinematicPairWithRange.hxx>
+#include <StepKinematics_MechanismRepresentation.hxx>
+#include <StepKinematics_MechanismStateRepresentation.hxx>
+#include <StepKinematics_OrientedJoint.hxx>
+#include <StepKinematics_PairRepresentationRelationship.hxx>
+#include <StepKinematics_PlanarCurvePairRange.hxx>
+#include <StepKinematics_PlanarPairValue.hxx>
+#include <StepKinematics_PlanarPairWithRange.hxx>
+#include <StepKinematics_PointOnPlanarCurvePairValue.hxx>
+#include <StepKinematics_PointOnPlanarCurvePairWithRange.hxx>
+#include <StepKinematics_PointOnSurfacePairValue.hxx>
+#include <StepKinematics_PointOnSurfacePairWithRange.hxx>
+#include <StepKinematics_PrismaticPairValue.hxx>
+#include <StepKinematics_PrismaticPairWithRange.hxx>
+#include <StepKinematics_ProductDefinitionKinematics.hxx>
+#include <StepKinematics_ProductDefinitionRelationshipKinematics.hxx>
+#include <StepKinematics_RackAndPinionPairValue.hxx>
+#include <StepKinematics_RackAndPinionPairWithRange.hxx>
+#include <StepKinematics_RevolutePairValue.hxx>
+#include <StepKinematics_RevolutePairWithRange.hxx>
+#include <StepKinematics_RigidLinkRepresentation.hxx>
+#include <StepKinematics_RollingCurvePair.hxx>
+#include <StepKinematics_RollingCurvePairValue.hxx>
+#include <StepKinematics_RollingSurfacePair.hxx>
+#include <StepKinematics_RollingSurfacePairValue.hxx>
+#include <StepKinematics_RotationAboutDirection.hxx>
+#include <StepKinematics_ScrewPairValue.hxx>
+#include <StepKinematics_ScrewPairWithRange.hxx>
+#include <StepKinematics_SlidingCurvePair.hxx>
+#include <StepKinematics_SlidingCurvePairValue.hxx>
+#include <StepKinematics_SlidingSurfacePair.hxx>
+#include <StepKinematics_SlidingSurfacePairValue.hxx>
+#include <StepKinematics_SphericalPairValue.hxx>
+#include <StepKinematics_SphericalPairWithPinAndRange.hxx>
+#include <StepKinematics_SphericalPairWithRange.hxx>
+#include <StepKinematics_SurfacePairWithRange.hxx>
+#include <StepKinematics_UnconstrainedPair.hxx>
+#include <StepKinematics_UnconstrainedPairValue.hxx>
+#include <StepKinematics_UniversalPair.hxx>
+#include <StepKinematics_UniversalPairValue.hxx>
+#include <StepKinematics_UniversalPairWithRange.hxx>
+
+#include <StepVisual_TessellatedConnectingEdge.hxx>
+#include <StepVisual_TessellatedEdge.hxx>
+#include <StepVisual_TessellatedPointSet.hxx>
+#include <StepVisual_TessellatedShapeRepresentation.hxx>
+#include <StepVisual_TessellatedShapeRepresentationWithAccuracyParameters.hxx>
+#include <StepVisual_TessellatedShell.hxx>
+#include <StepVisual_TessellatedSolid.hxx>
+#include <StepVisual_TessellatedStructuredItem.hxx>
+#include <StepVisual_TessellatedVertex.hxx>
+#include <StepVisual_TessellatedWire.hxx>
+#include <StepVisual_TriangulatedFace.hxx>
+#include <StepVisual_ComplexTriangulatedFace.hxx>
+#include <StepVisual_ComplexTriangulatedSurfaceSet.hxx>
+#include <StepVisual_CubicBezierTessellatedEdge.hxx>
+#include <StepVisual_CubicBezierTriangulatedFace.hxx>
+#include <StepVisual_TriangulatedSurfaceSet.hxx>
+
+#include <RWStepVisual_RWTessellatedConnectingEdge.hxx>
+#include <RWStepVisual_RWTessellatedEdge.hxx>
+#include <RWStepVisual_RWTessellatedPointSet.hxx>
+#include <RWStepVisual_RWTessellatedShapeRepresentation.hxx>
+#include <RWStepVisual_RWTessellatedShapeRepresentationWithAccuracyParameters.hxx>
+#include <RWStepVisual_RWTessellatedShell.hxx>
+#include <RWStepVisual_RWTessellatedSolid.hxx>
+#include <RWStepVisual_RWTessellatedStructuredItem.hxx>
+#include <RWStepVisual_RWTessellatedVertex.hxx>
+#include <RWStepVisual_RWTessellatedWire.hxx>
+#include <RWStepVisual_RWTriangulatedFace.hxx>
+#include <RWStepVisual_RWComplexTriangulatedFace.hxx>
+#include <RWStepVisual_RWComplexTriangulatedSurfaceSet.hxx>
+#include <RWStepVisual_RWCubicBezierTessellatedEdge.hxx>
+#include <RWStepVisual_RWCubicBezierTriangulatedFace.hxx>
+#include <RWStepVisual_RWTriangulatedSurfaceSet.hxx>
 
 static Standard_Integer catsh,catdr,catstr,catdsc,cataux;
 
@@ -5193,8 +5226,687 @@ void RWStepAP214_GeneralModule::FillSharedCase(const Standard_Integer CN,
     tool.Share(anent, iter);
   }
   break;
-    default : break;
-    }
+    case 724:
+  {
+    DeclareAndCast(StepRepr_RepresentationContextReference, anent, ent);
+    RWStepRepr_RWRepresentationContextReference tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 725:
+  {
+    DeclareAndCast(StepRepr_RepresentationReference, anent, ent);
+    RWStepRepr_RWRepresentationReference tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 726:
+  {
+    DeclareAndCast(StepGeom_SuParameters, anent, ent);
+    RWStepGeom_RWSuParameters tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 727:
+  {
+    DeclareAndCast(StepKinematics_RotationAboutDirection, anent, ent);
+    RWStepKinematics_RWRotationAboutDirection tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 728:
+  {
+    DeclareAndCast(StepKinematics_KinematicJoint, anent, ent);
+    RWStepKinematics_RWKinematicJoint tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 729:
+  {
+    DeclareAndCast(StepKinematics_ActuatedKinematicPair, anent, ent);
+    RWStepKinematics_RWActuatedKinematicPair tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 730:
+  {
+    DeclareAndCast(StepKinematics_ContextDependentKinematicLinkRepresentation, anent, ent);
+    RWStepKinematics_RWContextDependentKinematicLinkRepresentation tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 731:
+  {
+    DeclareAndCast(StepKinematics_CylindricalPair, anent, ent);
+    RWStepKinematics_RWCylindricalPair tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 732:
+  {
+    DeclareAndCast(StepKinematics_CylindricalPairValue, anent, ent);
+    RWStepKinematics_RWCylindricalPairValue tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 733:
+  {
+    DeclareAndCast(StepKinematics_CylindricalPairWithRange, anent, ent);
+    RWStepKinematics_RWCylindricalPairWithRange tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 734:
+  {
+    DeclareAndCast(StepKinematics_FullyConstrainedPair, anent, ent);
+    RWStepKinematics_RWFullyConstrainedPair tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 735:
+  {
+    DeclareAndCast(StepKinematics_GearPair, anent, ent);
+    RWStepKinematics_RWGearPair tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 736:
+  {
+    DeclareAndCast(StepKinematics_GearPairValue, anent, ent);
+    RWStepKinematics_RWGearPairValue tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 737:
+  {
+    DeclareAndCast(StepKinematics_GearPairWithRange, anent, ent);
+    RWStepKinematics_RWGearPairWithRange tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 738:
+  {
+    DeclareAndCast(StepKinematics_HomokineticPair, anent, ent);
+    RWStepKinematics_RWHomokineticPair tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 739:
+  {
+    DeclareAndCast(StepKinematics_KinematicLink, anent, ent);
+    RWStepKinematics_RWKinematicLink tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 740:
+  {
+    DeclareAndCast(StepKinematics_KinematicLinkRepresentationAssociation, anent, ent);
+    RWStepKinematics_RWKinematicLinkRepresentationAssociation tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 741:
+  {
+    DeclareAndCast(StepKinematics_KinematicPropertyMechanismRepresentation, anent, ent);
+    RWStepKinematics_RWKinematicPropertyMechanismRepresentation tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 742:
+  {
+    DeclareAndCast(StepKinematics_KinematicTopologyStructure, anent, ent);
+    RWStepKinematics_RWKinematicTopologyStructure tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 743:
+  {
+    DeclareAndCast(StepKinematics_LowOrderKinematicPair, anent, ent);
+    RWStepKinematics_RWLowOrderKinematicPair tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 744:
+  {
+    DeclareAndCast(StepKinematics_LowOrderKinematicPairValue, anent, ent);
+    RWStepKinematics_RWLowOrderKinematicPairValue tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 745:
+  {
+    DeclareAndCast(StepKinematics_LowOrderKinematicPairWithRange, anent, ent);
+    RWStepKinematics_RWLowOrderKinematicPairWithRange tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 746:
+  {
+    DeclareAndCast(StepKinematics_MechanismRepresentation, anent, ent);
+    RWStepKinematics_RWMechanismRepresentation tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 747:
+  {
+    DeclareAndCast(StepKinematics_OrientedJoint, anent, ent);
+    RWStepKinematics_RWOrientedJoint tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 748:
+  {
+    DeclareAndCast(StepKinematics_PlanarCurvePair, anent, ent);
+    RWStepKinematics_RWPlanarCurvePair tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 749:
+  {
+    DeclareAndCast(StepKinematics_PlanarCurvePairRange, anent, ent);
+    RWStepKinematics_RWPlanarCurvePairRange tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 750:
+  {
+    DeclareAndCast(StepKinematics_PlanarPair, anent, ent);
+    RWStepKinematics_RWPlanarPair tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 751:
+  {
+    DeclareAndCast(StepKinematics_PlanarPairValue, anent, ent);
+    RWStepKinematics_RWPlanarPairValue tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 752:
+  {
+    DeclareAndCast(StepKinematics_PlanarPairWithRange, anent, ent);
+    RWStepKinematics_RWPlanarPairWithRange tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 753:
+  {
+    DeclareAndCast(StepKinematics_PointOnPlanarCurvePair, anent, ent);
+    RWStepKinematics_RWPointOnPlanarCurvePair tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 754:
+  {
+    DeclareAndCast(StepKinematics_PointOnPlanarCurvePairValue, anent, ent);
+    RWStepKinematics_RWPointOnPlanarCurvePairValue tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 755:
+  {
+    DeclareAndCast(StepKinematics_PointOnPlanarCurvePairWithRange, anent, ent);
+    RWStepKinematics_RWPointOnPlanarCurvePairWithRange tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 756:
+  {
+    DeclareAndCast(StepKinematics_PointOnSurfacePair, anent, ent);
+    RWStepKinematics_RWPointOnSurfacePair tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 757:
+  {
+    DeclareAndCast(StepKinematics_PointOnSurfacePairValue, anent, ent);
+    RWStepKinematics_RWPointOnSurfacePairValue tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 758:
+  {
+    DeclareAndCast(StepKinematics_PointOnSurfacePairWithRange, anent, ent);
+    RWStepKinematics_RWPointOnSurfacePairWithRange tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 759:
+  {
+    DeclareAndCast(StepKinematics_PrismaticPair, anent, ent);
+    RWStepKinematics_RWPrismaticPair tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 760:
+  {
+    DeclareAndCast(StepKinematics_PrismaticPairValue, anent, ent);
+    RWStepKinematics_RWPrismaticPairValue tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 761:
+  {
+    DeclareAndCast(StepKinematics_PrismaticPairWithRange, anent, ent);
+    RWStepKinematics_RWPrismaticPairWithRange tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 762:
+  {
+    DeclareAndCast(StepKinematics_ProductDefinitionKinematics, anent, ent);
+    RWStepKinematics_RWProductDefinitionKinematics tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 763:
+  {
+    DeclareAndCast(StepKinematics_ProductDefinitionRelationshipKinematics, anent, ent);
+    RWStepKinematics_RWProductDefinitionRelationshipKinematics tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 764:
+  {
+    DeclareAndCast(StepKinematics_RackAndPinionPair, anent, ent);
+    RWStepKinematics_RWRackAndPinionPair tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 765:
+  {
+    DeclareAndCast(StepKinematics_RackAndPinionPairValue, anent, ent);
+    RWStepKinematics_RWRackAndPinionPairValue tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 766:
+  {
+    DeclareAndCast(StepKinematics_RackAndPinionPairWithRange, anent, ent);
+    RWStepKinematics_RWRackAndPinionPairWithRange tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 767:
+  {
+    DeclareAndCast(StepKinematics_RevolutePair, anent, ent);
+    RWStepKinematics_RWRevolutePair tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 768:
+  {
+    DeclareAndCast(StepKinematics_RevolutePairValue, anent, ent);
+    RWStepKinematics_RWRevolutePairValue tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 769:
+  {
+    DeclareAndCast(StepKinematics_RevolutePairWithRange, anent, ent);
+    RWStepKinematics_RWRevolutePairWithRange tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 770:
+  {
+    DeclareAndCast(StepKinematics_RollingCurvePair, anent, ent);
+    RWStepKinematics_RWRollingCurvePair tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 771:
+  {
+    DeclareAndCast(StepKinematics_RollingCurvePairValue, anent, ent);
+    RWStepKinematics_RWRollingCurvePairValue tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 772:
+  {
+    DeclareAndCast(StepKinematics_RollingSurfacePair, anent, ent);
+    RWStepKinematics_RWRollingSurfacePair tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 773:
+  {
+    DeclareAndCast(StepKinematics_RollingSurfacePairValue, anent, ent);
+    RWStepKinematics_RWRollingSurfacePairValue tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 774:
+  {
+    DeclareAndCast(StepKinematics_ScrewPair, anent, ent);
+    RWStepKinematics_RWScrewPair tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 775:
+  {
+    DeclareAndCast(StepKinematics_ScrewPairValue, anent, ent);
+    RWStepKinematics_RWScrewPairValue tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 776:
+  {
+    DeclareAndCast(StepKinematics_ScrewPairWithRange, anent, ent);
+    RWStepKinematics_RWScrewPairWithRange tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 777:
+  {
+    DeclareAndCast(StepKinematics_SlidingCurvePair, anent, ent);
+    RWStepKinematics_RWSlidingCurvePair tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 778:
+  {
+    DeclareAndCast(StepKinematics_SlidingCurvePairValue, anent, ent);
+    RWStepKinematics_RWSlidingCurvePairValue tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 779:
+  {
+    DeclareAndCast(StepKinematics_SlidingSurfacePair, anent, ent);
+    RWStepKinematics_RWSlidingSurfacePair tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 780:
+  {
+    DeclareAndCast(StepKinematics_SlidingSurfacePairValue, anent, ent);
+    RWStepKinematics_RWSlidingSurfacePairValue tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 781:
+  {
+    DeclareAndCast(StepKinematics_SphericalPair, anent, ent);
+    RWStepKinematics_RWSphericalPair tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 782:
+  {
+    DeclareAndCast(StepKinematics_SphericalPairValue, anent, ent);
+    RWStepKinematics_RWSphericalPairValue tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 783:
+  {
+    DeclareAndCast(StepKinematics_SphericalPairWithPin, anent, ent);
+    RWStepKinematics_RWSphericalPairWithPin tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 784:
+  {
+    DeclareAndCast(StepKinematics_SphericalPairWithPinAndRange, anent, ent);
+    RWStepKinematics_RWSphericalPairWithPinAndRange tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 785:
+  {
+    DeclareAndCast(StepKinematics_SphericalPairWithRange, anent, ent);
+    RWStepKinematics_RWSphericalPairWithRange tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 786:
+  {
+    DeclareAndCast(StepKinematics_SurfacePairWithRange, anent, ent);
+    RWStepKinematics_RWSurfacePairWithRange tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 787:
+  {
+    DeclareAndCast(StepKinematics_UnconstrainedPair, anent, ent);
+    RWStepKinematics_RWUnconstrainedPair tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 788:
+  {
+    DeclareAndCast(StepKinematics_UnconstrainedPairValue, anent, ent);
+    RWStepKinematics_RWUnconstrainedPairValue tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 789:
+  {
+    DeclareAndCast(StepKinematics_UniversalPair, anent, ent);
+    RWStepKinematics_RWUniversalPair tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 790:
+  {
+    DeclareAndCast(StepKinematics_UniversalPairValue, anent, ent);
+    RWStepKinematics_RWUniversalPairValue tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 791:
+  {
+    DeclareAndCast(StepKinematics_UniversalPairWithRange, anent, ent);
+    RWStepKinematics_RWUniversalPairWithRange tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 792:
+  {
+    DeclareAndCast(StepKinematics_PairRepresentationRelationship, anent, ent);
+    RWStepKinematics_RWPairRepresentationRelationship tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 793:
+  {
+    DeclareAndCast(StepKinematics_RigidLinkRepresentation, anent, ent);
+    RWStepKinematics_RWRigidLinkRepresentation tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 794:
+  {
+    DeclareAndCast(StepKinematics_KinematicTopologyDirectedStructure, anent, ent);
+    RWStepKinematics_RWKinematicTopologyDirectedStructure tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 795:
+  {
+    DeclareAndCast(StepKinematics_KinematicTopologyNetworkStructure, anent, ent);
+    RWStepKinematics_RWKinematicTopologyNetworkStructure tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 796:
+  {
+    DeclareAndCast(StepKinematics_LinearFlexibleAndPinionPair, anent, ent);
+    RWStepKinematics_RWLinearFlexibleAndPinionPair tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 797:
+  {
+    DeclareAndCast(StepKinematics_LinearFlexibleAndPlanarCurvePair, anent, ent);
+    RWStepKinematics_RWLinearFlexibleAndPlanarCurvePair tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 798:
+  {
+    DeclareAndCast(StepKinematics_LinearFlexibleLinkRepresentation, anent, ent);
+    RWStepKinematics_RWLinearFlexibleLinkRepresentation tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 800:
+  {
+    DeclareAndCast(StepKinematics_ActuatedKinPairAndOrderKinPair, anent, ent);
+    RWStepKinematics_RWActuatedKinPairAndOrderKinPair tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 801:
+  {
+    DeclareAndCast(StepKinematics_MechanismStateRepresentation, anent, ent);
+    RWStepKinematics_RWMechanismStateRepresentation tool;
+    tool.Share(anent, iter);
+  }
+  break;
+  case 802:
+  {
+    DeclareAndCast(StepVisual_RepositionedTessellatedGeometricSet, anEnt, ent);
+    RWStepVisual_RWRepositionedTessellatedGeometricSet aTool;
+    aTool.Share(anEnt, iter);
+    break;
+  }
+  case 804:
+  {
+    DeclareAndCast(StepVisual_TessellatedConnectingEdge, anEnt, ent);
+    RWStepVisual_RWTessellatedConnectingEdge aTool;
+    aTool.Share(anEnt, iter);
+  }
+  break;
+  case 805:
+  {
+    DeclareAndCast(StepVisual_TessellatedEdge, anEnt, ent);
+    RWStepVisual_RWTessellatedEdge aTool;
+    aTool.Share(anEnt, iter);
+  }
+  break;
+  case 806:
+  {
+    DeclareAndCast(StepVisual_TessellatedPointSet, anEnt, ent);
+    RWStepVisual_RWTessellatedPointSet aTool;
+    aTool.Share(anEnt, iter);
+  }
+  break;
+  case 807:
+  {
+    DeclareAndCast(StepVisual_TessellatedShapeRepresentation, anEnt, ent);
+    RWStepVisual_RWTessellatedShapeRepresentation aTool;
+    aTool.Share(anEnt, iter);
+  }
+  break;
+  case 808:
+  {
+    DeclareAndCast(StepVisual_TessellatedShapeRepresentationWithAccuracyParameters, anEnt, ent);
+    RWStepVisual_RWTessellatedShapeRepresentationWithAccuracyParameters aTool;
+    aTool.Share(anEnt, iter);
+  }
+  break;
+  case 809:
+  {
+    DeclareAndCast(StepVisual_TessellatedShell, anEnt, ent);
+    RWStepVisual_RWTessellatedShell aTool;
+    aTool.Share(anEnt, iter);
+  }
+  break;
+  case 810:
+  {
+    DeclareAndCast(StepVisual_TessellatedSolid, anEnt, ent);
+    RWStepVisual_RWTessellatedSolid aTool;
+    aTool.Share(anEnt, iter);
+  }
+  break;
+  case 811:
+  {
+    DeclareAndCast(StepVisual_TessellatedStructuredItem, anEnt, ent);
+    RWStepVisual_RWTessellatedStructuredItem aTool;
+    aTool.Share(anEnt, iter);
+  }
+  break;
+  case 812:
+  {
+    DeclareAndCast(StepVisual_TessellatedVertex, anEnt, ent);
+    RWStepVisual_RWTessellatedVertex aTool;
+    aTool.Share(anEnt, iter);
+  }
+  break;
+  case 813:
+  {
+    DeclareAndCast(StepVisual_TessellatedWire, anEnt, ent);
+    RWStepVisual_RWTessellatedWire aTool;
+    aTool.Share(anEnt, iter);
+  }
+  break;
+  case 814:
+  {
+    DeclareAndCast(StepVisual_TriangulatedFace, anEnt, ent);
+    RWStepVisual_RWTriangulatedFace aTool;
+    aTool.Share(anEnt, iter);
+  }
+  break;
+  case 815:
+  {
+    DeclareAndCast(StepVisual_ComplexTriangulatedFace, anEnt, ent);
+    RWStepVisual_RWComplexTriangulatedFace aTool;
+    aTool.Share(anEnt, iter);
+  }
+  break;
+  case 816:
+  {
+    DeclareAndCast(StepVisual_ComplexTriangulatedSurfaceSet, anEnt, ent);
+    RWStepVisual_RWComplexTriangulatedSurfaceSet aTool;
+    aTool.Share(anEnt, iter);
+  }
+  break;
+  case 817:
+  {
+    DeclareAndCast(StepVisual_CubicBezierTessellatedEdge, anEnt, ent);
+    RWStepVisual_RWCubicBezierTessellatedEdge aTool;
+    aTool.Share(anEnt, iter);
+  }
+  break;
+  case 818:
+  {
+    DeclareAndCast(StepVisual_CubicBezierTriangulatedFace, anEnt, ent);
+    RWStepVisual_RWCubicBezierTriangulatedFace aTool;
+    aTool.Share(anEnt, iter);
+  }
+  break;
+  case 819:
+  {
+    DeclareAndCast(StepVisual_TriangulatedSurfaceSet, anEnt, ent);
+    RWStepVisual_RWTriangulatedSurfaceSet aTool;
+    aTool.Share(anEnt, iter);
+  }
+  break;
+  case 820:
+  {
+    DeclareAndCast(StepBasic_GeneralPropertyAssociation, anEnt, ent);
+    RWStepBasic_RWGeneralPropertyAssociation aTool;
+    aTool.Share(anEnt, iter);
+  }
+  break;
+  case 821:
+  {
+    DeclareAndCast(StepBasic_GeneralPropertyRelationship, anEnt, ent);
+    RWStepBasic_RWGeneralPropertyRelationship aTool;
+    aTool.Share(anEnt, iter);
+  }
+  break;
+  case 824:
+  {
+    DeclareAndCast(StepRepr_MechanicalDesignAndDraughtingRelationship, anEnt, ent);
+    RWStepRepr_RWMechanicalDesignAndDraughtingRelationship aTool;
+    aTool.Share(anEnt, iter);
+  }
+  break;
+  default : break;
+  }
 }
 
 
@@ -7217,6 +7929,307 @@ Standard_Boolean RWStepAP214_GeneralModule::NewVoid
    case 723:
      ent = new StepVisual_SurfaceStyleRenderingWithProperties;
    break;
+   case 724:
+     ent = new StepRepr_RepresentationContextReference;
+     break;
+   case 725:
+     ent = new StepRepr_RepresentationReference;
+     break;
+   case 726:
+     ent = new StepGeom_SuParameters;
+     break;
+   case 727:
+     ent = new StepKinematics_RotationAboutDirection;
+     break;
+   case 728:
+     ent = new StepKinematics_KinematicJoint;
+     break;
+   case 729:
+     ent = new StepKinematics_ActuatedKinematicPair;
+     break;
+   case 730:
+     ent = new StepKinematics_ContextDependentKinematicLinkRepresentation;
+     break;
+   case 731:
+     ent = new StepKinematics_CylindricalPair;
+     break;
+   case 732:
+     ent = new StepKinematics_CylindricalPairValue;
+     break;
+   case 733:
+     ent = new StepKinematics_CylindricalPairWithRange;
+     break;
+   case 734:
+     ent = new StepKinematics_FullyConstrainedPair;
+     break;
+   case 735:
+     ent = new StepKinematics_GearPair;
+     break;
+   case 736:
+     ent = new StepKinematics_GearPairValue;
+     break;
+   case 737:
+     ent = new StepKinematics_GearPairWithRange;
+     break;
+   case 738:
+     ent = new StepKinematics_HomokineticPair;
+     break;
+   case 739:
+     ent = new StepKinematics_KinematicLink;
+     break;
+   case 740:
+     ent = new StepKinematics_KinematicLinkRepresentationAssociation;
+     break;
+   case 741:
+     ent = new StepKinematics_KinematicPropertyMechanismRepresentation;
+     break;
+   case 742:
+     ent = new StepKinematics_KinematicTopologyStructure;
+     break;
+   case 743:
+     ent = new StepKinematics_LowOrderKinematicPair;
+     break;
+   case 744:
+     ent = new StepKinematics_LowOrderKinematicPairValue;
+     break;
+   case 745:
+     ent = new StepKinematics_LowOrderKinematicPairWithRange;
+     break;
+   case 746:
+     ent = new StepKinematics_MechanismRepresentation;
+     break;
+   case 747:
+     ent = new StepKinematics_OrientedJoint;
+     break;
+   case 748:
+     ent = new StepKinematics_PlanarCurvePair;
+     break;
+   case 749:
+     ent = new StepKinematics_PlanarCurvePairRange;
+     break;
+   case 750:
+     ent = new StepKinematics_PlanarPair;
+     break;
+   case 751:
+     ent = new StepKinematics_PlanarPairValue;
+     break;
+   case 752:
+     ent = new StepKinematics_PlanarPairWithRange;
+     break;
+   case 753:
+     ent = new StepKinematics_PointOnPlanarCurvePair;
+     break;
+   case 754:
+     ent = new StepKinematics_PointOnPlanarCurvePairValue;
+     break;
+   case 755:
+     ent = new StepKinematics_PointOnPlanarCurvePairWithRange;
+     break;
+   case 756:
+     ent = new StepKinematics_PointOnSurfacePair;
+     break;
+   case 757:
+     ent = new StepKinematics_PointOnSurfacePairValue;
+     break;
+   case 758:
+     ent = new StepKinematics_PointOnSurfacePairWithRange;
+     break;
+   case 759:
+     ent = new StepKinematics_PrismaticPair;
+     break;
+   case 760:
+     ent = new StepKinematics_PrismaticPairValue;
+     break;
+   case 761:
+     ent = new StepKinematics_PrismaticPairWithRange;
+     break;
+   case 762:
+     ent = new StepKinematics_ProductDefinitionKinematics;
+     break;
+   case 763:
+     ent = new StepKinematics_ProductDefinitionRelationshipKinematics;
+     break;
+   case 764:
+     ent = new StepKinematics_RackAndPinionPair;
+     break;
+   case 765:
+     ent = new StepKinematics_RackAndPinionPairValue;
+     break;
+   case 766:
+     ent = new StepKinematics_RackAndPinionPairWithRange;
+     break;
+   case 767:
+     ent = new StepKinematics_RevolutePair;
+     break;
+   case 768:
+     ent = new StepKinematics_RevolutePairValue;
+     break;
+   case 769:
+     ent = new StepKinematics_RevolutePairWithRange;
+     break;
+   case 770:
+     ent = new StepKinematics_RollingCurvePair;
+     break;
+   case 771:
+     ent = new StepKinematics_RollingCurvePairValue;
+     break;
+   case 772:
+     ent = new StepKinematics_RollingSurfacePair;
+     break;
+   case 773:
+     ent = new StepKinematics_RollingSurfacePairValue;
+     break;
+   case 774:
+     ent = new StepKinematics_ScrewPair;
+     break;
+   case 775:
+     ent = new StepKinematics_ScrewPairValue;
+     break;
+   case 776:
+     ent = new StepKinematics_ScrewPairWithRange;
+     break;
+   case 777:
+     ent = new StepKinematics_SlidingCurvePair;
+     break;
+   case 778:
+     ent = new StepKinematics_SlidingCurvePairValue;
+     break;
+   case 779:
+     ent = new StepKinematics_SlidingSurfacePair;
+     break;
+   case 780:
+     ent = new StepKinematics_SlidingSurfacePairValue;
+     break;
+   case 781:
+     ent = new StepKinematics_SphericalPair;
+     break;
+   case 782:
+     ent = new StepKinematics_SphericalPairValue;
+     break;
+   case 783:
+     ent = new StepKinematics_SphericalPairWithPin;
+     break;
+   case 784:
+     ent = new StepKinematics_SphericalPairWithPinAndRange;
+     break;
+   case 785:
+     ent = new StepKinematics_SphericalPairWithRange;
+     break;
+   case 786:
+     ent = new StepKinematics_SurfacePairWithRange;
+     break;
+   case 787:
+     ent = new StepKinematics_UnconstrainedPair;
+     break;
+   case 788:
+     ent = new StepKinematics_UnconstrainedPairValue;
+     break;
+   case 789:
+     ent = new StepKinematics_UniversalPair;
+     break;
+   case 790:
+     ent = new StepKinematics_UniversalPairValue;
+     break;
+   case 791:
+     ent = new StepKinematics_UniversalPairWithRange;
+     break;
+   case 792:
+     ent = new StepKinematics_PairRepresentationRelationship;
+     break;
+   case 793:
+     ent = new StepKinematics_RigidLinkRepresentation;
+     break;
+   case 794:
+     ent = new StepKinematics_KinematicTopologyDirectedStructure;
+     break;
+   case 795:
+     ent = new StepKinematics_KinematicTopologyNetworkStructure;
+     break;
+   case 796:
+     ent = new StepKinematics_LinearFlexibleAndPinionPair;
+     break;
+   case 797:
+     ent = new StepKinematics_LinearFlexibleAndPlanarCurvePair;
+     break;
+   case 798:
+     ent = new StepKinematics_LinearFlexibleLinkRepresentation;
+     break;
+   case 800:
+     ent = new StepKinematics_ActuatedKinPairAndOrderKinPair;
+     break;
+   case 801:
+     ent = new StepKinematics_MechanismStateRepresentation;
+     break;
+   case 802:
+     ent = new StepVisual_RepositionedTessellatedGeometricSet;
+     break;
+   case 803:
+     ent = new StepVisual_RepositionedTessellatedItem;
+     break;
+   case 804:
+     ent = new StepVisual_TessellatedConnectingEdge;
+     break;
+   case 805:
+     ent = new StepVisual_TessellatedEdge;
+     break;
+   case 806:
+     ent = new StepVisual_TessellatedPointSet;
+     break;
+   case 807:
+     ent = new StepVisual_TessellatedShapeRepresentation;
+     break;
+   case 808:
+     ent = new StepVisual_TessellatedShapeRepresentationWithAccuracyParameters;
+     break;
+   case 809:
+     ent = new StepVisual_TessellatedShell;
+     break;
+   case 810:
+     ent = new StepVisual_TessellatedSolid;
+     break;
+   case 811:
+     ent = new StepVisual_TessellatedStructuredItem;
+     break;
+   case 812:
+     ent = new StepVisual_TessellatedVertex;
+     break;
+   case 813:
+     ent = new StepVisual_TessellatedWire;
+     break;
+   case 814:
+     ent = new StepVisual_TriangulatedFace;
+     break;
+   case 815:
+     ent = new StepVisual_ComplexTriangulatedFace;
+     break;
+   case 816:
+     ent = new StepVisual_ComplexTriangulatedSurfaceSet;
+     break;
+   case 817:
+     ent = new StepVisual_CubicBezierTessellatedEdge;
+     break;
+   case 818:
+     ent = new StepVisual_CubicBezierTriangulatedFace;
+     break;
+   case 819:
+     ent = new StepVisual_TriangulatedSurfaceSet;
+     break;
+   case 820:
+     ent = new StepBasic_GeneralPropertyAssociation;
+     break;
+   case 821:
+     ent = new StepBasic_GeneralPropertyRelationship;
+     break;
+   case 822:
+     ent = new StepRepr_BooleanRepresentationItem;
+     break;
+   case 823:
+     ent = new StepRepr_RealRepresentationItem;
+     break;
+   case 824:
+     ent = new StepRepr_MechanicalDesignAndDraughtingRelationship;
+     break;
+
   default: 
     return Standard_False;
   }
@@ -7819,7 +8832,100 @@ Standard_Integer  RWStepAP214_GeneralModule::CategoryNumber
   case 721:
   case 722:
   case 723: return catdr;
-
+  case 724: return cataux;
+  case 725: return cataux;
+  case 726: return cataux;
+  case 727: return cataux;
+  case 728: return cataux;
+  case 729: return cataux;
+  case 730: return cataux;
+  case 731: return cataux;
+  case 732: return cataux;
+  case 733: return cataux;
+  case 734: return cataux;
+  case 735: return cataux;
+  case 736: return cataux;
+  case 737: return cataux;
+  case 738: return cataux;
+  case 739: return cataux;
+  case 740: return cataux;
+  case 741: return cataux;
+  case 742: return cataux;
+  case 743: return cataux;
+  case 744: return cataux;
+  case 745: return cataux;
+  case 746: return cataux;
+  case 747: return cataux;
+  case 748: return cataux;
+  case 749: return cataux;
+  case 750: return cataux;
+  case 751: return cataux;
+  case 752: return cataux;
+  case 753: return cataux;
+  case 754: return cataux;
+  case 755: return cataux;
+  case 756: return cataux;
+  case 757: return cataux;
+  case 758: return cataux;
+  case 759: return cataux;
+  case 760: return cataux;
+  case 761: return cataux;
+  case 762: return cataux;
+  case 763: return cataux;
+  case 764: return cataux;
+  case 765: return cataux;
+  case 766: return cataux;
+  case 767: return cataux;
+  case 768: return cataux;
+  case 769: return cataux;
+  case 770: return cataux;
+  case 771: return cataux;
+  case 772: return cataux;
+  case 773: return cataux;
+  case 774: return cataux;
+  case 775: return cataux;
+  case 776: return cataux;
+  case 777: return cataux;
+  case 778: return cataux;
+  case 779: return cataux;
+  case 780: return cataux;
+  case 781: return cataux;
+  case 782: return cataux;
+  case 783: return cataux;
+  case 784: return cataux;
+  case 785: return cataux;
+  case 786: return cataux;
+  case 787: return cataux;
+  case 788: return cataux;
+  case 789: return cataux;
+  case 790: return cataux;
+  case 791: return cataux;
+  case 792: return cataux;
+  case 793: return cataux;
+  case 794: return cataux;
+  case 795: return cataux;
+  case 796: return cataux;
+  case 797: return cataux;
+  case 798: return cataux;
+  case 800: return catsh;
+  case 801: return cataux;
+  case 802: return cataux;
+  case 803: return cataux;
+  case 804: return cataux;
+  case 805: return cataux;
+  case 806: return cataux;
+  case 807: return cataux;
+  case 808: return cataux;
+  case 809: return cataux;
+  case 810: return cataux;
+  case 811: return cataux;
+  case 812: return cataux;
+  case 813: return cataux;
+  case 814: return cataux;
+  case 815: return cataux;
+  case 816: return cataux;
+  case 817: return cataux;
+  case 818: return cataux;
   default : break;
   }
   return 0;

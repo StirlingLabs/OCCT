@@ -24,12 +24,9 @@
 #include <GeomAbs_CurveType.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <gp_Pnt2d.hxx>
-#include <Standard_NoSuchObject.hxx>
 #include <Standard_NullObject.hxx>
 #include <TColStd_Array1OfReal.hxx>
 
-class Standard_OutOfRange;
-class Standard_DomainError;
 class gp_Vec2d;
 class gp_Lin2d;
 class gp_Circ2d;
@@ -57,6 +54,9 @@ public:
   
   //! Standard_ConstructionError is raised if Ufirst>Ulast
   Standard_EXPORT Geom2dAdaptor_Curve(const Handle(Geom2d_Curve)& C, const Standard_Real UFirst, const Standard_Real ULast);
+
+  //! Shallow copy of adaptor
+  Standard_EXPORT virtual Handle(Adaptor2d_Curve2d) ShallowCopy() const Standard_OVERRIDE;
 
   //! Reset currently loaded curve (undone Load()).
   Standard_EXPORT void Reset();
@@ -183,7 +183,7 @@ private:
   //! \param theParameter the value on the knot axis which identifies the caching span
   void RebuildCache (const Standard_Real theParameter) const;
 
-private:
+protected:
 
   Handle(Geom2d_Curve) myCurve;
   GeomAbs_CurveType myTypeCurve;

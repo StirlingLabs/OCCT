@@ -18,13 +18,10 @@
 #define _Geom2d_Direction_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <Geom2d_Vector.hxx>
 #include <Standard_Real.hxx>
-class Standard_ConstructionError;
 class gp_Dir2d;
-class Geom2d_Vector;
 class gp_Trsf2d;
 class Geom2d_Geometry;
 

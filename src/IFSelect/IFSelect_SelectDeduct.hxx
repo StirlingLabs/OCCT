@@ -21,10 +21,7 @@
 #include <Standard_Type.hxx>
 
 #include <IFSelect_Selection.hxx>
-#include <Standard_Boolean.hxx>
-class IFSelect_Selection;
 class IFSelect_SelectPointed;
-class Interface_InterfaceError;
 class Interface_EntityIterator;
 class Interface_Graph;
 class IFSelect_SelectionIterator;

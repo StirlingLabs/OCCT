@@ -41,6 +41,7 @@
 #include <STEPConstruct_Assembly.hxx>
 #include <STEPConstruct_UnitContext.hxx>
 #include <STEPControl_ActorRead.hxx>
+#include <StepData_Factors.hxx>
 #include <StepData_StepModel.hxx>
 #include <StepDimTol_DatumFeature.hxx>
 #include <StepDimTol_GeometricTolerance.hxx>
@@ -87,6 +88,11 @@
 #include <StepShape_ShapeDefinitionRepresentation.hxx>
 #include <StepShape_ShapeRepresentation.hxx>
 #include <StepShape_ShellBasedSurfaceModel.hxx>
+#include <StepVisual_TriangulatedFace.hxx>
+#include <StepVisual_TriangulatedSurfaceSet.hxx>
+#include <StepVisual_TessellatedShell.hxx>
+#include <StepVisual_TessellatedShapeRepresentation.hxx>
+#include <StepVisual_TessellatedSolid.hxx>
 #include <StepToGeom.hxx>
 #include <StepToTopoDS_Builder.hxx>
 #include <StepToTopoDS_DataMapOfTRI.hxx>
@@ -94,6 +100,7 @@
 #include <StepToTopoDS_Tool.hxx>
 #include <StepToTopoDS_TranslateFace.hxx>
 #include <TColStd_HSequenceOfTransient.hxx>
+#include <TopExp.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Compound.hxx>
@@ -102,6 +109,7 @@
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Shell.hxx>
 #include <TopoDS_Solid.hxx>
+#include <TopTools_IndexedMapOfShape.hxx>
 #include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopTools_ListOfShape.hxx>
 #include <TopTools_MapOfShape.hxx>
@@ -114,6 +122,7 @@
 #include <XSAlgo_AlgoContainer.hxx>
 #include <StepRepr_ConstructiveGeometryRepresentationRelationship.hxx>
 #include <StepRepr_ConstructiveGeometryRepresentation.hxx>
+#include <StepRepr_MechanicalDesignAndDraughtingRelationship.hxx>
 #include <Geom_Plane.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(STEPControl_ActorRead,Transfer_ActorOfTransientProcess)
@@ -203,11 +212,13 @@ namespace {
 // Purpose : Empty constructor
 // ============================================================================
 
-STEPControl_ActorRead::STEPControl_ActorRead()
+STEPControl_ActorRead::STEPControl_ActorRead(const Handle(Interface_InterfaceModel)& theModel)
 : myPrecision(0.0),
-  myMaxTol(0.0)
+  myMaxTol(0.0),
+  myModel(theModel)
 {
 }
+
 // ============================================================================
 // Method  : STEPControl_ActorRead::Recognize
 // Purpose : tells if an entity is valid for transfer by this Actor
@@ -222,8 +233,13 @@ Standard_Boolean  STEPControl_ActorRead::Recognize
 
   if (start->IsKind(STANDARD_TYPE(StepRepr_NextAssemblyUsageOccurrence))) return Standard_True;
 
-  TCollection_AsciiString aProdMode = Interface_Static::CVal("read.step.product.mode");
-  if(!aProdMode.IsEqual("ON"))
+  Handle(StepData_StepModel) aStepModel = Handle(StepData_StepModel)::DownCast(myModel);
+  if (aStepModel.IsNull())
+  {
+    return false;
+  }
+  bool aProdMode = aStepModel->InternalParameters.ReadProductMode;
+  if(!aProdMode)
     if(start->IsKind(STANDARD_TYPE(StepShape_ShapeDefinitionRepresentation))) return Standard_True;
 
   DeclareAndCast(StepShape_ShapeRepresentation,sr,start);
@@ -235,6 +251,8 @@ Standard_Boolean  STEPControl_ActorRead::Recognize
     return Standard_False;
   }
 
+  const Standard_Boolean aCanReadTessGeom = aStepModel->InternalParameters.ReadTessellated != 0;
+
   if (start->IsKind(STANDARD_TYPE(StepShape_FacetedBrep))) return Standard_True;
   if (start->IsKind(STANDARD_TYPE(StepShape_BrepWithVoids))) return Standard_True;
   if (start->IsKind(STANDARD_TYPE(StepShape_ManifoldSolidBrep))) return Standard_True;
@@ -245,6 +263,11 @@ Standard_Boolean  STEPControl_ActorRead::Recognize
   if (start->IsKind(STANDARD_TYPE(StepShape_FaceSurface))) return Standard_True;
   if (start->IsKind(STANDARD_TYPE(StepShape_EdgeBasedWireframeModel))) return Standard_True;
   if (start->IsKind(STANDARD_TYPE(StepShape_FaceBasedSurfaceModel))) return Standard_True;
+  if (aCanReadTessGeom && start->IsKind(STANDARD_TYPE(StepVisual_TessellatedFace))) return Standard_True;
+  if (aCanReadTessGeom && start->IsKind(STANDARD_TYPE(StepVisual_TessellatedSurfaceSet))) return Standard_True;
+  if (aCanReadTessGeom && start->IsKind(STANDARD_TYPE(StepVisual_TessellatedShell))) return Standard_True;
+  if (aCanReadTessGeom && start->IsKind(STANDARD_TYPE(StepVisual_TessellatedSolid))) return Standard_True;
+  if (aCanReadTessGeom && start->IsKind(STANDARD_TYPE(StepVisual_TessellatedShapeRepresentation))) return Standard_True;
 
 
 //  REPRESENTATION_RELATIONSHIP et consorts : on regarde le contenu ...
@@ -282,7 +305,15 @@ Handle(Transfer_Binder)  STEPControl_ActorRead::Transfer
  const Message_ProgressRange& theProgress)
 {  
   // [BEGIN] Get version of preprocessor (to detect I-Deas case) (ssv; 23.11.2010)
+  StepData_Factors aLocalFactors;
   Handle(StepData_StepModel) aStepModel = Handle(StepData_StepModel)::DownCast ( TP->Model() );
+  if (!aStepModel->IsInitializedUnit())
+  {
+    XSAlgo::AlgoContainer()->PrepareForTransfer(); // update unit info
+    aStepModel->SetLocalLengthUnit(UnitsMethods::GetCasCadeLengthUnit());
+    aLocalFactors.SetCascadeUnit(UnitsMethods::GetCasCadeLengthUnit());
+  }
+  aLocalFactors.SetCascadeUnit(aStepModel->LocalLengthUnit());
   Interface_EntityIterator anEntIt = aStepModel->Header();
   for ( anEntIt.Start(); anEntIt.More(); anEntIt.Next() ) {
     DeclareAndCast( HeaderSection_FileName, aFileNameEntity, anEntIt.Value() );
@@ -303,8 +334,8 @@ Handle(Transfer_Binder)  STEPControl_ActorRead::Transfer
     }
   }
   // [END] Get version of preprocessor (to detect I-Deas case) (ssv; 23.11.2010)
-  Standard_Boolean aTrsfUse = (Interface_Static::IVal("read.step.root.transformation") == 1);
-  return TransferShape(start, TP, Standard_True, aTrsfUse, theProgress);
+  Standard_Boolean aTrsfUse = (aStepModel->InternalParameters.ReadRootTransformation == 1);
+  return TransferShape(start, TP, aLocalFactors, Standard_True, aTrsfUse, theProgress);
 }
 
 
@@ -407,10 +438,12 @@ static void getSDR(const Handle(StepRepr_ProductDefinitionShape)& PDS,
                    Handle(TColStd_HSequenceOfTransient)& listSDRAspect,
                    const Handle(Transfer_TransientProcess)& TP)
 {
+  Handle(StepData_StepModel) aStepModel = Handle(StepData_StepModel)::DownCast(TP->Model());
+
   // Flag indicating preferred shape representation type, to be chosen if 
   // several different representations are attached to the same shape
   Standard_Integer delta = 100;
-  Standard_Integer ICS = Interface_Static::IVal("read.step.shape.repr");
+  Standard_Integer ICS = aStepModel->InternalParameters.ReadShapeRepr;
   Standard_Integer nbSDR0 = listSDR->Length();
   
   // Iterate by entities referring PDS
@@ -473,6 +506,7 @@ static void getSDR(const Handle(StepRepr_ProductDefinitionShape)& PDS,
  Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity
                    (const Handle(StepBasic_ProductDefinition)& PD,
                     const Handle(Transfer_TransientProcess)& TP,
+                    const StepData_Factors& theLocalFactors,
                     const Standard_Boolean theUseTrsf,
                     const Message_ProgressRange& theProgress)
 
@@ -509,17 +543,19 @@ static void getSDR(const Handle(StepRepr_ProductDefinitionShape)& PDS,
       continue;
     }
   }
+
+  Handle(StepData_StepModel) aStepModel = Handle(StepData_StepModel)::DownCast(TP->Model());
   
   // Flag indicating whether SDRs associated with the product`s main SDR
   // by SRRs (which correspond to hybrid model representation in AP203 since 1998) 
   // should be taken into account 
-  Standard_Integer readSRR = Interface_Static::IVal("read.step.shape.relationship");
+  Standard_Integer readSRR = aStepModel->InternalParameters.ReadRelationship;
   
-  Standard_Integer readConstructiveGeomRR = Interface_Static::IVal("read.step.constructivegeom.relationship");
+  Standard_Integer readConstructiveGeomRR = aStepModel->InternalParameters.ReadConstrRelation;
   // Flag indicating whether SDRs associated with the product`s main SDR
   // by SAs (which correspond to hybrid model representation in AP203 before 1998) 
   // should be taken into account 
-  Standard_Integer readSA = Interface_Static::IVal("read.step.shape.aspect");
+  Standard_Integer readSA = aStepModel->InternalParameters.ReadShapeAspect;
   if ( ! readSA ) 
     listSDRAspect->Clear();  
     
@@ -533,7 +569,7 @@ static void getSDR(const Handle(StepRepr_ProductDefinitionShape)& PDS,
   // possibly attached directly to intermediate assemblies (1)
   // Special mode (4) is used to translate shape attached to this product only,
   // ignoring sub-assemblies if any
-  Standard_Integer readAssembly = Interface_Static::IVal("read.step.assembly.level");
+  Standard_Integer readAssembly = aStepModel->InternalParameters.ReadAssemblyLevel;
   if ( readAssembly ==3 || ( readAssembly ==2 && listNAUO->Length() >0 ) ) 
     listSDR->Clear();
   else if ( readAssembly == 4 )
@@ -545,7 +581,7 @@ static void getSDR(const Handle(StepRepr_ProductDefinitionShape)& PDS,
 
   // common progress indicator for translation of own shapes and sub-assemblies
   Message_ProgressScope PS(theProgress, "Part", nbEnt);
-  Standard_Integer nbComponents=0, nbShapes=0;
+  Standard_Integer nbComponents=0;
 
   // translate sub-assemblies
   for ( Standard_Integer nbNauo =1; nbNauo <= listNAUO->Length() && PS.More(); nbNauo++) {
@@ -558,7 +594,7 @@ static void getSDR(const Handle(StepRepr_ProductDefinitionShape)& PDS,
 #endif
     Handle(Transfer_Binder) binder;
     Message_ProgressRange aRange = PS.Next();
-    if (!TP->IsBound(NAUO)) binder = TransferEntity(NAUO,TP, aRange);
+    if (!TP->IsBound(NAUO)) binder = TransferEntity(NAUO, TP, theLocalFactors, aRange);
     else	                binder = TP->Find(NAUO);
 
     TopoDS_Shape theResult = TransferBRep::ShapeResult (binder);
@@ -570,7 +606,7 @@ static void getSDR(const Handle(StepRepr_ProductDefinitionShape)& PDS,
         TopoDS_Iterator it(Result1);
         for ( ; it.More(); it.Next() ) 
         {
-          TopoDS_Shape aSubShape = it.Value();
+          const TopoDS_Shape& aSubShape = it.Value();
           B.Add(Cund, aSubShape);
         }
       }
@@ -599,7 +635,7 @@ static void getSDR(const Handle(StepRepr_ProductDefinitionShape)& PDS,
     Standard_Boolean useTrsf = theUseTrsf && (i <= nbNotAspect);
     Handle(Transfer_Binder) binder = TP->Find(rep);
     if (binder.IsNull())
-      binder = TransferEntity(rep, TP, isBound, useTrsf, aPS1.Next());
+      binder = TransferEntity(rep, TP, theLocalFactors, isBound, useTrsf, aPS1.Next());
 
     // if SDR is obtained from ShapeAspect and representation items have already been tramnslated,
     // this means that that ShapeAspect is used to refer to sub-shape of the main shape
@@ -620,14 +656,13 @@ static void getSDR(const Handle(StepRepr_ProductDefinitionShape)& PDS,
           TopoDS_Iterator it(Result1);
           for ( ; it.More(); it.Next() ) 
           {
-            TopoDS_Shape aSubShape = it.Value();
+            const TopoDS_Shape& aSubShape = it.Value();
             B.Add(Cund, aSubShape);
           }
         }
         else
           B.Add(Cund, theResult);
         // [END] ssv: OCCT#22436: extra compound in NMSSR case
-        nbShapes++;
       }
     }
     
@@ -635,50 +670,20 @@ static void getSDR(const Handle(StepRepr_ProductDefinitionShape)& PDS,
     // way of writing hybrid models in AP203 since 1998, and AP209
     // Note that both AP203 and AP209 allow main representation to be non-empty
     if ( readSRR && /*theResult.IsNull() &&*/ i <= nbNotAspect) {
-      Interface_EntityIterator subs1 = graph.Sharings(rep);
-      Handle(Standard_Type) tSRR = STANDARD_TYPE(StepRepr_ShapeRepresentationRelationship);
-      for (subs1.Start(); subs1.More(); subs1.Next()) {
-        Handle(Standard_Transient) anitem = subs1.Value();
-        if( !anitem->IsKind(STANDARD_TYPE(StepRepr_RepresentationRelationship)))
-          continue;
-        if (anitem->DynamicType() == tSRR)
-        {
-          Handle(StepRepr_ShapeRepresentationRelationship) SRR =
-            Handle(StepRepr_ShapeRepresentationRelationship)::DownCast(anitem);
-          Standard_Integer nbrep = (rep == SRR->Rep1() ? 2 : 1);
-          // SKL for bug 29068: parameter useTrsf is used because if root entity has connection with other
-          // by ShapeRepresentationRelationship then result after such transferring need to transform also.
-          // This case is from test "bugs modalg_7 bug30196"
-          binder = TransferEntity(SRR, TP, nbrep, useTrsf, aPS1.Next());
-          if (! binder.IsNull()) {
-            theResult = TransferBRep::ShapeResult (binder);
-            Result1 = theResult;
-            B.Add(Cund, theResult);
-            nbShapes++;
-          }
-        }
-        else if(readConstructiveGeomRR && anitem->IsKind(STANDARD_TYPE(StepRepr_ConstructiveGeometryRepresentationRelationship)))
-        {
-          Handle(StepRepr_ConstructiveGeometryRepresentationRelationship) aCSRR =
-            Handle(StepRepr_ConstructiveGeometryRepresentationRelationship)::DownCast(anitem);
-           binder = TransferEntity(aCSRR, TP);
-           if (! binder.IsNull())
-           {
-             Result1 = TransferBRep::ShapeResult (binder);
-             B.Add(Cund, Result1);
-             nbShapes++;
-           }
-        }
+      TopoDS_Shape aNewResult = TransferRelatedSRR(TP, rep, useTrsf, readConstructiveGeomRR, theLocalFactors, Cund, aPS1);
+      if (!aNewResult.IsNull())
+      {
+        Result1 = aNewResult;
       }
     }
   }
 
   // make a warning if both own shape and sub-assemblies are present
-  if ( nbShapes >0 && nbComponents > 0 )
+  if ( (Cund.NbChildren() - nbComponents) > 0 && nbComponents > 0 )
     TP->AddWarning ( PD, "Product has both sub-assemblies and directly assigned shape" );
 
   // if only single shape is read, add it as it is; otherwise add compound
-  if( nbShapes == 1 && nbComponents == 0 )
+  if( (Cund.NbChildren() - nbComponents) == 1 && nbComponents == 0 )
     shbinder = new TransferBRep_ShapeBinder (Result1);
   else
     shbinder = new TransferBRep_ShapeBinder (Cund);
@@ -696,6 +701,7 @@ static void getSDR(const Handle(StepRepr_ProductDefinitionShape)& PDS,
 Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity
                    (const Handle(StepRepr_NextAssemblyUsageOccurrence)& NAUO,
                     const Handle(Transfer_TransientProcess)& TP,
+                    const StepData_Factors& theLocalFactors,
                     const Message_ProgressRange& theProgress)
 {
  Handle(TransferBRep_ShapeBinder) shbinder;
@@ -721,7 +727,7 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity
       Handle(StepRepr_Representation) rep = ( SRRReversed ? RR->Rep2() : RR->Rep1() );
       if(rep.IsNull())
         continue;
-      iatrsf = ComputeSRRWT ( RR, TP, Trsf );
+      iatrsf = ComputeSRRWT ( RR, TP, Trsf, theLocalFactors);
       // find real ProductDefinition used rep
       Interface_EntityIterator subs3 = TP->Graph().Sharings(rep);
       for (subs3.Start(); subs3.More(); subs3.Next()) {
@@ -757,7 +763,7 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity
 
     if(!PD.IsNull()) {
       binder = TP->Find(PD);
-      if (binder.IsNull()) binder = TransferEntity(PD, TP, Standard_False, aPS.Next());
+      if (binder.IsNull()) binder = TransferEntity(PD, TP, theLocalFactors, Standard_False, aPS.Next());
       theResult = TransferBRep::ShapeResult(binder);
       if (!theResult.IsNull()) {
         if (iatrsf) {
@@ -771,7 +777,7 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity
     if ( theResult.IsNull() && !SRR.IsNull() ) {
       binder = TP->Find(SRR);
       if ( binder.IsNull() ) {
-        binder = TransferEntity(SRR, TP, 0, Standard_False, aPS.Next());
+        binder = TransferEntity(SRR, TP, theLocalFactors, 0, Standard_False, aPS.Next());
         theResult = TransferBRep::ShapeResult (binder);
         if (!theResult.IsNull())
           shbinder = new TransferBRep_ShapeBinder (theResult);
@@ -791,12 +797,14 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity
 Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity(
     const Handle(StepShape_ShapeRepresentation)& sr,
     const Handle(Transfer_TransientProcess)& TP,
+    const StepData_Factors& theLocalFactors,
     Standard_Boolean& isBound,
     const Standard_Boolean theUseTrsf,
     const Message_ProgressRange& theProgress)
 {
   NM_DETECTED = Standard_False;
   Handle(TransferBRep_ShapeBinder) shbinder;
+  Handle(StepData_StepModel) aStepModel = Handle(StepData_StepModel)::DownCast(TP->Model());
   if(!Recognize(sr))
     return shbinder;
   isBound = Standard_False;
@@ -811,7 +819,8 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity(
   
     // Compute unit conversion factors and geometric Accuracy
   Handle(StepRepr_Representation) oldSRContext = mySRContext; //:S4136
-  PrepareUnits(sr,TP);
+  StepData_Factors aLocalFactors = theLocalFactors;
+  PrepareUnits(sr, TP, aLocalFactors);
   
   BRep_Builder B;
   TopoDS_Compound comp;
@@ -820,7 +829,7 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity(
   Standard_Integer nsh = 0;
 
   // [BEGIN] Proceed with non-manifold topology (ssv; 12.11.2010)
-  Standard_Boolean isNMMode = Interface_Static::IVal("read.step.nonmanifold") != 0;
+  Standard_Boolean isNMMode = aStepModel->InternalParameters.ReadNonmanifold != 0;
   Standard_Boolean isManifold = Standard_True;
   if ( isNMMode && sr->IsKind(STANDARD_TYPE(StepShape_NonManifoldSurfaceShapeRepresentation)) ) {
     isManifold = Standard_False;
@@ -832,7 +841,7 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity(
   } 
   // Special processing for I-DEAS STP case (ssv; 15.11.2010)
   else {
-    Standard_Integer isIDeasMode = Interface_Static::IVal("read.step.ideas");
+    Standard_Integer isIDeasMode = aStepModel->InternalParameters.ReadIdeas;
     if (isNMMode && myNMTool.IsIDEASCase() && isIDeasMode) {
       isManifold = Standard_False;
       NM_DETECTED = Standard_True;
@@ -853,6 +862,7 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity(
   gp_Trsf aTrsf;
   Message_ProgressScope aPSRoot(theProgress, "Sub-assembly", isManifold ? 1 : 2);
   Message_ProgressScope aPS (aPSRoot.Next(), "Transfer", nb);
+  TopTools_IndexedMapOfShape aCompoundedShapes;
   for (Standard_Integer i = 1; i <= nb && aPS.More(); i ++)
   {
     Message_ProgressRange aRange = aPS.Next();
@@ -881,7 +891,7 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity(
         if (!subs3.More())
         {
           Handle(StepGeom_Axis2Placement3d) aCS = Handle(StepGeom_Axis2Placement3d)::DownCast(anitem);
-          Handle(Geom_Axis2Placement) aTargAP = StepToGeom::MakeAxis2Placement(aCS);
+          Handle(Geom_Axis2Placement) aTargAP = StepToGeom::MakeAxis2Placement(aCS, aLocalFactors);
           if (!aTargAP.IsNull())
           {
             const gp_Ax3 ax3Orig(gp_Pnt(0., 0., 0), gp_Vec(0., 0., 1.), gp_Vec(1., 0., 0.));
@@ -900,7 +910,7 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity(
     }
     Handle(Transfer_Binder) binder;
     if (!TP->IsBound(anitem)) {
-      binder = TransferShape(anitem, TP, isManifold, Standard_False, aRange);
+      binder = TransferShape(anitem, TP, aLocalFactors, isManifold, Standard_False, aRange);
     }
     else {
       isBound = Standard_True;
@@ -909,8 +919,13 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity(
     TopoDS_Shape theResult = TransferBRep::ShapeResult (binder);
     if (!theResult.IsNull()) {
       OneResult = theResult;
-      B.Add(comp, theResult);
-      nsh ++;
+      if (!aCompoundedShapes.Contains(theResult)) 
+      {
+        aCompoundedShapes.Add(theResult);
+        TopExp::MapShapes(theResult, aCompoundedShapes, Standard_False, Standard_False);
+        B.Add(comp, theResult);
+        nsh++;
+      }
     }
   }
 
@@ -966,7 +981,7 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity(
       // Put not suspected open Shells as they are (updated 23.11.2010)
       TopExp_Explorer allShellsExp(comp, TopAbs_SHELL);
       for ( ; allShellsExp.More(); allShellsExp.Next() ) {
-        TopoDS_Shape aCurrentShell = allShellsExp.Current();
+        const TopoDS_Shape& aCurrentShell = allShellsExp.Current();
         if ( !myNMTool.IsPureNMShell(aCurrentShell) && !shellClosingsMap.Contains(aCurrentShell) )
           brepBuilder.Add(compWithClosings, aCurrentShell);
       }
@@ -980,7 +995,7 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity(
     TopExp_Explorer exp(comp, TopAbs_SHELL);
     for (; exp.More(); exp.Next())
     {
-        TopoDS_Shape aSubShape = exp.Current();
+        const TopoDS_Shape& aSubShape = exp.Current();
         if (aSubShape.ShapeType() == TopAbs_SHELL && aSubShape.Closed()) {
             TopoDS_Solid nextSolid;
             brepBuilder.MakeSolid(nextSolid);
@@ -1018,7 +1033,7 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity(
     shbinder = new TransferBRep_ShapeBinder(comp);
   }
 
-  PrepareUnits ( oldSRContext, TP ); //:S4136
+  PrepareUnits ( oldSRContext, TP, aLocalFactors); //:S4136
   TP->Bind(sr, shbinder);
 
   
@@ -1037,6 +1052,7 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity(
 Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity
                    (const Handle(StepShape_ContextDependentShapeRepresentation)& CDSR,
                     const Handle(Transfer_TransientProcess)& TP,
+                    const StepData_Factors& theLocalFactors,
                     const Message_ProgressRange& theProgress)
 {
   Handle(TransferBRep_ShapeBinder) shbinder;
@@ -1054,11 +1070,11 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity
   TopoDS_Shape theResult;
   
   gp_Trsf Trsf;
-  Standard_Boolean iatrsf = ComputeSRRWT ( SRR, TP, Trsf );
+  Standard_Boolean iatrsf = ComputeSRRWT ( SRR, TP, Trsf, theLocalFactors);
 
   Handle(Transfer_Binder) binder;
   Standard_Boolean isBound = Standard_False;
-  if (!TP->IsBound(rep)) binder = TransferEntity(rep, TP, isBound, Standard_False, theProgress);
+  if (!TP->IsBound(rep)) binder = TransferEntity(rep, TP, theLocalFactors, isBound, Standard_False, theProgress);
   else binder = TP->Find(rep);
   theResult = TransferBRep::ShapeResult(binder);
       
@@ -1082,6 +1098,7 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity
 Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity(
     const Handle(StepRepr_ShapeRepresentationRelationship)& und,
     const Handle(Transfer_TransientProcess)& TP,
+    const StepData_Factors& theLocalFactors,
     const Standard_Integer nbrep,
     const Standard_Boolean theUseTrsf,
     const Message_ProgressRange& theProgress)
@@ -1101,7 +1118,7 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity(
   Standard_Integer nsh = 0;
   
   gp_Trsf Trsf;
-  Standard_Boolean iatrsf = ComputeSRRWT ( und, TP, Trsf );
+  Standard_Boolean iatrsf = ComputeSRRWT(und, TP, Trsf, theLocalFactors);
   
   //    Transfert : que faut-il prendre au juste ?
   Message_ProgressScope aPS(theProgress, NULL, 2);
@@ -1116,7 +1133,7 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity(
     Handle(StepShape_ShapeRepresentation) anitem = Handle(StepShape_ShapeRepresentation)::DownCast(anitemt);
     Handle(Transfer_Binder) binder;
     Standard_Boolean isBound = Standard_False;
-    if (!TP->IsBound(anitem)) binder = TransferEntity(anitem, TP, isBound, theUseTrsf, aRange);
+    if (!TP->IsBound(anitem)) binder = TransferEntity(anitem, TP, theLocalFactors, isBound, theUseTrsf, aRange);
     else	              binder = TP->Find(anitem);
     TopoDS_Shape theResult = TransferBRep::ShapeResult (binder);
     if (!theResult.IsNull()) {
@@ -1150,7 +1167,8 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity(
 
 Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity(
     const Handle(StepRepr_ConstructiveGeometryRepresentationRelationship)& theCGRR,
-    const Handle(Transfer_TransientProcess)& theTP)
+    const Handle(Transfer_TransientProcess)& theTP,
+    const StepData_Factors& theLocalFactors)
 {
  
   Handle(TransferBRep_ShapeBinder) shbinder;
@@ -1158,6 +1176,7 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity(
     return shbinder;
   Standard_Boolean resetUnits = Standard_False;
   Handle(StepRepr_Representation) oldSRContext = mySRContext;
+  StepData_Factors aLocalFactors = theLocalFactors;
   TopoDS_Compound aComp;
   BRep_Builder aB;
   aB.MakeCompound(aComp);
@@ -1169,7 +1188,7 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity(
       continue;
     if(mySRContext.IsNull() || aCRepr->ContextOfItems() != mySRContext->ContextOfItems())
     {
-      PrepareUnits(aCRepr,theTP);
+      PrepareUnits(aCRepr,theTP, aLocalFactors);
       resetUnits = Standard_True;
     }
     Standard_Integer j =1;
@@ -1182,7 +1201,7 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity(
         Handle(StepGeom_Axis2Placement3d)::DownCast(anItem);
       if( !aStepAxis.IsNull())
       {
-        Handle(Geom_Axis2Placement) anAxis = StepToGeom::MakeAxis2Placement (aStepAxis);
+        Handle(Geom_Axis2Placement) anAxis = StepToGeom::MakeAxis2Placement (aStepAxis, aLocalFactors);
         if(anAxis.IsNull())
           continue;
         Handle(Geom_Plane) aPlane = new Geom_Plane(gp_Ax3(anAxis->Ax2()));
@@ -1198,12 +1217,78 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity(
   shbinder = new TransferBRep_ShapeBinder (aComp);
   mySRContext = oldSRContext;
   if(oldSRContext.IsNull() || resetUnits)
-    PrepareUnits(oldSRContext,theTP);
+    PrepareUnits(oldSRContext, theTP, aLocalFactors);
 
   theTP->Bind(theCGRR, shbinder);
   
   return shbinder;
   
+}
+
+//=======================================================================
+//function : TransferEntity
+//purpose  : 
+//=======================================================================
+Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity(
+  const Handle(StepRepr_MechanicalDesignAndDraughtingRelationship)& theMDADR,
+  const Handle(Transfer_TransientProcess)& theTP,
+  const StepData_Factors& theLocalFactors,
+  const Message_ProgressRange& theProgress)
+{
+  Handle(TransferBRep_ShapeBinder) aShBinder;
+  if (theMDADR.IsNull())
+    return aShBinder;
+
+  Standard_Boolean aResetUnits = Standard_False;
+  Handle(StepRepr_Representation) anOldSRContext = mySRContext;
+  StepData_Factors aLocalFactors = theLocalFactors;
+  TopoDS_Compound aComp;
+  BRep_Builder aBuilder;
+  aBuilder.MakeCompound(aComp);
+
+  Message_ProgressScope aPS(theProgress, NULL, 2);
+  for (Standard_Integer anIndex = 1; anIndex <= 2; anIndex++)
+  {
+    Message_ProgressRange aRange = aPS.Next();
+    Handle(StepRepr_Representation) aRepr = (anIndex == 1) ? theMDADR->Rep1() : theMDADR->Rep2();
+    if (aRepr.IsNull())
+      continue;
+    if (mySRContext.IsNull() || aRepr->ContextOfItems() != mySRContext->ContextOfItems())
+    {
+      PrepareUnits(aRepr, theTP, aLocalFactors);
+      aResetUnits = Standard_True;
+    }
+    Handle(Transfer_Binder) aBinder;
+    if (aRepr->IsKind(STANDARD_TYPE(StepShape_ShapeRepresentation)))
+    {
+      Handle(StepShape_ShapeRepresentation) aShapeRepr = Handle(StepShape_ShapeRepresentation)::DownCast(aRepr);
+      Standard_Boolean isBound = Standard_False;
+      if (!theTP->IsBound(aShapeRepr))
+      {
+        aBinder = TransferEntity(aShapeRepr, theTP, theLocalFactors, isBound, false, aRange);
+      }
+      else
+      {
+        aBinder = theTP->Find(aShapeRepr);
+      }
+    }
+    TopoDS_Shape aResult = TransferBRep::ShapeResult(aBinder);
+    if (!aResult.IsNull())
+    {
+      aBuilder.Add(aComp, aResult);
+    }
+  }
+
+  aShBinder = new TransferBRep_ShapeBinder(aComp);
+  mySRContext = anOldSRContext;
+  if (anOldSRContext.IsNull() || aResetUnits)
+  {
+    PrepareUnits(anOldSRContext, theTP, aLocalFactors);
+  }
+
+  theTP->Bind(theMDADR, aShBinder);
+
+  return aShBinder;
 }
 
 //=======================================================================
@@ -1323,7 +1408,7 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::OldWay
   for (subs.Start(); subs.More() && PS.More(); subs.Next())
   {
     Message_ProgressRange aRange = PS.Next();
-    Handle(Standard_Transient) anitem = subs.Value();
+    const Handle(Standard_Transient)& anitem = subs.Value();
     if ( anitem->DynamicType() != tCDSR && anitem->DynamicType() != tSRR ) continue;
 //      DeclareAndCast(StepShape_ContextDependentShapeRepresentation,anitem,subs.Value());
 //      if (anitem.IsNull()) continue;
@@ -1357,6 +1442,7 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::OldWay
 Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity
                    (const Handle(StepGeom_GeometricRepresentationItem)& start,
                     const Handle(Transfer_TransientProcess)& TP,
+                    const StepData_Factors& theLocalFactors,
                     const Standard_Boolean isManifold,
                     const Message_ProgressRange& theProgress)
 {
@@ -1373,56 +1459,84 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity
          << start->DynamicType()->Name() << std::endl;
   chrono.Start();
 #endif
-  
+  Handle(StepData_StepModel) aStepModel = Handle(StepData_StepModel)::DownCast(TP->Model());
   //:S4136
+  StepData_Factors aLocalFactors = theLocalFactors;
   Handle(StepRepr_Representation) oldSRContext = mySRContext;
   if ( mySRContext.IsNull() ) { // if no context, try to find it (ex: r0701_ug.stp #4790)
     Handle(StepRepr_Representation) context = FindContext ( start, TP );
     if ( context.IsNull() ) {
       TP->AddWarning ( start, "Entity with no unit context; default units taken" );
-      ResetUnits();
+      ResetUnits(aStepModel, aLocalFactors);
     }
-    else PrepareUnits ( context, TP );
+    else PrepareUnits ( context, TP, aLocalFactors);
   }
   myShapeBuilder.SetPrecision(myPrecision);
   myShapeBuilder.SetMaxTol(myMaxTol);
 
   // Start progress scope (no need to check if progress exists -- it is safe)
   Message_ProgressScope aPS(theProgress, "Transfer stage", isManifold ? 2 : 1);
-
+  const Standard_Boolean aReadTessellatedWhenNoBRepOnly = (aStepModel->InternalParameters.ReadTessellated == 2);
+  Standard_Boolean aHasGeom = Standard_True;
   try {
     OCC_CATCH_SIGNALS
     Message_ProgressRange aRange = aPS.Next();
     if (start->IsKind(STANDARD_TYPE(StepShape_FacetedBrep))) {
-      myShapeBuilder.Init(GetCasted(StepShape_FacetedBrep, start), TP, aRange);
+      myShapeBuilder.Init(GetCasted(StepShape_FacetedBrep, start), TP, aLocalFactors, aRange);
       found = Standard_True;
     } 
     else if (start->IsKind(STANDARD_TYPE(StepShape_BrepWithVoids))) {
-      myShapeBuilder.Init(GetCasted(StepShape_BrepWithVoids, start), TP, aRange);
+      myShapeBuilder.Init(GetCasted(StepShape_BrepWithVoids, start), TP, aLocalFactors, aRange);
       found = Standard_True;
     } 
     else if (start->IsKind(STANDARD_TYPE(StepShape_ManifoldSolidBrep))) {
-      myShapeBuilder.Init(GetCasted(StepShape_ManifoldSolidBrep, start), TP, aRange);
+      myShapeBuilder.Init(GetCasted(StepShape_ManifoldSolidBrep, start), TP, aLocalFactors, aRange);
       found = Standard_True;
     } 
     else if (start->IsKind(STANDARD_TYPE(StepShape_ShellBasedSurfaceModel))) {
-      myShapeBuilder.Init(GetCasted(StepShape_ShellBasedSurfaceModel, start), TP, myNMTool, aRange);
+      myShapeBuilder.Init(GetCasted(StepShape_ShellBasedSurfaceModel, start), TP, myNMTool, aLocalFactors, aRange);
       found = Standard_True;
     } 
     else if (start->IsKind(STANDARD_TYPE(StepShape_FacetedBrepAndBrepWithVoids))) {
-      myShapeBuilder.Init(GetCasted(StepShape_FacetedBrepAndBrepWithVoids, start), TP, aRange);
+      myShapeBuilder.Init(GetCasted(StepShape_FacetedBrepAndBrepWithVoids, start), TP, aLocalFactors, aRange);
       found = Standard_True;
     } 
     else if (start->IsKind(STANDARD_TYPE(StepShape_GeometricSet))) {
-      myShapeBuilder.Init(GetCasted(StepShape_GeometricSet, start), TP, this, isManifold, aRange);
+      myShapeBuilder.Init(GetCasted(StepShape_GeometricSet, start), TP, aLocalFactors, this, isManifold, aRange);
       found = Standard_True;
     }
     else if (start->IsKind(STANDARD_TYPE(StepShape_EdgeBasedWireframeModel))) {
-      myShapeBuilder.Init(GetCasted(StepShape_EdgeBasedWireframeModel, start), TP);
+      myShapeBuilder.Init(GetCasted(StepShape_EdgeBasedWireframeModel, start), TP, aLocalFactors);
       found = Standard_True;
     }
     else if (start->IsKind(STANDARD_TYPE(StepShape_FaceBasedSurfaceModel))) {
-      myShapeBuilder.Init(GetCasted(StepShape_FaceBasedSurfaceModel, start), TP);
+      myShapeBuilder.Init(GetCasted(StepShape_FaceBasedSurfaceModel, start), TP, aLocalFactors);
+      found = Standard_True;
+    }
+    // TODO: Normally, StepVisual_Tessellated* entities should be processed after
+    //       StepShape_* entities in order to resolve links to BRep topological objects.
+    //       Currently it is not guaranteed and might require changes in the processing order.
+    else if (start->IsKind(STANDARD_TYPE(StepVisual_TessellatedSolid))) 
+    {
+      myShapeBuilder.Init(GetCasted(StepVisual_TessellatedSolid, start), TP,
+                          aReadTessellatedWhenNoBRepOnly, aHasGeom, aLocalFactors, aRange);
+      found = Standard_True;
+    }
+    else if (start->IsKind(STANDARD_TYPE(StepVisual_TessellatedShell))) 
+    {
+      myShapeBuilder.Init(GetCasted(StepVisual_TessellatedShell, start), TP, 
+                          aReadTessellatedWhenNoBRepOnly, aHasGeom, aLocalFactors, aRange);
+      found = Standard_True;
+    }
+    else if (start->IsKind(STANDARD_TYPE(StepVisual_TessellatedFace))) 
+    {
+      myShapeBuilder.Init(GetCasted(StepVisual_TessellatedFace, start), TP, 
+                          aReadTessellatedWhenNoBRepOnly, aHasGeom, aLocalFactors);
+      found = Standard_True;
+    }
+    else if (start->IsKind(STANDARD_TYPE(StepVisual_TessellatedSurfaceSet)))
+    {
+      myShapeBuilder.Init(GetCasted(StepVisual_TessellatedSurfaceSet, start), TP, aHasGeom, aLocalFactors);
       found = Standard_True;
     }
   }
@@ -1438,7 +1552,8 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity
   if (found && myShapeBuilder.IsDone()) {
     mappedShape = myShapeBuilder.Value();
     // Apply ShapeFix (on manifold shapes only. Non-manifold topology is processed separately: ssv; 13.11.2010)
-    if (isManifold) {
+    if (isManifold && aHasGeom) 
+    {
       Handle(Standard_Transient) info;
       mappedShape = 
         XSAlgo::AlgoContainer()->ProcessShape( mappedShape, myPrecision, myMaxTol,
@@ -1458,7 +1573,7 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity
     chrono.Show();
 #endif
   if ( oldSRContext.IsNull() && ! mySRContext.IsNull() ) //:S4136
-    PrepareUnits ( oldSRContext, TP );
+    PrepareUnits ( oldSRContext, TP, aLocalFactors);
   TP->Bind(start, shbinder);
   return shbinder;
 }
@@ -1472,11 +1587,12 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity
 Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity
                    (const Handle(StepRepr_MappedItem)&  mapit,
                     const Handle(Transfer_TransientProcess)& TP,
+                    const StepData_Factors& theLocalFactors,
                     const Message_ProgressRange& theProgress)
 {
   Handle(TransferBRep_ShapeBinder) shbinder;
-  
-    // --------------------------------------------------------------
+
+  // --------------------------------------------------------------
   // On se trouve ici dans un contexte " d'assemblage geometrique "
   //    - MappedItem
   // --------------------------------------------------------------
@@ -1487,15 +1603,15 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity
   //  La Shape, et la mise en position
   Handle(StepShape_ShapeRepresentation) maprep =  Handle(StepShape_ShapeRepresentation)::
     DownCast(mapit->MappingSource()->MappedRepresentation());
-  Standard_Boolean isBound = Standard_False; 
+  Standard_Boolean isBound = Standard_False;
+  Message_ProgressScope aPSRoot(theProgress, NULL, 2);
   Handle(Transfer_Binder) binder = TP->Find(maprep);
-  if (binder.IsNull())    binder = TransferEntity(maprep,TP,isBound, Standard_False, theProgress);
+  if (binder.IsNull())    binder = TransferEntity(maprep, TP, theLocalFactors, isBound, Standard_False, theProgress);
   shbinder = Handle(TransferBRep_ShapeBinder)::DownCast(binder);
   if (shbinder.IsNull()) TP->AddWarning(mapit,"No Shape Produced");
   else {
     TopoDS_Shape mappedShape = shbinder->Result();
     if ( ! mappedShape.IsNull() ) {
-      
       //  Positionnement : 2 formules
       //  1/ Ax2 dans Source et comme Target  : passage de Source a Target
       //  2/ CartesianOperator3d comme Target : on applique
@@ -1506,7 +1622,7 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity
       Handle(StepGeom_CartesianTransformationOperator3d) CartOp =
         Handle(StepGeom_CartesianTransformationOperator3d)::DownCast(mapit->MappingTarget());
       if ( ! CartOp.IsNull() ) {
-        ok = StepToGeom::MakeTransformation3d (CartOp, Trsf);
+        ok = StepToGeom::MakeTransformation3d (CartOp, Trsf, theLocalFactors);
       }
       else {
         Handle(StepGeom_Axis2Placement3d) Origin = 
@@ -1516,7 +1632,7 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity
         if ( ! Origin.IsNull() && ! Target.IsNull() ) {
           ok = Standard_True;
           Handle(StepRepr_Representation) rep = mySRContext; // NOTE: copy of handle !
-          ComputeTransformation ( Origin, Target, maprep, rep, TP, Trsf );
+          ComputeTransformation ( Origin, Target, maprep, rep, TP, Trsf, theLocalFactors);
           ok = Standard_True;
         }
       }
@@ -1525,6 +1641,39 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity
       else TP->AddWarning (mapit,"Mapped Item, case not recognized, location ignored");
       
       shbinder = new TransferBRep_ShapeBinder (mappedShape);
+    }
+  }
+  TopoDS_Compound aCund;
+  TopoDS_Shape aResult;
+  BRep_Builder aBuilder;
+  aBuilder.MakeCompound(aCund);
+  if (!shbinder.IsNull())
+  {
+    aResult = TransferBRep::ShapeResult(shbinder);
+    aBuilder.Add(aCund, aResult);
+  }
+  // translate possible shapes related by SRRs, which corresponds to
+  // way of writing hybrid models in AP203 since 1998, and AP209
+  Standard_Integer aReadSRR = Interface_Static::IVal("read.step.shape.relationship");
+  Standard_Integer aReadConstructiveGeomRR = Interface_Static::IVal("read.step.constructivegeom.relationship");
+  if (aReadSRR)
+  {
+    const Interface_Graph& aGraph = TP->Graph();
+    Standard_Integer aSRRnum = 0;
+    for (Interface_EntityIterator aSubsIt(aGraph.Sharings(maprep)); aSubsIt.More(); aSubsIt.Next())
+      ++aSRRnum;
+    Message_ProgressScope aPS(aPSRoot.Next(), "Part", aSRRnum);
+    TopoDS_Shape aNewResult = TransferRelatedSRR(TP, maprep, Standard_False, aReadConstructiveGeomRR, theLocalFactors, aCund, aPS);
+    if (!aNewResult.IsNull())
+    {
+      aResult = aNewResult;
+    }
+    // if only single shape is read, add it as it is; otherwise add compound
+    if (aCund.NbChildren() == 1)
+      shbinder = new TransferBRep_ShapeBinder(aResult);
+    else if (aCund.NbChildren() > 1)
+    {
+      shbinder = new TransferBRep_ShapeBinder(aCund);
     }
   }
   TP->Bind(mapit, shbinder);
@@ -1538,6 +1687,7 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity
 Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity
                    (const Handle(StepShape_FaceSurface)& fs,
                     const Handle(Transfer_TransientProcess)& TP,
+                    const StepData_Factors& theLocalFactors,
                     const Message_ProgressRange& theProgress)
 {
 
@@ -1557,15 +1707,17 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity
 
     // Non-manifold topology is not processed here (ssv; 15.11.2010)
     StepToTopoDS_NMTool dummyNMTool;
-    myTF.Init(fs, myTool, dummyNMTool);
+    myTF.Init(fs, myTool, dummyNMTool, theLocalFactors);
     Handle(StepRepr_Representation) oldSRContext = mySRContext;
+    StepData_Factors aLocalFactors = theLocalFactors;
+    Handle(StepData_StepModel) aStepModel = Handle(StepData_StepModel)::DownCast(TP->Model());
     if (mySRContext.IsNull()) { // if no context, try to find it (ex: r0701_ug.stp #4790)
       Handle(StepRepr_Representation) context = FindContext(fs, TP);
       if (context.IsNull()) {
         TP->AddWarning(fs, "Entity with no unit context; default units taken");
-        ResetUnits();
+        ResetUnits(aStepModel, aLocalFactors);
       }
-      else PrepareUnits(context, TP);
+      else PrepareUnits(context, TP, aLocalFactors);
     }
 
     // Apply ShapeFix
@@ -1588,7 +1740,7 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity
 
 
     if (oldSRContext.IsNull() && !mySRContext.IsNull()) //:S4136
-      PrepareUnits(oldSRContext, TP);
+      PrepareUnits(oldSRContext, TP, aLocalFactors);
     TP->Bind(fs, sb);
     return sb; // TP->Find (start);
   }
@@ -1608,12 +1760,12 @@ Handle(TransferBRep_ShapeBinder) STEPControl_ActorRead::TransferEntity
 Handle(Transfer_Binder) STEPControl_ActorRead::TransferShape(
     const Handle(Standard_Transient)& start,
     const Handle(Transfer_TransientProcess)& TP,
+    const StepData_Factors& theLocalFactors,
     const Standard_Boolean isManifold,
     const Standard_Boolean theUseTrsf,
     const Message_ProgressRange& theProgress)
 {
   if (start.IsNull()) return NullResult();
-  XSAlgo::AlgoContainer()->PrepareForTransfer();
 
   Message_Messenger::StreamBuffer sout = TP->Messenger()->SendInfo();
 #ifdef TRANSLOG
@@ -1623,13 +1775,13 @@ Handle(Transfer_Binder) STEPControl_ActorRead::TransferShape(
 #endif
   
   Handle(TransferBRep_ShapeBinder) shbinder;
-  
+  Handle(StepData_StepModel) aStepModel = Handle(StepData_StepModel)::DownCast(TP->Model());
 
   // Product Definition Entities
   // They should be treated with Design Manager
    // case ShapeDefinitionRepresentation if ProductMode != ON
-  TCollection_AsciiString aProdMode = Interface_Static::CVal("read.step.product.mode");
-  if(!aProdMode.IsEqual("ON") && 
+  bool aProdMode = aStepModel->InternalParameters.ReadProductMode;
+  if(!aProdMode && 
      start->IsKind(STANDARD_TYPE(StepShape_ShapeDefinitionRepresentation))) 
     shbinder = OldWay(start,TP, theProgress);
   //skl
@@ -1637,14 +1789,14 @@ Handle(Transfer_Binder) STEPControl_ActorRead::TransferShape(
   else if (start->IsKind(STANDARD_TYPE(StepBasic_ProductDefinition))) {
     Handle(StepBasic_ProductDefinition) PD =
       Handle(StepBasic_ProductDefinition)::DownCast(start);
-    shbinder = TransferEntity(PD, TP, theUseTrsf, theProgress);
+    shbinder = TransferEntity(PD, TP, theLocalFactors, theUseTrsf, theProgress);
   }
   
   // NextAssemblyUsageOccurrence
   else if (start->IsKind(STANDARD_TYPE(StepRepr_NextAssemblyUsageOccurrence))) {
     Handle(StepRepr_NextAssemblyUsageOccurrence) NAUO =
       Handle(StepRepr_NextAssemblyUsageOccurrence)::DownCast(start);
-    shbinder = TransferEntity(NAUO, TP, theProgress);
+    shbinder = TransferEntity(NAUO, TP, theLocalFactors, theProgress);
   }
   //end skl
     
@@ -1652,7 +1804,7 @@ Handle(Transfer_Binder) STEPControl_ActorRead::TransferShape(
   else if (start->IsKind(STANDARD_TYPE(StepShape_ShapeRepresentation))) {
     DeclareAndCast(StepShape_ShapeRepresentation,sr,start);
     Standard_Boolean isBound = Standard_False;
-    shbinder = TransferEntity(sr,TP,isBound, Standard_False, theProgress);
+    shbinder = TransferEntity(sr, TP, theLocalFactors, isBound, Standard_False, theProgress);
   }
   
     // --------------------------------------------------------------
@@ -1662,29 +1814,29 @@ Handle(Transfer_Binder) STEPControl_ActorRead::TransferShape(
 
   else if (start->IsKind(STANDARD_TYPE(StepShape_ContextDependentShapeRepresentation))) {
     DeclareAndCast(StepShape_ContextDependentShapeRepresentation,CDSR,start);
-    shbinder =  TransferEntity(CDSR,TP, theProgress);
+    shbinder =  TransferEntity(CDSR, TP, theLocalFactors, theProgress);
   }
 
   else if (start->IsKind (STANDARD_TYPE(StepRepr_ShapeRepresentationRelationship)) ) {
     //  REPRESENTATION_RELATIONSHIP et la famille
 
     DeclareAndCast(StepRepr_ShapeRepresentationRelationship,und,start);
-    shbinder =  TransferEntity(und,TP, 0, Standard_False, theProgress);
+    shbinder =  TransferEntity(und, TP, theLocalFactors, 0, Standard_False, theProgress);
   }
 
   else if (start->IsKind (STANDARD_TYPE(StepGeom_GeometricRepresentationItem)) ) {
     // Here starts the entity to be treated : Shape Representation Subtype
   // It can be also other Root entities
     DeclareAndCast(StepGeom_GeometricRepresentationItem,git,start);
-    shbinder = TransferEntity(git, TP, isManifold, theProgress);
+    shbinder = TransferEntity(git, TP, theLocalFactors, isManifold, theProgress);
   }
   else if (start->IsKind(STANDARD_TYPE(StepRepr_MappedItem))) {
     DeclareAndCast(StepRepr_MappedItem,mapit,start);
-    shbinder=  TransferEntity(mapit,TP, theProgress);
+    shbinder=  TransferEntity(mapit, TP, theLocalFactors, theProgress);
   }
   else if (start->IsKind(STANDARD_TYPE(StepShape_FaceSurface))) {
     DeclareAndCast(StepShape_FaceSurface,fs,start);
-    shbinder =  TransferEntity(fs,TP, theProgress);
+    shbinder =  TransferEntity(fs, TP, theLocalFactors, theProgress);
   }
 
 //  if (!shbinder.IsNull()) TP->Bind(start,binder);
@@ -1697,13 +1849,14 @@ Handle(Transfer_Binder) STEPControl_ActorRead::TransferShape(
 // ============================================================================
 
 void STEPControl_ActorRead::PrepareUnits(const Handle(StepRepr_Representation)& rep,
-                                         const Handle(Transfer_TransientProcess)& TP)
+                                         const Handle(Transfer_TransientProcess)& TP,
+                                         StepData_Factors& theLocalFactors)
 {
   mySRContext = rep;
-  
+  Handle(StepData_StepModel) aModel = Handle(StepData_StepModel)::DownCast(TP->Model());
   Standard_Integer stat1, stat2 = 0;  // sera alimente par STEPControl_Unit
   if (rep.IsNull()) {
-    ResetUnits();
+    ResetUnits(aModel, theLocalFactors);
     return;
   }
   
@@ -1711,7 +1864,7 @@ void STEPControl_ActorRead::PrepareUnits(const Handle(StepRepr_Representation)& 
   Handle(StepRepr_RepresentationContext) theRepCont = rep->ContextOfItems();
   if (theRepCont.IsNull()) {
     TP->AddWarning(rep,"Bad RepresentationContext, default unit taken");
-    ResetUnits();
+    ResetUnits(aModel, theLocalFactors);
     return;
   }
 
@@ -1742,17 +1895,16 @@ void STEPControl_ActorRead::PrepareUnits(const Handle(StepRepr_Representation)& 
     aTol    = theGRCAGAUC->GlobalUncertaintyAssignedContext();
   }
 
-
+  Handle(StepData_StepModel) aStepModel = Handle(StepData_StepModel)::DownCast(TP->Model());
   // ----------------------------------------------------
   // Decoding and Setting the Values
   // ----------------------------------------------------
-
   if (!theGUAC.IsNull()) {
-    stat1 = myUnit.ComputeFactors(theGUAC);
-    Standard_Integer anglemode = Interface_Static::IVal("step.angleunit.mode");
+    stat1 = myUnit.ComputeFactors(theGUAC, theLocalFactors);
+    Standard_Integer anglemode = aStepModel->InternalParameters.AngleUnit;
     Standard_Real angleFactor = ( anglemode == 0 ? myUnit.PlaneAngleFactor() :
 				  anglemode == 1 ? 1. : M_PI/180. );
-    UnitsMethods::InitializeFactors(myUnit.LengthFactor(),
+    theLocalFactors.InitializeFactors(myUnit.LengthFactor(),
 				    angleFactor,
 				    myUnit.SolidAngleFactor());
     if (stat1 != 0) TP->AddWarning (theRepCont,myUnit.StatusMessage(stat1));
@@ -1764,15 +1916,15 @@ void STEPControl_ActorRead::PrepareUnits(const Handle(StepRepr_Representation)& 
   }
 
 //  myPrecision = Precision::Confusion();
-  if (Interface_Static::IVal("read.precision.mode") == 1)  //:i1 gka S4136 05.04.99
-    myPrecision = Interface_Static::RVal("read.precision.val");
+  if (aStepModel->InternalParameters.ReadPrecisionMode == 1)  //:i1 gka S4136 05.04.99
+    myPrecision = aStepModel->InternalParameters.ReadPrecisionVal;
   else if (myUnit.HasUncertainty())
     myPrecision = myUnit.Uncertainty() * myUnit.LengthFactor();
   else {
     TP->AddWarning(theRepCont,"No Length Uncertainty, value of read.precision.val is taken");
-    myPrecision = Interface_Static::RVal("read.precision.val");
+    myPrecision = aStepModel->InternalParameters.ReadPrecisionVal;
   }
-  myMaxTol = Max ( myPrecision, Interface_Static::RVal("read.maxprecision.val") );
+  myMaxTol = Max ( myPrecision, aStepModel->InternalParameters.ReadMaxPrecisionVal );
   // Assign uncertainty
 #ifdef TRANSLOG
   if (TP->TraceLevel() > 1) 
@@ -1785,11 +1937,11 @@ void STEPControl_ActorRead::PrepareUnits(const Handle(StepRepr_Representation)& 
 //purpose  : 
 //=======================================================================
 
-void  STEPControl_ActorRead::ResetUnits ()
+void  STEPControl_ActorRead::ResetUnits (Handle(StepData_StepModel)& theModel, StepData_Factors& theLocalFactors)
 {
-  UnitsMethods::InitializeFactors ( 1, 1, 1 );
-  myPrecision = Interface_Static::RVal("read.precision.val");
-  myMaxTol = Max ( myPrecision, Interface_Static::RVal("read.maxprecision.val") );
+  theLocalFactors.InitializeFactors ( 1, 1, 1 );
+  myPrecision = theModel->InternalParameters.ReadPrecisionVal;
+  myMaxTol = Max ( myPrecision, theModel->InternalParameters.ReadMaxPrecisionVal );
 }
 
 //=======================================================================
@@ -1803,7 +1955,8 @@ Standard_Boolean STEPControl_ActorRead::ComputeTransformation (const Handle(Step
 							       const Handle(StepRepr_Representation) &OrigContext, 
 							       const Handle(StepRepr_Representation) &TargContext,
 							       const Handle(Transfer_TransientProcess) &TP,
-							       gp_Trsf &Trsf)
+							       gp_Trsf &Trsf,
+                     const StepData_Factors& theLocalFactors)
 {
   Trsf = gp_Trsf();  // reinit
   if ( Origin.IsNull() || Target.IsNull() ) return Standard_False;
@@ -1844,11 +1997,12 @@ Standard_Boolean STEPControl_ActorRead::ComputeTransformation (const Handle(Step
   
   // translate axis_placements taking units into account 
   Handle(StepRepr_Representation) oldSRContext = mySRContext;
-  if ( OrigContext  != oldSRContext ) PrepareUnits(OrigContext,TP);
-  Handle(Geom_Axis2Placement) theOrig = StepToGeom::MakeAxis2Placement (org);
-  if ( TargContext  != OrigContext  ) PrepareUnits(TargContext,TP);
-  Handle(Geom_Axis2Placement) theTarg = StepToGeom::MakeAxis2Placement (trg);
-  if ( oldSRContext != TargContext  ) PrepareUnits(oldSRContext,TP);
+  StepData_Factors aLocalFactors = theLocalFactors;
+  if ( OrigContext  != oldSRContext ) PrepareUnits(OrigContext, TP, aLocalFactors);
+  Handle(Geom_Axis2Placement) theOrig = StepToGeom::MakeAxis2Placement (org, aLocalFactors);
+  if ( TargContext  != OrigContext  ) PrepareUnits(TargContext, TP, aLocalFactors);
+  Handle(Geom_Axis2Placement) theTarg = StepToGeom::MakeAxis2Placement (trg, aLocalFactors);
+  if ( oldSRContext != TargContext  ) PrepareUnits(oldSRContext, TP, aLocalFactors);
 
   gp_Ax3 ax3Orig(theOrig->Ax2());
   gp_Ax3 ax3Targ(theTarg->Ax2());
@@ -1865,8 +2019,9 @@ Standard_Boolean STEPControl_ActorRead::ComputeTransformation (const Handle(Step
 
 //:j2 abv 22 Oct 98: auxiliary function: reading transformation from SRRWT
 Standard_Boolean STEPControl_ActorRead::ComputeSRRWT (const Handle(StepRepr_RepresentationRelationship) &SRR,
-						      const Handle(Transfer_TransientProcess) &TP,
-						      gp_Trsf &Trsf)
+                                                      const Handle(Transfer_TransientProcess) &TP,
+                                                      gp_Trsf &Trsf,
+                                                      const StepData_Factors& theLocalFactors)
 {
   Trsf = gp_Trsf(); // init
   
@@ -1874,16 +2029,16 @@ Standard_Boolean STEPControl_ActorRead::ComputeSRRWT (const Handle(StepRepr_Repr
   if ( srwt.IsNull() ) return Standard_False;
 
   StepRepr_Transformation SelectTrans = srwt->TransformationOperator();
-  
+  StepData_Factors aLocalFactors = theLocalFactors;
   // cartesian transformation
   Handle(StepGeom_CartesianTransformationOperator3d) CartOp = 
     Handle(StepGeom_CartesianTransformationOperator3d)::DownCast(SelectTrans.Value());
   if ( ! CartOp.IsNull() ) {
     // reset units (by Rep2 - ?)
     Handle(StepRepr_Representation) oldSRContext = mySRContext;
-    if ( SRR->Rep2() != oldSRContext ) PrepareUnits(SRR->Rep2(),TP);
-    StepToGeom::MakeTransformation3d (CartOp, Trsf);
-    if ( SRR->Rep2() != oldSRContext ) PrepareUnits(oldSRContext,TP);
+    if ( SRR->Rep2() != oldSRContext ) PrepareUnits(SRR->Rep2(), TP, aLocalFactors);
+    StepToGeom::MakeTransformation3d (CartOp, Trsf, aLocalFactors);
+    if ( SRR->Rep2() != oldSRContext ) PrepareUnits(oldSRContext, TP, aLocalFactors);
     return Trsf.Form() != gp_Identity;
   }
 
@@ -1897,7 +2052,7 @@ Standard_Boolean STEPControl_ActorRead::ComputeSRRWT (const Handle(StepRepr_Repr
   Handle(StepGeom_Axis2Placement3d) Ax2 =
     Handle(StepGeom_Axis2Placement3d)::DownCast(ItemDef->TransformItem2());
   if ( Ax1.IsNull() || Ax2.IsNull() ) return Standard_False;
-  return ComputeTransformation ( Ax1, Ax2, SRR->Rep1(), SRR->Rep2(), TP, Trsf);
+  return ComputeTransformation ( Ax1, Ax2, SRR->Rep1(), SRR->Rep2(), TP, Trsf, aLocalFactors);
 }
 
 //=======================================================================
@@ -1978,12 +2133,12 @@ void STEPControl_ActorRead::computeIDEASClosings(const TopoDS_Compound& comp,
   TopExp_Explorer shellExpA(comp, TopAbs_SHELL);
 
   for ( ; shellExpA.More(); shellExpA.Next() ) {
-    TopoDS_Shape shellA = shellExpA.Current();
+    const TopoDS_Shape& shellA = shellExpA.Current();
     TopExp_Explorer shellExpB(comp, TopAbs_SHELL);
     TopTools_ListOfShape closingShells;
 
     for ( ; shellExpB.More(); shellExpB.Next() ) {
-      TopoDS_Shape shellB = shellExpB.Current();
+      const TopoDS_Shape& shellB = shellExpB.Current();
       if ( shellA.IsSame(shellB) )
         continue;
       // Check whether ShellB is non-manifold and adjacent to ShellA.
@@ -1995,4 +2150,63 @@ void STEPControl_ActorRead::computeIDEASClosings(const TopoDS_Compound& comp,
     if ( !closingShells.IsEmpty() )
       shellClosingsMap.Add(shellA, closingShells);
   }
+}
+
+//=======================================================================
+// Method  : SetModel
+// Purpose :
+//=======================================================================
+void STEPControl_ActorRead::SetModel(const Handle(Interface_InterfaceModel)& theModel)
+{
+  myModel = theModel;
+}
+
+//=======================================================================
+// Method  : TransferRelatedSRR
+// Purpose : Helper method to transfer SRR related to the representation
+//=======================================================================
+TopoDS_Shape STEPControl_ActorRead::TransferRelatedSRR(const Handle(Transfer_TransientProcess)& theTP,
+                                                       const Handle(StepShape_ShapeRepresentation)& theRep,
+                                                       const Standard_Boolean theUseTrsf,
+                                                       const Standard_Integer theReadConstructiveGeomRR,
+                                                       const StepData_Factors& theLocalFactors,
+                                                       TopoDS_Compound& theCund,
+                                                       Message_ProgressScope& thePS)
+{
+  BRep_Builder aBuilder;
+  TopoDS_Shape aResult;
+  const Interface_Graph& aGraph = theTP->Graph();
+  for (Interface_EntityIterator aSubsIt(aGraph.Sharings(theRep)); aSubsIt.More() && thePS.More(); aSubsIt.Next())
+  {
+    Handle(Standard_Transient) anItem = aSubsIt.Value();
+    if (!anItem->IsKind(STANDARD_TYPE(StepRepr_RepresentationRelationship)))
+      continue;
+    Handle(Transfer_Binder) aBinder;
+    if (anItem->DynamicType() == STANDARD_TYPE(StepRepr_ShapeRepresentationRelationship))
+    {
+      Handle(StepRepr_ShapeRepresentationRelationship) aSRR =
+        Handle(StepRepr_ShapeRepresentationRelationship)::DownCast(anItem);
+      Standard_Integer aNbRep = (theRep == aSRR->Rep1() ? 2 : 1);
+      aBinder = TransferEntity(aSRR, theTP, theLocalFactors, aNbRep, theUseTrsf, thePS.Next());
+    }
+    else if (anItem->DynamicType() == STANDARD_TYPE(StepRepr_MechanicalDesignAndDraughtingRelationship))
+    {
+      Handle(StepRepr_MechanicalDesignAndDraughtingRelationship) aMDADR =
+        Handle(StepRepr_MechanicalDesignAndDraughtingRelationship)::DownCast(anItem);
+      aBinder = TransferEntity(aMDADR, theTP, theLocalFactors, thePS.Next());
+    }
+    else if (theReadConstructiveGeomRR &&
+             anItem->DynamicType() == STANDARD_TYPE(StepRepr_ConstructiveGeometryRepresentationRelationship))
+    {
+      Handle(StepRepr_ConstructiveGeometryRepresentationRelationship) aCGRR =
+        Handle(StepRepr_ConstructiveGeometryRepresentationRelationship)::DownCast(anItem);
+      aBinder = TransferEntity(aCGRR, theTP, theLocalFactors);
+    }
+    if (!aBinder.IsNull())
+    {
+      aResult = TransferBRep::ShapeResult(aBinder);
+      aBuilder.Add(theCund, aResult);
+    }
+  }
+  return aResult;
 }

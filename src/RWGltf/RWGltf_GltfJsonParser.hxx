@@ -15,12 +15,8 @@
 #ifndef _RWGltf_GltfJsonParser_HeaderFile
 #define _RWGltf_GltfJsonParser_HeaderFile
 
-#include <Graphic3d_Vec.hxx>
 #include <Message_Gravity.hxx>
 #include <Message_ProgressScope.hxx>
-#include <NCollection_DataMap.hxx>
-#include <NCollection_IndexedMap.hxx>
-#include <RWGltf_GltfAccessor.hxx>
 #include <RWGltf_GltfPrimArrayData.hxx>
 #include <RWGltf_GltfLatePrimitiveArray.hxx>
 #include <RWGltf_GltfBufferView.hxx>
@@ -43,16 +39,17 @@
 
 #ifdef HAVE_RAPIDJSON
   //#define RAPIDJSON_ASSERT
+  #include <Standard_WarningsDisable.hxx>
   #include <rapidjson/document.h>
   #include <rapidjson/prettywriter.h>
   #include <rapidjson/stringbuffer.h>
   #include <rapidjson/istreamwrapper.h>
   #include <rapidjson/ostreamwrapper.h>
-
+  #include <Standard_WarningsRestore.hxx>
+  
   typedef rapidjson::Document::ValueType RWGltf_JsonValue;
 #endif
 
-class Message_ProgressIndicator;
 
 //! INTERNAL tool for parsing glTF document (JSON structure).
 class RWGltf_GltfJsonParser
@@ -93,6 +90,9 @@ public:
   //! Set metadata map.
   void SetMetadata (TColStd_IndexedDataMapOfStringString& theMetadata) { myMetadata = &theMetadata; }
 
+  //! Set flag to translate asset.extras into metadata.
+  void SetReadAssetExtras (bool theToRead) { myToReadAssetExtras = theToRead; }
+
   //! Return transformation from glTF to OCCT coordinate system.
   const RWMesh_CoordinateSystemConverter& CoordinateSystemConverter() const { return myCSTrsf; }
 
@@ -110,6 +110,9 @@ public:
 
   //! Set flag to ignore nodes without Geometry, TRUE by default.
   void SetSkipEmptyNodes (bool theToSkip) { myToSkipEmptyNodes = theToSkip; }
+
+  //! Set flag to flag to load all scenes in the document, FALSE by default which means only main (default) scene will be loaded.
+  void SetLoadAllScenes (bool theToLoadAll) { myToLoadAllScenes = theToLoadAll; }
 
   //! Set flag to use Mesh name in case if Node name is empty, TRUE by default.
   void SetMeshNameAsFallback (bool theToFallback) { myUseMeshNameAsFallback = theToFallback; }
@@ -188,7 +191,8 @@ protected:
                                       const RWGltf_JsonValue& theMesh);
 
   //! Parse primitive array.
-  Standard_EXPORT bool gltfParsePrimArray (const Handle(RWGltf_GltfLatePrimitiveArray)& theMeshData,
+  Standard_EXPORT bool gltfParsePrimArray (TopoDS_Shape& thePrimArrayShape,
+                                           const TCollection_AsciiString& theMeshId,
                                            const TCollection_AsciiString& theMeshName,
                                            const RWGltf_JsonValue& thePrimArray);
 
@@ -196,7 +200,8 @@ protected:
   Standard_EXPORT bool gltfParseAccessor (const Handle(RWGltf_GltfLatePrimitiveArray)& theMeshData,
                                           const TCollection_AsciiString& theName,
                                           const RWGltf_JsonValue& theAccessor,
-                                          const RWGltf_GltfArrayType theType);
+                                          const RWGltf_GltfArrayType theType,
+                                          const RWGltf_JsonValue* theCompBuffView);
 
   //! Parse buffer view.
   Standard_EXPORT bool gltfParseBufferView (const Handle(RWGltf_GltfLatePrimitiveArray)& theMeshData,
@@ -283,8 +288,9 @@ protected:
   //! Groups for re-using shapes.
   enum ShapeMapGroup
   {
-    ShapeMapGroup_Nodes,  //!< nodes
-    ShapeMapGroup_Meshes, //!< meshes
+    ShapeMapGroup_Nodes,     //!< nodes
+    ShapeMapGroup_Meshes,    //!< meshes
+    ShapeMapGroup_PrimArray, //!< primitive array
   };
 
   //! Bind name attribute.
@@ -393,7 +399,7 @@ protected:
 
   private:
 
-    NCollection_DataMap<TCollection_AsciiString, const RWGltf_JsonValue*, TCollection_AsciiString> myChildren;
+    NCollection_DataMap<TCollection_AsciiString, const RWGltf_JsonValue*> myChildren;
     const RWGltf_JsonValue* myRoot;
 
   };
@@ -415,7 +421,7 @@ protected:
   NCollection_DataMap<TCollection_AsciiString, Handle(RWGltf_MaterialMetallicRoughness)> myMaterialsPbr;
   NCollection_DataMap<TCollection_AsciiString, Handle(RWGltf_MaterialCommon)> myMaterialsCommon;
   NCollection_DataMap<TCollection_AsciiString, Handle(XCAFDoc_VisMaterial)> myMaterials;
-  NCollection_DataMap<TCollection_AsciiString, TopoDS_Shape> myShapeMap[2];
+  NCollection_DataMap<TCollection_AsciiString, TopoDS_Shape> myShapeMap[3];
 
   NCollection_DataMap<TCollection_AsciiString, bool> myProbedFiles;
   NCollection_DataMap<TCollection_AsciiString, Handle(NCollection_Buffer)> myDecodedBuffers;
@@ -429,8 +435,10 @@ protected:
   bool                      myIsBinary;       //!< binary document
   bool                      myIsGltf1;        //!< obsolete glTF 1.0 version format
   bool                      myToSkipEmptyNodes; //!< ignore nodes without Geometry
+  bool                      myToLoadAllScenes;  //!< flag to load all scenes in the document, FALSE by default
   bool                      myUseMeshNameAsFallback; //!< flag to use Mesh name in case if Node name is empty, TRUE by default
   bool                      myToProbeHeader;  //!< flag to probe header without full reading, FALSE by default
+  bool                      myToReadAssetExtras; //!< flag to translate asset.extras into metadata, TRUE by default
 
 #ifdef HAVE_RAPIDJSON
   GltfElementMap myGltfRoots[RWGltf_GltfRootElement_NB]; //!< glTF format root elements

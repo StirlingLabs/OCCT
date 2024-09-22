@@ -24,13 +24,10 @@
 
 #include <BRep_Builder.hxx>
 #include <BRep_GCurve.hxx>
-#include <BRep_ListIteratorOfListOfCurveRepresentation.hxx>
-#include <BRep_ListOfCurveRepresentation.hxx>
 #include <BRep_TEdge.hxx>
 #include <BRep_Tool.hxx>
 #include <BRepLib.hxx>
 #include <Geom2d_BezierCurve.hxx>
-#include <Geom2d_BoundedCurve.hxx>
 #include <Geom2d_BSplineCurve.hxx>
 #include <Geom2d_Curve.hxx>
 #include <Geom2d_Line.hxx>
@@ -38,7 +35,6 @@
 #include <Geom2d_TrimmedCurve.hxx>
 #include <Geom_Curve.hxx>
 #include <Geom_Plane.hxx>
-#include <Geom_SphericalSurface.hxx>
 #include <Geom_Surface.hxx>
 #include <GeomLib.hxx>
 #include <Precision.hxx>
@@ -53,7 +49,6 @@
 #include <Standard_ErrorHandler.hxx>
 #include <Standard_Failure.hxx>
 #include <Standard_Type.hxx>
-#include <TopExp.hxx>
 #include <TopLoc_Location.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Edge.hxx>
@@ -395,7 +390,7 @@ static Handle(Geom2d_Curve) TranslatePCurve (const Handle(Geom_Surface)& aSurf,
 	    Standard_Real oldFirstCurve1 = oldFirst, oldLastCurve1 = oldLast;
 	    if(Curve2dPtr->IsKind(STANDARD_TYPE(Geom2d_BezierCurve))) {
 	      
-	      Standard_Real preci = Precision::PConfusion();
+	      constexpr Standard_Real preci = Precision::PConfusion();
 	      if ( Abs(oldFirst) > preci || Abs(oldLast-1) > preci ) {
 		Handle(Geom2d_BezierCurve) bezier = Handle(Geom2d_BezierCurve)::DownCast(Curve2dPtr->Copy());
 		bezier->Segment(oldFirst,oldLast);
@@ -417,7 +412,7 @@ static Handle(Geom2d_Curve) TranslatePCurve (const Handle(Geom_Surface)& aSurf,
 	    
 	    if(Curve2dPtr2->IsKind(STANDARD_TYPE(Geom2d_BezierCurve))) {
 	      
-	      Standard_Real preci = Precision::PConfusion();
+	      constexpr Standard_Real preci = Precision::PConfusion();
 	      if ( Abs(oldFirst) > preci || Abs(oldLast-1) > preci ) {
 		Handle(Geom2d_BezierCurve) bezier = Handle(Geom2d_BezierCurve)::DownCast(Curve2dPtr2->Copy());
 		bezier->Segment(oldFirst,oldLast);
@@ -520,7 +515,7 @@ Standard_Boolean ShapeFix_Edge::FixAddPCurve (const TopoDS_Edge& edge,
       //  Ici, on exploite les infos deja connues
       Standard_Real uf,ul,vf,vl;
       surf->Bounds (uf,ul,vf,vl);
-      //#4 rln 19/02/98 ProSTEP ug_exhaust-A.stp entity #284920 (thoroidal surface)
+      //#4 rln 19/02/98 ProSTEP ug_exhaust-A.stp entity #284920 (toroidal surface)
       //#13 rln 17/03/98 (updating fix #4) call to TranslatePCurve in the case
       //when a surface is either u- and vclosed or neither u- nor vclosed
       //#78 rln 12.03.99 S4135: checking spatial closure with prec

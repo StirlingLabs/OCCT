@@ -18,20 +18,14 @@
 #define _IGESDefs_GenericData_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <Standard_Integer.hxx>
 #include <TColStd_HArray1OfInteger.hxx>
 #include <TColStd_HArray1OfTransient.hxx>
 #include <IGESData_IGESEntity.hxx>
 #include <Standard_Real.hxx>
-#include <Standard_Boolean.hxx>
 class TCollection_HAsciiString;
-class Standard_DimensionMismatch;
-class Standard_OutOfRange;
-class Standard_NullObject;
 class Standard_Transient;
-class IGESData_IGESEntity;
 
 
 class IGESDefs_GenericData;

@@ -18,14 +18,10 @@
 #define _CDF_Directory_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <CDM_ListOfDocument.hxx>
 #include <Standard_Transient.hxx>
-#include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
-class Standard_NoSuchObject;
-class CDF_DirectoryIterator;
 class CDM_Document;
 
 

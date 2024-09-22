@@ -27,8 +27,6 @@ class GccEnt_QualifiedLin;
 class gp_Lin2d;
 class GccEnt_QualifiedCirc;
 class gp_Circ2d;
-class GccEnt_QualifiedLin;
-class GccEnt_QualifiedCirc;
 
 
 //! This package provides an implementation of the qualified
@@ -126,29 +124,6 @@ public:
   //! or line are external to one another.
   Standard_EXPORT static GccEnt_QualifiedCirc Outside (const gp_Circ2d& Obj);
 
-
-
-
-protected:
-
-
-
-
-
-private:
-
-
-
-
-friend class GccEnt_QualifiedLin;
-friend class GccEnt_QualifiedCirc;
-
 };
-
-
-
-
-
-
 
 #endif // _GccEnt_HeaderFile

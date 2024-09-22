@@ -21,12 +21,10 @@
 #include <Standard_Type.hxx>
 
 #include <Standard_Integer.hxx>
-#include <Standard_Address.hxx>
 #include <Standard_Real.hxx>
 #include <Standard_Transient.hxx>
 #include <MAT_SequenceOfArc.hxx>
 #include <MAT_SequenceOfBasicElt.hxx>
-#include <Standard_Boolean.hxx>
 class MAT_Arc;
 
 

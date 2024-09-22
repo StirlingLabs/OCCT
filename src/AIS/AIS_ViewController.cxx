@@ -21,10 +21,7 @@
 #include <Aspect_XRSession.hxx>
 #include <Aspect_Grid.hxx>
 #include <Geom_CartesianPoint.hxx>
-#include <Graphic3d_ArrayOfSegments.hxx>
-#include <Graphic3d_Texture2Dmanual.hxx>
 #include <Message.hxx>
-#include <Message_Messenger.hxx>
 #include <gp_Quaternion.hxx>
 #include <V3d_View.hxx>
 #include <V3d_Viewer.hxx>
@@ -37,6 +34,7 @@
 AIS_ViewController::AIS_ViewController()
 : myLastEventsTime    (0.0),
   myToAskNextFrame    (false),
+  myIsContinuousRedraw(false),
   myMinCamDistance    (1.0),
   myRotationMode      (AIS_RotationMode_BndBoxActive),
   myNavigationMode    (AIS_NavigationMode_Orbit),
@@ -62,6 +60,8 @@ AIS_ViewController::AIS_ViewController()
   myHasThrust (false),
   //
   myViewAnimation (new AIS_AnimationCamera ("AIS_ViewController_ViewAnimation", Handle(V3d_View)())),
+  myObjAnimation (new AIS_Animation ("AIS_ViewController_ObjectsAnimation")),
+  myToPauseObjAnimation (false),
   myPrevMoveTo (-1, -1),
   myHasHlrOnBeforeRotation (false),
   //
@@ -92,6 +92,7 @@ AIS_ViewController::AIS_ViewController()
   myTouchPanThresholdPx      (4.0f),
   myTouchZoomThresholdPx     (6.0f),
   myTouchZoomRatio           (0.13f),
+  myTouchDraggingThresholdPx (6.0f),
   //
   myNbTouchesLast (0),
   myUpdateStartPointPan  (true),
@@ -116,22 +117,37 @@ AIS_ViewController::AIS_ViewController()
   myRubberBand->SetDisplayMode (0);
   myRubberBand->SetMutable (true);
 
-  myMouseGestureMap.Bind (Aspect_VKeyMouse_LeftButton,                           AIS_MouseGesture_RotateOrbit);
-  myMouseGestureMap.Bind (Aspect_VKeyMouse_LeftButton | Aspect_VKeyFlags_CTRL,   AIS_MouseGesture_Zoom);
-  myMouseGestureMap.Bind (Aspect_VKeyMouse_LeftButton | Aspect_VKeyFlags_SHIFT,  AIS_MouseGesture_Pan);
-  myMouseGestureMap.Bind (Aspect_VKeyMouse_LeftButton | Aspect_VKeyFlags_ALT,    AIS_MouseGesture_SelectRectangle);
-  myMouseGestureMap.Bind (Aspect_VKeyMouse_LeftButton | Aspect_VKeyFlags_ALT | Aspect_VKeyFlags_SHIFT, AIS_MouseGesture_SelectRectangle);
+  myMouseGestureMap.Bind ((Standard_UInteger )Aspect_VKeyMouse_LeftButton,
+                          AIS_MouseGesture_RotateOrbit);
+  myMouseGestureMap.Bind ((Standard_UInteger )Aspect_VKeyMouse_LeftButton | (Standard_UInteger )Aspect_VKeyFlags_CTRL,
+                          AIS_MouseGesture_Zoom);
+  myMouseGestureMap.Bind ((Standard_UInteger )Aspect_VKeyMouse_LeftButton | (Standard_UInteger )Aspect_VKeyFlags_SHIFT,
+                          AIS_MouseGesture_Pan);
+  myMouseGestureMap.Bind ((Standard_UInteger )Aspect_VKeyMouse_LeftButton | (Standard_UInteger )Aspect_VKeyFlags_ALT,
+                          AIS_MouseGesture_SelectRectangle);
+  myMouseGestureMap.Bind ((Standard_UInteger )Aspect_VKeyMouse_LeftButton | (Standard_UInteger )Aspect_VKeyFlags_ALT | (Standard_UInteger )Aspect_VKeyFlags_SHIFT,
+                          AIS_MouseGesture_SelectRectangle);
 
-  myMouseSelectionSchemes.Bind (Aspect_VKeyMouse_LeftButton,                          AIS_SelectionScheme_Replace);
-  myMouseSelectionSchemes.Bind (Aspect_VKeyMouse_LeftButton | Aspect_VKeyFlags_ALT,   AIS_SelectionScheme_Replace);
-  myMouseSelectionSchemes.Bind (Aspect_VKeyMouse_LeftButton | Aspect_VKeyFlags_SHIFT, AIS_SelectionScheme_XOR);
-  myMouseSelectionSchemes.Bind (Aspect_VKeyMouse_LeftButton | Aspect_VKeyFlags_ALT | Aspect_VKeyFlags_SHIFT, AIS_SelectionScheme_XOR);
+  myMouseSelectionSchemes.Bind ((Standard_UInteger )Aspect_VKeyMouse_LeftButton,
+                                AIS_SelectionScheme_Replace);
+  myMouseSelectionSchemes.Bind ((Standard_UInteger )Aspect_VKeyMouse_LeftButton | (Standard_UInteger )Aspect_VKeyFlags_ALT,
+                                AIS_SelectionScheme_Replace);
+  myMouseSelectionSchemes.Bind ((Standard_UInteger )Aspect_VKeyMouse_LeftButton | (Standard_UInteger )Aspect_VKeyFlags_SHIFT,
+                                AIS_SelectionScheme_XOR);
+  myMouseSelectionSchemes.Bind ((Standard_UInteger )Aspect_VKeyMouse_LeftButton | (Standard_UInteger )Aspect_VKeyFlags_ALT | (Standard_UInteger )Aspect_VKeyFlags_SHIFT,
+                                AIS_SelectionScheme_XOR);
 
-  myMouseGestureMap.Bind (Aspect_VKeyMouse_RightButton,                          AIS_MouseGesture_Zoom);
-  myMouseGestureMap.Bind (Aspect_VKeyMouse_RightButton | Aspect_VKeyFlags_CTRL,  AIS_MouseGesture_RotateOrbit);
+  myMouseGestureMap.Bind ((Standard_UInteger )Aspect_VKeyMouse_RightButton,
+                          AIS_MouseGesture_Zoom);
+  myMouseGestureMap.Bind ((Standard_UInteger )Aspect_VKeyMouse_RightButton | (Standard_UInteger )Aspect_VKeyFlags_CTRL,
+                          AIS_MouseGesture_RotateOrbit);
 
-  myMouseGestureMap.Bind (Aspect_VKeyMouse_MiddleButton,                         AIS_MouseGesture_Pan);
-  myMouseGestureMap.Bind (Aspect_VKeyMouse_MiddleButton | Aspect_VKeyFlags_CTRL, AIS_MouseGesture_Pan);
+  myMouseGestureMap.Bind ((Standard_UInteger )Aspect_VKeyMouse_MiddleButton,
+                          AIS_MouseGesture_Pan);
+  myMouseGestureMap.Bind ((Standard_UInteger )Aspect_VKeyMouse_MiddleButton | (Standard_UInteger )Aspect_VKeyFlags_CTRL,
+                          AIS_MouseGesture_Pan);
+
+  myMouseGestureMapDrag.Bind (Aspect_VKeyMouse_LeftButton, AIS_MouseGesture_Drag);
 
   myXRTeleportHaptic.Duration  = 3600.0f;
   myXRTeleportHaptic.Frequency = 0.1f;
@@ -181,6 +197,53 @@ void AIS_ViewController::FlushViewEvents (const Handle(AIS_InteractiveContext)& 
 {
   flushBuffers (theCtx, theView);
   flushGestures(theCtx, theView);
+
+  if (theView->IsSubview())
+  {
+    // move input coordinates inside the view
+    const Graphic3d_Vec2i aDelta = theView->View()->SubviewTopLeft();
+    if (myGL.MoveTo.ToHilight || myGL.Dragging.ToStart)
+    {
+      myGL.MoveTo.Point -= aDelta;
+    }
+    if (myGL.Panning.ToStart)
+    {
+      myGL.Panning.PointStart -= aDelta;
+    }
+    if (myGL.Dragging.ToStart)
+    {
+      myGL.Dragging.PointStart -= aDelta;
+    }
+    if (myGL.Dragging.ToMove)
+    {
+      myGL.Dragging.PointTo -= aDelta;
+    }
+    if (myGL.OrbitRotation.ToStart)
+    {
+      myGL.OrbitRotation.PointStart -= Graphic3d_Vec2d (aDelta);
+    }
+    if (myGL.OrbitRotation.ToRotate)
+    {
+      myGL.OrbitRotation.PointTo -= Graphic3d_Vec2d (aDelta);
+    }
+    if (myGL.ViewRotation.ToStart)
+    {
+      myGL.ViewRotation.PointStart -= Graphic3d_Vec2d (aDelta);
+    }
+    if (myGL.ViewRotation.ToRotate)
+    {
+      myGL.ViewRotation.PointTo -= Graphic3d_Vec2d (aDelta);
+    }
+    for (Graphic3d_Vec2i& aPntIter : myGL.Selection.Points)
+    {
+      aPntIter -= aDelta;
+    }
+    for (Aspect_ScrollDelta& aZoomIter : myGL.ZoomActions)
+    {
+      aZoomIter.Point -= aDelta;
+    }
+  }
+
   if (theToHandle)
   {
     HandleViewEvents (theCtx, theView);
@@ -261,12 +324,26 @@ void AIS_ViewController::flushBuffers (const Handle(AIS_InteractiveContext)& ,
     myUI.Dragging.ToStop = false;
     myGL.Dragging.ToStop = true;
   }
-  else if (myUI.Dragging.ToStart)
+  else
   {
-    myUI.Dragging.ToStart = false;
-    myGL.Dragging.ToStart = true;
-    myGL.Dragging.PointStart = myUI.Dragging.PointStart;
+    if (myUI.Dragging.ToStart)
+    {
+      myUI.Dragging.ToStart = false;
+      myGL.Dragging.ToStart = true;
+      myGL.Dragging.PointStart = myUI.Dragging.PointStart;
+    }
+    if (myUI.Dragging.ToConfirm)
+    {
+      myUI.Dragging.ToConfirm = false;
+      myGL.Dragging.ToConfirm = true;
+    }
+    if (myUI.Dragging.ToMove)
+    {
+      myUI.Dragging.ToMove = false;
+      myGL.Dragging.ToMove = true;
+    }
   }
+
   myGL.Dragging.PointTo = myUI.Dragging.PointTo;
 
   if (myUI.OrbitRotation.ToStart)
@@ -351,6 +428,7 @@ void AIS_ViewController::flushGestures (const Handle(AIS_InteractiveContext)& ,
         const Graphic3d_Vec2d aRotDelta = aTouch.To - myGL.OrbitRotation.PointStart;
         myGL.OrbitRotation.ToRotate = true;
         myGL.OrbitRotation.PointTo  = myGL.OrbitRotation.PointStart + aRotDelta * aRotAccel;
+        myGL.Dragging.ToMove = true;
         myGL.Dragging.PointTo.SetValues ((int )aTouch.To.x(), (int )aTouch.To.y());
       }
       else
@@ -358,6 +436,7 @@ void AIS_ViewController::flushGestures (const Handle(AIS_InteractiveContext)& ,
         const Graphic3d_Vec2d aRotDelta = aTouch.To - myGL.ViewRotation.PointStart;
         myGL.ViewRotation.ToRotate = true;
         myGL.ViewRotation.PointTo = myGL.ViewRotation.PointStart + aRotDelta * aRotAccel;
+        myGL.Dragging.ToMove = true;
         myGL.Dragging.PointTo.SetValues ((int )aTouch.To.x(), (int )aTouch.To.y());
       }
 
@@ -609,6 +688,14 @@ bool AIS_ViewController::UpdateMouseClick (const Graphic3d_Vec2i& thePoint,
                                            bool theIsDoubleClick)
 {
   (void )theIsDoubleClick;
+
+  if (myToPauseObjAnimation
+  && !myObjAnimation.IsNull()
+  && !myObjAnimation->IsStopped())
+  {
+    myObjAnimation->Pause();
+  }
+
   AIS_SelectionScheme aScheme = AIS_SelectionScheme_UNKNOWN;
   if (myMouseSelectionSchemes.Find (theButton | theModifiers, aScheme))
   {
@@ -756,6 +843,7 @@ bool AIS_ViewController::UpdateMouseButtons (const Graphic3d_Vec2i& thePoint,
         }
         case AIS_MouseGesture_Zoom:
         case AIS_MouseGesture_ZoomWindow:
+        case AIS_MouseGesture_ZoomVertical:
         {
           if (!myToAllowZooming)
           {
@@ -772,6 +860,19 @@ bool AIS_ViewController::UpdateMouseButtons (const Graphic3d_Vec2i& thePoint,
           UpdatePolySelection (thePoint, true);
           break;
         }
+        case AIS_MouseGesture_Drag:
+        {
+          if (myToAllowDragging)
+          {
+            myUI.Dragging.ToStart = true;
+            myUI.Dragging.PointStart = thePoint;
+          }
+          else
+          {
+            myMouseActiveGesture = AIS_MouseGesture_NONE;
+          }
+          break;
+        }
         case AIS_MouseGesture_NONE:
         {
           break;
@@ -779,12 +880,19 @@ bool AIS_ViewController::UpdateMouseButtons (const Graphic3d_Vec2i& thePoint,
       }
     }
 
-    if (theButtons == Aspect_VKeyMouse_LeftButton
-     && theModifiers == Aspect_VKeyFlags_NONE
-     && myToAllowDragging)
+    AIS_MouseGesture aSecGesture = AIS_MouseGesture_NONE;
+    if (myMouseGestureMapDrag.Find (theButtons | theModifiers, aSecGesture))
     {
-      myUI.Dragging.ToStart = true;
-      myUI.Dragging.PointStart = thePoint;
+      if (aSecGesture == AIS_MouseGesture_Drag
+       && myToAllowDragging)
+      {
+        myUI.Dragging.ToStart = true;
+        myUI.Dragging.PointStart = thePoint;
+        if (myMouseActiveGesture == AIS_MouseGesture_NONE)
+        {
+          myMouseActiveGesture = aSecGesture;
+        }
+      }
     }
   }
 
@@ -826,6 +934,7 @@ bool AIS_ViewController::UpdateMousePosition (const Graphic3d_Vec2i& thePoint,
       myMouseClickCounter = 0;
       myMouseSingleButton = -1;
       myMouseStopDragOnUnclick = true;
+      myUI.Dragging.ToConfirm = true;
     }
   }
 
@@ -908,7 +1017,8 @@ bool AIS_ViewController::UpdateMousePosition (const Graphic3d_Vec2i& thePoint,
       const double aRotTol = theIsEmulated
                            ? double(myTouchToleranceScale) * myTouchRotationThresholdPx
                            : 0.0;
-      if (double (Abs (aDelta.x()) + Abs (aDelta.y())) > aRotTol)
+      const Graphic3d_Vec2d aDeltaF (aDelta);
+      if (Abs (aDeltaF.x()) + Abs (aDeltaF.y()) > aRotTol)
       {
         const double aRotAccel = myNavigationMode == AIS_NavigationMode_FirstPersonWalk ? myMouseAccel : myOrbitAccel;
         const Graphic3d_Vec2i aRotDelta = thePoint - myMousePressPoint;
@@ -924,6 +1034,8 @@ bool AIS_ViewController::UpdateMousePosition (const Graphic3d_Vec2i& thePoint,
           myUI.ViewRotation.PointTo = Graphic3d_Vec2d (myMousePressPoint.x(), myMousePressPoint.y())
                                     + Graphic3d_Vec2d (aRotDelta.x(), aRotDelta.y()) * aRotAccel;
         }
+
+        myUI.Dragging.ToMove  = true;
         myUI.Dragging.PointTo = thePoint;
 
         myMouseProgressPoint = thePoint;
@@ -932,6 +1044,7 @@ bool AIS_ViewController::UpdateMousePosition (const Graphic3d_Vec2i& thePoint,
       break;
     }
     case AIS_MouseGesture_Zoom:
+    case AIS_MouseGesture_ZoomVertical:
     {
       if (!myToAllowZooming)
       {
@@ -940,12 +1053,19 @@ bool AIS_ViewController::UpdateMousePosition (const Graphic3d_Vec2i& thePoint,
       const double aZoomTol = theIsEmulated
                             ? double(myTouchToleranceScale) * myTouchZoomThresholdPx
                             : 0.0;
-      if (double (Abs (aDelta.x())) > aZoomTol)
+      const double aScrollDelta = myMouseActiveGesture == AIS_MouseGesture_Zoom
+                                ? aDelta.x()
+                                : aDelta.y();
+      if (Abs (aScrollDelta) > aZoomTol)
       {
-        if (UpdateZoom (Aspect_ScrollDelta (aDelta.x())))
+        if (UpdateZoom (Aspect_ScrollDelta (aScrollDelta)))
         {
           toUpdateView = true;
         }
+
+        myUI.Dragging.ToMove  = true;
+        myUI.Dragging.PointTo = thePoint;
+
         myMouseProgressPoint = thePoint;
       }
       break;
@@ -959,7 +1079,8 @@ bool AIS_ViewController::UpdateMousePosition (const Graphic3d_Vec2i& thePoint,
       const double aPanTol = theIsEmulated
                            ? double(myTouchToleranceScale) * myTouchPanThresholdPx
                            : 0.0;
-      if (double (Abs (aDelta.x()) + Abs (aDelta.y())) > aPanTol)
+      const Graphic3d_Vec2d aDeltaF (aDelta);
+      if (Abs (aDeltaF.x()) + Abs (aDeltaF.y()) > aPanTol)
       {
         if (myUpdateStartPointPan)
         {
@@ -969,7 +1090,6 @@ bool AIS_ViewController::UpdateMousePosition (const Graphic3d_Vec2i& thePoint,
         }
 
         aDelta.y() = -aDelta.y();
-        myMouseProgressPoint = thePoint;
         if (myUI.Panning.ToPan)
         {
           myUI.Panning.Delta += aDelta;
@@ -979,6 +1099,37 @@ bool AIS_ViewController::UpdateMousePosition (const Graphic3d_Vec2i& thePoint,
           myUI.Panning.ToPan = true;
           myUI.Panning.Delta = aDelta;
         }
+
+        myUI.Dragging.ToMove  = true;
+        myUI.Dragging.PointTo = thePoint;
+
+        myMouseProgressPoint = thePoint;
+
+        toUpdateView = true;
+      }
+      break;
+    }
+    case AIS_MouseGesture_Drag:
+    {
+      if (!myToAllowDragging)
+      {
+        break;
+      }
+
+      const double aDragTol = theIsEmulated
+                            ? double(myTouchToleranceScale) * myTouchDraggingThresholdPx
+                            : 0.0;
+      if (double (Abs (aDelta.x()) + Abs (aDelta.y())) > aDragTol)
+      {
+        const double aRotAccel = myNavigationMode == AIS_NavigationMode_FirstPersonWalk ? myMouseAccel : myOrbitAccel;
+        const Graphic3d_Vec2i aRotDelta = thePoint - myMousePressPoint;
+        myUI.ViewRotation.ToRotate = true;
+        myUI.ViewRotation.PointTo = Graphic3d_Vec2d (myMousePressPoint.x(), myMousePressPoint.y())
+                                  + Graphic3d_Vec2d (aRotDelta.x(), aRotDelta.y()) * aRotAccel;
+        myUI.Dragging.ToMove  = true;
+        myUI.Dragging.PointTo = thePoint;
+
+        myMouseProgressPoint = thePoint;
         toUpdateView = true;
       }
       break;
@@ -1500,10 +1651,11 @@ void AIS_ViewController::handleZoom (const Handle(V3d_View)& theView,
 
     Graphic3d_Vec2i aWinSize;
     theView->Window()->Size (aWinSize.x(), aWinSize.y());
-    const Graphic3d_Vec2d aPanFromCenterPx (double(theParams.Point.x()) - 0.5 * double(aWinSize.x()),
-                                            double(aWinSize.y() - theParams.Point.y() - 1) - 0.5 * double(aWinSize.y()));
-    aDxy.x() += -aViewDims1.X() * aPanFromCenterPx.x() / double(aWinSize.x());
-    aDxy.y() += -aViewDims1.Y() * aPanFromCenterPx.y() / double(aWinSize.y());
+    const Graphic3d_Vec2d aWinSizeF (aWinSize);
+    const Graphic3d_Vec2d aPanFromCenterPx (double(theParams.Point.x()) - 0.5 * aWinSizeF.x(),
+                                            aWinSizeF.y() - double(theParams.Point.y()) - 1.0 - 0.5 * aWinSizeF.y());
+    aDxy.x() += -aViewDims1.X() * aPanFromCenterPx.x() / aWinSizeF.x();
+    aDxy.y() += -aViewDims1.Y() * aPanFromCenterPx.y() / aWinSizeF.y();
   }
 
   //theView->Translate (aCam, aDxy.x(), aDxy.y());
@@ -1837,7 +1989,7 @@ gp_Pnt AIS_ViewController::GravityPoint (const Handle(AIS_InteractiveContext)& t
 void AIS_ViewController::FitAllAuto (const Handle(AIS_InteractiveContext)& theCtx,
                                      const Handle(V3d_View)& theView)
 {
-  const Bnd_Box aBoxSel = theCtx->BoundingBoxOfSelection();
+  const Bnd_Box aBoxSel = theCtx->BoundingBoxOfSelection (theView);
   const double aFitMargin = 0.01;
   if (aBoxSel.IsVoid())
   {
@@ -2559,6 +2711,17 @@ void AIS_ViewController::OnSelectionChanged (const Handle(AIS_InteractiveContext
 }
 
 // =======================================================================
+// function : OnSubviewChanged
+// purpose  :
+// =======================================================================
+void AIS_ViewController::OnSubviewChanged (const Handle(AIS_InteractiveContext)& ,
+                                           const Handle(V3d_View)& ,
+                                           const Handle(V3d_View)& )
+{
+  //
+}
+
+// =======================================================================
 // function : OnObjectDragged
 // purpose  :
 // =======================================================================
@@ -2586,6 +2749,17 @@ void AIS_ViewController::OnObjectDragged (const Handle(AIS_InteractiveContext)& 
         myDragObject = aDetectedPrs;
         myDragOwner = aDetectedOwner;
       }
+      return;
+    }
+    case AIS_DragAction_Confirmed:
+    {
+      if (myDragObject.IsNull())
+      {
+        return;
+      }
+
+      myDragObject->ProcessDragging (theCtx, theView, myDragOwner, myGL.Dragging.PointStart,
+                                     myGL.Dragging.PointTo, theAction);
       return;
     }
     case AIS_DragAction_Update:
@@ -2905,12 +3079,17 @@ void AIS_ViewController::handleDynamicHighlight (const Handle(AIS_InteractiveCon
       myGL.OrbitRotation.ToRotate = false;
       myGL.ViewRotation .ToRotate = false;
     }
-    else if (myGL.OrbitRotation.ToRotate
-          || myGL.ViewRotation.ToRotate)
+    else if (myGL.Dragging.ToMove)
     {
+      if (myGL.Dragging.ToConfirm)
+      {
+        OnObjectDragged (theCtx, theView, AIS_DragAction_Confirmed);
+      }
       OnObjectDragged (theCtx, theView, AIS_DragAction_Update);
       myGL.OrbitRotation.ToRotate = false;
       myGL.ViewRotation .ToRotate = false;
+      myGL.Panning      .ToPan = false;
+      myGL.ZoomActions.Clear();
     }
   }
 }
@@ -2934,6 +3113,8 @@ void AIS_ViewController::handleMoveTo (const Handle(AIS_InteractiveContext)& the
 void AIS_ViewController::handleViewRedraw (const Handle(AIS_InteractiveContext)& ,
                                            const Handle(V3d_View)& theView)
 {
+  Handle(V3d_View) aParentView = theView->IsSubview() ? theView->ParentView() : theView;
+
   // manage animation state
   if (!myViewAnimation.IsNull()
    && !myViewAnimation->IsStopped())
@@ -2943,37 +3124,100 @@ void AIS_ViewController::handleViewRedraw (const Handle(AIS_InteractiveContext)&
     setAskNextFrame();
   }
 
+  if (!myObjAnimation.IsNull()
+   && !myObjAnimation->IsStopped())
+  {
+    myObjAnimation->UpdateTimer();
+    ResetPreviousMoveTo();
+    setAskNextFrame();
+  }
+
+  if (myIsContinuousRedraw)
+  {
+    myToAskNextFrame = true;
+  }
   if (theView->View()->IsActiveXR())
   {
     // VR requires continuous rendering
     myToAskNextFrame = true;
   }
 
-  for (V3d_ListOfViewIterator aViewIter (theView->Viewer()->ActiveViewIterator()); aViewIter.More(); aViewIter.Next())
+  for (int aSubViewPass = 0; aSubViewPass < 2; ++aSubViewPass)
   {
-    const Handle(V3d_View)& aView = aViewIter.Value();
-    if (aView->IsInvalidated()
-     || (myToAskNextFrame && aView == theView))
+    const bool isSubViewPass = (aSubViewPass == 0);
+    for (V3d_ListOfViewIterator aViewIter (theView->Viewer()->ActiveViewIterator()); aViewIter.More(); aViewIter.Next())
     {
-      if (aView->ComputedMode())
+      const Handle(V3d_View)& aView = aViewIter.Value();
+      if (isSubViewPass
+      && !aView->IsSubview())
       {
-        aView->Update();
+        for (const Handle(V3d_View)& aSubviewIter : aView->Subviews())
+        {
+          if (aSubviewIter->Viewer() != theView->Viewer())
+          {
+            if (aSubviewIter->IsInvalidated())
+            {
+              if (aSubviewIter->ComputedMode())
+              {
+                aSubviewIter->Update();
+              }
+              else
+              {
+                aSubviewIter->Redraw();
+              }
+            }
+            else if (aSubviewIter->IsInvalidatedImmediate())
+            {
+              aSubviewIter->RedrawImmediate();
+            }
+          }
+        }
+        continue;
       }
-      else
+      else if (!isSubViewPass
+             && aView->IsSubview())
       {
-        aView->Redraw();
+        continue;
+      }
+
+      if (aView->IsInvalidated()
+       || (myToAskNextFrame && aView == theView))
+      {
+        if (aView->ComputedMode())
+        {
+          aView->Update();
+        }
+        else
+        {
+          aView->Redraw();
+        }
+
+        if (aView->IsSubview())
+        {
+          aView->ParentView()->InvalidateImmediate();
+        }
+      }
+      else if (aView->IsInvalidatedImmediate())
+      {
+        if (aView->IsSubview())
+        {
+          aView->ParentView()->InvalidateImmediate();
+        }
+
+        aView->RedrawImmediate();
       }
     }
-    else if (aView->IsInvalidatedImmediate())
-    {
-      aView->RedrawImmediate();
-    }
+  }
+  if (theView->IsSubview()
+   && theView->Viewer() != aParentView->Viewer())
+  {
+    aParentView->RedrawImmediate();
   }
 
   if (myToAskNextFrame)
   {
     // ask more frames
-    theView->Window()->InvalidateContent (Handle(Aspect_DisplayConnection)());
+    aParentView->Window()->InvalidateContent (Handle(Aspect_DisplayConnection)());
   }
 }
 
@@ -3218,6 +3462,36 @@ void AIS_ViewController::HandleViewEvents (const Handle(AIS_InteractiveContext)&
 {
   const bool wasImmediateUpdate = theView->SetImmediateUpdate (false);
 
+  Handle(V3d_View) aPickedView;
+  if (theView->IsSubview()
+  || !theView->Subviews().IsEmpty())
+  {
+    // activate another subview on mouse click
+    bool toPickSubview = false;
+    Graphic3d_Vec2i aClickPoint;
+    if (myGL.Selection.Tool == AIS_ViewSelectionTool_Picking
+    && !myGL.Selection.Points.IsEmpty())
+    {
+      aClickPoint = myGL.Selection.Points.Last();
+      toPickSubview = true;
+    }
+    else if (!myGL.ZoomActions.IsEmpty())
+    {
+      //aClickPoint = myGL.ZoomActions.Last().Point;
+      //toPickSubview = true;
+    }
+
+    if (toPickSubview)
+    {
+      if (theView->IsSubview())
+      {
+        aClickPoint += theView->View()->SubviewTopLeft();
+      }
+      Handle(V3d_View) aParent = !theView->IsSubview() ? theView : theView->ParentView();
+      aPickedView = aParent->PickSubview (aClickPoint);
+    }
+  }
+
   handleViewOrientationKeys (theCtx, theView);
   const AIS_WalkDelta aWalk = handleNavigationKeys (theCtx, theView);
   handleXRInput (theCtx, theView, aWalk);
@@ -3234,6 +3508,12 @@ void AIS_ViewController::HandleViewEvents (const Handle(AIS_InteractiveContext)&
   theView->View()->UnsetXRPosedCamera();
 
   theView->SetImmediateUpdate (wasImmediateUpdate);
+
+  if (!aPickedView.IsNull()
+    && aPickedView != theView)
+  {
+    OnSubviewChanged (theCtx, theView, aPickedView);
+  }
 
   // make sure to not process the same events twice
   myGL.Reset();

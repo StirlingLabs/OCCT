@@ -18,14 +18,8 @@
 #define _Aspect_RectangularGrid_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
-#include <Standard_Real.hxx>
 #include <Aspect_Grid.hxx>
-#include <Standard_Boolean.hxx>
-class Standard_NegativeValue;
-class Standard_NullValue;
-class Standard_NumericError;
 
 class Aspect_RectangularGrid : public Aspect_Grid
 {

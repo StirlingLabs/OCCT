@@ -30,9 +30,6 @@
 #include <Geom_Surface.hxx>
 #include <Geom_TrimmedCurve.hxx>
 #include <Precision.hxx>
-#include <Standard_ConstructionError.hxx>
-#include <Standard_NoMoreObject.hxx>
-#include <Standard_NoSuchObject.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
@@ -62,8 +59,8 @@ void LocOpe_FindEdgesInFace::Set(const TopoDS_Shape& Sh,
   gp_Cylinder cy;
 
 
-  Standard_Real Tol = Precision::Confusion();
-  Standard_Real TolAng = Precision::Angular();
+  constexpr Standard_Real Tol = Precision::Confusion();
+  constexpr Standard_Real TolAng = Precision::Angular();
 
   S = BRep_Tool::Surface(F);
   Ts = S->DynamicType();

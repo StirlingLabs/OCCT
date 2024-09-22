@@ -19,11 +19,10 @@
 
 #include <TCollection_AsciiString.hxx>
 #include <Standard_Transient.hxx>
-#include <TCollection_AsciiString.hxx>
 #include <NCollection_DataMap.hxx>
 
-typedef NCollection_DataMap<TCollection_AsciiString,Handle(Standard_Transient),TCollection_AsciiString> STEPConstruct_DataMapOfAsciiStringTransient;
-typedef NCollection_DataMap<TCollection_AsciiString,Handle(Standard_Transient),TCollection_AsciiString>::Iterator STEPConstruct_DataMapIteratorOfDataMapOfAsciiStringTransient;
+typedef NCollection_DataMap<TCollection_AsciiString,Handle(Standard_Transient)> STEPConstruct_DataMapOfAsciiStringTransient;
+typedef NCollection_DataMap<TCollection_AsciiString,Handle(Standard_Transient)>::Iterator STEPConstruct_DataMapIteratorOfDataMapOfAsciiStringTransient;
 
 
 #endif

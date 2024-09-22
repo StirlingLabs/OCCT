@@ -23,24 +23,6 @@
 
 #include <Standard_Real.hxx>
 class Geom_Plane;
-class BRepBuilderAPI_Command;
-class BRepBuilderAPI_MakeShape;
-class BRepBuilderAPI_MakeVertex;
-class BRepBuilderAPI_MakeEdge;
-class BRepBuilderAPI_MakeEdge2d;
-class BRepBuilderAPI_MakePolygon;
-class BRepBuilderAPI_MakeFace;
-class BRepBuilderAPI_FindPlane;
-class BRepBuilderAPI_Sewing;
-class BRepBuilderAPI_MakeWire;
-class BRepBuilderAPI_MakeShell;
-class BRepBuilderAPI_MakeSolid;
-class BRepBuilderAPI_ModifyShape;
-class BRepBuilderAPI_Transform;
-class BRepBuilderAPI_NurbsConvert;
-class BRepBuilderAPI_GTransform;
-class BRepBuilderAPI_Copy;
-class BRepBuilderAPI_Collect;
 
 
 //! The  BRepBuilderAPI  package   provides  an   Application
@@ -121,45 +103,6 @@ public:
   //! Returns the default precision.
   Standard_EXPORT static Standard_Real Precision();
 
-
-
-
-protected:
-
-
-
-
-
-private:
-
-
-
-
-friend class BRepBuilderAPI_Command;
-friend class BRepBuilderAPI_MakeShape;
-friend class BRepBuilderAPI_MakeVertex;
-friend class BRepBuilderAPI_MakeEdge;
-friend class BRepBuilderAPI_MakeEdge2d;
-friend class BRepBuilderAPI_MakePolygon;
-friend class BRepBuilderAPI_MakeFace;
-friend class BRepBuilderAPI_FindPlane;
-friend class BRepBuilderAPI_Sewing;
-friend class BRepBuilderAPI_MakeWire;
-friend class BRepBuilderAPI_MakeShell;
-friend class BRepBuilderAPI_MakeSolid;
-friend class BRepBuilderAPI_ModifyShape;
-friend class BRepBuilderAPI_Transform;
-friend class BRepBuilderAPI_NurbsConvert;
-friend class BRepBuilderAPI_GTransform;
-friend class BRepBuilderAPI_Copy;
-friend class BRepBuilderAPI_Collect;
-
 };
-
-
-
-
-
-
 
 #endif // _BRepBuilderAPI_HeaderFile

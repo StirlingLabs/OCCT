@@ -25,12 +25,9 @@
 #include <TColStd_HArray1OfInteger.hxx>
 #include <TColStd_HArray2OfReal.hxx>
 #include <Standard_Integer.hxx>
-#include <Standard_Boolean.hxx>
 #include <TColStd_Array1OfInteger.hxx>
 #include <TColStd_Array1OfReal.hxx>
 #include <TColStd_Array2OfReal.hxx>
-class Standard_OutOfRange;
-class Standard_ConstructionError;
 
 
 //! Convert a serie of Polynomial N-Dimensional Curves
@@ -54,7 +51,7 @@ class Standard_ConstructionError;
 //! TrueIntervals : the nth polynomial has to be mapped linearly to be
 //! defined on the following interval :
 //! myTrueIntervals->Value(n) and myTrueIntervals->Value(n+1)
-//! so that it represent adequatly the function with the
+//! so that it adequately represents the function with the
 //! required continuity
 class Convert_CompPolynomialToPoles 
 {
@@ -88,7 +85,7 @@ public:
   //! TrueIntervals[2] = {-1, 1}
   Standard_EXPORT Convert_CompPolynomialToPoles(const Standard_Integer NumCurves, const Standard_Integer Continuity, const Standard_Integer Dimension, const Standard_Integer MaxDegree, const Handle(TColStd_HArray1OfInteger)& NumCoeffPerCurve, const Handle(TColStd_HArray1OfReal)& Coefficients, const Handle(TColStd_HArray2OfReal)& PolynomialIntervals, const Handle(TColStd_HArray1OfReal)& TrueIntervals);
   
-  //! To Convert sevral span with different order of Continuity.
+  //! To Convert several span with different order of Continuity.
   //! Warning: The Length of Continuity have to be NumCurves-1
   Standard_EXPORT Convert_CompPolynomialToPoles(const Standard_Integer NumCurves, const Standard_Integer Dimension, const Standard_Integer MaxDegree, const TColStd_Array1OfInteger& Continuity, const TColStd_Array1OfInteger& NumCoeffPerCurve, const TColStd_Array1OfReal& Coefficients, const TColStd_Array2OfReal& PolynomialIntervals, const TColStd_Array1OfReal& TrueIntervals);
   

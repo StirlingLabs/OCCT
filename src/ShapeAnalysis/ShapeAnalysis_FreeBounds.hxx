@@ -22,12 +22,9 @@
 #include <Standard_Handle.hxx>
 
 #include <TopoDS_Compound.hxx>
-#include <Standard_Real.hxx>
-#include <Standard_Boolean.hxx>
 #include <TopTools_HSequenceOfShape.hxx>
 #include <TopTools_DataMapOfShapeShape.hxx>
 class TopoDS_Shape;
-class TopoDS_Compound;
 
 
 //! This class is intended to output free bounds of the shape.
@@ -100,7 +97,7 @@ public:
   //! Returns compound of open wires out of free edges.
     const TopoDS_Compound& GetOpenWires() const;
   
-  //! Builds sequnce of <wires> out of sequence of not sorted
+  //! Builds sequence of <wires> out of sequence of not sorted
   //! <edges>.
   //! Tries to build wires of maximum length. Building a wire is
   //! stopped when no edges can be connected to it at its head or
@@ -115,7 +112,7 @@ public:
   
   Standard_EXPORT static void ConnectWiresToWires (Handle(TopTools_HSequenceOfShape)& iwires, const Standard_Real toler, const Standard_Boolean shared, Handle(TopTools_HSequenceOfShape)& owires);
   
-  //! Builds sequnce of <owires> out of sequence of not sorted
+  //! Builds sequence of <owires> out of sequence of not sorted
   //! <iwires>.
   //! Tries to build wires of maximum length. Building a wire is
   //! stopped when no wires can be connected to it at its head or

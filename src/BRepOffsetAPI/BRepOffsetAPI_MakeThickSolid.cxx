@@ -15,12 +15,9 @@
 // commercial license or contractual agreement.
 
 
-#include <BRepOffset_MakeOffset.hxx>
 #include <BRepOffsetAPI_MakeThickSolid.hxx>
-#include <Standard_ConstructionError.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Shape.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
 
 
 //=======================================================================
@@ -41,12 +38,13 @@ void BRepOffsetAPI_MakeThickSolid::MakeThickSolidByJoin
 (const TopoDS_Shape&         S,
  const TopTools_ListOfShape& ClosingFaces,
  const Standard_Real         Offset, 
- const Standard_Real         Tol, 
+ const Standard_Real         Tol,
  const BRepOffset_Mode       Mode,
  const Standard_Boolean      Intersection,
  const Standard_Boolean      SelfInter,
  const GeomAbs_JoinType      Join,
- const Standard_Boolean      RemoveIntEdges)
+ const Standard_Boolean      RemoveIntEdges,
+ const Message_ProgressRange& theRange)
 {
   NotDone();
   myLastUsedAlgo = OffsetAlgo_JOIN;
@@ -57,7 +55,7 @@ void BRepOffsetAPI_MakeThickSolid::MakeThickSolidByJoin
   for (; it.More(); it.Next())
     myOffsetShape.AddFace(TopoDS::Face(it.Value()));
 
-  myOffsetShape.MakeThickSolid();
+  myOffsetShape.MakeThickSolid(theRange);
   if (!myOffsetShape.IsDone())
     return;
 
@@ -89,7 +87,7 @@ void BRepOffsetAPI_MakeThickSolid::MakeThickSolidBySimple(const TopoDS_Shape& th
 //function : Build
 //purpose  : 
 //=======================================================================
-void BRepOffsetAPI_MakeThickSolid::Build()
+void BRepOffsetAPI_MakeThickSolid::Build(const Message_ProgressRange& /*theRange*/)
 {
 }
 
@@ -111,7 +109,7 @@ const TopTools_ListOfShape& BRepOffsetAPI_MakeThickSolid::Modified (const TopoDS
       // Useful only for faces without influence on others.
       TopTools_ListIteratorOfListOfShape it(myGenerated);
       for (; it.More(); it.Next())
-        it.Value().Reverse();
+        it.ChangeValue().Reverse();
     }
   }
   else if (myLastUsedAlgo == OffsetAlgo_SIMPLE)

@@ -24,15 +24,9 @@
 #include <TopoDS_Vertex.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
-#include <Standard_Real.hxx>
 #include <Standard_Integer.hxx>
-class Standard_ConstructionError;
-class Standard_OutOfRange;
 class BRep_Builder;
 class Geom_Surface;
-class TopoDS_Face;
-class TopoDS_Edge;
-class TopoDS_Vertex;
 
 
 //! The  FaceBuilder is an algorithm   to build a BRep

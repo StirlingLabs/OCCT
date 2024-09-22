@@ -181,6 +181,9 @@ private:
   //! Key up event.
   EM_BOOL onKeyUpEvent (int theEventType, const EmscriptenKeyboardEvent* theEvent);
 
+  //! Focus change event.
+  EM_BOOL onFocusEvent (int theEventType, const EmscriptenFocusEvent* theEvent);
+
 //! @name Emscripten callbacks (static functions)
 private:
 
@@ -204,6 +207,9 @@ private:
 
   static EM_BOOL onKeyUpCallback (int theEventType, const EmscriptenKeyboardEvent* theEvent, void* theView)
   { return ((WasmOcctView* )theView)->onKeyUpEvent (theEventType, theEvent); }
+
+  static EM_BOOL onFocusCallback (int theEventType, const EmscriptenFocusEvent* theEvent, void* theView)
+  { return ((WasmOcctView* )theView)->onFocusEvent (theEventType, theEvent); }
 
 private:
 
@@ -243,7 +249,7 @@ private:
   TCollection_AsciiString        myCanvasId;         //!< canvas element id on HTML page
   Graphic3d_Vec2i                myWinSizeOld;
   float                          myDevicePixelRatio; //!< device pixel ratio for handling high DPI displays
-  unsigned int                   myUpdateRequests;   //!< counter for unhandled update requests
+  unsigned int                   myNbUpdateRequests; //!< counter for unhandled update requests
 
 };
 

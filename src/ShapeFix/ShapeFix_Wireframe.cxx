@@ -21,17 +21,12 @@
 #include <Geom2d_Curve.hxx>
 #include <Geom_BSplineCurve.hxx>
 #include <Geom_Curve.hxx>
-#include <GeomAPI.hxx>
-#include <GeomConvert_CompCurveToBSplineCurve.hxx>
-#include <gp_Pln.hxx>
 #include <gp_Pnt.hxx>
 #include <Message_Msg.hxx>
 #include <ShapeAnalysis_Edge.hxx>
 #include <ShapeAnalysis_TransferParametersProj.hxx>
-#include <ShapeBuild_Edge.hxx>
 #include <ShapeBuild_ReShape.hxx>
 #include <ShapeConstruct.hxx>
-#include <ShapeConstruct_Curve.hxx>
 #include <ShapeFix.hxx>
 #include <ShapeFix_Edge.hxx>
 #include <ShapeFix_Wire.hxx>
@@ -47,11 +42,9 @@
 #include <TopoDS_Iterator.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Vertex.hxx>
-#include <TopTools_DataMapIteratorOfDataMapOfShapeShape.hxx>
 #include <TopTools_DataMapOfShapeInteger.hxx>
 #include <TopTools_DataMapOfShapeListOfShape.hxx>
 #include <TopTools_DataMapOfShapeShape.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopTools_ListOfShape.hxx>
 #include <TopTools_MapOfShape.hxx>
 
@@ -472,8 +465,7 @@ ShapeFix_Wireframe::ShapeFix_Wireframe(const TopoDS_Shape& shape)
 //purpose  : 
 //=======================================================================
 #include <BRepBuilderAPI_MakeFace.hxx>
-#include <TopExp.hxx>
-#include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
+
 Standard_Boolean ShapeFix_Wireframe::CheckSmallEdges(TopTools_MapOfShape& theSmallEdges,
                                                      TopTools_DataMapOfShapeListOfShape& theEdgeToFaces,
                                                      TopTools_DataMapOfShapeListOfShape& theFaceWithSmall,
@@ -704,7 +696,7 @@ Standard_Boolean ShapeFix_Wireframe::MergeSmallEdges(TopTools_MapOfShape& theSma
 		  C2->D1(first2,P,Vec2);
 		  if ( edge1.Orientation() == TopAbs_REVERSED ) Vec1.Reverse();
 		  if ( edge2.Orientation() == TopAbs_REVERSED ) Vec2.Reverse();
-          Standard_Real tol2 = Precision::SquareConfusion();
+          constexpr Standard_Real tol2 = Precision::SquareConfusion();
 		  if ( Vec1.SquareMagnitude() < tol2 ||
 		       Vec2.SquareMagnitude() < tol2 ) Ang1 = M_PI/2.;
 		  else Ang1 = Abs(Vec1.Angle(Vec2));
@@ -1153,7 +1145,7 @@ Standard_Boolean ShapeFix_Wireframe::MergeSmallEdges(TopTools_MapOfShape& theSma
 		  C2->D1(first2,P,Vec2);
 		  if ( edge1.Orientation() == TopAbs_REVERSED ) Vec1.Reverse();
 		  if ( edge2.Orientation() == TopAbs_REVERSED ) Vec2.Reverse();
-          Standard_Real tol2 = Precision::SquareConfusion();
+          constexpr Standard_Real tol2 = Precision::SquareConfusion();
 		  if ( Vec1.SquareMagnitude() < tol2 ||
 		       Vec2.SquareMagnitude() < tol2 ) Ang1 = M_PI/2.;
 		  else Ang1 = Abs(Vec1.Angle(Vec2));

@@ -45,9 +45,6 @@
 #include <ElSLib.hxx>
 #include <Geom2d_Curve.hxx>
 #include <Geom2d_Line.hxx>
-#include <Geom_BezierCurve.hxx>
-#include <Geom_BSplineCurve.hxx>
-#include <Geom_BSplineSurface.hxx>
 #include <Geom_ConicalSurface.hxx>
 #include <Geom_Curve.hxx>
 #include <Geom_CylindricalSurface.hxx>
@@ -63,7 +60,6 @@
 #include <Geom_TrimmedCurve.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <GeomConvert.hxx>
-#include <GeomLib.hxx>
 #include <gp.hxx>
 #include <gp_Ax1.hxx>
 #include <gp_Cone.hxx>
@@ -78,7 +74,6 @@
 #include <gp_Trsf.hxx>
 #include <gp_Trsf2d.hxx>
 #include <gp_Vec.hxx>
-#include <GProp.hxx>
 #include <GProp_GProps.hxx>
 #include <IGESBasic_SingleParent.hxx>
 #include <IGESData_IGESEntity.hxx>
@@ -86,21 +81,17 @@
 #include <IGESData_ToolLocation.hxx>
 #include <IGESData_TransfEntity.hxx>
 #include <IGESGeom_BoundedSurface.hxx>
-#include <IGESGeom_BSplineSurface.hxx>
 #include <IGESGeom_CircularArc.hxx>
-#include <IGESGeom_CurveOnSurface.hxx>
 #include <IGESGeom_Direction.hxx>
 #include <IGESGeom_Line.hxx>
 #include <IGESGeom_OffsetSurface.hxx>
 #include <IGESGeom_Plane.hxx>
-#include <IGESGeom_Point.hxx>
 #include <IGESGeom_RuledSurface.hxx>
 #include <IGESGeom_SurfaceOfRevolution.hxx>
 #include <IGESGeom_TabulatedCylinder.hxx>
 #include <IGESGeom_TrimmedSurface.hxx>
 #include <IGESSolid_ConicalSurface.hxx>
 #include <IGESSolid_CylindricalSurface.hxx>
-#include <IGESSolid_PlaneSurface.hxx>
 #include <IGESSolid_SphericalSurface.hxx>
 #include <IGESSolid_ToroidalSurface.hxx>
 #include <IGESToBRep.hxx>
@@ -115,14 +106,9 @@
 #include <ShapeAlgo.hxx>
 #include <ShapeAlgo_AlgoContainer.hxx>
 #include <ShapeAnalysis.hxx>
-#include <ShapeExtend_WireData.hxx>
 #include <ShapeFix_Wire.hxx>
 #include <Standard_ErrorHandler.hxx>
-#include <TColgp_Array1OfPnt.hxx>
-#include <TColStd_Array1OfInteger.hxx>
 #include <TColStd_Array1OfReal.hxx>
-#include <TopAbs.hxx>
-#include <TopExp.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopLoc_Location.hxx>
 #include <TopoDS.hxx>
@@ -130,7 +116,6 @@
 #include <TopoDS_Face.hxx>
 #include <TopoDS_Iterator.hxx>
 #include <TopoDS_Shape.hxx>
-#include <TopoDS_Shell.hxx>
 #include <TopoDS_Vertex.hxx>
 #include <TopoDS_Wire.hxx>
 
@@ -325,7 +310,7 @@ TopoDS_Shape IGESToBRep_TopoSurface::TransferTopoBasicSurface
     if (IGESData_ToolLocation::ConvertLocation
 	(GetEpsilon(),st->CompoundLocation(),trsf,GetUnitFactor())) { 
       TopLoc_Location locFace(trsf);
-      res.Move(locFace);
+      res.Move(locFace, Standard_False);
     }
     else {
       Message_Msg msg1035("IGES_1035");
@@ -651,7 +636,7 @@ TopoDS_Shape IGESToBRep_TopoSurface::TransferRuledSurface
     if (IGESData_ToolLocation::ConvertLocation
 	(GetEpsilon(),st->CompoundLocation(), trsf,GetUnitFactor())) { 
       TopLoc_Location shapeLoc(trsf);
-      res.Move(shapeLoc);
+      res.Move(shapeLoc, Standard_False);
     }
     else {
       Message_Msg msg1035("IGES_1035");
@@ -819,7 +804,7 @@ TopoDS_Shape IGESToBRep_TopoSurface::TransferSurfaceOfRevolution
     if (IGESData_ToolLocation::ConvertLocation
 	(GetEpsilon(), st->CompoundLocation(), trsf, GetUnitFactor())) { 
       TopLoc_Location shapeLoc(trsf);
-      res.Move(shapeLoc);
+      res.Move(shapeLoc, Standard_False);
     }
     else {
       Message_Msg msg1035("IGES_1035");
@@ -959,7 +944,7 @@ TopoDS_Shape IGESToBRep_TopoSurface::TransferTabulatedCylinder
     if (IGESData_ToolLocation::ConvertLocation
 	(GetEpsilon(),st->CompoundLocation(), trsf, GetUnitFactor())) { 
       TopLoc_Location shapeLoc(trsf);
-      res.Move(shapeLoc);
+      res.Move(shapeLoc, Standard_False);
     }
     else {
       Message_Msg msg1035("IGES_1035");
@@ -1115,7 +1100,7 @@ TopoDS_Shape IGESToBRep_TopoSurface::TransferOffsetSurface
     if (IGESData_ToolLocation::ConvertLocation
 	(GetEpsilon(),st->CompoundLocation(),trsf, GetUnitFactor())) { 
       TopLoc_Location loc2(trsf);
-      res.Move(loc2);
+      res.Move(loc2, Standard_False);
     }
     else {
       Message_Msg msg1035("IGES_1035");
@@ -1256,7 +1241,7 @@ TopoDS_Shape IGESToBRep_TopoSurface::TransferTrimmedSurface
           aMat.Value(2, 1), aMat.Value(2, 2), aMat.Value(2, 3), aTrans.Y(),
           aMat.Value(3, 1), aMat.Value(3, 2), aMat.Value(3, 3), aTrans.Z());
         TopLoc_Location aLoc(aT);
-        face.Move(aLoc);
+        face.Move(aLoc, Standard_False);
       }
     }
   }
@@ -1399,7 +1384,7 @@ TopoDS_Shape IGESToBRep_TopoSurface::TransferPlane
 //   il reste a la mettre en position
   if (trsf.Form() != gp_Identity) {
     TopLoc_Location loc(trsf);
-    res.Location(loc);
+    res.Location(loc, Standard_False);
   }
   return res;
 }
@@ -1476,14 +1461,14 @@ TopoDS_Shape  IGESToBRep_TopoSurface::TransferPerforate
 //    Ne pas oublier de composer la transformation locale a ce Wire
     if (trsi.Form() != gp_Identity) {
       TopLoc_Location locw(trsi);
-      wire.Location(locw);
+      wire.Location(locw, Standard_False);
     }
     B.Add (res,wire);
   }
 //    Enfin, appliquer la trsf globale
   if (trsf.Form() != gp_Identity) {
     TopLoc_Location loc(trsf);
-    res.Location(loc);
+    res.Location(loc, Standard_False);
   }
   return res;
 }
@@ -1605,7 +1590,7 @@ TopoDS_Shape IGESToBRep_TopoSurface::TransferPlaneParts(const Handle(IGESGeom_Pl
 	    return res;
 	  }
 	  
-	  TopoDS_Face F = MF.Face();
+	  const TopoDS_Face& F = MF.Face();
 	  GProp_GProps G;
 	  BRepGProp::SurfaceProperties(F,G);
 	  if (G.Mass() < 0) {

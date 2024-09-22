@@ -19,14 +19,10 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
-#include <Standard_Real.hxx>
 #include <Hatch_SequenceOfLine.hxx>
-#include <Standard_Boolean.hxx>
 #include <Hatch_LineForm.hxx>
 #include <Standard_Integer.hxx>
-class Standard_OutOfRange;
 class gp_Lin2d;
 class gp_Dir2d;
 class gp_Pnt2d;

@@ -23,16 +23,8 @@
 #include <TCollection_AsciiString.hxx>
 #include <Standard_Transient.hxx>
 #include <Standard_CString.hxx>
-#include <Standard_Character.hxx>
 #include <Standard_Integer.hxx>
-#include <Standard_Real.hxx>
-#include <Standard_Boolean.hxx>
 #include <Standard_OStream.hxx>
-class Standard_NullObject;
-class Standard_OutOfRange;
-class Standard_NumericError;
-class Standard_NegativeValue;
-class TCollection_AsciiString;
 class TCollection_HExtendedString;
 
 
@@ -74,6 +66,11 @@ public:
   
   //! Initializes a HAsciiString with a AsciiString.
   Standard_EXPORT TCollection_HAsciiString(const TCollection_AsciiString& aString);
+
+  //! Initializes a HAsciiString with a AsciiString.
+  TCollection_HAsciiString(TCollection_AsciiString&& theString) noexcept :
+    myString(std::move(theString))
+  {}
   
   //! Initializes a HAsciiString with a HAsciiString.
   Standard_EXPORT TCollection_HAsciiString(const Handle(TCollection_HAsciiString)& aString);

@@ -19,16 +19,12 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
-#include <Standard_Boolean.hxx>
 #include <math_Matrix.hxx>
 #include <math_Vector.hxx>
-#include <Standard_Real.hxx>
 #include <TColgp_Array1OfPnt.hxx>
 #include <TColStd_Array1OfReal.hxx>
 #include <TColgp_Array1OfVec.hxx>
-class StdFail_NotDone;
 class gp_Pnt;
 class gp_Vec;
 

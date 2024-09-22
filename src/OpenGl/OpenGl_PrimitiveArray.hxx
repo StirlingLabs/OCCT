@@ -13,11 +13,9 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef OpenGl_PrimitiveArray_Header
-#define OpenGl_PrimitiveArray_Header
+#ifndef OpenGl_PrimitiveArray_HeaderFile
+#define OpenGl_PrimitiveArray_HeaderFile
 
-#include <Aspect_InteriorStyle.hxx>
-#include <Aspect_TypeOfMarker.hxx>
 #include <Graphic3d_TypeOfPrimitiveArray.hxx>
 #include <Graphic3d_IndexBuffer.hxx>
 #include <Graphic3d_BoundBuffer.hxx>

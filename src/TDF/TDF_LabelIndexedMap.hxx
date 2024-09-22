@@ -16,11 +16,9 @@
 #ifndef TDF_LabelIndexedMap_HeaderFile
 #define TDF_LabelIndexedMap_HeaderFile
 
-#include <TDF_Label.hxx>
-#include <TDF_LabelMapHasher.hxx>
 #include <NCollection_IndexedMap.hxx>
 
-typedef NCollection_IndexedMap<TDF_Label,TDF_LabelMapHasher> TDF_LabelIndexedMap;
+typedef NCollection_IndexedMap<TDF_Label> TDF_LabelIndexedMap;
 
 
 #endif

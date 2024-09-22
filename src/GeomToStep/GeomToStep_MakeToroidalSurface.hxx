@@ -22,8 +22,8 @@
 #include <Standard_Handle.hxx>
 
 #include <GeomToStep_Root.hxx>
+
 class StepGeom_ToroidalSurface;
-class StdFail_NotDone;
 class Geom_ToroidalSurface;
 
 
@@ -38,7 +38,8 @@ public:
   DEFINE_STANDARD_ALLOC
 
   
-  Standard_EXPORT GeomToStep_MakeToroidalSurface(const Handle(Geom_ToroidalSurface)& TorSurf);
+  Standard_EXPORT GeomToStep_MakeToroidalSurface(const Handle(Geom_ToroidalSurface)& TorSurf,
+                                                 const StepData_Factors& theLocalFactors = StepData_Factors());
   
   Standard_EXPORT const Handle(StepGeom_ToroidalSurface)& Value() const;
 

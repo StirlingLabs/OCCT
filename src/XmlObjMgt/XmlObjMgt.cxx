@@ -13,12 +13,10 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-//AGV 150202: Add parameter isClearText to SetStringValue()
+#include <XmlObjMgt.hxx>
 
-#include <LDOM_Text.hxx>
 #include <TCollection_AsciiString.hxx>
 #include <TCollection_ExtendedString.hxx>
-#include <XmlObjMgt.hxx>
 #include <XmlObjMgt_Document.hxx>
 
 #include <errno.h>
@@ -169,7 +167,7 @@ Standard_Boolean XmlObjMgt::GetTagEntryString
   if (strncmp (aSource, aRefPrefix, aPrefixSize))
     return Standard_False;
 
-  //    Beging aTagEntry string
+  //    Begin aTagEntry string
   char * aTagEntry =
     (char *) Standard::Allocate (strlen(aSource)/2);  // quite enough to hold it
   char * aTagEntryPtr = aTagEntry + 1;

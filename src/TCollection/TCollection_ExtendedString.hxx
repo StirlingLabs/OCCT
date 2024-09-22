@@ -25,16 +25,12 @@
 #include <Standard_Integer.hxx>
 #include <Standard_CString.hxx>
 #include <Standard_Boolean.hxx>
-#include <Standard_ExtString.hxx>
 #include <Standard_Character.hxx>
 #include <Standard_ExtCharacter.hxx>
 #include <Standard_Real.hxx>
 #include <Standard_OStream.hxx>
 #include <Standard_PCharacter.hxx>
-class Standard_NullObject;
-class Standard_OutOfRange;
-class Standard_NumericError;
-class Standard_NegativeValue;
+#include <Standard_Macro.hxx>
 class TCollection_AsciiString;
 
 
@@ -101,16 +97,8 @@ public:
   //! Initializes a ExtendedString with another ExtendedString.
   Standard_EXPORT TCollection_ExtendedString(const TCollection_ExtendedString& astring);
 
-#ifndef OCCT_NO_RVALUE_REFERENCE
   //! Move constructor
-  TCollection_ExtendedString (TCollection_ExtendedString&& theOther)
-  : mystring (theOther.mystring),
-    mylength (theOther.mylength)
-  {
-    theOther.mystring = NULL;
-    theOther.mylength = 0;
-  }
-#endif
+  Standard_EXPORT TCollection_ExtendedString (TCollection_ExtendedString&& theOther) Standard_Noexcept;
 
   //! Creation by converting an Ascii string to an extended
   //! string. The string is treated as having UTF-8 coding.
@@ -150,18 +138,26 @@ TCollection_ExtendedString operator + (const TCollection_ExtendedString& other) 
   //! Copy <fromwhere> to <me>.
   //! Used as operator =
   Standard_EXPORT void Copy (const TCollection_ExtendedString& fromwhere);
-void operator = (const TCollection_ExtendedString& fromwhere)
-{
-  Copy(fromwhere);
-}
+
+  //! Copy assignment operator
+  TCollection_ExtendedString& operator= (const TCollection_ExtendedString& theOther)
+  {
+    Copy(theOther);
+    return *this;
+  }
+
+  //! Moves string without reallocations
+  Standard_EXPORT void Move (TCollection_ExtendedString&& theOther);
+
+  //! Move assignment operator
+  TCollection_ExtendedString& operator= (TCollection_ExtendedString&& theOther) noexcept
+  {
+    Move(std::forward<TCollection_ExtendedString>(theOther));
+    return *this;
+  }
 
   //! Exchange the data of two strings (without reallocating memory).
   Standard_EXPORT void Swap (TCollection_ExtendedString& theOther);
-
-#ifndef OCCT_NO_RVALUE_REFERENCE
-  //! Move assignment operator
-  TCollection_ExtendedString& operator= (TCollection_ExtendedString&& theOther) { Swap (theOther); return *this; }
-#endif
 
   //! Frees memory allocated by ExtendedString.
   Standard_EXPORT ~TCollection_ExtendedString();
@@ -338,16 +334,18 @@ friend Standard_EXPORT Standard_OStream& operator << (Standard_OStream& astream,
   //! the bounds of this extended string.
   Standard_EXPORT Standard_ExtCharacter Value (const Standard_Integer where) const;
 
-  //! Returns a hashed value for the extended string within the range 1 .. theUpper.
+  //! Returns a hashed value for the extended string.
   //! Note: if string is ASCII, the computed value is the same as the value computed with the HashCode function on a
   //! TCollection_AsciiString string composed with equivalent ASCII characters.
-  //! @param theExtendedString the extended string which hash code is to be computed
-  //! @param theUpperBound the upper bound of the range a computing hash code must be within
-  //! @return a computed hash code, in the range [1, theUpperBound]
-  static Standard_Integer HashCode (const TCollection_ExtendedString& theString,
-                                    const Standard_Integer theUpperBound)
+  //! @return a computed hash code
+  size_t HashCode () const
   {
-    return ::HashCode (theString.ToExtString(), theUpperBound);
+    const int aSize = mylength * sizeof(Standard_ExtCharacter);
+    if (mylength < 2)
+    {
+      return opencascade::FNVHash::hash_combine(*mystring, aSize);
+    }
+    return opencascade::hashBytes(mystring, aSize);
   }
 
   //! Returns true if the characters in this extended
@@ -372,23 +370,33 @@ friend Standard_EXPORT Standard_OStream& operator << (Standard_OStream& astream,
 private:
 
   //! Returns true if the input CString was successfully converted to UTF8 coding.
-  Standard_EXPORT Standard_Boolean ConvertToUnicode (const Standard_CString astring);
+  Standard_Boolean ConvertToUnicode (const Standard_CString astring);
+
+  //! Internal wrapper to allocate on stack or heap
+  void allocate(const int theLength);
+
+  //! Internal wrapper to reallocate on stack or heap
+  void reallocate(const int theLength);
+
+  //! Internal wrapper to deallocate on stack
+  void deallocate();
 
 private:
 
-  Standard_PExtCharacter mystring; //!< NULL-terminated string
-  Standard_Integer       mylength; //!< length in 16-bit code units (excluding terminating NULL symbol)
-
+  Standard_PExtCharacter mystring{}; //!< NULL-terminated string
+  Standard_Integer       mylength{}; //!< length in 16-bit code units (excluding terminating NULL symbol)
 };
 
-//! Computes a hash code for the given extended string, in the range [1, theUpperBound]
-//! @param theExtendedString the extended string which hash code is to be computed
-//! @param theUpperBound the upper bound of the range a computing hash code must be within
-//! @return a computed hash code, in the range [1, theUpperBound]
-inline Standard_Integer HashCode (const TCollection_ExtendedString& theExtendedString,
-                                  const Standard_Integer theUpperBound)
+namespace std
 {
-  return TCollection_ExtendedString::HashCode (theExtendedString, theUpperBound);
+  template <>
+  struct hash<TCollection_ExtendedString>
+  {
+    size_t operator()(const TCollection_ExtendedString& theString) const
+    {
+      return theString.HashCode();
+    }
+  };
 }
 
 #endif // _TCollection_ExtendedString_HeaderFile

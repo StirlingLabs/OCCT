@@ -21,14 +21,10 @@
 #include <Standard_Type.hxx>
 
 #include <Standard_Integer.hxx>
-#include <Standard_Boolean.hxx>
 #include <TColStd_HArray1OfReal.hxx>
 #include <TColStd_HArray2OfReal.hxx>
 #include <TColgp_HArray2OfXYZ.hxx>
-#include <Standard_Real.hxx>
 #include <IGESData_IGESEntity.hxx>
-class Standard_DimensionMismatch;
-class Standard_OutOfRange;
 class gp_Pnt;
 
 

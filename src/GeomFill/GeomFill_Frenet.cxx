@@ -25,7 +25,6 @@
 #include <gp_Vec.hxx>
 #include <NCollection_Array1.hxx>
 #include <Precision.hxx>
-#include <Standard_ConstructionError.hxx>
 #include <Standard_OutOfRange.hxx>
 #include <Standard_Type.hxx>
 #include <TColgp_SequenceOfPnt2d.hxx>
@@ -117,7 +116,7 @@ Handle(GeomFill_TrihedronLaw) GeomFill_Frenet::Copy() const
 //purpose  : 
 //=======================================================================
 
- void GeomFill_Frenet::SetCurve(const Handle(Adaptor3d_Curve)& C) 
+Standard_Boolean GeomFill_Frenet::SetCurve(const Handle(Adaptor3d_Curve)& C) 
 {
   GeomFill_TrihedronLaw::SetCurve(C);
   if (! C.IsNull()) {
@@ -141,6 +140,7 @@ Handle(GeomFill_TrihedronLaw) GeomFill_Frenet::Copy() const
        }
     }
   }
+  return Standard_True;
 }
 
 //=======================================================================
@@ -152,8 +152,10 @@ Handle(GeomFill_TrihedronLaw) GeomFill_Frenet::Copy() const
 {
   Standard_Integer i, j;
   GeomFill_SnglrFunc Func(myCurve);
-  Standard_Real TolF = 1.0e-10, Tol = 10*TolF, Tol2 = Tol * Tol,
-                PTol = Precision::PConfusion();
+  constexpr Standard_Real TolF = 1.0e-10;
+  constexpr Standard_Real Tol = 10 * TolF;
+  constexpr Standard_Real Tol2 = Tol * Tol;
+  constexpr Standard_Real PTol = Precision::PConfusion();
 
 // We want to determine if the curve has linear segments
   Standard_Integer NbIntC2 = myCurve->NbIntervals(GeomAbs_C2);

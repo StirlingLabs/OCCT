@@ -18,7 +18,6 @@
 #define _IGESAppli_NodalDisplAndRot_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <IGESDimen_HArray1OfGeneralNote.hxx>
 #include <TColStd_HArray1OfInteger.hxx>
@@ -26,8 +25,6 @@
 #include <IGESData_IGESEntity.hxx>
 #include <Standard_Integer.hxx>
 class IGESBasic_HArray1OfHArray1OfXYZ;
-class Standard_DimensionMismatch;
-class Standard_OutOfRange;
 class IGESDimen_GeneralNote;
 class IGESAppli_Node;
 class gp_XYZ;

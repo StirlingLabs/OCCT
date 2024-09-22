@@ -18,13 +18,9 @@
 #define _DrawDim_Dimension_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
-#include <Standard_Boolean.hxx>
-#include <Standard_Real.hxx>
 #include <Draw_Color.hxx>
 #include <Draw_Drawable3D.hxx>
-class Draw_Color;
 class gp_Pnt;
 class Draw_Display;
 

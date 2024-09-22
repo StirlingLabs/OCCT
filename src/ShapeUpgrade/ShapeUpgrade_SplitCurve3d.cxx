@@ -23,14 +23,12 @@
 #include <Precision.hxx>
 #include <ShapeAnalysis_Curve.hxx>
 #include <ShapeExtend.hxx>
-#include <ShapeUpgrade.hxx>
 #include <ShapeUpgrade_SplitCurve3d.hxx>
 #include <Standard_ErrorHandler.hxx>
 #include <Standard_Failure.hxx>
 #include <Standard_Type.hxx>
 #include <TColGeom_HArray1OfCurve.hxx>
 #include <TColStd_HSequenceOfReal.hxx>
-#include <TColStd_ListIteratorOfListOfReal.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(ShapeUpgrade_SplitCurve3d,ShapeUpgrade_SplitCurve)
 
@@ -64,7 +62,7 @@ ShapeUpgrade_SplitCurve3d::ShapeUpgrade_SplitCurve3d()
 //  if (ShapeUpgrade::Debug()) std::cout << "SplitCurve3d::Init"<<std::endl;
   Handle(Geom_Curve) CopyOfC = Handle(Geom_Curve)::DownCast(C->Copy());
   myCurve = CopyOfC;
-  Standard_Real precision = Precision::PConfusion();
+  constexpr Standard_Real precision = Precision::PConfusion();
   Standard_Real firstPar = First;
   Standard_Real lastPar = Last;
   Handle (Geom_Curve) aCurve = myCurve;
@@ -158,7 +156,7 @@ ShapeUpgrade_SplitCurve3d::ShapeUpgrade_SplitCurve3d()
   // 15.11.2002 PTV OCC966
   if(!ShapeAnalysis_Curve::IsPeriodic(myCurve)) {
     //pdn exceptons only on non periodic curves
-    Standard_Real precision = Precision::PConfusion();
+    constexpr Standard_Real precision = Precision::PConfusion();
     Standard_Real firstPar = myCurve->FirstParameter();
     Standard_Real lastPar  = myCurve->LastParameter();
     if(Abs(First-firstPar) < precision)

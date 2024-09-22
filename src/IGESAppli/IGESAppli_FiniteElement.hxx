@@ -18,13 +18,11 @@
 #define _IGESAppli_FiniteElement_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <Standard_Integer.hxx>
 #include <IGESAppli_HArray1OfNode.hxx>
 #include <IGESData_IGESEntity.hxx>
 class TCollection_HAsciiString;
-class Standard_OutOfRange;
 class IGESAppli_Node;
 
 

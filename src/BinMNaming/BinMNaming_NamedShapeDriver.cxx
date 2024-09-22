@@ -28,7 +28,6 @@
 #include <TDF_Label.hxx>
 #include <TDocStd_FormatVersion.hxx>
 #include <TNaming_Builder.hxx>
-#include <TNaming_Evolution.hxx>
 #include <TNaming_Iterator.hxx>
 #include <TNaming_NamedShape.hxx>
 #include <TopAbs_Orientation.hxx>
@@ -132,7 +131,7 @@ static int TranslateFrom  (const BinObjMgt_Persistent&  theSource,
   TopAbs_Orientation anOrient = CharToOrientation (aCharOrient);
 
   theResult.TShape      (theShapeSet->Shape (aShapeID).TShape());//TShape
-  theResult.Location    (theShapeSet->Locations().Location (aLocID)); //Location
+  theResult.Location    (theShapeSet->Locations().Location (aLocID), Standard_False); //Location
   theResult.Orientation (anOrient);//Orientation
   return 0;
 }
@@ -277,7 +276,6 @@ void BinMNaming_NamedShapeDriver::Paste (const Handle(TDF_Attribute)& theSource,
   if (myIsQuickPart) // enables direct writing of shapes to the stream
     aDirectStream = theTarget.GetOStream();
 
-  Standard_Integer i = 1;  
   for (TNaming_Iterator SIterator(aSAtt); SIterator.More(); SIterator.Next()) {
     const TopoDS_Shape& anOldShape = SIterator.OldShape();
     const TopoDS_Shape& aNewShape = SIterator.NewShape();
@@ -297,8 +295,6 @@ void BinMNaming_NamedShapeDriver::Paste (const Handle(TDF_Attribute)& theSource,
       else
         TranslateTo (aNewShape, theTarget, static_cast<BinTools_ShapeSet*>(aShapeSet));
     }
-    
-    i++;
   }
 
 }

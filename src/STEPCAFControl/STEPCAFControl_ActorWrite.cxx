@@ -14,7 +14,6 @@
 // commercial license or contractual agreement.
 
 
-#include <Standard_Type.hxx>
 #include <STEPCAFControl_ActorWrite.hxx>
 #include <TopoDS_Shape.hxx>
 
@@ -64,9 +63,10 @@ void STEPCAFControl_ActorWrite::RegisterAssembly (const TopoDS_Shape &S)
 //purpose  : 
 //=======================================================================
 
-Standard_Boolean STEPCAFControl_ActorWrite::IsAssembly (TopoDS_Shape &S) const
+Standard_Boolean STEPCAFControl_ActorWrite::IsAssembly (const Handle(StepData_StepModel)& theModel,
+                                                        TopoDS_Shape &S) const
 {
-  if ( myStdMode ) return STEPControl_ActorWrite::IsAssembly ( S );
+  if ( myStdMode ) return STEPControl_ActorWrite::IsAssembly ( theModel, S );
   return myMap.Contains ( S );
 }
 

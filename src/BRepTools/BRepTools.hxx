@@ -23,12 +23,11 @@
 #include <Standard_Handle.hxx>
 
 #include <Standard_Real.hxx>
-#include <Standard_Boolean.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
 #include <Standard_OStream.hxx>
 #include <Standard_IStream.hxx>
-#include <Standard_CString.hxx>
 #include <Message_ProgressRange.hxx>
+#include <TopTools_ListOfShape.hxx>
 
 class TopoDS_Face;
 class TopoDS_Wire;
@@ -41,16 +40,6 @@ class TopoDS_CompSolid;
 class TopoDS_Compound;
 class TopoDS_Shape;
 class BRep_Builder;
-class BRepTools_WireExplorer;
-class BRepTools_Modification;
-class BRepTools_Modifier;
-class BRepTools_TrsfModification;
-class BRepTools_NurbsConvertModification;
-class BRepTools_GTrsfModification;
-class BRepTools_Substitution;
-class BRepTools_Quilt;
-class BRepTools_ShapeSet;
-class BRepTools_ReShape;
 class Geom_Curve;
 class Geom2d_Curve;
 class Geom_Surface;
@@ -285,7 +274,7 @@ public:
   //! @param theWithNormals [in]   flag which specifies whether to save triangulation with (TRUE) or without (FALSE) normals;
   //!                              has no effect on triangulation-only geometry
   //! @param theVersion [in]       the TopTools format version
-  //! @param theRange              the range of progress indicator to fill in
+  //! @param theProgress the range of progress indicator to fill in
   Standard_EXPORT static void Write (const TopoDS_Shape& theShape,
                                      Standard_OStream& theStream,
                                      const Standard_Boolean theWithTriangles,
@@ -302,7 +291,7 @@ public:
   //! This alias writes shape with triangulation data.
   //! @param theShape [in] the shape to write
   //! @param theFile [in]  the path to file to output shape into
-  //! @param theRange      the range of progress indicator to fill in
+  //! @param theProgress the range of progress indicator to fill in
   static Standard_Boolean Write (const TopoDS_Shape& theShape,
                                  const Standard_CString theFile,
                                  const Message_ProgressRange& theProgress = Message_ProgressRange())
@@ -319,7 +308,7 @@ public:
   //! @param theWithNormals [in]   flag which specifies whether to save triangulation with (TRUE) or without (FALSE) normals;
   //!                              has no effect on triangulation-only geometry
   //! @param theVersion [in]       the TopTools format version
-  //! @param theRange              the range of progress indicator to fill in
+  //! @param theProgress the range of progress indicator to fill in
   Standard_EXPORT static Standard_Boolean Write (const TopoDS_Shape& theShape,
                                                  const Standard_CString theFile,
                                                  const Standard_Boolean theWithTriangles,
@@ -341,7 +330,7 @@ public:
   //! Method returns actual tolerance of edge
   Standard_EXPORT static Standard_Real EvalAndUpdateTol(const TopoDS_Edge& theE, 
                                                         const Handle(Geom_Curve)& theC3d, 
-                                                        const Handle(Geom2d_Curve) theC2d, 
+                                                        const Handle(Geom2d_Curve)& theC2d, 
                                                         const Handle(Geom_Surface)& theS,
                                                         const Standard_Real theF,
                                                         const Standard_Real theL);
@@ -358,31 +347,14 @@ public:
   //! removal is not going to break topological connectivity between sub-shapes.
   //! The flag <theForce> if set to true disables the connectivity check and clears
   //! the given shape from all sub-shapes with internal orientation.
-  Standard_EXPORT static void RemoveInternals (TopoDS_Shape& theS,
-                                               const Standard_Boolean theForce = Standard_False);
+  Standard_EXPORT static void RemoveInternals(TopoDS_Shape& theS,
+    const Standard_Boolean theForce = Standard_False);
 
-
-protected:
-
-
-
-
-
-private:
-
-
-
-
-friend class BRepTools_WireExplorer;
-friend class BRepTools_Modification;
-friend class BRepTools_Modifier;
-friend class BRepTools_TrsfModification;
-friend class BRepTools_NurbsConvertModification;
-friend class BRepTools_GTrsfModification;
-friend class BRepTools_Substitution;
-friend class BRepTools_Quilt;
-friend class BRepTools_ShapeSet;
-friend class BRepTools_ReShape;
+  //! Check all locations of shape according criterium:
+  //! aTrsf.IsNegative() || (Abs(Abs(aTrsf.ScaleFactor()) - 1.) > TopLoc_Location::ScalePrec())
+  //! All sub-shapes having such locations are put in list theProblemShapes
+  Standard_EXPORT static void CheckLocations(const TopoDS_Shape& theS,
+                                             TopTools_ListOfShape& theProblemShapes);
 
 };
 

@@ -17,14 +17,12 @@
 
 #include <Extrema_GenLocateExtPS.hxx>
 
-#include <Adaptor3d_Surface.hxx>
 #include <Extrema_FuncPSNorm.hxx>
 #include <Extrema_FuncPSDist.hxx>
 #include <Extrema_POnSurf.hxx>
 #include <gp_Pnt.hxx>
 #include <math_FunctionSetRoot.hxx>
 #include <math_NewtonFunctionSetRoot.hxx>
-#include <math_BFGS.hxx>
 #include <math_BFGS.hxx>
 #include <math_FRPR.hxx>
 #include <StdFail_NotDone.hxx>
@@ -33,7 +31,7 @@ static void CorrectTol(const Standard_Real theU0, const Standard_Real theV0,
   math_Vector& theTol)
 {
   //Correct tolerance for large values of UV parameters
-  Standard_Real aTolRef = Precision::PConfusion();
+  constexpr Standard_Real aTolRef = Precision::PConfusion();
   Standard_Real anEpsRef = Epsilon(1.);
   Standard_Real epsu = Epsilon(theU0);
   const Standard_Real tolog10 = 0.43429;

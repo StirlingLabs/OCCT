@@ -18,13 +18,10 @@
 
 #include <Adaptor2d_Curve2d.hxx>
 #include <Adaptor3d_Curve.hxx>
-#include <Adaptor3d_CurveOnSurface.hxx>
 #include <Adaptor3d_Surface.hxx>
 #include <AdvApprox_ApproxAFunction.hxx>
 #include <AdvApprox_PrefAndRec.hxx>
 #include <Approx_CurvlinFunc.hxx>
-#include <CPnts_AbscissaPoint.hxx>
-#include <GCPnts_AbscissaPoint.hxx>
 #include <Geom2d_BSplineCurve.hxx>
 #include <Geom_BSplineCurve.hxx>
 #include <GeomAbs_Shape.hxx>
@@ -33,11 +30,8 @@
 #include <gp_Pnt.hxx>
 #include <gp_Pnt2d.hxx>
 #include <gp_Vec.hxx>
-#include <gp_Vec2d.hxx>
 #include <math_Vector.hxx>
 #include <Precision.hxx>
-#include <Standard_ConstructionError.hxx>
-#include <Standard_OutOfRange.hxx>
 #include <TColgp_Array1OfPnt.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
 #include <TColStd_Array1OfReal.hxx>
@@ -202,7 +196,7 @@ Approx_CurvilinearParameter::Approx_CurvilinearParameter(const Handle(Adaptor3d_
   std::cout<<"initialization time = "<<t_init<<std::endl;
   std::cout<<"approximation time = "<<t_approx<<std::endl;
   std::cout<<"total time for uparam computation = "<<t_uparam<<std::endl;
-  std::cout<<"number uparam calles = "<<uparam_count<<std::endl;
+  std::cout<<"number uparam calls = "<<uparam_count<<std::endl;
 #endif
 }
 
@@ -363,7 +357,7 @@ Approx_CurvilinearParameter::Approx_CurvilinearParameter(const Handle(Adaptor2d_
   std::cout<<"initialization time = "<<t_init<<std::endl;
   std::cout<<"approximation time = "<<t_approx<<std::endl;
   std::cout<<"total time for uparam computation = "<<t_uparam<<std::endl;
-  std::cout<<"number uparam calles = "<<uparam_count<<std::endl;
+  std::cout<<"number uparam calls = "<<uparam_count<<std::endl;
 #endif
 }
 
@@ -536,7 +530,7 @@ Approx_CurvilinearParameter::Approx_CurvilinearParameter(const Handle(Adaptor2d_
   std::cout<<"initialization time = "<<t_init<<std::endl;
   std::cout<<"approximation time = "<<t_approx<<std::endl;
   std::cout<<"total time for uparam computation = "<<t_uparam<<std::endl;
-  std::cout<<"number uparam calles = "<<uparam_count<<std::endl;
+  std::cout<<"number uparam calls = "<<uparam_count<<std::endl;
 #endif
 }
 

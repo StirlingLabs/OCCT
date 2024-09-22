@@ -20,7 +20,6 @@
 #include <Standard.hxx>
 #include <Standard_Type.hxx>
 
-#include <Standard_Real.hxx>
 #include <Standard_Integer.hxx>
 #include <gp_XYZ.hxx>
 #include <TColStd_HArray1OfInteger.hxx>
@@ -29,13 +28,8 @@
 #include <IGESData_HArray1OfIGESEntity.hxx>
 #include <TColgp_HArray1OfXYZ.hxx>
 #include <IGESData_IGESEntity.hxx>
-#include <Standard_Boolean.hxx>
-class Standard_DimensionMismatch;
-class Standard_OutOfRange;
-class gp_XYZ;
 class gp_Pnt;
 class TCollection_HAsciiString;
-class IGESData_IGESEntity;
 
 
 class IGESDimen_NewGeneralNote;

@@ -18,13 +18,21 @@
     8bit                don't fail on 8-bit input characters
     warn                warn about inconsistencies
     nodefault           don't create default echo-all rule
+    noinput             disables the generation of code for reading input from standard input
     noyywrap            don't use yywrap() function
     yyclass             define name of the scanner class
+    noyyalloc           disables default allocation function
+    noyyfree            disables default deallocation function
+    noyyrealloc         disables default reallocation function
+    case-insensitive    enable case insensitive parsing(any ?i: and other case setting will be ignored)
 */
 %option c++
 %option 8bit warn nodefault
 %option noyywrap
+%option noinput
 %option yyclass="step::scanner"
+%option noyyalloc noyyfree noyyrealloc
+%option case-insensitive
 
 %top{
 // This file is part of Open CASCADE Technology software library.
@@ -46,9 +54,14 @@
 #endif
 #define YY_DECL int step::scanner::lex (step::parser::semantic_type* /*yylval*/)
 
+// Disable checking for eof
+#ifdef  YY_INTERACTIVE
+#undef YY_INTERACTIVE
+#endif
+
 typedef step::parser::token token;
 
-/* skl 31.01.2002 for OCC133(OCC96,97) - uncorrect
+/* skl 31.01.2002 for OCC133(OCC96,97) - incorrect
 long string in files Henri.stp and 401.stp*/
 #include <Standard_Failure.hxx>
 #define YY_FATAL_ERROR(msg) Standard_Failure::Raise(msg);
@@ -139,6 +152,23 @@ long string in files Henri.stp and 401.stp*/
 <End>[^\n]     {;} /* skip any characters (except newlines) */
 
 %%
+
+#include <Standard.hxx>
+
+void* yyalloc (size_t theNbBytes)
+{
+  return Standard::AllocateOptimal (theNbBytes);
+}
+
+void* yyrealloc (void * thePnt, size_t theNbBytes)
+{
+   return Standard::Reallocate (thePnt, theNbBytes);
+}
+
+void yyfree (void* thePnt)
+{      
+  Standard::Free (thePnt);
+}
 
 step::scanner::scanner(StepFile_ReadData* theDataModel, std::istream* in, std::ostream* out)
     : stepFlexLexer(in, out), myDataModel(theDataModel)

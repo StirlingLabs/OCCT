@@ -22,8 +22,8 @@
 #include <Standard_Handle.hxx>
 
 #include <GeomToStep_Root.hxx>
+
 class StepGeom_Axis2Placement2d;
-class StdFail_NotDone;
 class gp_Ax2;
 class gp_Ax22d;
 
@@ -39,9 +39,11 @@ public:
   DEFINE_STANDARD_ALLOC
 
   
-  Standard_EXPORT GeomToStep_MakeAxis2Placement2d(const gp_Ax2& A);
+  Standard_EXPORT GeomToStep_MakeAxis2Placement2d(const gp_Ax2& A,
+                                                  const StepData_Factors& theLocalFactors = StepData_Factors());
   
-  Standard_EXPORT GeomToStep_MakeAxis2Placement2d(const gp_Ax22d& A);
+  Standard_EXPORT GeomToStep_MakeAxis2Placement2d(const gp_Ax22d& A,
+                                                  const StepData_Factors& theLocalFactors = StepData_Factors());
   
   Standard_EXPORT const Handle(StepGeom_Axis2Placement2d)& Value() const;
 

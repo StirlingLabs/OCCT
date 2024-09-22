@@ -24,15 +24,12 @@
 #include <CSLib_NormalStatus.hxx>
 #include <Geom_RectangularTrimmedSurface.hxx>
 #include <Geom_Surface.hxx>
-#include <gp.hxx>
 #include <HLRAlgo_BiPoint.hxx>
 #include <HLRAlgo_EdgeStatus.hxx>
-#include <HLRAlgo_ListIteratorOfListOfBPoint.hxx>
 #include <HLRAlgo_PolyData.hxx>
 #include <HLRAlgo_PolyInternalData.hxx>
 #include <HLRAlgo_PolyMask.hxx>
 #include <HLRAlgo_PolyShellData.hxx>
-#include <HLRAlgo_Projector.hxx>
 #include <HLRBRep_PolyAlgo.hxx>
 #include <Poly_Polygon3D.hxx>
 #include <Poly_PolygonOnTriangulation.hxx>
@@ -42,7 +39,6 @@
 #include <Standard_OutOfRange.hxx>
 #include <Standard_Stream.hxx>
 #include <Standard_Type.hxx>
-#include <TColStd_HArray1OfInteger.hxx>
 #include <TopExp.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
@@ -50,7 +46,6 @@
 #include <TopoDS_Shape.hxx>
 #include <TopTools_Array1OfShape.hxx>
 #include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(HLRBRep_PolyAlgo,Standard_Transient)
 
@@ -2417,7 +2412,7 @@ void HLRBRep_PolyAlgo::CheckFrBackTriangles (HLRAlgo_ListOfBPoint& theList,
     {
       for (HLRAlgo_ListIteratorOfListOfBPoint aBPointIter (theList); aBPointIter.More(); aBPointIter.Next())
       {
-        HLRAlgo_BiPoint& BP = aBPointIter.Value();
+        HLRAlgo_BiPoint& BP = aBPointIter.ChangeValue();
         HLRAlgo_BiPoint::IndicesT& theIndices = BP.Indices();
         if (theIndices.FaceConex1 != 0)
         {
@@ -3445,7 +3440,7 @@ TopoDS_Shape HLRBRep_PolyAlgo::OutLinedShape (const TopoDS_Shape& theShape) cons
     const HLRAlgo_ListOfBPoint& aList = aShell.Value (aShellIter)->Edges();
     for (aBPntIter.Initialize (aList); aBPntIter.More(); aBPntIter.Next())
     {
-      HLRAlgo_BiPoint& aBP = aBPntIter.Value();
+      HLRAlgo_BiPoint& aBP = aBPntIter.ChangeValue();
       if (aBP.IntLine())
       {
         const HLRAlgo_BiPoint::IndicesT& aIndices = aBP.Indices();

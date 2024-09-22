@@ -23,14 +23,11 @@
 #include <CDF_MetaDataDriver.hxx>
 #include <CDM_Application.hxx>
 #include <CDM_CanCloseStatus.hxx>
-#include <TColStd_SequenceOfExtendedString.hxx>
 #include <Standard_IStream.hxx>
 #include <NCollection_IndexedDataMap.hxx>
 
-class Standard_NoSuchObject;
 class Standard_GUID;
 class CDM_Document;
-class TCollection_ExtendedString;
 class PCDM_Reader;
 class CDM_MetaData;
 class PCDM_RetrievalDriver;

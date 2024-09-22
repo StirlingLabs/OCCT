@@ -18,9 +18,7 @@
 #define _DrawFairCurve_Batten_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
-#include <Standard_Address.hxx>
 #include <DrawTrSurf_BSplineCurve2d.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_Real.hxx>

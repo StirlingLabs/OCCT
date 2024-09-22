@@ -30,15 +30,12 @@
 #include <TColgp_HArray2OfPnt2d.hxx>
 #include <TColgp_HArray2OfPnt.hxx>
 #include <TColStd_HArray1OfInteger.hxx>
-#include <Standard_Address.hxx>
 #include <AdvApprox_EvaluatorFunction.hxx>
 #include <TColStd_Array1OfInteger.hxx>
 #include <TColStd_Array1OfReal.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
 #include <TColgp_Array1OfPnt.hxx>
 #include <Standard_OStream.hxx>
-class Standard_OutOfRange;
-class Standard_ConstructionError;
 class AdvApprox_Cutting;
 
 

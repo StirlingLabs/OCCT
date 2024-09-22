@@ -13,10 +13,9 @@
 
 
 #include <BRep_Tool.hxx>
-#include <OSD_OpenFile.hxx>
+#include <OSD_FileSystem.hxx>
 #include <OSD_Path.hxx>
 #include <Poly_Triangulation.hxx>
-#include <Quantity_HArray1OfColor.hxx>
 #include <Standard_Stream.hxx>
 #include <TColStd_HArray1OfReal.hxx>
 #include <TopAbs_ShapeEnum.hxx>
@@ -24,7 +23,6 @@
 #include <TopoDS.hxx>
 #include <TopoDS_Face.hxx>
 #include <TopoDS_Shape.hxx>
-#include <TopTools_Array1OfShape.hxx>
 #include <Vrml.hxx>
 #include <Vrml_Group.hxx>
 #include <Vrml_Instancing.hxx>
@@ -225,9 +223,9 @@ Standard_Boolean VrmlAPI_Writer::write_v1(const TopoDS_Shape& aShape,const Stand
 {
   OSD_Path thePath(aFile);
   TCollection_AsciiString theFile;thePath.SystemName(theFile);
-  std::ofstream outfile;
-  OSD_OpenStream(outfile, theFile.ToCString(), std::ios::out);
-  if (!outfile)
+  const Handle(OSD_FileSystem)& aFileSystem = OSD_FileSystem::DefaultFileSystem();
+  std::shared_ptr<std::ostream> anOutFile = aFileSystem->OpenOStream (theFile, std::ios::out | std::ios::binary);
+  if (anOutFile.get() == NULL)
   {
     return Standard_False;
   }
@@ -308,16 +306,16 @@ Standard_Boolean VrmlAPI_Writer::write_v1(const TopoDS_Shape& aShape,const Stand
 									   XUp, YUp, ZUp,
 									   Camera,
 									   Light);
-  Vrml::VrmlHeaderWriter(outfile);
+  Vrml::VrmlHeaderWriter (*anOutFile);
   if (myRepresentation == VrmlAPI_BothRepresentation)
-    Vrml::CommentWriter(" This file contents both Shaded and Wire Frame representation of selected Shape ",outfile);   
+    Vrml::CommentWriter(" This file contents both Shaded and Wire Frame representation of selected Shape ", *anOutFile);
   if (myRepresentation == VrmlAPI_ShadedRepresentation)
-    Vrml::CommentWriter(" This file contents only Shaded representation of selected Shape ",outfile);   
+    Vrml::CommentWriter(" This file contents only Shaded representation of selected Shape ", *anOutFile);
   if (myRepresentation == VrmlAPI_WireFrameRepresentation)
-    Vrml::CommentWriter(" This file contents only Wire Frame representation of selected Shape ",outfile);   
+    Vrml::CommentWriter(" This file contents only Wire Frame representation of selected Shape ", *anOutFile);
   Vrml_Separator S1;
-  S1.Print(outfile); 
-  projector->Add(outfile);
+  S1.Print (*anOutFile); 
+  projector->Add (*anOutFile);
   Light = VrmlConverter_DirectionLight;
   Camera = VrmlConverter_OrthographicCamera;
   Handle(VrmlConverter_Projector) projector1 = new VrmlConverter_Projector (Shapes, 
@@ -326,32 +324,32 @@ Standard_Boolean VrmlAPI_Writer::write_v1(const TopoDS_Shape& aShape,const Stand
 									   XUp, YUp, ZUp,
 									   Camera,
 									   Light);
-  projector1->Add(outfile);
+  projector1->Add (*anOutFile);
   Vrml_Separator S2;
-  S2.Print(outfile); 
+  S2.Print (*anOutFile);
   if ( (myRepresentation == VrmlAPI_ShadedRepresentation || myRepresentation == VrmlAPI_BothRepresentation) && hasTriangles)
     {
       Vrml_Group Group1;
-      Group1.Print(outfile);
+      Group1.Print (*anOutFile);
       Vrml_Instancing I2 ("Shaded representation of shape");
-      I2.DEF(outfile);
-      VrmlConverter_ShadedShape::Add(outfile,aShape,myDrawer);
-      Group1.Print(outfile);
+      I2.DEF (*anOutFile);
+      VrmlConverter_ShadedShape::Add (*anOutFile,aShape,myDrawer);
+      Group1.Print (*anOutFile);
     }
   if (myRepresentation == VrmlAPI_WireFrameRepresentation || myRepresentation == VrmlAPI_BothRepresentation)
     {
       Vrml_Group Group2;
-      Group2.Print(outfile);
+      Group2.Print (*anOutFile);
       Vrml_Instancing I3 ("Wire Frame representation of shape");
-      I3.DEF(outfile);
-      VrmlConverter_WFDeflectionShape::Add(outfile,aShape,myDrawer);
-      Group2.Print(outfile);
+      I3.DEF (*anOutFile);
+      VrmlConverter_WFDeflectionShape::Add (*anOutFile,aShape,myDrawer);
+      Group2.Print (*anOutFile);
     }
-  S2.Print(outfile);
-  S1.Print(outfile);
+  S2.Print (*anOutFile);
+  S1.Print (*anOutFile);
 
-  outfile.close();
-  return outfile.good();
+  anOutFile->flush();
+  return anOutFile->good();
 }
 
 Standard_Boolean VrmlAPI_Writer::write_v2(const TopoDS_Shape& aShape,const Standard_CString aFile) const
@@ -369,15 +367,15 @@ Standard_Boolean VrmlAPI_Writer::write_v2(const TopoDS_Shape& aShape,const Stand
   aConv.AddShape(aShape);
   aConv.Convert(anExtFace, anExtEdge);
 
-  std::ofstream anOutStream;
-  OSD_OpenStream(anOutStream, aFile, std::ios::out);
-  if (anOutStream)
+  const Handle(OSD_FileSystem)& aFileSystem = OSD_FileSystem::DefaultFileSystem();
+  std::shared_ptr<std::ostream> anOutStream = aFileSystem->OpenOStream (aFile, std::ios::out | std::ios::binary);
+  if (anOutStream.get() != NULL)
   {
-    anOutStream << aScene;
-    anOutStream.close();
-    return anOutStream.good();
+    *anOutStream << aScene;
+    anOutStream->flush();
+    return anOutStream->good();
   }
-
+  anOutStream.reset();
   return Standard_False;
 }
 
@@ -394,15 +392,15 @@ Standard_Boolean VrmlAPI_Writer::WriteDoc(
   VrmlData_ShapeConvert aConv(aScene, theScale);
   aConv.ConvertDocument(theDoc);
 
-  std::ofstream anOutStream;
-  OSD_OpenStream(anOutStream, theFile, std::ios::out);
-  if (anOutStream)
+  const Handle(OSD_FileSystem)& aFileSystem = OSD_FileSystem::DefaultFileSystem();
+  std::shared_ptr<std::ostream> anOutStream = aFileSystem->OpenOStream (theFile, std::ios::out | std::ios::binary);
+  if (anOutStream.get() != NULL)
   {
-    anOutStream << aScene;
-    anOutStream.close();
-    return anOutStream.good();
+    *anOutStream << aScene;
+    anOutStream->flush();
+    return anOutStream->good();
   }
-
+  anOutStream.reset();
   return Standard_False;
 }
 

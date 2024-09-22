@@ -18,11 +18,7 @@
 #include <BndLib_Add3dCurve.hxx>
 #include <BndLib_AddSurface.hxx>
 #include <BRepBndLib.hxx>
-#include <BRepToIGES_BREntity.hxx>
 #include <BRepToIGESBRep_Entity.hxx>
-#include <Geom_Curve.hxx>
-#include <Geom_Geometry.hxx>
-#include <Geom_Surface.hxx>
 #include <GeomAdaptor_Curve.hxx>
 #include <GeomAdaptor_Surface.hxx>
 #include <GeomToIGES_GeomCurve.hxx>
@@ -38,11 +34,10 @@
 #include <Interface_Macros.hxx>
 #include <Interface_Static.hxx>
 #include <Message_ProgressScope.hxx>
-#include <OSD_OpenFile.hxx>
+#include <OSD_FileSystem.hxx>
 #include <ShapeAnalysis_ShapeTolerance.hxx>
 #include <Standard_Stream.hxx>
 #include <Standard_Transient.hxx>
-#include <TopExp_Explorer.hxx>
 #include <TopoDS_Shape.hxx>
 #include <Transfer_FinderProcess.hxx>
 #include <XSAlgo.hxx>
@@ -97,7 +92,7 @@ Standard_Boolean IGESControl_Writer::AddShape (const TopoDS_Shape& theShape,
   TopoDS_Shape Shape = XSAlgo::AlgoContainer()->ProcessShape( theShape, Tol, maxTol, 
                                                               "write.iges.resource.name", 
                                                               "write.iges.sequence", info,
-                                                              aPS.Next());
+                                                              aPS.Next(), false, TopAbs_EDGE);
   if (!aPS.More())
     return Standard_False;
 
@@ -253,17 +248,21 @@ Standard_Boolean IGESControl_Writer::Write
 Standard_Boolean IGESControl_Writer::Write
   (const Standard_CString file, const Standard_Boolean fnes)
 {
-  std::ofstream fout;
-  OSD_OpenStream(fout,file,std::ios::out);
-  if (!fout) return Standard_False;
+  const Handle(OSD_FileSystem)& aFileSystem = OSD_FileSystem::DefaultFileSystem();
+  std::shared_ptr<std::ostream> aStream = aFileSystem->OpenOStream (file, std::ios::out | std::ios::binary);
+  if (aStream.get() == NULL)
+  {
+    return Standard_False;
+  }
 #ifdef OCCT_DEBUG
   std::cout<<" Ecriture fichier ("<< (fnes ? "fnes" : "IGES") <<"): "<<file<<std::endl;
 #endif
-  Standard_Boolean res = Write (fout,fnes);
+  Standard_Boolean res = Write (*aStream,fnes);
 
   errno = 0;
-  fout.close();
-  res = fout.good() && res && !errno;
+  aStream->flush();
+  res = aStream->good() && res && !errno;
+  aStream.reset();
 
   return res;
 }

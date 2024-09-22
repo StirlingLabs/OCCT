@@ -40,7 +40,8 @@ XCAFDoc_VisMaterial::XCAFDoc_VisMaterial()
   myAlphaCutOff (0.5f),
   myFaceCulling (Graphic3d_TypeOfBackfacingModel_Auto)
 {
-  //
+  myPbrMat   .IsDefined = false;
+  myCommonMat.IsDefined = false;
 }
 
 //=======================================================================
@@ -191,7 +192,9 @@ XCAFDoc_VisMaterialPBR XCAFDoc_VisMaterial::ConvertToPbrMaterial()
   aPbrMat.BaseColorTexture = myCommonMat.DiffuseTexture;
   aPbrMat.BaseColor.SetRGB (myCommonMat.DiffuseColor);
   aPbrMat.BaseColor.SetAlpha (1.0f - myCommonMat.Transparency);
-  aPbrMat.Metallic  = Graphic3d_PBRMaterial::MetallicFromSpecular (myCommonMat.SpecularColor);
+  aPbrMat.Metallic  = myCommonMat.Transparency <= ShortRealEpsilon()
+                    ? Graphic3d_PBRMaterial::MetallicFromSpecular (myCommonMat.SpecularColor)
+                    : 0.0f;
   aPbrMat.Roughness = Graphic3d_PBRMaterial::RoughnessFromSpecular (myCommonMat.SpecularColor, myCommonMat.Shininess);
   aPbrMat.EmissiveFactor = myCommonMat.EmissiveColor;
   return aPbrMat;
@@ -218,7 +221,9 @@ void XCAFDoc_VisMaterial::FillMaterialAspect (Graphic3d_MaterialAspect& theAspec
     {
       Graphic3d_PBRMaterial aPbr;
       aPbr.SetColor (myCommonMat.DiffuseColor);
-      aPbr.SetMetallic (Graphic3d_PBRMaterial::MetallicFromSpecular (myCommonMat.SpecularColor));
+      aPbr.SetMetallic (myCommonMat.Transparency <= ShortRealEpsilon()
+                      ? Graphic3d_PBRMaterial::MetallicFromSpecular (myCommonMat.SpecularColor)
+                      : 0.0f);
       aPbr.SetRoughness (Graphic3d_PBRMaterial::RoughnessFromSpecular (myCommonMat.SpecularColor, myCommonMat.Shininess));
       aPbr.SetEmission (myCommonMat.EmissiveColor);
       theAspect.SetPBRMaterial (aPbr);
@@ -236,6 +241,11 @@ void XCAFDoc_VisMaterial::FillMaterialAspect (Graphic3d_MaterialAspect& theAspec
       theAspect.SetAlpha        (myPbrMat.BaseColor.Alpha());
       theAspect.SetSpecularColor(Quantity_Color (Graphic3d_Vec3 (myPbrMat.Metallic)));
       theAspect.SetShininess    (1.0f - myPbrMat.Roughness);
+      if (theAspect.Shininess() < 0.01f)
+      {
+        // clamp too small shininess values causing visual artifacts on corner view angles
+        theAspect.SetShininess (0.01f);
+      }
       theAspect.SetEmissiveColor (Quantity_Color (myPbrMat.EmissiveFactor.cwiseMin (Graphic3d_Vec3 (1.0f))));
     }
 
@@ -284,23 +294,23 @@ void XCAFDoc_VisMaterial::FillAspect (const Handle(Graphic3d_Aspects)& theAspect
   Handle(Graphic3d_TextureSet) aTextureSet = new Graphic3d_TextureSet (aNbTexUnits);
   if (!aColorTexture.IsNull())
   {
-    aTextureSet->SetValue (aTexIter++, new XCAFPrs_Texture (*aColorTexture, Graphic3d_TextureUnit_BaseColor));
+    aTextureSet->SetValue (aTexIter++, new XCAFPrs_Texture (aColorTexture, Graphic3d_TextureUnit_BaseColor));
   }
   if (!myPbrMat.EmissiveTexture.IsNull())
   {
-    aTextureSet->SetValue (aTexIter++, new XCAFPrs_Texture (*myPbrMat.EmissiveTexture, Graphic3d_TextureUnit_Emissive));
+    aTextureSet->SetValue (aTexIter++, new XCAFPrs_Texture (myPbrMat.EmissiveTexture, Graphic3d_TextureUnit_Emissive));
   }
   if (!myPbrMat.OcclusionTexture.IsNull())
   {
-    aTextureSet->SetValue (aTexIter++, new XCAFPrs_Texture (*myPbrMat.OcclusionTexture, Graphic3d_TextureUnit_Occlusion));
+    aTextureSet->SetValue (aTexIter++, new XCAFPrs_Texture (myPbrMat.OcclusionTexture, Graphic3d_TextureUnit_Occlusion));
   }
   if (!myPbrMat.NormalTexture.IsNull())
   {
-    aTextureSet->SetValue (aTexIter++, new XCAFPrs_Texture (*myPbrMat.NormalTexture, Graphic3d_TextureUnit_Normal));
+    aTextureSet->SetValue (aTexIter++, new XCAFPrs_Texture (myPbrMat.NormalTexture, Graphic3d_TextureUnit_Normal));
   }
   if (!myPbrMat.MetallicRoughnessTexture.IsNull())
   {
-    aTextureSet->SetValue (aTexIter++, new XCAFPrs_Texture (*myPbrMat.MetallicRoughnessTexture, Graphic3d_TextureUnit_MetallicRoughness));
+    aTextureSet->SetValue (aTexIter++, new XCAFPrs_Texture (myPbrMat.MetallicRoughnessTexture, Graphic3d_TextureUnit_MetallicRoughness));
   }
 
   theAspect->SetTextureSet (aTextureSet);

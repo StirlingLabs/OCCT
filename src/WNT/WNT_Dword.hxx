@@ -12,8 +12,8 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef __WNT_Dword_HeaderFile
-# define __WNT_Dword_HeaderFile
+#ifndef WNT_Dword_HeaderFile
+#define WNT_Dword_HeaderFile
 
 // Purpose: Defines a Windows NT DWORD type.
 
@@ -33,11 +33,6 @@
 #   undef THIS
 #  endif  // THIS
 # endif  // __WINDOWS_H_INCLUDED
-
-# ifndef __STANDARD_TYPE_HXX_INCLUDED
-#  define __STANDARD_TYPE_HXX_INCLUDED
-#  include <Standard_Type.hxx>
-# endif  // __STANDARD_TYPE_HXX_INCLUDED 
 
 typedef DWORD WNT_Dword;
 

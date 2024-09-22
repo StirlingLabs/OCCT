@@ -18,22 +18,9 @@
 
 #include <Standard_DomainError.hxx>
 #include <Standard_NullObject.hxx>
-#include <Standard_TypeMismatch.hxx>
 #include <Standard_Dump.hxx>
 #include <TopLoc_Location.hxx>
 #include <TopoDS_TShape.hxx>
-
-//=======================================================================
-// function : HashCode
-// purpose  :
-//=======================================================================
-Standard_Integer TopoDS_Shape::HashCode (const Standard_Integer theUpperBound) const
-{
-  // PKV
-  const Standard_Integer aHS = ::HashCode (myTShape.get(), theUpperBound);
-  const Standard_Integer aHL = myLocation.HashCode (theUpperBound);
-  return ::HashCode (aHS ^ aHL, theUpperBound);
-}
 
 //=======================================================================
 //function : DumpJson

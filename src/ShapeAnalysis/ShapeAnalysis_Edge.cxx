@@ -19,11 +19,9 @@
 //    abv 06.05.99: S4137: adding methods GetTangent2d()
 
 #include <Adaptor3d_Curve.hxx>
-#include <Adaptor3d_CurveOnSurface.hxx>
 #include <BRep_Builder.hxx>
 #include <BRep_GCurve.hxx>
 #include <BRepLib_ValidateEdge.hxx>
-#include <BRep_ListIteratorOfListOfCurveRepresentation.hxx>
 #include <BRep_TEdge.hxx>
 #include <BRep_Tool.hxx>
 #include <BRepAdaptor_Curve.hxx>
@@ -45,7 +43,6 @@
 #include <ShapeAnalysis_Edge.hxx>
 #include <ShapeExtend.hxx>
 #include <Standard_ErrorHandler.hxx>
-#include <Standard_Failure.hxx>
 #include <TopExp.hxx>
 #include <TopLoc_Location.hxx>
 #include <TopoDS_Edge.hxx>
@@ -859,7 +856,7 @@ static Standard_Boolean IsOverlapPartEdges(const TopoDS_Edge& theFirstEdge,
                                            const Standard_Real& theTolerance,
                                            const Standard_Real& theStep,
                                            const Standard_Real& theStartLength,
-                                           const Standard_Real& theEndLenght)
+                                           const Standard_Real& theEndLength)
 {
   TColStd_SequenceOfInteger aSeqIntervals;
   BRepAdaptor_Curve aAdCurve1(theFirstEdge);
@@ -867,7 +864,7 @@ static Standard_Boolean IsOverlapPartEdges(const TopoDS_Edge& theFirstEdge,
   BRepExtrema_DistShapeShape aMinDist;
   aMinDist.LoadS1(theSecEdge);
 
-  for(Standard_Real aS = theStartLength; aS <= theEndLenght; aS+=theStep/2) {
+  for(Standard_Real aS = theStartLength; aS <= theEndLength; aS+=theStep/2) {
     
     gp_Pnt aPoint;
     if(aS <= Precision::Confusion()) {
@@ -981,7 +978,7 @@ Standard_Boolean ShapeAnalysis_Edge::CheckPCurveRange (const Standard_Real theFi
                                                        const Standard_Real theLast,
                                                        const Handle(Geom2d_Curve)& thePC)
 {
-  const Standard_Real eps = Precision::PConfusion();
+  constexpr Standard_Real eps = Precision::PConfusion();
   Standard_Boolean isValid = Standard_True; 
   Standard_Boolean IsPeriodic = thePC->IsPeriodic();
   Standard_Real aPeriod = RealLast();

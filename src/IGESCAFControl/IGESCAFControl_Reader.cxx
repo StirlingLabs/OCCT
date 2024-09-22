@@ -19,30 +19,30 @@
 #include <IGESCAFControl.hxx>
 #include <IGESCAFControl_Reader.hxx>
 #include <IGESData_IGESEntity.hxx>
+#include <IGESData_IGESModel.hxx>
 #include <IGESData_LevelListEntity.hxx>
 #include <IGESGraph_Color.hxx>
 #include <Interface_InterfaceModel.hxx>
 #include <Quantity_Color.hxx>
 #include <TCollection_AsciiString.hxx>
-#include <TCollection_ExtendedString.hxx>
 #include <TCollection_HAsciiString.hxx>
 #include <TDataStd_Name.hxx>
-#include <TDF_Label.hxx>
 #include <TDocStd_Document.hxx>
 #include <TopoDS_Compound.hxx>
 #include <TopoDS_Iterator.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopTools_MapOfShape.hxx>
-#include <Transfer_Binder.hxx>
 #include <Transfer_TransientProcess.hxx>
 #include <TransferBRep.hxx>
 #include <XCAFDoc_ColorTool.hxx>
 #include <XCAFDoc_DocumentTool.hxx>
 #include <XCAFDoc_LayerTool.hxx>
-#include <XCAFDoc_ShapeMapTool.hxx>
 #include <XCAFDoc_ShapeTool.hxx>
+#include <XSAlgo.hxx>
+#include <XSAlgo_AlgoContainer.hxx>
 #include <XSControl_TransferReader.hxx>
 #include <XSControl_WorkSession.hxx>
+#include <UnitsMethods.hxx>
 
 //=======================================================================
 //function : checkColorRange
@@ -95,7 +95,7 @@ static void AddCompositeShape (const Handle(XCAFDoc_ShapeTool)& theSTool,
                                TopTools_MapOfShape& theMap)
 {
   TopoDS_Shape aShape = theShape;
-  TopLoc_Location aLoc = theShape.Location();
+  const TopLoc_Location& aLoc = theShape.Location();
   if (!theConsiderLoc && !aLoc.IsIdentity())
     aShape.Location( TopLoc_Location() );
   if (!theMap.Add (aShape)) 
@@ -147,7 +147,7 @@ static void AddCompositeShape (const Handle(XCAFDoc_ShapeTool)& theSTool,
 //function : Transfer
 //purpose  : basic working method
 //=======================================================================
-Standard_Boolean IGESCAFControl_Reader::Transfer (Handle(TDocStd_Document) &doc,
+Standard_Boolean IGESCAFControl_Reader::Transfer (const Handle(TDocStd_Document) &doc,
                                                   const Message_ProgressRange& theProgress)
 {
   // read all shapes
@@ -157,6 +157,19 @@ Standard_Boolean IGESCAFControl_Reader::Transfer (Handle(TDocStd_Document) &doc,
   //  TransferOneRoot ( i );
   //}
   
+  // set units
+  Handle(IGESData_IGESModel) aModel = Handle(IGESData_IGESModel)::DownCast(WS()->Model());
+
+  Standard_Real aScaleFactorMM = 1.;
+  if (!XCAFDoc_DocumentTool::GetLengthUnit(doc, aScaleFactorMM, UnitsMethods_LengthUnit_Millimeter))
+  {
+    XSAlgo::AlgoContainer()->PrepareForTransfer(); // update unit info
+    aScaleFactorMM = UnitsMethods::GetCasCadeLengthUnit();
+    // set length unit to the document
+    XCAFDoc_DocumentTool::SetLengthUnit(doc, aScaleFactorMM, UnitsMethods_LengthUnit_Millimeter);
+  }
+  aModel->ChangeGlobalSection().SetCascadeUnit(aScaleFactorMM);
+
   TransferRoots(theProgress); // replaces the above
   num = NbShapes();
   if ( num <=0 ) return Standard_False;
@@ -178,7 +191,6 @@ Standard_Boolean IGESCAFControl_Reader::Transfer (Handle(TDocStd_Document) &doc,
   }
   
   // added by skl 13.10.2003
-  const Handle(Interface_InterfaceModel) &Model = WS()->Model();
   const Handle(XSControl_TransferReader) &TR = WS()->TransferReader();
   const Handle(Transfer_TransientProcess) &TP = TR->TransientProcess();
   Standard_Boolean IsCTool = Standard_True;
@@ -188,9 +200,9 @@ Standard_Boolean IGESCAFControl_Reader::Transfer (Handle(TDocStd_Document) &doc,
   Handle(XCAFDoc_LayerTool) LTool = XCAFDoc_DocumentTool::LayerTool(doc->Main());
   if(LTool.IsNull()) IsLTool = Standard_False;
 
-  Standard_Integer nb = Model->NbEntities();
+  Standard_Integer nb = aModel->NbEntities();
   for(i=1; i<=nb; i++) {
-    Handle(IGESData_IGESEntity) ent = Handle(IGESData_IGESEntity)::DownCast ( Model->Value(i) );
+    Handle(IGESData_IGESEntity) ent = Handle(IGESData_IGESEntity)::DownCast (aModel->Value(i) );
     if ( ent.IsNull() ) continue;
     Handle(Transfer_Binder) binder = TP->Find ( ent );
     if ( binder.IsNull() ) continue;
@@ -310,7 +322,8 @@ Standard_Boolean IGESCAFControl_Reader::Transfer (Handle(TDocStd_Document) &doc,
 
     //Checks that current entity is a subfigure
     Handle(IGESBasic_SubfigureDef) aSubfigure = Handle(IGESBasic_SubfigureDef)::DownCast (ent);
-    if (GetNameMode() && !aSubfigure.IsNull() && STool->Search (S, L, Standard_True, Standard_True))
+    if (GetNameMode() && !aSubfigure.IsNull() && !aSubfigure->Name().IsNull() &&
+        STool->Search(S, L, Standard_True, Standard_True))
     {
       //In this case we attach subfigure name to the label, instead of default "COMPOUND"
       Handle(TCollection_HAsciiString) aName = aSubfigure->Name();
@@ -323,8 +336,6 @@ Standard_Boolean IGESCAFControl_Reader::Transfer (Handle(TDocStd_Document) &doc,
   }
 
   CTool->ReverseChainsOfTreeNodes();
-
-  // end added by skl 13.10.2003
 
   // Update assembly compounds
   STool->UpdateAssemblies();
@@ -339,7 +350,7 @@ Standard_Boolean IGESCAFControl_Reader::Transfer (Handle(TDocStd_Document) &doc,
 //=======================================================================
 
 Standard_Boolean IGESCAFControl_Reader::Perform (const Standard_CString filename,
-                                                 Handle(TDocStd_Document) &doc,
+                                                 const Handle(TDocStd_Document) &doc,
                                                  const Message_ProgressRange& theProgress)
 {
   if ( ReadFile ( filename ) != IFSelect_RetDone ) return Standard_False;

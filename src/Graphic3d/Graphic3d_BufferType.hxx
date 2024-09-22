@@ -11,17 +11,18 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef _Graphic3d_BufferType_H__
-#define _Graphic3d_BufferType_H__
+#ifndef Graphic3d_BufferType_HeaderFile
+#define Graphic3d_BufferType_HeaderFile
 
 //! Define buffers available for dump
 enum Graphic3d_BufferType
 {
-  Graphic3d_BT_RGB,   //!< color buffer without alpha component
-  Graphic3d_BT_RGBA,  //!< color buffer
-  Graphic3d_BT_Depth, //!< depth buffer
+  Graphic3d_BT_RGB,                 //!< color buffer without alpha component
+  Graphic3d_BT_RGBA,                //!< color buffer
+  Graphic3d_BT_Depth,               //!< depth buffer
   Graphic3d_BT_RGB_RayTraceHdrLeft, //!< left view HDR color buffer for Ray-Tracing
-  Graphic3d_BT_Red,   //!< color buffer, red channel
+  Graphic3d_BT_Red,                 //!< color buffer, red channel
+  Graphic3d_BT_ShadowMap,           //!< buffer with shadow map
 };
 
 #endif // _Graphic3d_BufferType_H__

@@ -22,8 +22,8 @@
 #include <Standard_Handle.hxx>
 
 #include <GeomToStep_Root.hxx>
+#include <StepData_StepModel.hxx>
 class StepGeom_Axis2Placement3d;
-class StdFail_NotDone;
 class gp_Ax2;
 class gp_Ax3;
 class gp_Trsf;
@@ -41,15 +41,19 @@ public:
   DEFINE_STANDARD_ALLOC
 
   
-  Standard_EXPORT GeomToStep_MakeAxis2Placement3d();
+  Standard_EXPORT GeomToStep_MakeAxis2Placement3d(const StepData_Factors& theLocalFactors = StepData_Factors());
   
-  Standard_EXPORT GeomToStep_MakeAxis2Placement3d(const gp_Ax2& A);
+  Standard_EXPORT GeomToStep_MakeAxis2Placement3d(const gp_Ax2& A,
+                                                  const StepData_Factors& theLocalFactors = StepData_Factors());
   
-  Standard_EXPORT GeomToStep_MakeAxis2Placement3d(const gp_Ax3& A);
+  Standard_EXPORT GeomToStep_MakeAxis2Placement3d(const gp_Ax3& A,
+                                                  const StepData_Factors& theLocalFactors = StepData_Factors());
   
-  Standard_EXPORT GeomToStep_MakeAxis2Placement3d(const gp_Trsf& T);
+  Standard_EXPORT GeomToStep_MakeAxis2Placement3d(const gp_Trsf& T,
+                                                  const StepData_Factors& theLocalFactors = StepData_Factors());
   
-  Standard_EXPORT GeomToStep_MakeAxis2Placement3d(const Handle(Geom_Axis2Placement)& A);
+  Standard_EXPORT GeomToStep_MakeAxis2Placement3d(const Handle(Geom_Axis2Placement)& A,
+                                                  const StepData_Factors& theLocalFactors = StepData_Factors());
   
   Standard_EXPORT const Handle(StepGeom_Axis2Placement3d)& Value() const;
 

@@ -20,13 +20,10 @@
 #include <Standard.hxx>
 #include <Standard_Type.hxx>
 
-#include <Standard_Address.hxx>
 #include <math_Vector.hxx>
 #include <Blend_Point.hxx>
 #include <gp_Pnt.hxx>
 #include <Approx_SweepFunction.hxx>
-#include <Standard_Real.hxx>
-#include <Standard_Boolean.hxx>
 #include <TColgp_Array1OfPnt.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
 #include <TColStd_Array1OfReal.hxx>
@@ -36,10 +33,7 @@
 #include <TColStd_Array1OfInteger.hxx>
 #include <GeomAbs_Shape.hxx>
 class BRepBlend_Line;
-class Standard_OutOfRange;
 class Blend_AppFunction;
-class gp_Pnt;
-class Blend_Point;
 
 
 class BRepBlend_AppFuncRoot;
@@ -75,7 +69,7 @@ public:
   //! get the Multplicities of the section
   Standard_EXPORT virtual void Mults (TColStd_Array1OfInteger& TMults) const Standard_OVERRIDE;
   
-  //! Returns if the section is rationnal or not
+  //! Returns if the section is rational or not
   Standard_EXPORT virtual Standard_Boolean IsRational() const Standard_OVERRIDE;
   
   //! Returns  the number  of  intervals for  continuity
@@ -101,7 +95,7 @@ public:
   Standard_EXPORT virtual void Resolution (const Standard_Integer Index, const Standard_Real Tol, Standard_Real& TolU, Standard_Real& TolV) const Standard_OVERRIDE;
   
   //! Returns the tolerance to reach in approximation
-  //! to respecte
+  //! to respect
   //! BoundTol error at the Boundary
   //! AngleTol tangent error at the Boundary (in radian)
   //! SurfTol error inside the surface.

@@ -20,7 +20,6 @@
 #include <Adaptor3d_Surface.hxx>
 
 #include <IntPolyh_Couple.hxx>
-#include <IntPolyh_CoupleMapHasher.hxx>
 #include <IntPolyh_MaillageAffinage.hxx>
 #include <IntPolyh_SectionLine.hxx>
 #include <IntPolyh_StartPoint.hxx>
@@ -29,11 +28,7 @@
 
 #include <NCollection_Map.hxx>
 
-static Standard_Boolean IsAdvRequired(IntPolyh_PMaillageAffinage& theMaillage);
-
 static Standard_Integer ComputeIntersection(IntPolyh_PMaillageAffinage& theMaillage);
-
-static Standard_Boolean AnalyzeIntersection(IntPolyh_PMaillageAffinage& theMaillage);
 
 //=======================================================================
 //function : IntPolyh_Intersection
@@ -49,6 +44,7 @@ IntPolyh_Intersection::IntPolyh_Intersection(const Handle(Adaptor3d_Surface)& th
   myNbSU2 = 10;
   myNbSV2 = 10;
   myIsDone = Standard_False;
+  myIsParallel = Standard_False;
   mySectionLines.Init(1000);
   myTangentZones.Init(10000);
   Perform();
@@ -72,6 +68,7 @@ IntPolyh_Intersection::IntPolyh_Intersection(const Handle(Adaptor3d_Surface)& th
   myNbSU2 = theNbSU2;
   myNbSV2 = theNbSV2;
   myIsDone = Standard_False;
+  myIsParallel = Standard_False;
   mySectionLines.Init(1000);
   myTangentZones.Init(10000);
   Perform();
@@ -95,6 +92,7 @@ IntPolyh_Intersection::IntPolyh_Intersection(const Handle(Adaptor3d_Surface)& th
   myNbSU2 = theUPars2.Length();
   myNbSV2 = theVPars2.Length();
   myIsDone = Standard_False;
+  myIsParallel = Standard_False;
   mySectionLines.Init(1000);
   myTangentZones.Init(10000);
   Perform(theUPars1, theVPars1, theUPars2, theVPars2);
@@ -420,7 +418,7 @@ void IntPolyh_Intersection::MergeCouples(IntPolyh_ListOfCouples &anArrayFF,
                                          IntPolyh_ListOfCouples &anArrayRR) const
 {
   // Fence map to remove from the lists the duplicating elements.
-  NCollection_Map<IntPolyh_Couple, IntPolyh_CoupleMapHasher> aFenceMap;
+  NCollection_Map<IntPolyh_Couple> aFenceMap;
   //
   IntPolyh_ListOfCouples* pLists[4] = {&anArrayFF, &anArrayFR, &anArrayRF, &anArrayRR};
   for (Standard_Integer i = 0; i < 4; ++i) {
@@ -442,7 +440,7 @@ void IntPolyh_Intersection::MergeCouples(IntPolyh_ListOfCouples &anArrayFF,
 //           too small (less than 5 deg), the advanced intersection is required.
 //           Otherwise, the standard intersection is considered satisfactory.
 //=======================================================================
-Standard_Boolean IsAdvRequired(IntPolyh_PMaillageAffinage& theMaillage)
+Standard_Boolean IntPolyh_Intersection::IsAdvRequired(IntPolyh_PMaillageAffinage& theMaillage)
 {
   if (!theMaillage)
     return Standard_True;
@@ -452,7 +450,7 @@ Standard_Boolean IsAdvRequired(IntPolyh_PMaillageAffinage& theMaillage)
   // Number of interfering pairs
   Standard_Integer aNbCouples = Couples.Extent();
   // Flag to define whether advanced intersection is required or not
-  Standard_Boolean isAdvReq = (aNbCouples == 0);
+  Standard_Boolean isAdvReq = (aNbCouples == 0) && !IsParallel();
   if (isAdvReq)
     // No interfering triangles are found -> perform advanced intersection
     return isAdvReq;
@@ -507,7 +505,7 @@ Standard_Integer ComputeIntersection(IntPolyh_PMaillageAffinage& theMaillage)
 //function : AnalyzeIntersection
 //purpose  : Analyzes the intersection on the number of interfering triangles
 //=======================================================================
-Standard_Boolean AnalyzeIntersection(IntPolyh_PMaillageAffinage& theMaillage)
+Standard_Boolean IntPolyh_Intersection::AnalyzeIntersection(IntPolyh_PMaillageAffinage& theMaillage)
 {
   if (!theMaillage)
     return Standard_False;
@@ -528,7 +526,9 @@ Standard_Boolean AnalyzeIntersection(IntPolyh_PMaillageAffinage& theMaillage)
     if (npara >= theMaillage->GetArrayOfTriangles(1).NbItems() ||
         npara >= theMaillage->GetArrayOfTriangles(2).NbItems())
     {
-      return Standard_False;
+      Couples.Clear();
+      myIsParallel = Standard_True;
+      return Standard_True;
     }
   }
   return Standard_True;

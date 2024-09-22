@@ -18,12 +18,10 @@
 #define _GccInt_BPoint_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <gp_Pnt2d.hxx>
 #include <GccInt_Bisec.hxx>
 #include <GccInt_IType.hxx>
-class gp_Pnt2d;
 
 
 class GccInt_BPoint;

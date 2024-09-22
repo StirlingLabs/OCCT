@@ -35,9 +35,6 @@
 #include <gp_Torus.hxx>
 #include <gp_Trsf.hxx>
 #include <gp_Vec.hxx>
-#include <Standard_DomainError.hxx>
-#include <Standard_NoSuchObject.hxx>
-#include <Standard_OutOfRange.hxx>
 #include <TopoDS_Face.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(BRepAdaptor_Surface, Adaptor3d_Surface)
@@ -63,6 +60,24 @@ BRepAdaptor_Surface::BRepAdaptor_Surface(const TopoDS_Face& F,
 }
 
 
+//=======================================================================
+//function : ShallowCopy
+//purpose  : 
+//=======================================================================
+
+Handle(Adaptor3d_Surface) BRepAdaptor_Surface::ShallowCopy() const
+{
+  Handle(BRepAdaptor_Surface) aCopy = new BRepAdaptor_Surface();
+
+  const Handle(Adaptor3d_Surface) aSurface = mySurf.ShallowCopy();
+  const GeomAdaptor_Surface& aGeomSurface = *(Handle(GeomAdaptor_Surface)::DownCast(aSurface));
+  aCopy->mySurf = aGeomSurface;
+
+  aCopy->myTrsf = myTrsf;
+  aCopy->myFace = myFace;
+
+  return aCopy;
+}
 //=======================================================================
 //function : Initialize
 //purpose  : 

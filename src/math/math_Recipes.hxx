@@ -15,14 +15,13 @@
 #ifndef math_Recipes_HeaderFile
 #define math_Recipes_HeaderFile
 
-#include <Standard_Boolean.hxx>
-#include <Standard_Integer.hxx>
-#include <Standard_Real.hxx>
-#include <Standard_Handle.hxx>
 #include <Message_ProgressRange.hxx>
 
-class math_IntegerVector;
-class math_Vector;
+#include <NCollection_Allocator.hxx>
+
+template<typename T> class math_VectorBase;
+using math_IntegerVector = math_VectorBase<int>;
+using math_Vector = math_VectorBase<double>;
 class math_Matrix;
 
 const Standard_Integer math_Status_UserAborted         = -1;

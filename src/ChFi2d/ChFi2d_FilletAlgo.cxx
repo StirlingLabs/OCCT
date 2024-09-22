@@ -27,7 +27,6 @@
 #include <TopoDS_Iterator.hxx>
 #include <TColStd_ListIteratorOfListOfReal.hxx>
 
-#include <gp_Circ.hxx>
 #include <Geom_Circle.hxx>
 #include <Geom2d_Line.hxx>
 
@@ -181,7 +180,7 @@ static Standard_Boolean IsRadiusIntersected(const Handle(Geom2d_Curve)& theCurve
     if (gp_Vec2d(aPoint, theStart).IsOpposite(gp_Vec2d(aPoint, theEnd), Precision::Angular())) 
       return Standard_True;
   }
-  Handle(Geom2d_Curve) aCurve = theCurve;
+  const Handle(Geom2d_Curve)& aCurve = theCurve;
   for(a = anInter.NbSegments(); a > 0; a--) 
   {
     //anInter.Segment(a, aCurve); //not implemented (bug in OCC)
@@ -454,7 +453,7 @@ void ChFi2d_FilletAlgo::PerformNewton(FilletPoint* theLeft, FilletPoint* theRigh
     else
     {
       if (Abs(aB) > Abs(aDet * 1000000.)) 
-      {	// possible floating point operations accurancy errors
+      {	// possible floating point operations accuracy errors
         //std::cout<<"*";
         ProcessPoint(theLeft, theRight, theLeft->getParam() + aDX / 2.0); // linear division otherwise
       } 
@@ -598,7 +597,7 @@ TopoDS_Edge ChFi2d_FilletAlgo::Result(const gp_Pnt& thePoint, TopoDS_Edge& theEd
   gp_Vec aCircleDir;
   aCircle->D1(aParam1, aPoint1, aCircleDir);
     
-  if ((aCircleDir.Angle(aDir) > M_PI / 2.0) ^ aIsOut)
+  if ((aCircleDir.Angle(aDir) > M_PI / 2.0) ? !aIsOut : aIsOut)
     aStart = aNearest->getParam();
   else
     anEnd = aNearest->getParam();
@@ -620,7 +619,7 @@ TopoDS_Edge ChFi2d_FilletAlgo::Result(const gp_Pnt& thePoint, TopoDS_Edge& theEd
    
   aCircle->D1(aParam2, aPoint2, aCircleDir);
 
-  if ((aCircleDir.Angle(aDir) > M_PI / 2.0) ^ (!aIsOut))
+  if ((aCircleDir.Angle(aDir) > M_PI / 2.0) ? aIsOut : !aIsOut)
     aStart = aNearest->getParam2();
   else
     anEnd = aNearest->getParam2();

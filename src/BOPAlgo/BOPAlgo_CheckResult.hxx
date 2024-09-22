@@ -23,8 +23,6 @@
 #include <TopoDS_Shape.hxx>
 #include <BOPAlgo_CheckStatus.hxx>
 #include <TopTools_ListOfShape.hxx>
-#include <Standard_Real.hxx>
-class TopoDS_Shape;
 
 
 //! contains information about faulty shapes and faulty types

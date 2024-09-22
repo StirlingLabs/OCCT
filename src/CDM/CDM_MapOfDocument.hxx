@@ -18,11 +18,10 @@
 #define CDM_MapOfDocument_HeaderFile
 
 #include <CDM_Document.hxx>
-#include <CDM_DocumentHasher.hxx>
 #include <NCollection_Map.hxx>
 
-typedef NCollection_Map<Handle(CDM_Document),CDM_DocumentHasher> CDM_MapOfDocument;
-typedef NCollection_Map<Handle(CDM_Document),CDM_DocumentHasher>::Iterator CDM_MapIteratorOfMapOfDocument;
+typedef NCollection_Map<Handle(CDM_Document)> CDM_MapOfDocument;
+typedef NCollection_Map<Handle(CDM_Document)>::Iterator CDM_MapIteratorOfMapOfDocument;
 
 
 #endif

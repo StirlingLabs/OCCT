@@ -14,21 +14,17 @@
 #ifndef _Graphic3d_Aspects_HeaderFile
 #define _Graphic3d_Aspects_HeaderFile
 
-#include <Aspect_PolygonOffsetMode.hxx>
 #include <Aspect_InteriorStyle.hxx>
 #include <Aspect_TypeOfDisplayText.hxx>
 #include <Aspect_TypeOfLine.hxx>
-#include <Aspect_TypeOfMarker.hxx>
 #include <Aspect_TypeOfStyleText.hxx>
 #include <Font_FontAspect.hxx>
-#include <Font_NameOfFont.hxx>
 #include <Graphic3d_AlphaMode.hxx>
 #include <Graphic3d_MarkerImage.hxx>
 #include <Graphic3d_MaterialAspect.hxx>
 #include <Graphic3d_HatchStyle.hxx>
 #include <Graphic3d_PolygonOffset.hxx>
 #include <Graphic3d_ShaderProgram.hxx>
-#include <Graphic3d_TextureMap.hxx>
 #include <Graphic3d_TextureSet.hxx>
 #include <Graphic3d_TypeOfBackfacingModel.hxx>
 #include <Graphic3d_TypeOfShadingModel.hxx>
@@ -49,7 +45,7 @@ public:
   //! Modifies the interior type used for rendering
   void SetInteriorStyle (const Aspect_InteriorStyle theStyle) { myInteriorStyle = theStyle; }
 
-  //! Returns shading model; Graphic3d_TOSM_DEFAULT by default.
+  //! Returns shading model; Graphic3d_TypeOfShadingModel_DEFAULT by default.
   //! Graphic3d_TOSM_DEFAULT means that Shading Model set as default for entire Viewer will be used.
   Graphic3d_TypeOfShadingModel ShadingModel() const { return myShadingModel; }
 

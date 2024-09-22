@@ -19,7 +19,6 @@
 #include <VrmlData_ListOfNode.hxx>
 #include <VrmlData_MapOfNode.hxx>
 #include <VrmlData_ErrorStatus.hxx>
-#include <VrmlData_Geometry.hxx>
 #include <VrmlData_WorldInfo.hxx>
 #include <TopoDS_Shape.hxx>
 #include <Standard_OStream.hxx>
@@ -69,7 +68,7 @@ class VrmlData_Scene
    * in that node are matched with these directories.
    * The last (implicit) search directory is the current process directory
    * ("."). It takes effect if the list is empty or if there is no match with
-   * exisiting directories.
+   * existing directories.
    */
   Standard_EXPORT void          SetVrmlDir  (const TCollection_ExtendedString&);
 
@@ -206,7 +205,7 @@ class VrmlData_Scene
                                 ReadLine    (VrmlData_InBuffer& theBuffer);
 
   /**
-   * Read a singel word from the input stream, delimited by whitespace.
+   * Read a single word from the input stream, delimited by whitespace.
    */
   Standard_EXPORT static VrmlData_ErrorStatus
                                 ReadWord    (VrmlData_InBuffer&       theBuffer,

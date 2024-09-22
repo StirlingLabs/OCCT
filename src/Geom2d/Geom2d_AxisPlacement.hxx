@@ -18,16 +18,13 @@
 #define _Geom2d_AxisPlacement_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <gp_Ax2d.hxx>
 #include <Geom2d_Geometry.hxx>
 #include <Standard_Real.hxx>
-class gp_Ax2d;
 class gp_Pnt2d;
 class gp_Dir2d;
 class gp_Trsf2d;
-class Geom2d_Geometry;
 
 
 class Geom2d_AxisPlacement;

@@ -23,11 +23,8 @@
 
 #include <Interface_BitMap.hxx>
 #include <TColStd_HSequenceOfTransient.hxx>
-#include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
 class Interface_InterfaceModel;
-class Standard_DomainError;
-class Standard_OutOfRange;
 class Interface_GeneralLib;
 class Interface_GTool;
 class Interface_Protocol;

@@ -23,10 +23,7 @@
 
 #include <Standard_Integer.hxx>
 #include <TColStd_HArray1OfReal.hxx>
-#include <TColStd_HArray2OfReal.hxx>
 #include <Standard_Real.hxx>
-#include <GeomAbs_IsoType.hxx>
-#include <GeomAbs_Shape.hxx>
 #include <AdvApp2Var_Context.hxx>
 #include <AdvApp2Var_Network.hxx>
 #include <AdvApp2Var_Framework.hxx>
@@ -34,8 +31,6 @@
 #include <TColGeom_HArray1OfSurface.hxx>
 #include <AdvApp2Var_EvaluatorFunc2Var.hxx>
 #include <Standard_OStream.hxx>
-class Standard_OutOfRange;
-class Standard_ConstructionError;
 class AdvApprox_Cutting;
 class AdvApp2Var_Criterion;
 class Geom_BSplineSurface;
@@ -47,13 +42,13 @@ class Geom_BSplineSurface;
 //! OneDTol, TwoDTol, ThreeDTol: The tolerance of approximation in each
 //! subspaces
 //! OneDTolFr, TwoDTolFr, ThreeDTolFr: The tolerance of approximation on
-//! the boundarys in each subspaces
+//! the boundaries in each subspaces
 //! [FirstInU, LastInU]: The Bounds in U of the Approximation
 //! [FirstInV, LastInV]: The Bounds in V of the Approximation
 //! FavorIso : Give preference to extract u-iso or v-iso on F(U,V)
 //! This can be useful to optimize the <Func> method
 //! ContInU, ContInV : Continuity waiting in u and v
-//! PrecisCode : Precision on approximation's error mesurement
+//! PrecisCode : Precision on approximation's error measurement
 //! 1 : Fast computation and average precision
 //! 2 : Average computation and good precision
 //! 3 : Slow computation and very good precision

@@ -14,22 +14,12 @@
 // commercial license or contractual agreement.
 
 
-#include <Graphic3d_ArrayOfPolygons.hxx>
-#include <Graphic3d_ArrayOfPolylines.hxx>
 #include <Graphic3d_ArrayOfSegments.hxx>
 #include <Graphic3d_ArrayOfTriangles.hxx>
-#include <Graphic3d_AspectFillArea3d.hxx>
-#include <Graphic3d_AspectLine3d.hxx>
-#include <Graphic3d_Group.hxx>
 #include <MeshVS_Buffer.hxx>
-#include <MeshVS_DataMapIteratorOfDataMapOfColorMapOfInteger.hxx>
-#include <MeshVS_DataMapIteratorOfDataMapOfIntegerColor.hxx>
-#include <MeshVS_DataMapIteratorOfDataMapOfIntegerTwoColors.hxx>
-#include <MeshVS_DataMapIteratorOfDataMapOfTwoColorsMapOfInteger.hxx>
 #include <MeshVS_DataMapOfColorMapOfInteger.hxx>
 #include <MeshVS_DataMapOfTwoColorsMapOfInteger.hxx>
 #include <MeshVS_DataSource.hxx>
-#include <MeshVS_DisplayModeFlags.hxx>
 #include <MeshVS_Drawer.hxx>
 #include <MeshVS_DrawerAttribute.hxx>
 #include <MeshVS_ElementalColorPrsBuilder.hxx>
@@ -161,7 +151,7 @@ void MeshVS_ElementalColorPrsBuilder::Build ( const Handle(Prs3d_Presentation)& 
     Standard_Boolean IsExist = Standard_False;
     for ( MeshVS_DataMapIteratorOfDataMapOfTwoColorsMapOfInteger anIterC2 ( aTwoColorsOfElements );
           anIterC2.More() && !IsExist; anIterC2.Next () )
-      if ( IsEqual ( anIterC2.Key(), anIterM2.Value() ) )
+      if (  anIterC2.Key() == anIterM2.Value() )
       {
         TColStd_MapOfInteger& aChangeValue = (TColStd_MapOfInteger&) anIterC2.Value();
         aChangeValue.Add ( aMKey );
@@ -635,7 +625,10 @@ void MeshVS_ElementalColorPrsBuilder::Build ( const Handle(Prs3d_Presentation)& 
     }
 
     aGroup2->AddPrimitiveArray (aFaceTriangles);
-    aSGroup->AddPrimitiveArray (anEdgeSegments);
+    if (anEdgeOn)
+    {
+      aSGroup->AddPrimitiveArray (anEdgeSegments);
+    }
   }
 }
 

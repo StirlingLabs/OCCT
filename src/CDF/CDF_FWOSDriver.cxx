@@ -13,7 +13,6 @@
 
 
 #include <CDF_FWOSDriver.hxx>
-#include <CDM_Document.hxx>
 #include <CDM_MetaData.hxx>
 #include <OSD_Directory.hxx>
 #include <OSD_File.hxx>
@@ -158,8 +157,6 @@ TCollection_ExtendedString CDF_FWOSDriver::Concatenate(const TCollection_Extende
                                                           const TCollection_ExtendedString& aName)
 {
   TCollection_ExtendedString ff(aFolder);
-  ff = "";
-  ff += aFolder;
   PutSlash(ff);
   ff+=aName;
   return ff;

@@ -22,8 +22,6 @@
 #include <Standard_Handle.hxx>
 
 #include <GeomToIGES_GeomEntity.hxx>
-#include <Standard_Real.hxx>
-class GeomToIGES_GeomEntity;
 class IGESData_IGESEntity;
 class Geom_Curve;
 class Geom_BoundedCurve;

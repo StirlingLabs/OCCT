@@ -64,7 +64,7 @@ struct BSplSLib_DataContainer
 
 //=======================================================================
 //function : RationalDerivative
-//purpose  : computes the rational derivatives when whe have the
+//purpose  : computes the rational derivatives when we have the
 //           the derivatives of the homogeneous numerator and the
 //           the derivatives of the denominator 
 //=======================================================================
@@ -2845,7 +2845,7 @@ void BSplSLib::MovePoint (const Standard_Real            U,
     }
   }
 
-  // find a ukk2 if symetriy
+  // find a ukk2 if symmetry
   ukk2 = ukk1;
   i = ukk1 - UFirstNonZeroBsplineIndex + 2;
   if ((ukk1+1) <= ULastIndex) {
@@ -2871,7 +2871,7 @@ void BSplSLib::MovePoint (const Standard_Real            U,
     }
   }
 
-  // find a vkk2 if symetriy
+  // find a vkk2 if symmetry
   vkk2 = vkk1;
   j = vkk1 - VFirstNonZeroBsplineIndex + 2;
   if ((vkk1+1) <= VLastIndex) {

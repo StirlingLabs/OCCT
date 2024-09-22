@@ -16,11 +16,8 @@
 
 
 #include <Standard_OStream.hxx>
-#include <TCollection_AsciiString.hxx>
 #include <TDF_ChildIterator.hxx>
 #include <TDF_Label.hxx>
-#include <TDF_LabelMap.hxx>
-#include <TDF_MapIteratorOfLabelMap.hxx>
 #include <TDF_RelocationTable.hxx>
 #include <TDF_Tool.hxx>
 #include <TFunction_Logbook.hxx>
@@ -87,7 +84,7 @@ void TFunction_Logbook::Clear()
 
 //=======================================================================
 //function : IsEmpty
-//purpose  : Returns Standard_True if the nothing is reccorded in the logbook
+//purpose  : Returns Standard_True if the nothing is recorded in the logbook
 //=======================================================================
 
 Standard_Boolean TFunction_Logbook::IsEmpty () const

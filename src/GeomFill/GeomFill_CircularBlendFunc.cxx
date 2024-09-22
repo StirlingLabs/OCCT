@@ -21,7 +21,6 @@
 #include <GeomFill_CircularBlendFunc.hxx>
 #include <gp_Pnt.hxx>
 #include <Precision.hxx>
-#include <Standard_OutOfRange.hxx>
 #include <Standard_Type.hxx>
 #include <TColStd_Array1OfReal.hxx>
 #include <TColStd_SequenceOfReal.hxx>
@@ -58,7 +57,7 @@ static void GeomFillFusInt(const TColStd_Array1OfReal& I1,
 		    TColStd_SequenceOfReal& Seq)
 {
   Standard_Integer ind1=1, ind2=1;
-  Standard_Real    Epspar = Precision::PConfusion()*0.99;
+  constexpr Standard_Real Epspar = Precision::PConfusion()*0.99;
   // en suposant que le positionement fonctionne a PConfusion()/2
   Standard_Real    v1, v2;
 // Initialisations : les IND1 et IND2 pointent sur le 1er element
@@ -592,7 +591,7 @@ Intervals(TColStd_Array1OfReal& T, const GeomAbs_Shape S) const
  void GeomFill_CircularBlendFunc::SetInterval(const Standard_Real First,
 					      const Standard_Real Last) 
 {
-  Standard_Real Eps = Precision::PConfusion();
+  constexpr Standard_Real Eps = Precision::PConfusion();
   myTPath = myPath->Trim(First, Last, Eps);
   myTCurve1 = myCurve1->Trim(First, Last, Eps);
   myTCurve2 = myCurve2->Trim(First, Last, Eps); 

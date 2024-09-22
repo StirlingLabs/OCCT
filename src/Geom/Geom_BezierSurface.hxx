@@ -20,10 +20,8 @@
 #include <Standard.hxx>
 #include <Standard_Type.hxx>
 
-#include <Standard_Boolean.hxx>
 #include <TColgp_HArray2OfPnt.hxx>
 #include <TColStd_HArray2OfReal.hxx>
-#include <Standard_Real.hxx>
 #include <Standard_Integer.hxx>
 #include <Geom_BoundedSurface.hxx>
 #include <TColgp_Array2OfPnt.hxx>
@@ -33,10 +31,6 @@
 #include <GeomAbs_Shape.hxx>
 #include <BSplSLib.hxx>
 
-class Standard_ConstructionError;
-class Standard_DimensionError;
-class Standard_RangeError;
-class Standard_OutOfRange;
 class gp_Pnt;
 class gp_Vec;
 class Geom_Curve;

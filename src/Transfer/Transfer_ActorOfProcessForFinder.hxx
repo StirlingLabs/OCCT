@@ -18,11 +18,8 @@
 #define _Transfer_ActorOfProcessForFinder_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
-#include <Standard_Boolean.hxx>
 #include <Standard_Transient.hxx>
-#include <Transfer_HSequenceOfFinder.hxx>
 #include <Transfer_TransferMapOfProcessForFinder.hxx>
 #include <Message_ProgressRange.hxx>
 
@@ -47,7 +44,7 @@ public:
   
   Standard_EXPORT Transfer_ActorOfProcessForFinder();
   
-  //! Prerequesite for Transfer : the method Transfer is
+  //! Prerequisite for Transfer : the method Transfer is
   //! called on a starting object only if Recognize has
   //! returned True on it
   //! This allows to define a list of Actors, each one

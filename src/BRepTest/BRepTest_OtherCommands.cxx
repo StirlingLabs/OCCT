@@ -20,50 +20,30 @@
 #include <Draw_Interpretor.hxx>
 #include <DBRep.hxx>
 #include <DrawTrSurf.hxx>
+#include <Draw_ProgressIndicator.hxx>
 
 #include <string.h>
 #include <stdio.h>
 
-#include <Standard_ErrorHandler.hxx>
 #include <Precision.hxx>
 #include <TCollection_AsciiString.hxx>
-#include <gp_Lin.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_Dir.hxx>
-#include <gp_Ax1.hxx>
 
 #include <ElCLib.hxx>
 
 #include <TColgp_SequenceOfPnt.hxx>
 
-#include <GeomAbs_JoinType.hxx>
-#include <Geom_Line.hxx>
-
 #include <IntCurvesFace_Intersector.hxx>
 
-#include <TopAbs.hxx>
 #include <TopAbs_Orientation.hxx>
 
 #include <TopoDS.hxx>
 #include <TopoDS_Shape.hxx>
-#include <TopoDS_Compound.hxx>
-#include <TopoDS_CompSolid.hxx>
-#include <TopoDS_Solid.hxx>
-#include <TopoDS_Shell.hxx>
 #include <TopoDS_Face.hxx>
-#include <TopoDS_Wire.hxx>
-#include <TopoDS_Edge.hxx>
-#include <TopoDS_Vertex.hxx>
-#include <TopoDS_Iterator.hxx>
 
 #include <BRep_Builder.hxx>
 #include <BRep_Tool.hxx>
-
-#include <TopExp_Explorer.hxx>
-
-#include <TopTools_ListOfShape.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
-#include <TopTools_MapOfShape.hxx>
 
 #include <LocOpe_CSIntersector.hxx>
 #include <LocOpe_SequenceOfLin.hxx>
@@ -392,7 +372,7 @@ Standard_Integer MakeBoss(Draw_Interpretor& , Standard_Integer , const char** a)
 //function : MakeShell
 //purpose  : 
 //=======================================================================
-Standard_Integer MakeShell(Draw_Interpretor& , Standard_Integer , const char** a)
+Standard_Integer MakeShell(Draw_Interpretor& theDI, Standard_Integer , const char** a)
 {
 
   TopoDS_Shape aShape = DBRep::Get( a[1] ); 
@@ -404,12 +384,14 @@ Standard_Integer MakeShell(Draw_Interpretor& , Standard_Integer , const char** a
   
   Standard_Real Off = -Draw::Atof( a[3] );
 
+  Handle(Draw_ProgressIndicator) aProgress = new Draw_ProgressIndicator(theDI, 1);
+
   BRepOffset_MakeOffset Offset;
 
   Offset.Initialize( aShape, Off,  1.0e-3, BRepOffset_Skin, 
 			       Standard_True , Standard_False , GeomAbs_Arc );
   Offset.AddFace( F );
-  Offset.MakeThickSolid();
+  Offset.MakeThickSolid(aProgress->Start());
 
   if( Offset.IsDone() ) {
   //    SaveShape::Save(Offset.Shape(), "ss");
@@ -551,7 +533,7 @@ TopoDS_Face NextFaceForPrism (const TopoDS_Shape& shape,
     if (ASI.IsDone()) {
       Standard_Integer no=1, IndFrom, IndTo;
       TopAbs_Orientation theOr;
-      Standard_Real min = 1.e-04, Tol = -Precision::Confusion();
+      constexpr Standard_Real min = 1.e-04, Tol = -Precision::Confusion();
       if (ASI.LocalizeAfter (no, min, Tol, theOr, IndFrom, IndTo))  {
 	nextFace = ASI.Point(no, IndFrom).Face();  
 	break;

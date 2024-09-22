@@ -12,7 +12,7 @@ if (NOT BISON_EXECUTABLE OR NOT EXISTS "${BISON_EXECUTABLE}")
 endif()
 
 # Add paths to 3rdparty subfolders containing name "bison" to CMAKE_PROGRAM_PATH variable to make
-# these paths searhed by find_package
+# these paths searched by find_package
 if (3RDPARTY_DIR)
   file (GLOB BISON_PATHS LIST_DIRECTORIES true "${3RDPARTY_DIR}/*bison*/")
   foreach (candidate_path ${BISON_PATHS})
@@ -22,6 +22,4 @@ if (3RDPARTY_DIR)
   endforeach()
 endif()
  
-# bison 3.2 is required because it provides options to avoid generation of redundant header
-# files and embedding of local paths in the generated code
-find_package (BISON 3.2)
+find_package (BISON 3.7.4)

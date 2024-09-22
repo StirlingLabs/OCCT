@@ -19,13 +19,9 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
 #include <TopoDS_Face.hxx>
-#include <Standard_Real.hxx>
-#include <Standard_Boolean.hxx>
 #include <TopoDS_Shape.hxx>
-#include <GeomAbs_JoinType.hxx>
 #include <BRepFill_IndexedDataMapOfOrientedShapeListOfShape.hxx>
 #include <BRepMAT2d_BisectingLocus.hxx>
 #include <BRepMAT2d_LinkTopoBilo.hxx>
@@ -34,12 +30,6 @@
 #include <BRepFill_DataMapOfOrientedShapeListOfShape.hxx>
 #include <TopTools_SequenceOfShape.hxx>
 #include <TColgp_SequenceOfPnt.hxx>
-class Standard_ConstructionError;
-class Standard_NoSuchObject;
-class TopoDS_Face;
-class BRepMAT2d_BisectingLocus;
-class BRepMAT2d_LinkTopoBilo;
-class TopoDS_Shape;
 class Bisector_Bisec;
 class BRepFill_TrimEdgeTool;
 

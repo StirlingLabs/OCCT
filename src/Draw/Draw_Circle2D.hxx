@@ -18,14 +18,11 @@
 #define _Draw_Circle2D_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <gp_Circ2d.hxx>
 #include <Standard_Real.hxx>
 #include <Draw_Color.hxx>
 #include <Draw_Drawable2D.hxx>
-class gp_Circ2d;
-class Draw_Color;
 class Draw_Display;
 
 

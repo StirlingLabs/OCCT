@@ -25,19 +25,12 @@
 #include <gp_Pnt.hxx>
 #include <gp_Vec.hxx>
 #include <TColgp_SequenceOfAx1.hxx>
-#include <Standard_Real.hxx>
-#include <Standard_Boolean.hxx>
 #include <Adaptor3d_Curve.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <Standard_Integer.hxx>
 #include <TColStd_Array1OfReal.hxx>
 #include <GeomAbs_CurveType.hxx>
 class ChFiDS_SurfData;
-class Standard_OutOfRange;
-class Standard_NoSuchObject;
-class Standard_DomainError;
-class gp_Pnt;
-class gp_Vec;
 class gp_Ax1;
 class Geom_Curve;
 class gp_Lin;
@@ -57,6 +50,9 @@ class ChFiDS_ElSpine  : public Adaptor3d_Curve
 public:
 
   Standard_EXPORT ChFiDS_ElSpine();
+
+  //! Shallow copy of adaptor
+  Standard_EXPORT virtual Handle(Adaptor3d_Curve) ShallowCopy() const Standard_OVERRIDE;
   
   Standard_EXPORT virtual Standard_Real FirstParameter() const Standard_OVERRIDE;
   

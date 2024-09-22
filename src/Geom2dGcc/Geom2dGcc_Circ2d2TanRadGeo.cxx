@@ -18,7 +18,6 @@
 #include <GccEnt_BadQualifier.hxx>
 #include <GccEnt_QualifiedCirc.hxx>
 #include <GccEnt_QualifiedLin.hxx>
-#include <Geom2dAdaptor_Curve.hxx>
 #include <Geom2dGcc_Circ2d2TanRadGeo.hxx>
 #include <Geom2dGcc_CurveTool.hxx>
 #include <Geom2dGcc_QCurve.hxx>
@@ -856,7 +855,7 @@ pararg2(1,aNbSolMAX)
         Intp.Perform(C1,C2,Tol,Tol);
         if (Intp.IsDone()) {
           if (!Intp.IsEmpty()) {
-            const Standard_Real aSQApproxTol = Precision::Approximation() *
+            constexpr Standard_Real aSQApproxTol = Precision::Approximation() *
                                                 Precision::Approximation();
             for (Standard_Integer i = 1; i <= Intp.NbPoints() && NbrSol < aNbSolMAX; i++)
             {

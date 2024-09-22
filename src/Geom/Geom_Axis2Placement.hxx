@@ -18,14 +18,10 @@
 #define _Geom_Axis2Placement_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
-#include <gp_Dir.hxx>
 #include <Geom_AxisPlacement.hxx>
-class Standard_ConstructionError;
 class gp_Ax2;
 class gp_Pnt;
-class gp_Dir;
 class gp_Trsf;
 class Geom_Geometry;
 

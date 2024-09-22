@@ -15,11 +15,8 @@
 // commercial license or contractual agreement.
 
 
-#include <BRepPrim_Wedge.hxx>
 #include <BRepPrimAPI_MakeWedge.hxx>
 #include <gp_Ax2.hxx>
-#include <Standard_DomainError.hxx>
-#include <StdFail_NotDone.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Shell.hxx>
 #include <TopoDS_Solid.hxx>
@@ -119,7 +116,7 @@ const TopoDS_Shell&  BRepPrimAPI_MakeWedge::Shell()
 //purpose  : 
 //=======================================================================
 
-void BRepPrimAPI_MakeWedge::Build()
+void BRepPrimAPI_MakeWedge::Build(const Message_ProgressRange& /*theRange*/)
 {
   BRep_Builder B;
   B.MakeSolid(TopoDS::Solid(myShape));

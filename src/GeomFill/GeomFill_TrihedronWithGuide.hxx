@@ -18,15 +18,10 @@
 #define _GeomFill_TrihedronWithGuide_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
-#include <gp_Pnt.hxx>
 #include <GeomFill_TrihedronLaw.hxx>
 #include <Standard_Real.hxx>
 
-class Standard_OutOfRange;
-class Standard_NotImplemented;
-class gp_Pnt;
 
 
 class GeomFill_TrihedronWithGuide;

@@ -13,8 +13,8 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef _OpenGl_GlCore40_Header
-#define _OpenGl_GlCore40_Header
+#ifndef OpenGl_GlCore40_HeaderFile
+#define OpenGl_GlCore40_HeaderFile
 
 #include <OpenGl_GlCore33.hxx>
 
@@ -23,8 +23,6 @@ struct OpenGl_GlCore40 : public OpenGl_GlCore33
 {
 private:
   typedef OpenGl_GlCore33 theBaseClass_t;
-
-#if !defined(GL_ES_VERSION_2_0)
 
 public: //! @name GL_ARB_draw_indirect (added to OpenGL 4.0 core)
 
@@ -92,8 +90,6 @@ public: //! @name OpenGL 4.0 additives to 3.3
   using theBaseClass_t::glBlendEquationSeparatei;
   using theBaseClass_t::glBlendFunci;
   using theBaseClass_t::glBlendFuncSeparatei;
-
-#endif
 
 };
 

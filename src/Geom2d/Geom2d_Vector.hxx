@@ -18,14 +18,10 @@
 #define _Geom2d_Vector_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <gp_Vec2d.hxx>
 #include <Geom2d_Geometry.hxx>
 #include <Standard_Real.hxx>
-class Standard_DomainError;
-class gp_VectorWithNullMagnitude;
-class gp_Vec2d;
 
 
 class Geom2d_Vector;

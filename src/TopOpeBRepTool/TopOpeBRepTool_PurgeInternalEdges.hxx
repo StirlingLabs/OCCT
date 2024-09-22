@@ -19,16 +19,11 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
 #include <TopoDS_Shape.hxx>
-#include <Standard_Boolean.hxx>
 #include <TopTools_DataMapOfShapeListOfShape.hxx>
 #include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
 #include <Standard_Integer.hxx>
-class Standard_ConstructionError;
-class Standard_NullObject;
-class TopoDS_Shape;
 
 
 //! remove from  a shape, the  internal edges that are
@@ -74,8 +69,8 @@ public:
     return myIsDone;
   }
   
-  //! Using   the list  of internal edge    from each face,
-  //! rebuild myShape by removing thoses edges.
+  //! Using the list of internal edges from each face,
+  //! rebuild myShape by removing those edges.
   Standard_EXPORT void Perform();
 
 protected:

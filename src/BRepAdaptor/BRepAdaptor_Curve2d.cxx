@@ -17,7 +17,6 @@
 
 #include <BRep_Tool.hxx>
 #include <BRepAdaptor_Curve2d.hxx>
-#include <Standard_NullObject.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
 
@@ -43,6 +42,27 @@ BRepAdaptor_Curve2d::BRepAdaptor_Curve2d(const TopoDS_Edge& E,
   Initialize(E,F);
 }
 
+//=======================================================================
+//function : ShallowCopy
+//purpose  : 
+//=======================================================================
+
+Handle(Adaptor2d_Curve2d) BRepAdaptor_Curve2d::ShallowCopy() const
+{
+  Handle(BRepAdaptor_Curve2d) aCopy = new BRepAdaptor_Curve2d();
+
+  aCopy->myCurve = myCurve;
+  aCopy->myTypeCurve = myTypeCurve;
+  aCopy->myFirst = myFirst;
+  aCopy->myLast = myLast;
+  aCopy->myBSplineCurve = myBSplineCurve;
+  if (!myNestedEvaluator.IsNull())
+  {
+    aCopy->myNestedEvaluator = myNestedEvaluator->ShallowCopy();
+  }
+
+  return aCopy;
+}
 
 //=======================================================================
 //function : Initialize

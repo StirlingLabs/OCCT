@@ -19,11 +19,16 @@
 #include <Message_ProgressScope.hxx>
 #include <MoniTool_DataMapOfShapeTransient.hxx>
 #include <StdFail_NotDone.hxx>
+#include <StepData_Factors.hxx>
+#include <StepData_StepModel.hxx>
 #include <StepShape_ClosedShell.hxx>
 #include <StepShape_FacetedBrepAndBrepWithVoids.hxx>
 #include <StepShape_HArray1OfOrientedClosedShell.hxx>
 #include <StepShape_OrientedClosedShell.hxx>
 #include <StepShape_TopologicalRepresentationItem.hxx>
+#include <StepVisual_HArray1OfTessellatedStructuredItem.hxx>
+#include <StepVisual_TessellatedShell.hxx>
+#include <StepVisual_TessellatedSolid.hxx>
 #include <TCollection_HAsciiString.hxx>
 #include <TColStd_SequenceOfTransient.hxx>
 #include <TopoDS.hxx>
@@ -44,6 +49,7 @@
 TopoDSToStep_MakeFacetedBrepAndBrepWithVoids::
   TopoDSToStep_MakeFacetedBrepAndBrepWithVoids(const TopoDS_Solid& aSolid,
                                                const Handle(Transfer_FinderProcess)& FP,
+                                               const StepData_Factors& theLocalFactors,
                                                const Message_ProgressRange& theProgress)
 {
   done = Standard_False;
@@ -56,11 +62,13 @@ TopoDSToStep_MakeFacetedBrepAndBrepWithVoids::
   Handle(StepShape_ClosedShell)                   aOuter, aCShell;
   Handle(StepShape_OrientedClosedShell)           aOCShell;
   Handle(StepShape_HArray1OfOrientedClosedShell)  aVoids;
+  TColStd_SequenceOfTransient                     aTessShells;
 
   aOutShell = BRepClass3d::OuterShell(aSolid);
 
+  Handle(StepData_StepModel) aStepModel = Handle(StepData_StepModel)::DownCast(FP->Model());
   TopoDSToStep_Builder StepB;
-  TopoDSToStep_Tool    aTool;
+  TopoDSToStep_Tool    aTool(aStepModel);
 
   if (!aOutShell.IsNull()) {
     Standard_Integer nbshapes = 0;
@@ -72,32 +80,37 @@ TopoDSToStep_MakeFacetedBrepAndBrepWithVoids::
     {
       if (It.Value().ShapeType() == TopAbs_SHELL) {
         Message_ProgressRange aRange = aPS.Next();
-	TopoDS_Shell CurrentShell = TopoDS::Shell(It.Value());
-	if (It.Value().Closed()) {
+        TopoDS_Shell CurrentShell = TopoDS::Shell(It.Value());
+        if (It.Value().Closed()) {
 
-	  aTool.Init(aMap, Standard_False);
-	  StepB.Init(CurrentShell, aTool, FP, aRange);
-	  TopoDSToStep::AddResult ( FP, aTool );
+          aTool.Init(aMap, Standard_False, aStepModel->InternalParameters.WriteSurfaceCurMode);
+          StepB.Init(CurrentShell, aTool, FP, Standard_False, theLocalFactors, aRange);
+          TopoDSToStep::AddResult(FP, aTool);
 
-	  if (StepB.IsDone()) {
-	    aCShell = Handle(StepShape_ClosedShell)::DownCast(StepB.Value());
-	    if ( aOutShell.IsEqual(It.Value()) ) 
-	      aOuter = aCShell;
-	    else 
-	      S.Append(aCShell);
-	  }
-	  else {
-	    Handle(TransferBRep_ShapeMapper) errShape =
-	      new TransferBRep_ShapeMapper(CurrentShell);
-	    FP->AddWarning(errShape," Shell from Solid not mapped to FacetedBrepAndBrepWithVoids");
-	  }
-	}
-	else {
-	  done = Standard_False;
-	  Handle(TransferBRep_ShapeMapper) errShape =
-	    new TransferBRep_ShapeMapper(CurrentShell);
-	  FP->AddWarning(errShape," Shell from Solid not closed; not mapped to FacetedBrepAndBrepWithVoids");
-	}
+          if (StepB.IsDone()) {
+            aCShell = Handle(StepShape_ClosedShell)::DownCast(StepB.Value());
+            if (aOutShell.IsEqual(It.Value()))
+              aOuter = aCShell;
+            else
+              S.Append(aCShell);
+            Handle(StepVisual_TessellatedItem) aTessShell = StepB.TessellatedValue();
+            if (!aTessShell.IsNull()) 
+            {
+              aTessShells.Append(aTessShell);
+            }
+          }
+          else {
+            Handle(TransferBRep_ShapeMapper) errShape =
+              new TransferBRep_ShapeMapper(CurrentShell);
+            FP->AddWarning(errShape, " Shell from Solid not mapped to FacetedBrepAndBrepWithVoids");
+          }
+        }
+        else {
+          done = Standard_False;
+          Handle(TransferBRep_ShapeMapper) errShape =
+            new TransferBRep_ShapeMapper(CurrentShell);
+          FP->AddWarning(errShape, " Shell from Solid not closed; not mapped to FacetedBrepAndBrepWithVoids");
+        }
       }
     }
     if (!aPS.More())
@@ -111,12 +124,38 @@ TopoDSToStep_MakeFacetedBrepAndBrepWithVoids::
     for ( Standard_Integer i=1; i<=N; i++ ) {
       aOCShell = new StepShape_OrientedClosedShell();
       aOCShell->Init(aName, Handle(StepShape_ClosedShell)::DownCast(S.Value(i)),
-		     Standard_True);
+        Standard_True);
       aVoids->SetValue(i, aOCShell);
     }
     theFacetedBrepAndBrepWithVoids = 
       new StepShape_FacetedBrepAndBrepWithVoids();
     theFacetedBrepAndBrepWithVoids->Init(aName, aOuter, aVoids);
+
+    if (!aTessShells.IsEmpty()) 
+    {
+      Handle(StepVisual_TessellatedSolid) aTessSolid = new StepVisual_TessellatedSolid();
+      Handle(TCollection_HAsciiString) aTessName = new TCollection_HAsciiString("");
+      Standard_Integer aNbItems = 0;
+      for (TColStd_SequenceOfTransient::Iterator anIt(aTessShells); anIt.More(); anIt.Next()) 
+      {
+        Handle(StepVisual_TessellatedShell) aTessShell = Handle(StepVisual_TessellatedShell)::DownCast(anIt.Value());
+        aNbItems += aTessShell->NbItems();
+      }
+      Handle(StepVisual_HArray1OfTessellatedStructuredItem) anItems
+        = new StepVisual_HArray1OfTessellatedStructuredItem(1, aNbItems);
+      for (TColStd_SequenceOfTransient::Iterator anIt(aTessShells); anIt.More(); anIt.Next()) 
+      {
+        Handle(StepVisual_TessellatedShell) aTessShell = Handle(StepVisual_TessellatedShell)::DownCast(anIt.Value());
+        for (Standard_Integer i = 1; i <= aTessShell->NbItems(); ++i) 
+        {
+          anItems->SetValue(i, aTessShell->ItemsValue(i));
+        }
+      }
+      Standard_Boolean aHasGeomLink = !theFacetedBrepAndBrepWithVoids.IsNull();
+      aTessSolid->Init(aTessName, anItems, aHasGeomLink, theFacetedBrepAndBrepWithVoids);
+      theTessellatedItem = aTessSolid;
+    }
+
     done = Standard_True;
   }
   else {
@@ -136,4 +175,16 @@ const Handle(StepShape_FacetedBrepAndBrepWithVoids) &
 {
   StdFail_NotDone_Raise_if (!done, "TopoDSToStep_MakeFacetedBrepAndBrepWithVoids::Value() - no result");
   return theFacetedBrepAndBrepWithVoids;
+}
+
+// ============================================================================
+// Method  : TopoDSToStep_MakeFacetedBrepAndBrepWithVoids::TessellatedValue
+// Purpose : Returns TessellatedItem as the optional result
+// ============================================================================
+
+const Handle(StepVisual_TessellatedItem)&
+TopoDSToStep_MakeFacetedBrepAndBrepWithVoids::TessellatedValue() const
+{
+  StdFail_NotDone_Raise_if(!done, "TopoDSToStep_MakeFacetedBrepAndBrepWithVoids::TessellatedValue() - no result");
+  return theTessellatedItem;
 }

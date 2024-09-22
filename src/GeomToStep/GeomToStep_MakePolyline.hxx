@@ -24,8 +24,8 @@
 #include <GeomToStep_Root.hxx>
 #include <TColgp_Array1OfPnt.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
+
 class StepGeom_Polyline;
-class StdFail_NotDone;
 
 
 //! This class implements the mapping between an Array1 of points
@@ -37,9 +37,11 @@ public:
   DEFINE_STANDARD_ALLOC
 
   
-  Standard_EXPORT GeomToStep_MakePolyline(const TColgp_Array1OfPnt& P);
+  Standard_EXPORT GeomToStep_MakePolyline(const TColgp_Array1OfPnt& P,
+                                          const StepData_Factors& theLocalFactors = StepData_Factors());
   
-  Standard_EXPORT GeomToStep_MakePolyline(const TColgp_Array1OfPnt2d& P);
+  Standard_EXPORT GeomToStep_MakePolyline(const TColgp_Array1OfPnt2d& P,
+                                          const StepData_Factors& theLocalFactors = StepData_Factors());
   
   Standard_EXPORT const Handle(StepGeom_Polyline)& Value() const;
 

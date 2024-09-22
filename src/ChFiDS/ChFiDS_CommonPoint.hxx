@@ -25,15 +25,8 @@
 #include <TopoDS_Vertex.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_Vec.hxx>
-#include <Standard_Real.hxx>
 #include <Standard_Boolean.hxx>
 #include <TopAbs_Orientation.hxx>
-class Standard_DomainError;
-class Standard_TypeMismatch;
-class TopoDS_Vertex;
-class TopoDS_Edge;
-class gp_Pnt;
-class gp_Vec;
 
 
 //! point    start/end of  fillet common  to  2 adjacent  filets

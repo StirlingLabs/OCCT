@@ -14,9 +14,7 @@
 // AdvApp2Var_SysBase.cxx
 #include <assert.h>
 #include <cmath>
-#include <stdlib.h>
 #include <string.h>
-#include <AdvApp2Var_Data_f2c.hxx>
 #include <AdvApp2Var_SysBase.hxx>
 #include <AdvApp2Var_Data.hxx>
 #include <Standard.hxx>
@@ -114,11 +112,6 @@ static
 int mcrgetv_(integer *sz,
 	     intptr_t *iad,
 	     integer *ier);
-
-static
-int mcrlocv_(void* t,
-	     intptr_t *l);
-
 
 static struct {
     integer lec, imp, keyb, mae, jscrn, itblt, ibb;
@@ -383,9 +376,6 @@ int AdvApp2Var_SysBase::macrchk_()
   
   /* Local variables */
   integer  i__, j;
-  intptr_t ioff;
-  doublereal* t = 0;
-  intptr_t loc;
   
 /* ***********************************************************************
  */
@@ -426,7 +416,7 @@ int AdvApp2Var_SysBase::macrchk_()
 
 /*     FONCTION : */
 /*     ---------- */
-/*        TABLE OF MANAGEMENT OF DYNAMIC MEMOTY ALLOCATIONS */
+/*        TABLE OF MANAGEMENT OF DYNAMIC MEMORY ALLOCATIONS */
 
 /*     KEYWORDS : */
 /*     ----------- */
@@ -469,8 +459,6 @@ int AdvApp2Var_SysBase::macrchk_()
 /* ----------------------------------------------------------------------*
  */
 
-/* CALCULATE ADDRESS OF T */
-  mcrlocv_(t, &loc);  
   /* CONTROL OF FLAGS IN THE TABLE */
   i__1 = mcrgene_.ncore;
   for (i__ = 0; i__ < i__1; ++i__) {
@@ -481,10 +469,9 @@ int AdvApp2Var_SysBase::macrchk_()
       intptr_t* pp = p + j;
       if (*pp != -1) {
 	
-	ioff = (*pp - loc) / 8;
-	
-	if (t[ioff] != -134744073.) {
-	  
+	double* t = reinterpret_cast<double*>(*pp);
+	if (*t != -134744073.)
+	{
 	  /* MSG : '*** ERREUR  : REMOVAL FROM MEMORY OF ADDRESS
 	     E:',ICORE(J,I) */
 	  /*       AND OF RANK ICORE(12,I) */
@@ -727,10 +714,7 @@ int macrgfl_(intptr_t *iadfld,
   
   char cbid[1] = {};
   integer ibid, ienr;
-  doublereal* t = 0;
   integer novfl = 0;
-  intptr_t ioff,iadt;
-  
   
   /* ***********************************************************************
    */
@@ -824,27 +808,25 @@ int macrgfl_(intptr_t *iadfld,
     ifois = 1;
   }
   
-  /*  CALCULATE THE ADDRESS OF T */
-  mcrlocv_(t, &iadt);
-  
+ 
   /* CALCULATE THE OFFSET */
-  ioff = (*iadfld - iadt) / 8;
+  double* t = reinterpret_cast<double*>(*iadfld);
   
   /*  SET TO OVERFLOW OF THE USER ZONE IN CASE OF PRODUCTION VERSION */
   if (*iphase == 1 && novfl == 0) {
     ienr = *iznuti / 8;
-    maoverf_(&ienr, &t[ioff + 1]);
+    maoverf_(&ienr, &t[1]);
   }
     
   /*  UPDATE THE START FLAG */
-  t[ioff] = -134744073.;
+  *t = -134744073.;
   
   /*  FAKE CALL TO STOP THE DEBUGGER : */
   macrbrk_();
   
   /*  UPDATE THE START FLAG */
-  ioff = (*iadflf - iadt) / 8;
-  t[ioff] = -134744073.;
+  t = reinterpret_cast<double*>(*iadflf);
+  *t = -134744073.;
     
   /*  FAKE CALL TO STOP THE DEBUGGER : */
   macrbrk_();
@@ -929,10 +911,9 @@ int macrmsg_(const char *,//crout,
     /* Parameter adjustments */
   ct -= ct_len;
   (void )ct; // unused
+  (void )xt; // unused
+  (void )it; // unused
 
-  --xt;
-  --it;
-  
   /* Function Body */
   mamdlng_(cln, 3L);
   
@@ -1807,7 +1788,7 @@ int maoverf_(integer *nbentr,
     /* Loop. The upper limit is the integer value of the logarithm of base 2
      */
     /* of NBENTR/NLONGR. */
-    i__1 = (integer) (log((real) (*nbentr) / (float)63.) / log((float)2.))
+    i__1 = (integer) (std::log((real) (*nbentr) / (float)63.) / std::log((float)2.))
       ;
     for (ibid = 1; ibid <= i__1; ++ibid) {
       
@@ -2076,7 +2057,7 @@ int mcrcomm_(integer *kop,
 	itab[(i__ << 2) - 4] = *noct / 8 + 1;
 	itab[(i__ << 2) - 3] = ipre;
 	itab[(i__ << 2) - 2] = *noct;
-	mcrlocv_(&dtab[ipre - 1], iadr);
+	*iadr = reinterpret_cast<intptr_t> (&dtab[ipre - 1]);
 	itab[(i__ << 2) - 1] = *iadr;
 	goto L9900;
       }
@@ -2219,8 +2200,8 @@ int AdvApp2Var_SysBase::mcrdelt_(integer *iunit,
 /*     ---------- */
 /*       TABLE OF MANAGEMENT OF DYNAMIC ALLOCATIONS IN MEMORY */
 
-/*     KEYWORS : */
-/*     ----------- */
+/*     KEYWORDS : */
+/*     ---------- */
 /*       SYSTEM, MEMORY, ALLOCATION */
 
 /*     DEMSCRIPTION/NOTES/LIMITATIONS : */
@@ -2270,7 +2251,7 @@ int AdvApp2Var_SysBase::mcrdelt_(integer *iunit,
 /* SEARCH IN MCRGENE */
 
     n = -1;
-    mcrlocv_(t, &loc);
+    loc = reinterpret_cast<intptr_t> (t);
 
     for (i__ = mcrgene_.ncore - 1; i__ >= 0; --i__) {
 	if (*iunit == mcrgene_.icore[i__].unit && *isize == 
@@ -2503,7 +2484,7 @@ int mcrfree_(integer *,//ibyte,
 /*                                                                        */
 /*                   = 0  ==> OK                                          */
 /*                   = 1  ==> Allocation impossible                       */
-/*                   = -1 ==> Ofset > 2**31 - 1                           */
+/*                   = -1 ==> Offset > 2**31 - 1                          */
 /*                                                                        */
 
 /*                                                                        */
@@ -2669,19 +2650,6 @@ int AdvApp2Var_SysBase::mcrlist_(integer *ier) const
 
  return 0 ;
 } /* mcrlist_ */
-
-
-//=======================================================================
-//function : mcrlocv_
-//purpose  : 
-//=======================================================================
-int mcrlocv_(void* t,
-	     intptr_t *l)
-
-{
-  *l = reinterpret_cast<intptr_t> (t);
-  return 0 ;
-}
 
 //=======================================================================
 //function : AdvApp2Var_SysBase::mcrrqst_
@@ -2888,7 +2856,7 @@ int AdvApp2Var_SysBase::mcrrqst_(integer *iunit,
 /*     . add delta for alinement with the base */
 /*     . round to multiple of 8 above */
 
-  mcrlocv_(t, &loc);
+  loc = reinterpret_cast<intptr_t> (t);
     izu = ibyte + loc % *iunit;
     irest = izu % 8;
     if (irest != 0) {
@@ -2899,7 +2867,7 @@ int AdvApp2Var_SysBase::mcrrqst_(integer *iunit,
 /*     . add size of the user zone */
 /*     . add 8 for alinement of start address of */
 /*       allocation on multiple of 8 so that to be able to  */
-/*       set flags with Double Precision without other pb than alignement */
+/*       set flags with Double Precision without other pb than alignment */
 /*     . add 16 octets for two flags */
 
     ibyte = izu + 24;

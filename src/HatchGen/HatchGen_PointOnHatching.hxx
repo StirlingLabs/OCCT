@@ -23,10 +23,7 @@
 
 #include <HatchGen_PointsOnElement.hxx>
 #include <HatchGen_IntersectionPoint.hxx>
-#include <Standard_Real.hxx>
-#include <Standard_Integer.hxx>
 #include <Standard_Boolean.hxx>
-class Standard_OutOfRange;
 class IntRes2d_IntersectionPoint;
 class HatchGen_PointOnElement;
 

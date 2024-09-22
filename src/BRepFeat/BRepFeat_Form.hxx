@@ -21,7 +21,6 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
-#include <Standard_Boolean.hxx>
 #include <TopTools_DataMapOfShapeListOfShape.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopTools_ListOfShape.hxx>
@@ -32,7 +31,6 @@
 #include <BRepBuilderAPI_MakeShape.hxx>
 #include <TColGeom_SequenceOfCurve.hxx>
 #include <Standard_Integer.hxx>
-class TopoDS_Shape;
 class Geom_Curve;
 class LocOpe_Gluer;
 class BRepAlgoAPI_BooleanOperation;

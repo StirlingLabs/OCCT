@@ -21,11 +21,8 @@
 #include <Standard_Type.hxx>
 
 #include <IFSelect_Dispatch.hxx>
-#include <Standard_CString.hxx>
-#include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
 class IFSelect_SignCounter;
-class Interface_InterfaceError;
 class TCollection_AsciiString;
 class Interface_Graph;
 class IFGraph_SubPartsIterator;

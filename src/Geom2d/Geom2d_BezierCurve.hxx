@@ -18,23 +18,15 @@
 #define _Geom2d_BezierCurve_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
-#include <Standard_Boolean.hxx>
 #include <TColgp_HArray1OfPnt2d.hxx>
-#include <TColStd_HArray1OfReal.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_Real.hxx>
 #include <Geom2d_BoundedCurve.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
-#include <TColStd_Array1OfReal.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <BSplCLib.hxx>
 
-class Standard_ConstructionError;
-class Standard_DimensionError;
-class Standard_RangeError;
-class Standard_OutOfRange;
 class gp_Pnt2d;
 class gp_Vec2d;
 class gp_Trsf2d;

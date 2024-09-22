@@ -20,10 +20,8 @@
 #include <Standard.hxx>
 #include <Standard_Type.hxx>
 
-#include <Standard_Boolean.hxx>
 #include <ExprIntrp_Generator.hxx>
 class Expr_GeneralRelation;
-class Standard_NoSuchObject;
 class TCollection_AsciiString;
 
 

@@ -22,10 +22,8 @@
 #include <Standard_Handle.hxx>
 
 #include <BRepFill_MultiLine.hxx>
-#include <Standard_Boolean.hxx>
 class Geom_Curve;
 class Geom2d_Curve;
-class StdFail_NotDone;
 
 
 //! Evaluate the 3dCurve and the PCurves described in a MultiLine from BRepFill.

@@ -23,7 +23,6 @@
 
 #include <Standard_Boolean.hxx>
 #include <Standard_Real.hxx>
-#include <gp_XYZ.hxx>
 #include <math_FunctionSetWithDerivatives.hxx>
 #include <Standard_Integer.hxx>
 #include <math_Vector.hxx>
@@ -33,7 +32,6 @@ class GeomFill_SectionLaw;
 class Geom_Curve;
 class Geom_Surface;
 class gp_Pnt;
-class gp_XYZ;
 class math_Matrix;
 class gp_Vec;
 

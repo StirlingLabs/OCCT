@@ -31,17 +31,13 @@
 #include <BOPDS_VectorOfInterfVF.hxx>
 #include <BOPDS_VectorOfInterfVV.hxx>
 #include <BRep_Tool.hxx>
-#include <gp_Torus.hxx>
-#include <TopExp.hxx>
 #include <BOPTools_AlgoTools.hxx>
 #include <BOPTools_Parallel.hxx>
 #include <BRepBuilderAPI_Copy.hxx>
 #include <IntTools_Context.hxx>
-#include <IntTools_Tools.hxx>
 #include <IntTools_FaceFace.hxx>
 #include <Standard_ErrorHandler.hxx>
 #include <Standard_Failure.hxx>
-#include <TopTools_ListOfShape.hxx>
 #include <TopTools_MapOfShape.hxx>
 
 //=======================================================================
@@ -50,14 +46,14 @@
 //=======================================================================
 class BOPAlgo_FaceSelfIntersect : 
   public IntTools_FaceFace,
-  public BOPAlgo_Algo {
+  public BOPAlgo_ParallelAlgo {
 
  public:
   DEFINE_STANDARD_ALLOC
 
   BOPAlgo_FaceSelfIntersect() : 
     IntTools_FaceFace(),  
-    BOPAlgo_Algo(),
+    BOPAlgo_ParallelAlgo(),
     myIF(-1), myTolF(1.e-7) {
   }
   //
@@ -89,7 +85,11 @@ class BOPAlgo_FaceSelfIntersect :
   }
   //
   virtual void Perform() {
-    BOPAlgo_Algo::UserBreak();
+    Message_ProgressScope aPS(myProgressRange, NULL, 1);
+    if (UserBreak(aPS))
+    {
+      return;
+    }
     IntTools_FaceFace::Perform (myF, myF, myRunParallel);
   }
   //
@@ -140,7 +140,7 @@ void BOPAlgo_CheckerSI::SetLevelOfCheck(const Standard_Integer theLevel)
 //function : Init
 //purpose  : 
 //=======================================================================
-void BOPAlgo_CheckerSI::Init()
+void BOPAlgo_CheckerSI::Init(const Message_ProgressRange& /*theRange*/)
 {
   Clear();
   //
@@ -164,7 +164,7 @@ void BOPAlgo_CheckerSI::Init()
 //function : Perform
 //purpose  : 
 //=======================================================================
-void BOPAlgo_CheckerSI::Perform()
+void BOPAlgo_CheckerSI::Perform(const Message_ProgressRange& theRange)
 {
   try {
     OCC_CATCH_SIGNALS
@@ -174,24 +174,33 @@ void BOPAlgo_CheckerSI::Perform()
       return;
     }
     //
+    Message_ProgressScope aPS(theRange, "Checking shape on self-intersection", 10);
     // Perform intersection of sub shapes
-    BOPAlgo_PaveFiller::Perform();
+    BOPAlgo_PaveFiller::Perform(aPS.Next(8));
+    if (UserBreak(aPS))
+    {
+      return;
+    }
     //
-    CheckFaceSelfIntersection();
+    CheckFaceSelfIntersection(aPS.Next());
     
+    Message_ProgressScope aPSZZ(aPS.Next(), NULL, 4);
     // Perform intersection with solids
     if (!HasErrors())
-      PerformVZ();
+      PerformVZ(aPSZZ.Next());
     //
     if (!HasErrors())
-      PerformEZ();
+      PerformEZ(aPSZZ.Next());
     //
     if (!HasErrors())
-      PerformFZ();
+      PerformFZ(aPSZZ.Next());
     //
     if (!HasErrors())
-      PerformZZ();
+      PerformZZ(aPSZZ.Next());
     //
+    if (HasErrors())
+      return;
+
     // Treat the intersection results
     PostTreat();
   }
@@ -384,7 +393,7 @@ void BOPAlgo_CheckerSI::PostTreat()
 //function : CheckFaceSelfIntersection
 //purpose  : 
 //=======================================================================
-void BOPAlgo_CheckerSI::CheckFaceSelfIntersection()
+void BOPAlgo_CheckerSI::CheckFaceSelfIntersection(const Message_ProgressRange& theRange)
 {
   if (myLevelOfCheck < 5)
     return;
@@ -398,6 +407,8 @@ void BOPAlgo_CheckerSI::CheckFaceSelfIntersection()
   BOPAlgo_VectorOfFaceSelfIntersect aVFace;
   
   Standard_Integer aNbS=myDS->NbSourceShapes();
+
+  Message_ProgressScope aPSOuter(theRange, NULL, 1);
   
   //
   for (Standard_Integer i = 0; i < aNbS; i++)
@@ -432,17 +443,21 @@ void BOPAlgo_CheckerSI::CheckFaceSelfIntersection()
     aFaceSelfIntersect.SetIndex(i);
     aFaceSelfIntersect.SetFace(aF);
     aFaceSelfIntersect.SetTolF(aTolF);
-    //
-    if (myProgressScope != NULL)
-    {
-      aFaceSelfIntersect.SetProgressIndicator(*myProgressScope);
-    }
   }
   
   Standard_Integer aNbFace = aVFace.Length();
+  Message_ProgressScope aPSParallel(aPSOuter.Next(), "Checking surface on self-intersection", aNbFace);
+  for (Standard_Integer iF = 0; iF < aNbFace; ++iF)
+  {
+    aVFace.ChangeValue(iF).SetProgressRange(aPSParallel.Next());
+  }
   //======================================================
   BOPTools_Parallel::Perform (myRunParallel, aVFace);
   //======================================================
+  if (UserBreak(aPSOuter))
+  {
+    return;
+  }
   //
   for (Standard_Integer k = 0; k < aNbFace; k++)
   {

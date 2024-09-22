@@ -18,15 +18,12 @@
 #define _Draw_Axis3D_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <gp_Ax3.hxx>
 #include <Draw_Color.hxx>
 #include <Standard_Integer.hxx>
 #include <Draw_Drawable3D.hxx>
-class Draw_Color;
 class gp_Pnt;
-class gp_Ax3;
 class Draw_Display;
 
 

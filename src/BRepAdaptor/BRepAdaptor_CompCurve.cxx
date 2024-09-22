@@ -18,7 +18,6 @@
 
 #include <BRep_Tool.hxx>
 #include <BRepTools_WireExplorer.hxx>
-#include <ElCLib.hxx>
 #include <GCPnts_AbscissaPoint.hxx>
 #include <Geom_BezierCurve.hxx>
 #include <Geom_BSplineCurve.hxx>
@@ -29,10 +28,6 @@
 #include <gp_Parab.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_Vec.hxx>
-#include <Standard_DomainError.hxx>
-#include <Standard_NoSuchObject.hxx>
-#include <Standard_NullObject.hxx>
-#include <Standard_OutOfRange.hxx>
 #include <TopAbs_Orientation.hxx>
 #include <TopExp.hxx>
 #include <TopoDS_Edge.hxx>
@@ -77,6 +72,34 @@ BRepAdaptor_CompCurve::BRepAdaptor_CompCurve(const TopoDS_Wire& theWire,
   IsbyAC  (theIsAC)
 {
   Initialize(theWire, theIsAC, theFirst, theLast, theTolerance);
+}
+
+//=======================================================================
+//function : ShallowCopy
+//purpose  : 
+//=======================================================================
+
+Handle(Adaptor3d_Curve) BRepAdaptor_CompCurve::ShallowCopy() const
+{
+  Handle(BRepAdaptor_CompCurve) aCopy = new BRepAdaptor_CompCurve();
+
+  aCopy->myWire   = myWire;
+  aCopy->TFirst   = TFirst;
+  aCopy->TLast    = TLast;
+  aCopy->PTol     = PTol;
+  aCopy->myCurves = new (BRepAdaptor_HArray1OfCurve) (1, myCurves->Size());
+  for (Standard_Integer anI = 1; anI <= myCurves->Size(); ++anI)
+  {
+    const Handle(Adaptor3d_Curve) aCurve = myCurves->Value(anI).ShallowCopy();
+    const BRepAdaptor_Curve& aBrepCurve = *(Handle(BRepAdaptor_Curve)::DownCast(aCurve));
+    aCopy->myCurves->SetValue(anI, aBrepCurve);
+  }
+  aCopy->myKnots  = myKnots;
+  aCopy->CurIndex = CurIndex;
+  aCopy->Forward  = Forward;
+  aCopy->IsbyAC   = IsbyAC;
+
+  return aCopy;
 }
 
  void BRepAdaptor_CompCurve::Initialize(const TopoDS_Wire& W,

@@ -19,11 +19,10 @@
 
 #include <AppCont_Function.hxx>
 #include <AppParCurves_MultiCurve.hxx>
-#include <math_Vector.hxx>
 #include <math_Matrix.hxx>
 #include <NCollection_Array1.hxx>
 #include <AppParCurves_Constraint.hxx>
-
+#include <math_Vector.hxx>
 
 struct PeriodicityInfo
 {

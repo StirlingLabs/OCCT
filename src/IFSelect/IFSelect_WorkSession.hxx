@@ -20,7 +20,6 @@
 #include <Standard.hxx>
 #include <Standard_Type.hxx>
 
-#include <Standard_Boolean.hxx>
 #include <TCollection_AsciiString.hxx>
 #include <Interface_CheckIterator.hxx>
 #include <TColStd_IndexedDataMapOfTransientTransient.hxx>
@@ -32,14 +31,9 @@
 #include <Standard_Integer.hxx>
 #include <TColStd_HSequenceOfTransient.hxx>
 #include <TColStd_HSequenceOfInteger.hxx>
-#include <Standard_Type.hxx>
-#include <Standard_Transient.hxx>
 #include <TColStd_HSequenceOfHAsciiString.hxx>
 #include <IFSelect_RemainMode.hxx>
-#include <TColStd_SequenceOfTransient.hxx>
-#include <TColStd_SequenceOfInteger.hxx>
 #include <IFSelect_PrintCount.hxx>
-#include <TCollection_AsciiString.hxx>
 class IFSelect_ShareOut;
 class IFSelect_WorkLibrary;
 class Interface_Protocol;
@@ -48,11 +42,9 @@ class Interface_HGraph;
 class Interface_GTool;
 
 class IFSelect_ModelCopier;
-class Standard_DomainError;
 class IFSelect_Signature;
 class TCollection_HAsciiString;
 class Interface_Graph;
-class Interface_CheckIterator;
 class IFSelect_IntParam;
 class IFSelect_Selection;
 class Interface_EntityIterator;

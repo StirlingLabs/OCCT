@@ -22,11 +22,6 @@
 #include <BOPDS_DS.hxx>
 #include <BOPTest.hxx>
 #include <BOPTest_Objects.hxx>
-#include <BRep_Builder.hxx>
-#include <BRepAlgoAPI_BooleanOperation.hxx>
-#include <BRepAlgoAPI_Common.hxx>
-#include <BRepAlgoAPI_Cut.hxx>
-#include <BRepAlgoAPI_Fuse.hxx>
 #include <BRepAlgoAPI_Section.hxx>
 #include <BRepTest_Objects.hxx>
 #include <DBRep.hxx>
@@ -39,10 +34,10 @@
 #include <IntTools_PntOn2Faces.hxx>
 #include <NCollection_BaseAllocator.hxx>
 #include <TCollection_AsciiString.hxx>
-#include <TopoDS_Compound.hxx>
 #include <TopoDS_Iterator.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopTools_ListOfShape.hxx>
+#include <Draw_ProgressIndicator.hxx>
 
 #include <stdio.h>
 //
@@ -145,6 +140,7 @@ Standard_Integer bop(Draw_Interpretor& di,
   bRunParallel=BOPTest_Objects::RunParallel();
   bNonDestructive = BOPTest_Objects::NonDestructive();
   BOPAlgo_GlueEnum aGlue = BOPTest_Objects::Glue();
+  Handle(Draw_ProgressIndicator) aProgress = new Draw_ProgressIndicator(di, 1);
   //
   aLC.Append(aS1);
   aLC.Append(aS2);
@@ -164,7 +160,7 @@ Standard_Integer bop(Draw_Interpretor& di,
   pPF->SetGlue(aGlue);
   pPF->SetUseOBB(BOPTest_Objects::UseOBB());
   //
-  pPF->Perform();
+  pPF->Perform(aProgress->Start());
   BOPTest::ReportAlerts(pPF->GetReport());
   //
   return 0;
@@ -233,7 +229,6 @@ Standard_Integer bopsmt(Draw_Interpretor& di,
     return 0;
   }
   //
-  char buf[64];
   Standard_Boolean bRunParallel;
   Standard_Integer aNb;
   BOPAlgo_BOP aBOP;
@@ -241,12 +236,12 @@ Standard_Integer bopsmt(Draw_Interpretor& di,
   const TopTools_ListOfShape& aLC=pPF->Arguments();
   aNb=aLC.Extent();
   if (aNb!=2) {
-    Sprintf (buf, " wrong number of arguments %s\n", aNb);
-    di << buf;
+    di << " wrong number of arguments " << aNb << '\n';
     return 0;
   }
   // 
   bRunParallel=BOPTest_Objects::RunParallel();
+  Handle(Draw_ProgressIndicator) aProgress = new Draw_ProgressIndicator(di, 1);
   //
   const TopoDS_Shape& aS1=aLC.First();
   const TopoDS_Shape& aS2=aLC.Last();
@@ -258,7 +253,7 @@ Standard_Integer bopsmt(Draw_Interpretor& di,
   aBOP.SetCheckInverted(BOPTest_Objects::CheckInverted());
   aBOP.SetToFillHistory(BRepTest_Objects::IsHistoryNeeded());
   //
-  aBOP.PerformWithFiller(*pPF);
+  aBOP.PerformWithFiller(*pPF, aProgress->Start());  
   BOPTest::ReportAlerts(aBOP.GetReport());
 
   // Store the history of Boolean operation into the session
@@ -301,7 +296,6 @@ Standard_Integer bopsection(Draw_Interpretor& di,
     return 0;
   }
   //
-  char buf[64];
   Standard_Boolean bRunParallel;
   Standard_Integer aNb;
   BOPAlgo_Section aBOP;
@@ -309,8 +303,7 @@ Standard_Integer bopsection(Draw_Interpretor& di,
   const TopTools_ListOfShape& aLC=pPF->Arguments();
   aNb=aLC.Extent();
   if (aNb!=2) {
-    Sprintf (buf, " wrong number of arguments %s\n", aNb);
-    di << buf;
+    di << " wrong number of arguments " << aNb << '\n';
     return 0;
   }
   //
@@ -325,7 +318,8 @@ Standard_Integer bopsection(Draw_Interpretor& di,
   aBOP.SetCheckInverted(BOPTest_Objects::CheckInverted());
   aBOP.SetToFillHistory(BRepTest_Objects::IsHistoryNeeded());
   //
-  aBOP.PerformWithFiller(*pPF);
+  Handle(Draw_ProgressIndicator) aProgress = new Draw_ProgressIndicator(di, 1);
+  aBOP.PerformWithFiller(*pPF, aProgress->Start());
   BOPTest::ReportAlerts(aBOP.GetReport());
 
   // Store the history of Section operation into the session
@@ -436,6 +430,7 @@ Standard_Integer  bsection(Draw_Interpretor& di,
   //
   BRepAlgoAPI_Section aSec(aS1, aS2, Standard_False);
   //
+  Handle(Draw_ProgressIndicator) aProgress = new Draw_ProgressIndicator(di, 1);
   aSec.Approximation(bApp);
   aSec.ComputePCurveOn1(bPC1);
   aSec.ComputePCurveOn2(bPC2);
@@ -446,8 +441,7 @@ Standard_Integer  bsection(Draw_Interpretor& di,
   aSec.SetGlue(aGlue);
   aSec.SetUseOBB(BOPTest_Objects::UseOBB());
   //
-  aSec.Build();
-
+  aSec.Build(aProgress->Start());  
   // Store the history of Section operation into the session
   if (BRepTest_Objects::IsHistoryNeeded())
     BRepTest_Objects::SetHistory(aSec.History());
@@ -483,10 +477,8 @@ Standard_Integer bsmt (Draw_Interpretor& di,
                        const char** a,
                        const BOPAlgo_Operation aOp)
 {
-  Standard_Boolean bRunParallel, bNonDestructive;
   TopoDS_Shape aS1, aS2;
   TopTools_ListOfShape aLC;
-  Standard_Real aTol;
   //
   if (n != 4) {
     di << " use bx r s1 s2\n";
@@ -502,47 +494,30 @@ Standard_Integer bsmt (Draw_Interpretor& di,
   }
   aLC.Append(aS1);
   aLC.Append(aS2);
-  // 
-  aTol=BOPTest_Objects::FuzzyValue();
-  bRunParallel = BOPTest_Objects::RunParallel();
-  bNonDestructive = BOPTest_Objects::NonDestructive();
-  BOPAlgo_GlueEnum aGlue = BOPTest_Objects::Glue();
   //
   Handle(NCollection_BaseAllocator)aAL=
     NCollection_BaseAllocator::CommonBaseAllocator();
   //
-  //---------------------------------------------------------------
-  BOPAlgo_PaveFiller aPF(aAL);
-  //
-  aPF.SetArguments(aLC);
-  aPF.SetFuzzyValue(aTol); 
-  aPF.SetRunParallel(bRunParallel);
-  aPF.SetNonDestructive(bNonDestructive);
-  aPF.SetGlue(aGlue);
-  aPF.SetUseOBB(BOPTest_Objects::UseOBB());
-  //
-  aPF.Perform();
-  BOPTest::ReportAlerts(aPF.GetReport());
-  if (aPF.HasErrors()) {
-    return 0;
-  }
-  //
-  //---------------------------------------------------------------
   BOPAlgo_BOP aBOP(aAL);
-  //
   aBOP.AddArgument(aS1);
   aBOP.AddTool(aS2);
   aBOP.SetOperation(aOp);
-  aBOP.SetRunParallel(bRunParallel);
+  // set options
+  aBOP.SetGlue(BOPTest_Objects::Glue());
+  aBOP.SetFuzzyValue(BOPTest_Objects::FuzzyValue());
+  aBOP.SetNonDestructive(BOPTest_Objects::NonDestructive());
+  aBOP.SetRunParallel(BOPTest_Objects::RunParallel());
+  aBOP.SetUseOBB(BOPTest_Objects::UseOBB());
   aBOP.SetCheckInverted(BOPTest_Objects::CheckInverted());
   aBOP.SetToFillHistory(BRepTest_Objects::IsHistoryNeeded());
   //
-  aBOP.PerformWithFiller(aPF);
+  Handle(Draw_ProgressIndicator) aProgress = new Draw_ProgressIndicator(di, 1);
+  aBOP.Perform(aProgress->Start());
   BOPTest::ReportAlerts(aBOP.GetReport());
 
   // Store the history of Boolean operation into the session
   if (BRepTest_Objects::IsHistoryNeeded())
-    BRepTest_Objects::SetHistory(aPF.Arguments(), aBOP);
+    BRepTest_Objects::SetHistory(aBOP.PDS()->Arguments(), aBOP);
 
   if (aBOP.HasErrors()) {
     return 0;
@@ -688,7 +663,7 @@ Standard_Integer bopcurves (Draw_Interpretor& di,
     for (Standard_Integer i=1; i<=aNbCurves; i++) {
       const IntTools_Curve& anIC=aSCs(i);
 
-      Handle (Geom_Curve)  aC3D = anIC.Curve();
+      const Handle (Geom_Curve)&  aC3D = anIC.Curve();
 
       if (aC3D.IsNull()) {
         di << " has Null 3d curve# " << i << "\n";
@@ -703,8 +678,8 @@ Standard_Integer bopcurves (Draw_Interpretor& di,
       DrawTrSurf::Set(nameC, aC3D);
       di << nameC << " ";
       //
-      Handle(Geom2d_Curve) aPC1 = anIC.FirstCurve2d();
-      Handle(Geom2d_Curve) aPC2 = anIC.SecondCurve2d();
+      const Handle(Geom2d_Curve)& aPC1 = anIC.FirstCurve2d();
+      const Handle(Geom2d_Curve)& aPC2 = anIC.SecondCurve2d();
       //
       if (!aPC1.IsNull() || !aPC2.IsNull()) {
         di << "(";
@@ -852,7 +827,8 @@ Standard_Integer mkvolume(Draw_Interpretor& di, Standard_Integer n, const char**
   aMV.SetUseOBB(BOPTest_Objects::UseOBB());
   aMV.SetToFillHistory(BRepTest_Objects::IsHistoryNeeded());
   //
-  aMV.Perform();
+  Handle(Draw_ProgressIndicator) aProgress = new Draw_ProgressIndicator(di, 1);
+  aMV.Perform(aProgress->Start());
   BOPTest::ReportAlerts(aMV.GetReport());
 
   // Store the history of Volume Maker into the session

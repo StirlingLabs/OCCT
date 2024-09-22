@@ -20,7 +20,6 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
-#include <Standard_Boolean.hxx>
 #include <IGESControl_Writer.hxx>
 #include <Standard_CString.hxx>
 #include <TDF_LabelSequence.hxx>
@@ -124,7 +123,10 @@ protected:
   //! to IGES entity
   Standard_EXPORT Standard_Boolean WriteNames (const TDF_LabelSequence& labels);
 
-
+  //! Finds length units located in root of label
+  //! If it exists, initializes local length unit from it
+  //! Else initializes according to Cascade length unit
+  Standard_EXPORT void prepareUnit(const TDF_Label& theLabel);
 
 
 private:

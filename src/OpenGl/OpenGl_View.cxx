@@ -15,13 +15,12 @@
 
 #include <OpenGl_View.hxx>
 
+#include <Aspect_NeutralWindow.hxx>
 #include <Aspect_RenderingContext.hxx>
-#include <Aspect_Window.hxx>
 #include <Aspect_XRSession.hxx>
 #include <Graphic3d_AspectFillArea3d.hxx>
 #include <Graphic3d_Texture2Dmanual.hxx>
 #include <Graphic3d_TextureEnv.hxx>
-#include <Graphic3d_Mat4d.hxx>
 #include <Image_AlienPixMap.hxx>
 #include <OpenGl_ArbFBO.hxx>
 #include <OpenGl_BackgroundArray.hxx>
@@ -31,6 +30,7 @@
 #include <OpenGl_GlCore11.hxx>
 #include <OpenGl_GraduatedTrihedron.hxx>
 #include <OpenGl_GraphicDriver.hxx>
+#include <OpenGl_RenderFilter.hxx>
 #include <OpenGl_ShaderManager.hxx>
 #include <OpenGl_ShadowMap.hxx>
 #include <OpenGl_Texture.hxx>
@@ -39,7 +39,6 @@
 #include <OSD_Parallel.hxx>
 #include <Standard_CLocaleSentry.hxx>
 
-#include "../Graphic3d/Graphic3d_Structure.pxx"
 #include "../Textures/Textures_EnvLUT.pxx"
 
 namespace
@@ -109,7 +108,6 @@ OpenGl_View::OpenGl_View (const Handle(Graphic3d_StructureManager)& theMgr,
   myCaps           (theCaps),
   myWasRedrawnGL   (Standard_False),
   myToShowGradTrihedron  (false),
-  myZLayers        (Structure_MAX_PRIORITY - Structure_MIN_PRIORITY + 1),
   myStateCounter         (theCounter),
   myCurrLightSourceState (theCounter->Increment()),
   myLightsRevision       (0),
@@ -127,11 +125,11 @@ OpenGl_View::OpenGl_View (const Handle(Graphic3d_StructureManager)& theMgr,
   myTransientDrawToFront (Standard_True),
   myBackBufferRestored   (Standard_False),
   myIsImmediateDrawn     (Standard_False),
-  myTextureParams   (new OpenGl_Aspects()),
-  myCubeMapParams   (new OpenGl_Aspects()),
-  myBackgroundType  (Graphic3d_TOB_NONE),
-  myPBREnvState     (OpenGl_PBREnvState_NONEXISTENT),
-  myPBREnvRequest   (OpenGl_PBREnvRequest_NONE),
+  myTextureParams     (new OpenGl_Aspects()),
+  myCubeMapParams     (new OpenGl_Aspects()),
+  myColoredQuadParams (new OpenGl_Aspects()),
+  myPBREnvState       (OpenGl_PBREnvState_NONEXISTENT),
+  myPBREnvRequest     (Standard_False),
   // ray-tracing fields initialization
   myRaytraceInitStatus     (OpenGl_RT_NONE),
   myIsRaytraceDataValid    (Standard_False),
@@ -160,23 +158,25 @@ OpenGl_View::OpenGl_View (const Handle(Graphic3d_StructureManager)& theMgr,
   myNoShadingLight = new Graphic3d_LightSet();
   myNoShadingLight->Add (aLight);
 
-  myMainSceneFbos[0]         = new OpenGl_FrameBuffer();
-  myMainSceneFbos[1]         = new OpenGl_FrameBuffer();
-  myMainSceneFbosOit[0]      = new OpenGl_FrameBuffer();
-  myMainSceneFbosOit[1]      = new OpenGl_FrameBuffer();
-  myImmediateSceneFbos[0]    = new OpenGl_FrameBuffer();
-  myImmediateSceneFbos[1]    = new OpenGl_FrameBuffer();
-  myImmediateSceneFbosOit[0] = new OpenGl_FrameBuffer();
-  myImmediateSceneFbosOit[1] = new OpenGl_FrameBuffer();
-  myXrSceneFbo               = new OpenGl_FrameBuffer();
-  myOpenGlFBO                = new OpenGl_FrameBuffer();
-  myOpenGlFBO2               = new OpenGl_FrameBuffer();
-  myRaytraceFBO1[0]          = new OpenGl_FrameBuffer();
-  myRaytraceFBO1[1]          = new OpenGl_FrameBuffer();
-  myRaytraceFBO2[0]          = new OpenGl_FrameBuffer();
-  myRaytraceFBO2[1]          = new OpenGl_FrameBuffer();
+  myMainSceneFbos[0]         = new OpenGl_FrameBuffer ("fbo0_main");
+  myMainSceneFbos[1]         = new OpenGl_FrameBuffer ("fbo1_main");
+  myMainSceneFbosOit[0]      = new OpenGl_FrameBuffer ("fbo0_main_oit");
+  myMainSceneFbosOit[1]      = new OpenGl_FrameBuffer ("fbo1_main_oit");
+  myImmediateSceneFbos[0]    = new OpenGl_FrameBuffer ("fbo0_imm");
+  myImmediateSceneFbos[1]    = new OpenGl_FrameBuffer ("fbo1_imm");
+  myImmediateSceneFbosOit[0] = new OpenGl_FrameBuffer ("fbo0_imm_oit");
+  myImmediateSceneFbosOit[1] = new OpenGl_FrameBuffer ("fbo1_imm_oit");
+  myXrSceneFbo               = new OpenGl_FrameBuffer ("fbo_xr");
+  myOpenGlFBO                = new OpenGl_FrameBuffer ("fbo_gl");
+  myOpenGlFBO2               = new OpenGl_FrameBuffer ("fbo_gl2");
+  myRaytraceFBO1[0]          = new OpenGl_FrameBuffer ("fbo0_raytrace1");
+  myRaytraceFBO1[1]          = new OpenGl_FrameBuffer ("fbo1_raytrace1");
+  myRaytraceFBO2[0]          = new OpenGl_FrameBuffer ("fbo0_raytrace2");
+  myRaytraceFBO2[1]          = new OpenGl_FrameBuffer ("fbo1_raytrace2");
   myDepthPeelingFbos = new OpenGl_DepthPeeling();
   myShadowMaps = new OpenGl_ShadowMapArray();
+
+  myXrSceneFbo->ColorTexture()->Sampler()->Parameters()->SetFilter (Graphic3d_TOTF_BILINEAR);
 }
 
 // =======================================================================
@@ -193,6 +193,7 @@ OpenGl_View::~OpenGl_View()
 
   OpenGl_Element::Destroy (NULL, myTextureParams);
   OpenGl_Element::Destroy (NULL, myCubeMapParams);
+  OpenGl_Element::Destroy (NULL, myColoredQuadParams);
 }
 
 // =======================================================================
@@ -342,10 +343,8 @@ void OpenGl_View::initTextureEnv (const Handle(OpenGl_Context)& theContext)
   }
 
   Handle(OpenGl_Texture) aTextureEnv = new OpenGl_Texture (myTextureEnvData->GetId(), myTextureEnvData->GetParams());
-  if (Handle(Image_PixMap) anImage = myTextureEnvData->GetImage (theContext->SupportedTextureFormats()))
-  {
-    aTextureEnv->Init (theContext, *anImage, myTextureEnvData->Type(), true);
-  }
+  aTextureEnv->Init (theContext, myTextureEnvData);
+
   myTextureEnv = new OpenGl_TextureSet (aTextureEnv);
   myTextureEnv->ChangeTextureSetBits() = Graphic3d_TextureSetBits_BaseColor;
 }
@@ -367,20 +366,57 @@ Standard_Boolean OpenGl_View::SetImmediateModeDrawToFront (const Standard_Boolea
 // =======================================================================
 Handle(Aspect_Window) OpenGl_View::Window() const
 {
-  return myWindow->PlatformWindow();
+  return myWindow->SizeWindow();
 }
 
 // =======================================================================
 // function : SetWindow
 // purpose  :
 // =======================================================================
-void OpenGl_View::SetWindow (const Handle(Aspect_Window)& theWindow,
+void OpenGl_View::SetWindow (const Handle(Graphic3d_CView)& theParentVIew,
+                             const Handle(Aspect_Window)& theWindow,
                              const Aspect_RenderingContext theContext)
 {
-  myWindow = myDriver->CreateRenderWindow (theWindow, theContext);
-  Standard_ASSERT_RAISE (!myWindow.IsNull(),
-                         "OpenGl_View::SetWindow, "
-                         "Failed to create OpenGl window.");
+  if (theContext != nullptr
+  && !theParentVIew.IsNull())
+  {
+    throw Standard_ProgramError ("OpenGl_View::SetWindow(), internal error");
+  }
+
+  if (myParentView != nullptr)
+  {
+    myParentView->RemoveSubview (this);
+    myParentView = nullptr;
+  }
+
+  OpenGl_View* aParentView = dynamic_cast<OpenGl_View*> (theParentVIew.get());
+  if (!theParentVIew.IsNull())
+  {
+    if (aParentView == nullptr
+     || aParentView->GlWindow().IsNull()
+     || aParentView->GlWindow()->GetGlContext().IsNull())
+    {
+      throw Standard_ProgramError ("OpenGl_View::SetWindow(), internal error");
+    }
+
+    myParentView = aParentView;
+    myParentView->AddSubview (this);
+
+    Handle(Aspect_NeutralWindow) aSubWindow = Handle(Aspect_NeutralWindow)::DownCast(theWindow);
+    SubviewResized (aSubWindow);
+
+    const Handle(OpenGl_Window)& aParentGlWindow = aParentView->GlWindow();
+    Aspect_RenderingContext aRendCtx = aParentGlWindow->GetGlContext()->RenderingContext();
+    myWindow = myDriver->CreateRenderWindow (aParentGlWindow->PlatformWindow(), theWindow, aRendCtx);
+  }
+  else
+  {
+    myWindow = myDriver->CreateRenderWindow (theWindow, theWindow, theContext);
+  }
+  if (myWindow.IsNull())
+  {
+    throw Standard_ProgramError ("OpenGl_View::SetWindow, Failed to create OpenGl window");
+  }
 
   myWorkspace = new OpenGl_Workspace (this, myWindow);
   myWorldViewProjState.Reset();
@@ -388,8 +424,25 @@ void OpenGl_View::SetWindow (const Handle(Aspect_Window)& theWindow,
   myHasFboBlit = Standard_True;
   Invalidate();
 
+  // choose preferred FBO format
+  const Handle(OpenGl_Context)& aCtx = myWorkspace->GetGlContext();
+  if (aCtx->IsWindowDeepColor()
+   && aCtx->IsGlGreaterEqual (3, 0))
+  {
+    myFboColorFormat = GL_RGB10_A2;
+  }
+  else if (aCtx->HasSRGB())
+  {
+    // note that GL_SRGB8 is not required to be renderable, unlike GL_RGB8, GL_RGBA8, GL_SRGB8_ALPHA8
+    myFboColorFormat = GL_SRGB8_ALPHA8;
+  }
+  else
+  {
+    myFboColorFormat = GL_RGBA8;
+  }
+
   // Environment texture resource does not support lazy initialization.
-  initTextureEnv (myWorkspace->GetGlContext());
+  initTextureEnv (aCtx);
 }
 
 // =======================================================================
@@ -398,10 +451,11 @@ void OpenGl_View::SetWindow (const Handle(Aspect_Window)& theWindow,
 // =======================================================================
 void OpenGl_View::Resized()
 {
-  if (myWindow.IsNull())
-    return;
-
-  myWindow->Resize();
+  base_type::Resized();
+  if (!myWindow.IsNull())
+  {
+    myWindow->Resize();
+  }
 }
 
 // =======================================================================
@@ -433,8 +487,7 @@ static void SetMinMaxValuesCallback (Graphic3d_CView* theView)
 void OpenGl_View::GraduatedTrihedronDisplay (const Graphic3d_GraduatedTrihedron& theTrihedronData)
 {
   myGTrihedronData = theTrihedronData;
-  myGTrihedronData.PtrView = this;
-  myGTrihedronData.CubicAxesCallback = SetMinMaxValuesCallback;
+  myGTrihedronData.SetCubicAxesCallback (SetMinMaxValuesCallback);
   myGraduatedTrihedron.SetValues (myGTrihedronData);
   myToShowGradTrihedron = true;
 }
@@ -445,7 +498,6 @@ void OpenGl_View::GraduatedTrihedronDisplay (const Graphic3d_GraduatedTrihedron&
 // =======================================================================
 void OpenGl_View::GraduatedTrihedronErase()
 {
-  myGTrihedronData.PtrView = NULL;
   myGraduatedTrihedron.Release (myWorkspace->GetGlContext().operator->());
   myToShowGradTrihedron = false;
 }
@@ -465,19 +517,21 @@ void OpenGl_View::GraduatedTrihedronMinMaxValues (const Graphic3d_Vec3 theMin, c
 // =======================================================================
 Standard_Boolean OpenGl_View::BufferDump (Image_PixMap& theImage, const Graphic3d_BufferType& theBufferType)
 {
+  const Handle(OpenGl_Context)& aCtx = myWorkspace->GetGlContext();
   if (theBufferType != Graphic3d_BT_RGB_RayTraceHdrLeft)
   {
-    return myWorkspace->BufferDump(myFBO, theImage, theBufferType);
+    return myWorkspace->BufferDump (myFBO, theImage, theBufferType);
   }
 
   if (!myRaytraceParameters.AdaptiveScreenSampling)
   {
-    return myWorkspace->BufferDump(myAccumFrames % 2 ? myRaytraceFBO2[0] : myRaytraceFBO1[0], theImage, theBufferType);
+    return myWorkspace->BufferDump (myAccumFrames % 2 ? myRaytraceFBO2[0] : myRaytraceFBO1[0], theImage, theBufferType);
   }
 
-#if defined(GL_ES_VERSION_2_0)
-  return false;
-#else
+  if (aCtx->GraphicsLibrary() == Aspect_GraphicsLibrary_OpenGLES)
+  {
+    return false;
+  }
   if (theImage.Format() != Image_Format_RGBF)
   {
     return false;
@@ -500,9 +554,9 @@ Standard_Boolean OpenGl_View::BufferDump (Image_PixMap& theImage, const Graphic3
     return false;
   }
 
-  glBindTexture (GL_TEXTURE_RECTANGLE, myRaytraceOutputTexture[0]->TextureId());
-  glGetTexImage (GL_TEXTURE_RECTANGLE, 0, OpenGl_TextureFormat::Create<GLfloat, 1>().Format(), GL_FLOAT, &aValues[0]);
-  glBindTexture (GL_TEXTURE_RECTANGLE, 0);
+  aCtx->core11fwd->glBindTexture (GL_TEXTURE_RECTANGLE, myRaytraceOutputTexture[0]->TextureId());
+  aCtx->core11fwd->glGetTexImage (GL_TEXTURE_RECTANGLE, 0, OpenGl_TextureFormat::Create<GLfloat, 1>().Format(), GL_FLOAT, &aValues[0]);
+  aCtx->core11fwd->glBindTexture (GL_TEXTURE_RECTANGLE, 0);
   for (unsigned int aRow = 0; aRow < aH; aRow += 2)
   {
     for (unsigned int aCol = 0; aCol < aW; aCol += 3)
@@ -516,7 +570,71 @@ Standard_Boolean OpenGl_View::BufferDump (Image_PixMap& theImage, const Graphic3
   }
 
   return true;
-#endif
+}
+
+//=======================================================================
+//function : ShadowMapDump
+//purpose  :
+//=======================================================================
+Standard_Boolean OpenGl_View::ShadowMapDump (Image_PixMap& theImage, const TCollection_AsciiString& theLightName)
+{
+  if (!myShadowMaps->IsValid())
+  {
+    return Standard_False;
+  }
+
+  const Handle(OpenGl_Context)& aGlCtx = myWorkspace->GetGlContext();
+  for (Standard_Integer aShadowIter = 0; aShadowIter < myShadowMaps->Size(); ++aShadowIter)
+  {
+    Handle(OpenGl_ShadowMap)& aShadow = myShadowMaps->ChangeValue(aShadowIter);
+    if (!aShadow.IsNull() && aShadow->LightSource()->Name() == theLightName)
+    {
+      const Handle(OpenGl_FrameBuffer)& aShadowFbo = aShadow->FrameBuffer();
+      if (aShadowFbo->GetVPSizeX() == myRenderParams.ShadowMapResolution)
+      {
+        if ((Standard_Integer)theImage.Width() != aShadowFbo->GetVPSizeX() || (Standard_Integer)theImage.Height() != aShadowFbo->GetVPSizeY())
+        {
+          theImage.InitZero(Image_Format_GrayF, aShadowFbo->GetVPSizeX(), aShadowFbo->GetVPSizeY());
+        }
+        GLint aReadBufferPrev = GL_BACK;
+        // Bind FBO if used.
+        if (!aShadowFbo.IsNull() && aShadowFbo->IsValid())
+        {
+          aShadowFbo->BindBuffer (aGlCtx);
+        }
+        else if (aGlCtx->GraphicsLibrary() != Aspect_GraphicsLibrary_OpenGLES)
+        {
+          aGlCtx->core11fwd->glGetIntegerv (GL_READ_BUFFER, &aReadBufferPrev);
+          GLint aDrawBufferPrev = GL_BACK;
+          aGlCtx->core11fwd->glGetIntegerv (GL_DRAW_BUFFER, &aDrawBufferPrev);
+          aGlCtx->core11fwd->glReadBuffer (aDrawBufferPrev);
+        }
+        // Setup alignment.
+        const GLint anAligment = Min (GLint(theImage.MaxRowAligmentBytes()), 8); // limit to 8 bytes for OpenGL.
+        aGlCtx->core11fwd->glPixelStorei (GL_PACK_ALIGNMENT, anAligment);
+        // Read data.
+        aGlCtx->core11fwd->glReadPixels (0, 0, GLsizei(theImage.SizeX()), GLsizei(theImage.SizeY()), GL_DEPTH_COMPONENT, GL_FLOAT, theImage.ChangeData());
+        aGlCtx->core11fwd->glPixelStorei (GL_PACK_ALIGNMENT, 1);
+        if (aGlCtx->hasPackRowLength)
+        {
+          aGlCtx->core11fwd->glPixelStorei (GL_PACK_ROW_LENGTH, 0);
+        }
+        // Unbind FBO.
+        if (!aShadowFbo.IsNull() && aShadowFbo->IsValid())
+        {
+          aShadowFbo->UnbindBuffer (aGlCtx);
+        }
+        else if (aGlCtx->GraphicsLibrary() != Aspect_GraphicsLibrary_OpenGLES)
+        {
+          aGlCtx->core11fwd->glReadBuffer (aReadBufferPrev);
+        }
+        // Check for errors.
+        const bool hasErrors = aGlCtx->ResetErrors (true);
+        return !hasErrors;
+      }
+    }
+  }
+  return Standard_False;
 }
 
 // =======================================================================
@@ -544,7 +662,16 @@ void OpenGl_View::SetGradientBackground (const Aspect_GradientBackground& theBac
   Quantity_Color aColor1, aColor2;
   theBackground.Colors (aColor1, aColor2);
   myBackgrounds[Graphic3d_TOB_GRADIENT]->SetGradientParameters (aColor1, aColor2, theBackground.BgGradientFillMethod());
-
+  if (theBackground.BgGradientFillMethod() >= Aspect_GradientFillMethod_Corner1
+   && theBackground.BgGradientFillMethod() <= Aspect_GradientFillMethod_Corner4)
+  {
+    if (const Handle(OpenGl_Context)& aCtx = myWorkspace->GetGlContext())
+    {
+      myColoredQuadParams->Aspect()->SetShaderProgram(aCtx->ShaderManager()->GetColoredQuadProgram());
+      myColoredQuadParams->Aspect()->ShaderProgram()->PushVariableVec3 ("uColor1", aColor1.Rgb());
+      myColoredQuadParams->Aspect()->ShaderProgram()->PushVariableVec3 ("uColor2", aColor2.Rgb());
+    }
+  }
   myBackgroundType = Graphic3d_TOB_GRADIENT;
 }
 
@@ -555,49 +682,62 @@ void OpenGl_View::SetGradientBackground (const Aspect_GradientBackground& theBac
 void OpenGl_View::SetBackgroundImage (const Handle(Graphic3d_TextureMap)& theTextureMap,
                                       Standard_Boolean theToUpdatePBREnv)
 {
+  Handle(Graphic3d_TextureMap) aNewMap = theTextureMap;
   if (theTextureMap.IsNull()
   || !theTextureMap->IsDone())
+  {
+    if (!theTextureMap.IsNull())
+    {
+      Message::SendFail ("Error: unable to set image background");
+    }
+    aNewMap.Nullify();
+  }
+
+  Handle(Graphic3d_CubeMap) aCubeMap = Handle(Graphic3d_CubeMap)::DownCast (aNewMap);
+  if (theToUpdatePBREnv)
+  {
+    // update PBR environment
+    const TCollection_AsciiString anIdOld = !myCubeMapIBL.IsNull()
+                                           ? myCubeMapIBL->GetId()
+                                           : TCollection_AsciiString();
+    const TCollection_AsciiString anIdNew = !aCubeMap.IsNull()
+                                           ? aCubeMap->GetId()
+                                           : TCollection_AsciiString();
+    if (anIdNew != anIdOld)
+    {
+      myPBREnvRequest = true;
+    }
+    myCubeMapIBL = aCubeMap;
+  }
+
+  if (aNewMap.IsNull())
   {
     if (myBackgroundType == Graphic3d_TOB_TEXTURE
      || myBackgroundType == Graphic3d_TOB_CUBEMAP)
     {
       myBackgroundType = Graphic3d_TOB_NONE;
-      if (theToUpdatePBREnv)
-      {
-        myPBREnvRequest = OpenGl_PBREnvRequest_CLEAR;
-      }
     }
     return;
   }
 
   Handle(Graphic3d_AspectFillArea3d) anAspect = new Graphic3d_AspectFillArea3d();
-  Handle(Graphic3d_TextureSet) aTextureSet = new Graphic3d_TextureSet (theTextureMap);
+  Handle(Graphic3d_TextureSet) aTextureSet = new Graphic3d_TextureSet (aNewMap);
   anAspect->SetInteriorStyle (Aspect_IS_SOLID);
   anAspect->SetFaceCulling (Graphic3d_TypeOfBackfacingModel_DoubleSided);
-  anAspect->SetShadingModel (Graphic3d_TOSM_UNLIT);
+  anAspect->SetShadingModel (Graphic3d_TypeOfShadingModel_Unlit);
   anAspect->SetTextureSet (aTextureSet);
   anAspect->SetTextureMapOn (true);
 
-  if (Handle(Graphic3d_Texture2D) aTextureMap = Handle(Graphic3d_Texture2D)::DownCast (theTextureMap))
+  if (Handle(Graphic3d_Texture2D) aTextureMap = Handle(Graphic3d_Texture2D)::DownCast (aNewMap))
   {
-    if (theToUpdatePBREnv && myBackgroundType == Graphic3d_TOB_CUBEMAP)
-    {
-      myPBREnvRequest = OpenGl_PBREnvRequest_CLEAR;
-    }
-
     myTextureParams->SetAspect (anAspect);
     myBackgroundType  = Graphic3d_TOB_TEXTURE;
     myBackgroundImage = aTextureMap;
     return;
   }
 
-  if (Handle(Graphic3d_CubeMap) aCubeMap = Handle(Graphic3d_CubeMap)::DownCast (theTextureMap))
+  if (!aCubeMap.IsNull())
   {
-    if (theToUpdatePBREnv)
-    {
-      myPBREnvRequest = OpenGl_PBREnvRequest_BAKE;
-    }
-
     aCubeMap->SetMipmapsGeneration (Standard_True);
     if (const Handle(OpenGl_Context)& aCtx = myWorkspace->GetGlContext())
     {
@@ -612,11 +752,41 @@ void OpenGl_View::SetBackgroundImage (const Handle(Graphic3d_TextureMap)& theTex
     myWorkspace->ApplyAspects();
 
     myBackgroundType = Graphic3d_TOB_CUBEMAP;
-    myBackgroundCubeMap = aCubeMap;
+    myCubeMapBackground = aCubeMap;
     return;
   }
 
   throw Standard_ProgramError ("OpenGl_View::SetBackgroundImage() - invalid texture map set for background");
+}
+
+// =======================================================================
+// function : SetImageBasedLighting
+// purpose  :
+// =======================================================================
+void OpenGl_View::SetImageBasedLighting (Standard_Boolean theToEnableIBL)
+{
+  if (!theToEnableIBL
+    || myBackgroundType != Graphic3d_TOB_CUBEMAP)
+  {
+    if (!myCubeMapIBL.IsNull())
+    {
+      myPBREnvRequest = true;
+      myCubeMapIBL.Nullify();
+    }
+    return;
+  }
+
+  const TCollection_AsciiString anIdOld = !myCubeMapIBL.IsNull()
+                                         ? myCubeMapIBL->GetId()
+                                         : TCollection_AsciiString();
+  const TCollection_AsciiString anIdNew = !myCubeMapBackground.IsNull()
+                                         ? myCubeMapBackground->GetId()
+                                         : TCollection_AsciiString();
+  if (anIdNew != anIdOld)
+  {
+    myPBREnvRequest = true;
+  }
+  myCubeMapIBL = myCubeMapBackground;
 }
 
 // =======================================================================
@@ -635,15 +805,6 @@ Aspect_FillMethod OpenGl_View::BackgroundImageStyle() const
 void OpenGl_View::SetBackgroundImageStyle (const Aspect_FillMethod theFillStyle)
 {
   myBackgrounds[Graphic3d_TOB_TEXTURE]->SetTextureFillMethod (theFillStyle);
-}
-
-// =======================================================================
-// function : BackgroundCubeMap
-// purpose  :
-// =======================================================================
-Handle(Graphic3d_CubeMap) OpenGl_View::BackgroundCubeMap() const
-{
-  return myBackgroundCubeMap;
 }
 
 // =======================================================================
@@ -746,6 +907,17 @@ Bnd_Box OpenGl_View::MinMaxValues (const Standard_Boolean theToIncludeAuxiliary)
 
   Bnd_Box aBox = base_type::MinMaxValues (theToIncludeAuxiliary);
 
+  // make sure that stats overlay isn't clamped on hardware with unavailable depth clamping
+  if (theToIncludeAuxiliary
+  &&  myRenderParams.ToShowStats
+  && !myWorkspace->GetGlContext()->arbDepthClamp)
+  {
+    Bnd_Box aStatsBox (gp_Pnt (float(myWindow->Width() / 2.0), float(myWindow->Height() / 2.0), 0.0),
+                       gp_Pnt (float(myWindow->Width() / 2.0), float(myWindow->Height() / 2.0), 0.0));
+    myRenderParams.StatsPosition->Apply (myCamera, myCamera->ProjectionMatrix(), myCamera->OrientationMatrix(),
+                                         myWindow->Width(), myWindow->Height(), aStatsBox);
+    aBox.Add (aStatsBox);
+  }
   return aBox;
 }
 
@@ -837,7 +1009,7 @@ void OpenGl_View::FBOChangeViewport (const Handle(Standard_Transient)& theFbo,
 //purpose  :
 //=======================================================================
 void OpenGl_View::displayStructure (const Handle(Graphic3d_CStructure)& theStructure,
-                                    const Standard_Integer              thePriority)
+                                    const Graphic3d_DisplayPriority thePriority)
 {
   const OpenGl_Structure*  aStruct = static_cast<const OpenGl_Structure*> (theStructure.get());
   const Graphic3d_ZLayerId aZLayer = aStruct->ZLayer();
@@ -873,7 +1045,7 @@ void OpenGl_View::changeZLayer (const Handle(Graphic3d_CStructure)& theStructure
 //purpose  :
 //=======================================================================
 void OpenGl_View::changePriority (const Handle(Graphic3d_CStructure)& theStructure,
-                                  const Standard_Integer theNewPriority)
+                                  const Graphic3d_DisplayPriority theNewPriority)
 {
   const Graphic3d_ZLayerId aLayerId = theStructure->ZLayer();
   const OpenGl_Structure* aStruct = static_cast<const OpenGl_Structure*> (theStructure.get());
@@ -900,6 +1072,19 @@ void OpenGl_View::DiagnosticInformation (TColStd_IndexedDataMapOfStringString& t
   {
     TCollection_AsciiString aResRatio (myRenderParams.ResolutionRatio());
     theDict.ChangeFromIndex (theDict.Add ("ResolutionRatio", aResRatio)) = aResRatio;
+    if (myMainSceneFbos[0]->IsValid())
+    {
+      TCollection_AsciiString anFboInfo;
+      if (const Handle(OpenGl_Texture)& aColorTex = myMainSceneFbos[0]->ColorTexture())
+      {
+        anFboInfo += OpenGl_TextureFormat::FormatFormat (aColorTex->SizedFormat());
+      }
+      if (const Handle(OpenGl_Texture)& aDepthTex = myMainSceneFbos[0]->DepthStencilTexture())
+      {
+        anFboInfo = anFboInfo + " " + OpenGl_TextureFormat::FormatFormat (aDepthTex->SizedFormat());
+      }
+      theDict.ChangeFromIndex (theDict.Add ("FBO buffer", anFboInfo)) = anFboInfo;
+    }
   }
 }
 
@@ -947,7 +1132,7 @@ void OpenGl_View::drawBackground (const Handle(OpenGl_Workspace)& theWorkspace,
   }
 
 #ifdef GL_DEPTH_CLAMP
-  const bool wasDepthClamped = aCtx->arbDepthClamp && glIsEnabled (GL_DEPTH_CLAMP);
+  const bool wasDepthClamped = aCtx->arbDepthClamp && aCtx->core11fwd->glIsEnabled (GL_DEPTH_CLAMP);
   if (aCtx->arbDepthClamp && !wasDepthClamped)
   {
     // make sure background is always drawn (workaround skybox rendering on some hardware)
@@ -957,26 +1142,42 @@ void OpenGl_View::drawBackground (const Handle(OpenGl_Workspace)& theWorkspace,
 
   if (myBackgroundType == Graphic3d_TOB_CUBEMAP)
   {
-    myCubeMapParams->Aspect()->ShaderProgram()->PushVariableInt ("uZCoeff", myBackgroundCubeMap->ZIsInverted() ? -1 : 1);
-    myCubeMapParams->Aspect()->ShaderProgram()->PushVariableInt ("uYCoeff", myBackgroundCubeMap->IsTopDown() ? 1 : -1);
-    const OpenGl_Aspects* anOldAspectFace = theWorkspace->SetAspects (myCubeMapParams);
+    updateSkydomeBg (aCtx);
+    if (!myCubeMapParams->Aspect()->ShaderProgram().IsNull())
+    {
+      myCubeMapParams->Aspect()->ShaderProgram()->PushVariableInt ("uZCoeff", myCubeMapBackground->ZIsInverted() ? -1 : 1);
+      myCubeMapParams->Aspect()->ShaderProgram()->PushVariableInt ("uYCoeff", myCubeMapBackground->IsTopDown() ? 1 : -1);
+      const OpenGl_Aspects* anOldAspectFace = theWorkspace->SetAspects (myCubeMapParams);
 
-    myBackgrounds[Graphic3d_TOB_CUBEMAP]->Render (theWorkspace, theProjection);
+      myBackgrounds[Graphic3d_TOB_CUBEMAP]->Render (theWorkspace, theProjection);
 
-    theWorkspace->SetAspects (anOldAspectFace);
+      theWorkspace->SetAspects (anOldAspectFace);
+    }
   }
   else if (myBackgroundType == Graphic3d_TOB_GRADIENT
         || myBackgroundType == Graphic3d_TOB_TEXTURE)
   {
     // Drawing background gradient if:
-    // - gradient fill type is not Aspect_GFM_NONE and
+    // - gradient fill type is not Aspect_GradientFillMethod_None and
     // - either background texture is no specified or it is drawn in Aspect_FM_CENTERED mode
     if (myBackgrounds[Graphic3d_TOB_GRADIENT]->IsDefined()
       && (!myTextureParams->Aspect()->ToMapTexture()
         || myBackgrounds[Graphic3d_TOB_TEXTURE]->TextureFillMethod() == Aspect_FM_CENTERED
         || myBackgrounds[Graphic3d_TOB_TEXTURE]->TextureFillMethod() == Aspect_FM_NONE))
     {
-      myBackgrounds[Graphic3d_TOB_GRADIENT]->Render(theWorkspace, theProjection);
+      if (myBackgrounds[Graphic3d_TOB_GRADIENT]->GradientFillMethod() >= Aspect_GradientFillMethod_Corner1
+       && myBackgrounds[Graphic3d_TOB_GRADIENT]->GradientFillMethod() <= Aspect_GradientFillMethod_Corner4)
+      {
+        const OpenGl_Aspects* anOldAspectFace = theWorkspace->SetAspects (myColoredQuadParams);
+
+        myBackgrounds[Graphic3d_TOB_GRADIENT]->Render (theWorkspace, theProjection);
+
+        theWorkspace->SetAspects (anOldAspectFace);
+      }
+      else
+      {
+        myBackgrounds[Graphic3d_TOB_GRADIENT]->Render (theWorkspace, theProjection);
+      }
     }
 
     // Drawing background image if it is defined
@@ -1052,11 +1253,17 @@ bool OpenGl_View::prepareFrameBuffers (Graphic3d_Camera::Projection& theProj)
   {
     aNbSamples = OpenGl_Context::GetPowerOfTwo (aNbSamples, aCtx->MaxMsaaSamples());
   }
+  // Only MSAA textures can be blit into MSAA target,
+  // while render buffers could be resolved only into non-MSAA targets.
+  // As result, within obsolete OpenGL ES 3.0 context, we may create only one MSAA render buffer for main scene content
+  // and blit it into non-MSAA immediate FBO.
+  const bool hasTextureMsaa = aCtx->HasTextureMultisampling();
 
   bool toUseOit = myRenderParams.TransparencyMethod != Graphic3d_RTM_BLEND_UNORDERED
+               && !myIsSubviewComposer
                && checkOitCompatibility (aCtx, aNbSamples > 0);
 
-  const bool toInitImmediateFbo = myTransientDrawToFront
+  const bool toInitImmediateFbo = myTransientDrawToFront && !myIsSubviewComposer
                                && (!aCtx->caps->useSystemBuffer || (toUseOit && HasImmediateStructures()));
 
   if ( aFrameBuffer == NULL
@@ -1102,7 +1309,7 @@ bool OpenGl_View::prepareFrameBuffers (Graphic3d_Camera::Projection& theProj)
     if (myMainSceneFbos[0]->IsValid() && (toInitImmediateFbo || myImmediateSceneFbos[0]->IsValid()))
     {
       const bool wasFailedImm0 = checkWasFailedFbo (myImmediateSceneFbos[0], myMainSceneFbos[0]);
-      if (!myImmediateSceneFbos[0]->InitLazy (aCtx, *myMainSceneFbos[0])
+      if (!myImmediateSceneFbos[0]->InitLazy (aCtx, *myMainSceneFbos[0], hasTextureMsaa)
        && !wasFailedImm0)
       {
         TCollection_ExtendedString aMsg = TCollection_ExtendedString() + "Error! Immediate FBO "
@@ -1146,7 +1353,7 @@ bool OpenGl_View::prepareFrameBuffers (Graphic3d_Camera::Projection& theProj)
         && myMainSceneFbos[0]->IsValid())
   {
     const bool wasFailedMain1 = checkWasFailedFbo (myMainSceneFbos[1], myMainSceneFbos[0]);
-    if (!myMainSceneFbos[1]->InitLazy (aCtx, *myMainSceneFbos[0])
+    if (!myMainSceneFbos[1]->InitLazy (aCtx, *myMainSceneFbos[0], true)
      && !wasFailedMain1)
     {
       TCollection_ExtendedString aMsg = TCollection_ExtendedString() + "Error! Main FBO (second) "
@@ -1167,14 +1374,14 @@ bool OpenGl_View::prepareFrameBuffers (Graphic3d_Camera::Projection& theProj)
     {
       const bool wasFailedImm0 = checkWasFailedFbo (myImmediateSceneFbos[0], myMainSceneFbos[0]);
       const bool wasFailedImm1 = checkWasFailedFbo (myImmediateSceneFbos[1], myMainSceneFbos[0]);
-      if (!myImmediateSceneFbos[0]->InitLazy (aCtx, *myMainSceneFbos[0])
+      if (!myImmediateSceneFbos[0]->InitLazy (aCtx, *myMainSceneFbos[0], hasTextureMsaa)
        && !wasFailedImm0)
       {
         TCollection_ExtendedString aMsg = TCollection_ExtendedString() + "Error! Immediate FBO (first) "
                                         + printFboFormat (myImmediateSceneFbos[0]) + " initialization has failed";
         aCtx->PushMessage (GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_ERROR, 0, GL_DEBUG_SEVERITY_HIGH, aMsg);
       }
-      if (!myImmediateSceneFbos[1]->InitLazy (aCtx, *myMainSceneFbos[0])
+      if (!myImmediateSceneFbos[1]->InitLazy (aCtx, *myMainSceneFbos[0], hasTextureMsaa)
        && !wasFailedImm1)
       {
         TCollection_ExtendedString aMsg = TCollection_ExtendedString() + "Error! Immediate FBO (first) "
@@ -1195,8 +1402,8 @@ bool OpenGl_View::prepareFrameBuffers (Graphic3d_Camera::Projection& theProj)
   }
 
   // process PBR environment
-  if (myRenderParams.ShadingModel == Graphic3d_TOSM_PBR
-   || myRenderParams.ShadingModel == Graphic3d_TOSM_PBR_FACET)
+  if (myRenderParams.ShadingModel == Graphic3d_TypeOfShadingModel_Pbr
+   || myRenderParams.ShadingModel == Graphic3d_TypeOfShadingModel_PbrFacet)
   {
     if (!myPBREnvironment.IsNull()
       && myPBREnvironment->SizesAreDifferent (myRenderParams.PbrEnvPow2Size,
@@ -1205,7 +1412,7 @@ bool OpenGl_View::prepareFrameBuffers (Graphic3d_Camera::Projection& theProj)
       myPBREnvironment->Release (aCtx.get());
       myPBREnvironment.Nullify();
       myPBREnvState = OpenGl_PBREnvState_NONEXISTENT;
-      myPBREnvRequest = OpenGl_PBREnvRequest_BAKE;
+      myPBREnvRequest = true;
       ++myLightsRevision;
     }
 
@@ -1221,14 +1428,18 @@ bool OpenGl_View::prepareFrameBuffers (Graphic3d_Camera::Projection& theProj)
         if (!aCtx->GetResource (THE_SHARED_ENV_LUT_KEY, anEnvLUT))
         {
           bool toConvertHalfFloat = false;
-        #if defined(GL_ES_VERSION_2_0)
+
           // GL_RG32F is not texture-filterable format in OpenGL ES without OES_texture_float_linear extension.
           // GL_RG16F is texture-filterable since OpenGL ES 3.0 or OpenGL ES 2.0 + OES_texture_half_float_linear.
           // OpenGL ES 3.0 allows initialization of GL_RG16F from 32-bit float data, but OpenGL ES 2.0 + OES_texture_half_float does not.
           // Note that it is expected that GL_RG16F has enough precision for this table, so that it can be used also on desktop OpenGL.
-          const bool hasHalfFloat = aCtx->IsGlGreaterEqual (3, 0) || aCtx->CheckExtension ("GL_OES_texture_half_float_linear");
-          toConvertHalfFloat = !aCtx->IsGlGreaterEqual (3, 0) && hasHalfFloat;
-        #endif
+          const bool hasHalfFloat = aCtx->GraphicsLibrary() == Aspect_GraphicsLibrary_OpenGLES
+                                && (aCtx->IsGlGreaterEqual (3, 0) || aCtx->CheckExtension ("GL_OES_texture_half_float_linear"));
+          if (aCtx->GraphicsLibrary() == Aspect_GraphicsLibrary_OpenGLES)
+          {
+            toConvertHalfFloat = !aCtx->IsGlGreaterEqual (3, 0) && hasHalfFloat;
+          }
+
           Image_Format anImgFormat = Image_Format_UNKNOWN;
           if (aCtx->arbTexRG)
           {
@@ -1271,13 +1482,12 @@ bool OpenGl_View::prepareFrameBuffers (Graphic3d_Camera::Projection& theProj)
           }
 
           OpenGl_TextureFormat aTexFormat = OpenGl_TextureFormat::FindFormat (aCtx, aPixMap->Format(), false);
-        #if defined(GL_ES_VERSION_2_0)
-          if (aTexFormat.IsValid()
+          if (aCtx->GraphicsLibrary() == Aspect_GraphicsLibrary_OpenGLES
+           && aTexFormat.IsValid()
            && hasHalfFloat)
           {
             aTexFormat.SetInternalFormat (aCtx->arbTexRG ? GL_RG16F : GL_RGBA16F);
           }
-        #endif
 
           Handle(Graphic3d_TextureParams) aParams = new Graphic3d_TextureParams();
           aParams->SetFilter (Graphic3d_TOTF_BILINEAR);
@@ -1285,7 +1495,7 @@ bool OpenGl_View::prepareFrameBuffers (Graphic3d_Camera::Projection& theProj)
           aParams->SetTextureUnit (aCtx->PBREnvLUTTexUnit());
           anEnvLUT = new OpenGl_Texture(THE_SHARED_ENV_LUT_KEY, aParams);
           if (!aTexFormat.IsValid()
-           || !anEnvLUT->Init (aCtx, aTexFormat, Graphic3d_Vec2i((Standard_Integer)Textures_EnvLUTSize), Graphic3d_TOT_2D, aPixMap.get()))
+           || !anEnvLUT->Init (aCtx, aTexFormat, Graphic3d_Vec2i((Standard_Integer)Textures_EnvLUTSize), Graphic3d_TypeOfTexture_2D, aPixMap.get()))
           {
             aCtx->PushMessage (GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_ERROR, 0, GL_DEBUG_SEVERITY_HIGH, "Failed allocation of LUT for PBR");
             anEnvLUT.Nullify();
@@ -1299,7 +1509,7 @@ bool OpenGl_View::prepareFrameBuffers (Graphic3d_Camera::Projection& theProj)
         myWorkspace->ApplyAspects();
       }
     }
-    processPBREnvRequest (aCtx);
+    updatePBREnvironment (aCtx);
   }
 
   // create color and coverage accumulation buffers required for OIT algorithm
@@ -1426,7 +1636,7 @@ bool OpenGl_View::prepareFrameBuffers (Graphic3d_Camera::Projection& theProj)
   }
 
   // allocate shadow maps
-  const Handle(Graphic3d_LightSet)& aLights = myRenderParams.ShadingModel == Graphic3d_TOSM_UNLIT ? myNoShadingLight : myLights;
+  const Handle(Graphic3d_LightSet)& aLights = myRenderParams.ShadingModel == Graphic3d_TypeOfShadingModel_Unlit ? myNoShadingLight : myLights;
   if (!aLights.IsNull())
   {
     aLights->UpdateRevision();
@@ -1556,7 +1766,7 @@ void OpenGl_View::Redraw()
   OpenGl_FrameBuffer* aFrameBuffer = myFBO.get();
   bool toSwap = aCtx->IsRender()
             && !aCtx->caps->buffersNoSwap
-            &&  aFrameBuffer == NULL
+            &&  aFrameBuffer == nullptr
             &&  (!IsActiveXR() || myRenderParams.ToMirrorComposer);
   if ( aFrameBuffer == NULL
    && !aCtx->DefaultFrameBuffer().IsNull()
@@ -1618,25 +1828,23 @@ void OpenGl_View::Redraw()
       anImmFbosOit[1] = NULL;
     }
 
-  #if !defined(GL_ES_VERSION_2_0)
     aCtx->SetReadDrawBuffer (aStereoMode == Graphic3d_StereoMode_QuadBuffer ? GL_BACK_LEFT : GL_BACK);
-  #endif
     aCtx->SetResolution (myRenderParams.Resolution, myRenderParams.ResolutionRatio(),
                          aMainFbos[0] != NULL ? myRenderParams.RenderResolutionScale : 1.0f);
 
     redraw (Graphic3d_Camera::Projection_MonoLeftEye, aMainFbos[0], aMainFbosOit[0]);
     myBackBufferRestored = Standard_True;
     myIsImmediateDrawn   = Standard_False;
-  #if !defined(GL_ES_VERSION_2_0)
     aCtx->SetReadDrawBuffer (aStereoMode == Graphic3d_StereoMode_QuadBuffer ? GL_BACK_LEFT : GL_BACK);
-  #endif
     aCtx->SetResolution (myRenderParams.Resolution, myRenderParams.ResolutionRatio(),
                          anImmFbos[0] != NULL ? myRenderParams.RenderResolutionScale : 1.0f);
     if (!redrawImmediate (Graphic3d_Camera::Projection_MonoLeftEye, aMainFbos[0], anImmFbos[0], anImmFbosOit[0]))
     {
       toSwap = false;
     }
-    else if (aStereoMode == Graphic3d_StereoMode_SoftPageFlip && toSwap)
+    else if (aStereoMode == Graphic3d_StereoMode_SoftPageFlip
+          && toSwap
+          && myParentView == nullptr)
     {
       aCtx->SwapBuffers();
     }
@@ -1649,18 +1857,15 @@ void OpenGl_View::Redraw()
       {
         blitBuffers (aMainFbos[0], anXRFbo); // resize or resolve MSAA samples
       }
-    #if !defined(GL_ES_VERSION_2_0)
-      const Aspect_GraphicsLibrary aGraphicsLib = Aspect_GraphicsLibrary_OpenGL;
-    #else
-      const Aspect_GraphicsLibrary aGraphicsLib = Aspect_GraphicsLibrary_OpenGLES;
-    #endif
+      const Aspect_GraphicsLibrary aGraphicsLib = aCtx->GraphicsLibrary();
       myXRSession->SubmitEye ((void* )(size_t )anXRFbo->ColorTexture()->TextureId(),
                               aGraphicsLib, Aspect_ColorSpace_sRGB, Aspect_Eye_Left);
     }
 
-  #if !defined(GL_ES_VERSION_2_0)
-    aCtx->SetReadDrawBuffer (aStereoMode == Graphic3d_StereoMode_QuadBuffer ? GL_BACK_RIGHT : GL_BACK);
-  #endif
+    if (aCtx->GraphicsLibrary() != Aspect_GraphicsLibrary_OpenGLES)
+    {
+      aCtx->SetReadDrawBuffer (aStereoMode == Graphic3d_StereoMode_QuadBuffer ? GL_BACK_RIGHT : GL_BACK);
+    }
     aCtx->SetResolution (myRenderParams.Resolution, myRenderParams.ResolutionRatio(),
                          aMainFbos[1] != NULL ? myRenderParams.RenderResolutionScale : 1.0f);
 
@@ -1682,11 +1887,8 @@ void OpenGl_View::Redraw()
       {
         blitBuffers (aMainFbos[1], anXRFbo); // resize or resolve MSAA samples
       }
-    #if !defined(GL_ES_VERSION_2_0)
-      const Aspect_GraphicsLibrary aGraphicsLib = Aspect_GraphicsLibrary_OpenGL;
-    #else
-      const Aspect_GraphicsLibrary aGraphicsLib = Aspect_GraphicsLibrary_OpenGLES;
-    #endif
+
+      const Aspect_GraphicsLibrary aGraphicsLib = aCtx->GraphicsLibrary();
       myXRSession->SubmitEye ((void* )(size_t )anXRFbo->ColorTexture()->TextureId(),
                               aGraphicsLib, Aspect_ColorSpace_sRGB, Aspect_Eye_Right);
       aCtx->core11fwd->glFinish();
@@ -1719,12 +1921,10 @@ void OpenGl_View::Redraw()
       anImmFboOit = myImmediateSceneFbosOit[0]->IsValid() ? myImmediateSceneFbosOit[0].operator->() : NULL;
     }
 
-  #if !defined(GL_ES_VERSION_2_0)
     if (aMainFbo == NULL)
     {
       aCtx->SetReadDrawBuffer (GL_BACK);
     }
-  #endif
     aCtx->SetResolution (myRenderParams.Resolution, myRenderParams.ResolutionRatio(),
                          aMainFbo != aFrameBuffer ? myRenderParams.RenderResolutionScale : 1.0f);
 
@@ -1769,7 +1969,8 @@ void OpenGl_View::Redraw()
   }
 
   // Swap the buffers
-  if (toSwap)
+  if (toSwap
+   && myParentView == nullptr)
   {
     aCtx->SwapBuffers();
     if (!myMainSceneFbos[0]->IsValid())
@@ -1861,12 +2062,10 @@ void OpenGl_View::RedrawImmediate()
     {
       aCtx->arbFBO->glBindFramebuffer (GL_FRAMEBUFFER, OpenGl_FrameBuffer::NO_FRAMEBUFFER);
     }
-  #if !defined(GL_ES_VERSION_2_0)
     if (anImmFbos[0] == NULL)
     {
       aCtx->SetReadDrawBuffer (aStereoMode == Graphic3d_StereoMode_QuadBuffer ? GL_BACK_LEFT : GL_BACK);
     }
-  #endif
 
     aCtx->SetResolution (myRenderParams.Resolution, myRenderParams.ResolutionRatio(),
                          anImmFbos[0] != NULL ? myRenderParams.RenderResolutionScale : 1.0f);
@@ -1877,8 +2076,9 @@ void OpenGl_View::RedrawImmediate()
                               Standard_True) || toSwap;
     if (aStereoMode == Graphic3d_StereoMode_SoftPageFlip
     &&  toSwap
-    &&  myFBO.get() == NULL
-    && !aCtx->caps->buffersNoSwap)
+    &&  myFBO.get() == nullptr
+    && !aCtx->caps->buffersNoSwap
+    &&  myParentView == nullptr)
     {
       aCtx->SwapBuffers();
     }
@@ -1887,12 +2087,10 @@ void OpenGl_View::RedrawImmediate()
     {
       aCtx->arbFBO->glBindFramebuffer (GL_FRAMEBUFFER, OpenGl_FrameBuffer::NO_FRAMEBUFFER);
     }
-  #if !defined(GL_ES_VERSION_2_0)
     if (anImmFbos[1] == NULL)
     {
       aCtx->SetReadDrawBuffer (aStereoMode == Graphic3d_StereoMode_QuadBuffer ? GL_BACK_RIGHT : GL_BACK);
     }
-  #endif
     aCtx->SetResolution (myRenderParams.Resolution, myRenderParams.ResolutionRatio(),
                          anImmFbos[1] != NULL ? myRenderParams.RenderResolutionScale : 1.0f);
     toSwap = redrawImmediate (Graphic3d_Camera::Projection_MonoRightEye,
@@ -1915,12 +2113,10 @@ void OpenGl_View::RedrawImmediate()
       anImmFbo    = myImmediateSceneFbos[0].operator->();
       anImmFboOit = myImmediateSceneFbosOit[0]->IsValid() ? myImmediateSceneFbosOit[0].operator->() : NULL;
     }
-  #if !defined(GL_ES_VERSION_2_0)
     if (aMainFbo == NULL)
     {
       aCtx->SetReadDrawBuffer (GL_BACK);
     }
-  #endif
     aCtx->SetResolution (myRenderParams.Resolution, myRenderParams.ResolutionRatio(),
                          anImmFbo != aFrameBuffer ? myRenderParams.RenderResolutionScale : 1.0f);
     toSwap = redrawImmediate (aProjectType,
@@ -1947,7 +2143,8 @@ void OpenGl_View::RedrawImmediate()
 
   if (toSwap
   &&  myFBO.get() == NULL
-  && !aCtx->caps->buffersNoSwap)
+  && !aCtx->caps->buffersNoSwap
+  &&  myParentView == nullptr)
   {
     aCtx->SwapBuffers();
   }
@@ -2031,9 +2228,10 @@ bool OpenGl_View::redrawImmediate (const Graphic3d_Camera::Projection theProject
   }
   else if (theDrawFbo == NULL)
   {
-  #if !defined(GL_ES_VERSION_2_0)
-    aCtx->core11fwd->glGetBooleanv (GL_DOUBLEBUFFER, &toCopyBackToFront);
-  #endif
+    if (aCtx->GraphicsLibrary() != Aspect_GraphicsLibrary_OpenGLES)
+    {
+      aCtx->core11fwd->glGetBooleanv (GL_DOUBLEBUFFER, &toCopyBackToFront);
+    }
     if (toCopyBackToFront
      && myTransientDrawToFront)
     {
@@ -2070,7 +2268,94 @@ bool OpenGl_View::redrawImmediate (const Graphic3d_Camera::Projection theProject
 
   render (theProjection, theDrawFbo, theOitAccumFbo, Standard_True);
 
+  blitSubviews (theProjection, theDrawFbo);
+
   return !toCopyBackToFront;
+}
+
+// =======================================================================
+// function : blitSubviews
+// purpose  :
+// =======================================================================
+bool OpenGl_View::blitSubviews (const Graphic3d_Camera::Projection ,
+                                OpenGl_FrameBuffer* theDrawFbo)
+{
+  const Handle(OpenGl_Context)& aCtx = myWorkspace->GetGlContext();
+  if (aCtx->arbFBOBlit == nullptr)
+  {
+    return false;
+  }
+
+  bool isChanged = false;
+  for (const Handle(Graphic3d_CView)& aChildIter : mySubviews)
+  {
+    OpenGl_View* aSubView = dynamic_cast<OpenGl_View*> (aChildIter.get());
+    if (!aSubView->IsActive())
+    {
+      continue;
+    }
+
+    const Handle(OpenGl_FrameBuffer)& aChildFbo = !aSubView->myImmediateSceneFbos[0].IsNull()
+                                                 ? aSubView->myImmediateSceneFbos[0]
+                                                 : aSubView->myMainSceneFbos[0];
+    if (aChildFbo.IsNull() || !aChildFbo->IsValid())
+    {
+      continue;
+    }
+
+    aChildFbo->BindReadBuffer (aCtx);
+    if (theDrawFbo != NULL
+     && theDrawFbo->IsValid())
+    {
+      theDrawFbo->BindDrawBuffer (aCtx);
+    }
+    else
+    {
+      aCtx->arbFBO->glBindFramebuffer (GL_DRAW_FRAMEBUFFER, OpenGl_FrameBuffer::NO_FRAMEBUFFER);
+      aCtx->SetFrameBufferSRGB (false);
+    }
+
+    Graphic3d_Vec2i aWinSize (aCtx->Viewport()[2], aCtx->Viewport()[3]); //aSubView->GlWindow()->PlatformWindow()->Dimensions();
+    Graphic3d_Vec2i aSubViewSize = aChildFbo->GetVPSize();
+    Graphic3d_Vec2i aSubViewPos  = aSubView->SubviewTopLeft();
+    Graphic3d_Vec2i aDestSize    = aSubViewSize;
+    if (aSubView->RenderingParams().RenderResolutionScale != 1.0f)
+    {
+      aDestSize = Graphic3d_Vec2i (Graphic3d_Vec2d(aDestSize) / Graphic3d_Vec2d(aSubView->RenderingParams().RenderResolutionScale));
+    }
+    aSubViewPos.y() = aWinSize.y() - aDestSize.y() - aSubViewPos.y();
+
+    const GLint aFilterGl = aDestSize == aSubViewSize ? GL_NEAREST : GL_LINEAR;
+    aCtx->arbFBOBlit->glBlitFramebuffer (0, 0, aSubViewSize.x(), aSubViewSize.y(),
+                                         aSubViewPos.x(), aSubViewPos.y(), aSubViewPos.x() + aDestSize.x(), aSubViewPos.y() + aDestSize.y(),
+                                         GL_COLOR_BUFFER_BIT, aFilterGl);
+    const int anErr = aCtx->core11fwd->glGetError();
+    if (anErr != GL_NO_ERROR)
+    {
+      TCollection_ExtendedString aMsg = TCollection_ExtendedString() + "FBO blitting has failed [Error " + OpenGl_Context::FormatGlError (anErr) + "]\n"
+                                      + "  Please check your graphics driver settings or try updating driver.";
+      if (aChildFbo->NbSamples() != 0)
+      {
+        myToDisableMSAA = true;
+        aMsg += "\n  MSAA settings should not be overridden by driver!";
+      }
+      aCtx->PushMessage (GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_ERROR, 0, GL_DEBUG_SEVERITY_HIGH, aMsg);
+    }
+
+    if (theDrawFbo != NULL
+     && theDrawFbo->IsValid())
+    {
+      theDrawFbo->BindBuffer (aCtx);
+    }
+    else
+    {
+      aCtx->arbFBO->glBindFramebuffer (GL_FRAMEBUFFER, OpenGl_FrameBuffer::NO_FRAMEBUFFER);
+      aCtx->SetFrameBufferSRGB (false);
+    }
+    isChanged = true;
+  }
+
+  return isChanged;
 }
 
 //=======================================================================
@@ -2096,7 +2381,7 @@ void OpenGl_View::renderShadowMap (const Handle(OpenGl_ShadowMap)& theShadowMap)
 
   aCtx->ShaderManager()->UpdateMaterialState();
   aCtx->ShaderManager()->UpdateModelWorldStateTo (OpenGl_Mat4());
-  aCtx->ShaderManager()->SetShadingModel (Graphic3d_TOSM_UNLIT);
+  aCtx->ShaderManager()->SetShadingModel (Graphic3d_TypeOfShadingModel_Unlit);
 
   const Handle(OpenGl_FrameBuffer)& aShadowBuffer = theShadowMap->FrameBuffer();
   aShadowBuffer->BindBuffer    (aCtx);
@@ -2114,7 +2399,12 @@ void OpenGl_View::renderShadowMap (const Handle(OpenGl_ShadowMap)& theShadowMap)
   aCtx->core11fwd->glClearDepth (1.0);
   aCtx->core11fwd->glClear (GL_DEPTH_BUFFER_BIT);
 
-  renderScene (Graphic3d_Camera::Projection_Orthographic, aShadowBuffer.get(), NULL, false);
+  Graphic3d_Camera::Projection aProjection = theShadowMap->LightSource()->Type() == Graphic3d_TypeOfLightSource_Directional
+                                           ? Graphic3d_Camera::Projection_Orthographic
+                                           : Graphic3d_Camera::Projection_Perspective;
+  myWorkspace->SetRenderFilter (myWorkspace->RenderFilter() | OpenGl_RenderFilter_SkipTrsfPersistence);
+  renderScene (aProjection, aShadowBuffer.get(), NULL, false);
+  myWorkspace->SetRenderFilter (myWorkspace->RenderFilter() & ~(Standard_Integer)OpenGl_RenderFilter_SkipTrsfPersistence);
 
   aCtx->SetColorMask (true);
   myWorkspace->ResetAppliedAspect();
@@ -2145,7 +2435,6 @@ void OpenGl_View::render (Graphic3d_Camera::Projection theProjection,
                                         && theOutputFBO != NULL
                                         && theOutputFBO->NbSamples() != 0);
 
-#if !defined(GL_ES_VERSION_2_0)
   // Disable current clipping planes
   if (aContext->core11ffp != NULL)
   {
@@ -2155,7 +2444,6 @@ void OpenGl_View::render (Graphic3d_Camera::Projection theProjection,
       aContext->core11fwd->glDisable (aClipPlaneId);
     }
   }
-#endif
 
   // update states of OpenGl_BVHTreeSelector (frustum culling algorithm);
   // note that we pass here window dimensions ignoring Graphic3d_RenderingParams::RenderResolutionScale
@@ -2164,7 +2452,7 @@ void OpenGl_View::render (Graphic3d_Camera::Projection theProjection,
   myBVHSelector.CacheClipPtsProjections();
 
   const Handle(OpenGl_ShaderManager)& aManager = aContext->ShaderManager();
-  const Handle(Graphic3d_LightSet)&   aLights  = myRenderParams.ShadingModel == Graphic3d_TOSM_UNLIT ? myNoShadingLight : myLights;
+  const Handle(Graphic3d_LightSet)&   aLights  = myRenderParams.ShadingModel == Graphic3d_TypeOfShadingModel_Unlit ? myNoShadingLight : myLights;
   Standard_Size aLightsRevision = 0;
   if (!aLights.IsNull())
   {
@@ -2203,20 +2491,17 @@ void OpenGl_View::render (Graphic3d_Camera::Projection theProjection,
     drawBackground (myWorkspace, theProjection);
   }
 
-#if !defined(GL_ES_VERSION_2_0)
   // Switch off lighting by default
   if (aContext->core11ffp != NULL
    && aContext->caps->ffpEnable)
   {
     aContext->core11fwd->glDisable (GL_LIGHTING);
   }
-#endif
 
   // =================================
   //      Step 3: Redraw main plane
   // =================================
 
-#if !defined(GL_ES_VERSION_2_0)
   // if the view is scaled normal vectors are scaled to unit
   // length for correct displaying of shaded objects
   const gp_Pnt anAxialScale = aContext->Camera()->AxialScale();
@@ -2230,7 +2515,6 @@ void OpenGl_View::render (Graphic3d_Camera::Projection theProjection,
   {
     aContext->SetGlNormalizeEnabled (Standard_False);
   }
-#endif
 
   aManager->SetShadingModel (OpenGl_ShaderManager::PBRShadingModelFallback (myRenderParams.ShadingModel, checkPBRAvailability()));
 
@@ -2324,9 +2608,16 @@ void OpenGl_View::renderStructs (Graphic3d_Camera::Projection theProjection,
                                  OpenGl_FrameBuffer*          theOitAccumFbo,
                                  const Standard_Boolean       theToDrawImmediate)
 {
-  myZLayers.UpdateCulling (myWorkspace, theToDrawImmediate);
-  if ( myZLayers.NbStructures() <= 0 )
+  if (myIsSubviewComposer)
+  {
     return;
+  }
+
+  myZLayers.UpdateCulling (myWorkspace, theToDrawImmediate);
+  if (myZLayers.NbStructures() <= 0)
+  {
+    return;
+  }
 
   Handle(OpenGl_Context) aCtx = myWorkspace->GetGlContext();
   Standard_Boolean toRenderGL = theToDrawImmediate ||
@@ -2357,7 +2648,7 @@ void OpenGl_View::renderStructs (Graphic3d_Camera::Projection theProjection,
       if (aCtx->arbFBOBlit != NULL)
       {
         // Render bottom OSD layer
-        myZLayers.Render (myWorkspace, theToDrawImmediate, OpenGl_LF_Bottom, theReadDrawFbo, theOitAccumFbo);
+        myZLayers.Render (myWorkspace, theToDrawImmediate, OpenGl_LF_Bottom, myZLayerTarget, theReadDrawFbo, theOitAccumFbo);
 
         const Standard_Integer aPrevFilter = myWorkspace->RenderFilter() & ~(Standard_Integer )(OpenGl_RenderFilter_NonRaytraceableOnly);
         myWorkspace->SetRenderFilter (aPrevFilter | OpenGl_RenderFilter_NonRaytraceableOnly);
@@ -2373,7 +2664,7 @@ void OpenGl_View::renderStructs (Graphic3d_Camera::Projection theProjection,
           }
 
           // Render non-polygonal elements in default layer
-          myZLayers.Render (myWorkspace, theToDrawImmediate, OpenGl_LF_RayTracable, theReadDrawFbo, theOitAccumFbo);
+          myZLayers.Render (myWorkspace, theToDrawImmediate, OpenGl_LF_RayTracable, myZLayerTarget, theReadDrawFbo, theOitAccumFbo);
         }
         myWorkspace->SetRenderFilter (aPrevFilter);
       }
@@ -2396,7 +2687,7 @@ void OpenGl_View::renderStructs (Graphic3d_Camera::Projection theProjection,
       raytrace (aSizeXY.x(), aSizeXY.y(), theProjection, theReadDrawFbo, aCtx);
 
       // Render upper (top and topmost) OpenGL layers
-      myZLayers.Render (myWorkspace, theToDrawImmediate, OpenGl_LF_Upper, theReadDrawFbo, theOitAccumFbo);
+      myZLayers.Render (myWorkspace, theToDrawImmediate, OpenGl_LF_Upper, myZLayerTarget, theReadDrawFbo, theOitAccumFbo);
     }
   }
 
@@ -2404,7 +2695,9 @@ void OpenGl_View::renderStructs (Graphic3d_Camera::Projection theProjection,
   // mode or in case of ray-tracing failure
   if (toRenderGL)
   {
-    myZLayers.Render (myWorkspace, theToDrawImmediate, OpenGl_LF_All, theReadDrawFbo, theOitAccumFbo);
+    // check if only a single layer is to be dumped
+    OpenGl_LayerFilter aFilter = myZLayerRedrawMode ? OpenGl_LF_Single : OpenGl_LF_All;
+    myZLayers.Render (myWorkspace, theToDrawImmediate, aFilter, myZLayerTarget, theReadDrawFbo, theOitAccumFbo);
 
     // Set flag that scene was redrawn by standard pipeline
     myWasRedrawnGL = Standard_True;
@@ -2499,14 +2792,15 @@ void OpenGl_View::bindDefaultFbo (OpenGl_FrameBuffer* theCustomFbo)
   }
   else
   {
-  #if !defined(GL_ES_VERSION_2_0)
-    aCtx->SetReadDrawBuffer (GL_BACK);
-  #else
-    if (aCtx->arbFBO != NULL)
+    if (aCtx->GraphicsLibrary() != Aspect_GraphicsLibrary_OpenGLES)
+    {
+      aCtx->SetReadDrawBuffer (GL_BACK);
+    }
+    else if (aCtx->arbFBO != NULL)
     {
       aCtx->arbFBO->glBindFramebuffer (GL_FRAMEBUFFER, OpenGl_FrameBuffer::NO_FRAMEBUFFER);
     }
-  #endif
+
     const Standard_Integer aViewport[4] = { 0, 0, myWindow->Width(), myWindow->Height() };
     aCtx->ResizeViewport (aViewport);
   }
@@ -2595,9 +2889,22 @@ bool OpenGl_View::blitBuffers (OpenGl_FrameBuffer*    theReadFbo,
   aCtx->SetColorMask (true); // restore default alpha component write state
 
   const bool toApplyGamma = aCtx->ToRenderSRGB() != aCtx->IsFrameBufferSRGB();
-  if (aCtx->arbFBOBlit != NULL
-  && !toApplyGamma
-  &&  theReadFbo->NbSamples() != 0)
+  bool toDrawTexture = true;
+  if (aCtx->arbFBOBlit != NULL)
+  {
+    if (!toApplyGamma
+     &&  theReadFbo->NbSamples() != 0)
+    {
+      toDrawTexture = false;
+    }
+    if (theReadFbo->IsColorRenderBuffer())
+    {
+      // render buffers could be resolved only via glBlitFramebuffer()
+      toDrawTexture = false;
+    }
+  }
+
+  if (!toDrawTexture)
   {
     GLbitfield aCopyMask = 0;
     theReadFbo->BindReadBuffer (aCtx);
@@ -2672,13 +2979,12 @@ bool OpenGl_View::blitBuffers (OpenGl_FrameBuffer*    theReadFbo,
     aCtx->core20fwd->glDepthFunc (GL_ALWAYS);
     aCtx->core20fwd->glDepthMask (GL_TRUE);
     aCtx->core20fwd->glEnable (GL_DEPTH_TEST);
-  #if defined(GL_ES_VERSION_2_0)
-    if (!aCtx->IsGlGreaterEqual (3, 0)
-     && !aCtx->extFragDepth)
+    if (aCtx->GraphicsLibrary() == Aspect_GraphicsLibrary_OpenGLES
+    && !aCtx->IsGlGreaterEqual (3, 0)
+    && !aCtx->extFragDepth)
     {
       aCtx->core20fwd->glDisable (GL_DEPTH_TEST);
     }
-  #endif
 
     aCtx->BindTextures (Handle(OpenGl_TextureSet)(), Handle(OpenGl_ShaderProgram)());
 
@@ -2766,10 +3072,7 @@ void OpenGl_View::drawStereoPair (OpenGl_FrameBuffer* theDrawFbo)
     if (!myOpenGlFBO ->InitLazy (aCtx, aPair[0]->GetVPSize(), myFboColorFormat, myFboDepthFormat, 0)
      || !myOpenGlFBO2->InitLazy (aCtx, aPair[0]->GetVPSize(), myFboColorFormat, 0, 0))
     {
-      aCtx->PushMessage (GL_DEBUG_SOURCE_APPLICATION,
-                         GL_DEBUG_TYPE_ERROR,
-                         0,
-                         GL_DEBUG_SEVERITY_HIGH,
+      aCtx->PushMessage (GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_ERROR, 0, GL_DEBUG_SEVERITY_HIGH,
                          "Error! Unable to allocate FBO for blitting stereo pair");
       bindDefaultFbo (theDrawFbo);
       return;
@@ -2828,10 +3131,16 @@ void OpenGl_View::drawStereoPair (OpenGl_FrameBuffer* theDrawFbo)
   OpenGl_VertexBuffer* aVerts = initBlitQuad (myToFlipOutput);
 
   const Handle(OpenGl_ShaderManager)& aManager = aCtx->ShaderManager();
-  if (aVerts->IsValid()
-   && aManager->BindStereoProgram (myRenderParams.StereoMode))
+  if (!aVerts->IsValid()
+   || !aManager->BindStereoProgram (myRenderParams.StereoMode))
   {
-    if (myRenderParams.StereoMode == Graphic3d_StereoMode_Anaglyph)
+    aCtx->PushMessage (GL_DEBUG_SOURCE_APPLICATION, GL_DEBUG_TYPE_ERROR, 0, GL_DEBUG_SEVERITY_HIGH, "Error! Anaglyph has failed");
+    return;
+  }
+
+  switch (myRenderParams.StereoMode)
+  {
+    case Graphic3d_StereoMode_Anaglyph:
     {
       OpenGl_Mat4 aFilterL, aFilterR;
       aFilterL.SetDiagonal (Graphic3d_Vec4 (0.0f, 0.0f, 0.0f, 0.0f));
@@ -2892,28 +3201,55 @@ void OpenGl_View::drawStereoPair (OpenGl_FrameBuffer* theDrawFbo)
       }
       aCtx->ActiveProgram()->SetUniform (aCtx, "uMultL", aFilterL);
       aCtx->ActiveProgram()->SetUniform (aCtx, "uMultR", aFilterR);
+      break;
     }
-
-    aPair[0]->ColorTexture()->Bind (aCtx, Graphic3d_TextureUnit_0);
-    aPair[1]->ColorTexture()->Bind (aCtx, Graphic3d_TextureUnit_1);
-    aVerts->BindVertexAttrib (aCtx, 0);
-
-    aCtx->core20fwd->glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
-
-    aVerts->UnbindVertexAttrib (aCtx, 0);
-    aPair[1]->ColorTexture()->Unbind (aCtx, Graphic3d_TextureUnit_1);
-    aPair[0]->ColorTexture()->Unbind (aCtx, Graphic3d_TextureUnit_0);
+    case Graphic3d_StereoMode_RowInterlaced:
+    {
+      Graphic3d_Vec2 aTexOffset = myRenderParams.ToSmoothInterlacing
+                                ? Graphic3d_Vec2 (0.0f, -0.5f / float(aPair[0]->GetSizeY()))
+                                : Graphic3d_Vec2();
+      aCtx->ActiveProgram()->SetUniform (aCtx, "uTexOffset", aTexOffset);
+      break;
+    }
+    case Graphic3d_StereoMode_ColumnInterlaced:
+    {
+      Graphic3d_Vec2 aTexOffset = myRenderParams.ToSmoothInterlacing
+                                ? Graphic3d_Vec2 (0.5f / float(aPair[0]->GetSizeX()), 0.0f)
+                                : Graphic3d_Vec2();
+      aCtx->ActiveProgram()->SetUniform (aCtx, "uTexOffset", aTexOffset);
+      break;
+    }
+    case Graphic3d_StereoMode_ChessBoard:
+    {
+      Graphic3d_Vec2 aTexOffset = myRenderParams.ToSmoothInterlacing
+                                ? Graphic3d_Vec2 (0.5f / float(aPair[0]->GetSizeX()),
+                                                 -0.5f / float(aPair[0]->GetSizeY()))
+                                : Graphic3d_Vec2();
+      aCtx->ActiveProgram()->SetUniform (aCtx, "uTexOffset", aTexOffset);
+      break;
+    }
+    default: break;
   }
-  else
+
+  for (int anEyeIter = 0; anEyeIter < 2; ++anEyeIter)
   {
-    TCollection_ExtendedString aMsg = TCollection_ExtendedString()
-      + "Error! Anaglyph has failed";
-    aCtx->PushMessage (GL_DEBUG_SOURCE_APPLICATION,
-                       GL_DEBUG_TYPE_ERROR,
-                       0,
-                       GL_DEBUG_SEVERITY_HIGH,
-                       aMsg);
+    OpenGl_FrameBuffer* anEyeFbo = aPair[anEyeIter];
+    anEyeFbo->ColorTexture()->Bind (aCtx, (Graphic3d_TextureUnit )(Graphic3d_TextureUnit_0 + anEyeIter));
+    if (anEyeFbo->ColorTexture()->Sampler()->Parameters()->Filter() != Graphic3d_TOTF_BILINEAR)
+    {
+      // force filtering
+      anEyeFbo->ColorTexture()->Sampler()->Parameters()->SetFilter (Graphic3d_TOTF_BILINEAR);
+      aCtx->core20fwd->glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+      aCtx->core20fwd->glTexParameteri (GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+    }
   }
+  aVerts->BindVertexAttrib (aCtx, 0);
+
+  aCtx->core20fwd->glDrawArrays (GL_TRIANGLE_STRIP, 0, 4);
+
+  aVerts->UnbindVertexAttrib (aCtx, 0);
+  aPair[1]->ColorTexture()->Unbind (aCtx, Graphic3d_TextureUnit_1);
+  aPair[0]->ColorTexture()->Unbind (aCtx, Graphic3d_TextureUnit_0);
 }
 
 // =======================================================================
@@ -2923,7 +3259,6 @@ void OpenGl_View::drawStereoPair (OpenGl_FrameBuffer* theDrawFbo)
 bool OpenGl_View::copyBackToFront()
 {
   myIsImmediateDrawn = Standard_False;
-#if !defined(GL_ES_VERSION_2_0)
   const Handle(OpenGl_Context)& aCtx = myWorkspace->GetGlContext();
   if (aCtx->core11ffp == NULL)
   {
@@ -2984,9 +3319,6 @@ bool OpenGl_View::copyBackToFront()
   // read/write from front buffer now
   aCtx->SetReadBuffer (aCtx->DrawBuffer());
   return true;
-#else
-  return false;
-#endif
 }
 
 // =======================================================================
@@ -3034,6 +3366,97 @@ Standard_Boolean OpenGl_View::checkOitCompatibility (const Handle(OpenGl_Context
 }
 
 // =======================================================================
+// function : updateSkydomeBg
+// purpose  :
+// =======================================================================
+void OpenGl_View::updateSkydomeBg (const Handle(OpenGl_Context)& theCtx)
+{
+  if (!myToUpdateSkydome)
+  {
+    return;
+  }
+
+  myToUpdateSkydome = false;
+
+  // Set custom shader
+  Handle(OpenGl_ShaderProgram) aProg;
+  Handle(Graphic3d_ShaderProgram) aProxy = theCtx->ShaderManager()->GetBgSkydomeProgram();
+  TCollection_AsciiString anUnused;
+  theCtx->ShaderManager()->Create (aProxy, anUnused, aProg);
+  Handle(OpenGl_ShaderProgram) aPrevProgram = theCtx->ActiveProgram();
+  theCtx->BindProgram (aProg);
+
+  // Setup uniforms
+  aProg->SetUniform (theCtx, "uSunDir", OpenGl_Vec3((float )mySkydomeAspect.SunDirection().X(),
+                                                    (float )mySkydomeAspect.SunDirection().Y(),
+                                                    (float )mySkydomeAspect.SunDirection().Z()));
+  aProg->SetUniform (theCtx, "uCloudy", mySkydomeAspect.Cloudiness());
+  aProg->SetUniform (theCtx, "uTime",   mySkydomeAspect.TimeParameter());
+  aProg->SetUniform (theCtx, "uFog",    mySkydomeAspect.Fogginess());
+
+  // Create and prepare framebuffer
+  GLint aPrevFBO = 0;
+  theCtx->core11fwd->glGetIntegerv (GL_FRAMEBUFFER_BINDING, &aPrevFBO);
+  GLuint anFBO = 0;
+  theCtx->arbFBO->glGenFramebuffers (1, &anFBO);
+  theCtx->arbFBO->glBindFramebuffer (GL_FRAMEBUFFER, anFBO);
+
+  const Standard_Integer anOldViewport[4] = {theCtx->Viewport()[0], theCtx->Viewport()[1], theCtx->Viewport()[2], theCtx->Viewport()[3]};
+  const Standard_Integer aViewport[4] = {0, 0, mySkydomeAspect.Size(), mySkydomeAspect.Size()};
+  theCtx->ResizeViewport (aViewport);
+
+  // Fullscreen triangle
+  Handle(OpenGl_VertexBuffer) aVBO = new OpenGl_VertexBuffer();
+  const float aTriangle[] = {-1.0, -1.0, 3.0, -1.0, -1.0, 3.0};
+  aVBO->Init (theCtx, 2, 3, aTriangle);
+  aVBO->BindAttribute (theCtx, Graphic3d_TypeOfAttribute::Graphic3d_TOA_POS);
+  aVBO->Bind (theCtx);
+
+  if (mySkydomeTexture.IsNull())
+  {
+    mySkydomeTexture = new OpenGl_Texture();
+    mySkydomeTexture->Sampler()->Parameters()->SetFilter (Graphic3d_TOTF_BILINEAR);
+  }
+  if (mySkydomeTexture->SizeX() != mySkydomeAspect.Size())
+  {
+    mySkydomeTexture->Release (theCtx.get());
+    mySkydomeTexture->InitCubeMap (theCtx, NULL, mySkydomeAspect.Size(),
+                                   Image_Format_RGB, false, false);
+  }
+
+  // init aspects if needed
+  if (myCubeMapParams->TextureSet (theCtx).IsNull())
+  {
+    myCubeMapParams->Aspect()->SetInteriorStyle (Aspect_IS_SOLID);
+    myCubeMapParams->Aspect()->SetFaceCulling (Graphic3d_TypeOfBackfacingModel_DoubleSided);
+    myCubeMapParams->Aspect()->SetShadingModel (Graphic3d_TypeOfShadingModel_Unlit);
+    myCubeMapParams->Aspect()->SetShaderProgram (theCtx->ShaderManager()->GetBgCubeMapProgram());
+    Handle(Graphic3d_TextureSet) aTextureSet = new Graphic3d_TextureSet (1);
+    myCubeMapParams->Aspect()->SetTextureSet (aTextureSet);
+    myCubeMapParams->Aspect()->SetTextureMapOn (true);
+    myCubeMapParams->SynchronizeAspects();
+  }
+
+  myCubeMapParams->Aspect()->ShaderProgram()->PushVariableInt ("uZCoeff", 1);
+  myCubeMapParams->Aspect()->ShaderProgram()->PushVariableInt ("uYCoeff", 1);
+
+  for (Standard_Integer aSideIter = 0; aSideIter < 6; aSideIter++)
+  {
+    aProg->SetUniform (theCtx, "uSide", aSideIter);
+    theCtx->arbFBO->glFramebufferTexture2D (GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + aSideIter,
+                                            mySkydomeTexture->TextureId(), 0);
+    theCtx->core15->glDrawArrays (GL_TRIANGLES, 0, 3);
+  }
+  theCtx->arbFBO->glDeleteFramebuffers (1, &anFBO);
+  aVBO->Release (theCtx.get());
+
+  myCubeMapParams->TextureSet (theCtx)->ChangeFirst() = mySkydomeTexture;
+  theCtx->BindProgram (aPrevProgram);
+  theCtx->ResizeViewport (anOldViewport);
+  theCtx->arbFBO->glBindFramebuffer (GL_FRAMEBUFFER, aPrevFBO);
+}
+
+// =======================================================================
 // function : checkPBRAvailability
 // purpose  :
 // =======================================================================
@@ -3044,19 +3467,57 @@ Standard_Boolean OpenGl_View::checkPBRAvailability() const
 }
 
 // =======================================================================
-// function : bakePBREnvironment
+// function : updatePBREnvironment
 // purpose  :
 // =======================================================================
-void OpenGl_View::bakePBREnvironment (const Handle(OpenGl_Context)& theCtx)
+void OpenGl_View::updatePBREnvironment (const Handle(OpenGl_Context)& theCtx)
 {
-  const Handle(OpenGl_TextureSet)& aTextureSet = myCubeMapParams->TextureSet (theCtx);
-  if (!aTextureSet.IsNull()
-   && !aTextureSet->IsEmpty())
+  if (myBackgroundType == Graphic3d_TOB_CUBEMAP
+   && myToUpdateSkydome)
+  {
+    updateSkydomeBg (theCtx);
+  }
+
+  if (myPBREnvState != OpenGl_PBREnvState_CREATED
+  || !myPBREnvRequest)
+  {
+    myPBREnvRequest = false;
+    return;
+  }
+
+  myPBREnvRequest = false;
+
+  Handle(OpenGl_TextureSet) aGlTextureSet;
+  OpenGl_Aspects* aTmpGlAspects = NULL;
+  if (!myCubeMapIBL.IsNull()
+    && myCubeMapIBL == myCubeMapBackground)
+  {
+    aGlTextureSet = myCubeMapParams->TextureSet (theCtx);
+  }
+  else if (!myCubeMapIBL.IsNull())
+  {
+    myCubeMapIBL->SetMipmapsGeneration (Standard_True);
+
+    Handle(Graphic3d_AspectFillArea3d) anAspect = new Graphic3d_AspectFillArea3d();
+    {
+      Handle(Graphic3d_TextureSet) aTextureSet = new Graphic3d_TextureSet (myCubeMapIBL);
+      anAspect->SetInteriorStyle (Aspect_IS_SOLID);
+      anAspect->SetTextureSet (aTextureSet);
+      anAspect->SetTextureMapOn (true);
+    }
+
+    aTmpGlAspects = new OpenGl_Aspects();
+    aTmpGlAspects->SetAspect (anAspect);
+    aGlTextureSet = aTmpGlAspects->TextureSet (theCtx);
+  }
+
+  if (!aGlTextureSet.IsNull()
+   && !aGlTextureSet->IsEmpty())
   {
     myPBREnvironment->Bake (theCtx,
-                            aTextureSet->First(),
-                            myBackgroundCubeMap->ZIsInverted(),
-                            myBackgroundCubeMap->IsTopDown(),
+                            aGlTextureSet->First(),
+                            myCubeMapIBL->ZIsInverted(),
+                            myCubeMapIBL->IsTopDown(),
                             myRenderParams.PbrEnvBakingDiffNbSamples,
                             myRenderParams.PbrEnvBakingSpecNbSamples,
                             myRenderParams.PbrEnvBakingProbability);
@@ -3065,31 +3526,6 @@ void OpenGl_View::bakePBREnvironment (const Handle(OpenGl_Context)& theCtx)
   {
     myPBREnvironment->Clear (theCtx);
   }
-}
-
-// =======================================================================
-// function : clearPBREnvironment
-// purpose  :
-// =======================================================================
-void OpenGl_View::clearPBREnvironment (const Handle(OpenGl_Context)& theCtx)
-{
-  myPBREnvironment->Clear (theCtx);
-}
-
-// =======================================================================
-// function : clearPBREnvironment
-// purpose  :
-// =======================================================================
-void OpenGl_View::processPBREnvRequest (const Handle(OpenGl_Context)& theCtx)
-{
-  if (myPBREnvState == OpenGl_PBREnvState_CREATED)
-  {
-    switch (myPBREnvRequest)
-    {
-      case OpenGl_PBREnvRequest_NONE:  return;
-      case OpenGl_PBREnvRequest_BAKE:  bakePBREnvironment  (theCtx); break;
-      case OpenGl_PBREnvRequest_CLEAR: clearPBREnvironment (theCtx); break;
-    }
-  }
-  myPBREnvRequest = OpenGl_PBREnvRequest_NONE;
+  aGlTextureSet.Nullify();
+  OpenGl_Element::Destroy (theCtx.get(), aTmpGlAspects);
 }

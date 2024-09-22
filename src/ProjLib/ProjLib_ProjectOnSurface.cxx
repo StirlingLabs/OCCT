@@ -18,14 +18,11 @@
 
 #include <Adaptor3d_Curve.hxx>
 #include <Adaptor3d_Surface.hxx>
-#include <AppCont_Function.hxx>
-#include <AppParCurves_MultiCurve.hxx>
 #include <Approx_FitAndDivide.hxx>
 #include <BSplCLib.hxx>
 #include <Extrema_ExtPS.hxx>
 #include <Extrema_POnSurf.hxx>
 #include <Geom_BSplineCurve.hxx>
-#include <PLib.hxx>
 #include <Precision.hxx>
 #include <Standard_NoSuchObject.hxx>
 #include <TColgp_Array1OfPnt.hxx>
@@ -94,7 +91,7 @@ public:
     myNbPnt2d = 0;
     Standard_Real U = myCurve->FirstParameter();
     gp_Pnt P = myCurve->Value(U);
-    Standard_Real Tol = Precision::PConfusion();
+    constexpr Standard_Real Tol = Precision::PConfusion();
     myExtPS = new Extrema_ExtPS (P, *S, Tol, Tol);
   }
 

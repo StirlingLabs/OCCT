@@ -25,7 +25,6 @@
 #include <gp_Pnt2d.hxx>
 #include <gp_Vec2d.hxx>
 #include <Precision.hxx>
-#include <Standard_DomainError.hxx>
 #include <Standard_NoSuchObject.hxx>
 #include <Standard_OutOfRange.hxx>
 
@@ -52,6 +51,22 @@ Adaptor2d_Line2d::Adaptor2d_Line2d()
 : myUfirst(UFirst), myUlast(ULast), myAx2d(P,D)
 {
 }
+
+//=======================================================================
+//function : ShallowCopy
+//purpose  : 
+//=======================================================================
+
+ Handle(Adaptor2d_Curve2d) Adaptor2d_Line2d::ShallowCopy() const
+ {
+   Handle(Adaptor2d_Line2d) aCopy = new Adaptor2d_Line2d();
+
+   aCopy->myUfirst = myUfirst;
+   aCopy->myUlast  = myUlast;
+   aCopy->myAx2d   = myAx2d;
+
+   return aCopy;
+ }
 
 //=======================================================================
 //function : Load

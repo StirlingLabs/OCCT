@@ -34,7 +34,6 @@
 #include <TopoDS_Vertex.hxx>
 #include <TopoDS_Wire.hxx>
 #include <TopOpeBRepBuild_WireToFace.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
 
 //=======================================================================
 //function : BRepAlgo_FaceRestrictor
@@ -104,7 +103,7 @@ static Standard_Boolean  ChangePCurve (TopoDS_Edge&          E,
 //purpose  : 
 //=======================================================================
 
-static void ProjCurve3d (TopoDS_Edge&          E,
+static bool ProjCurve3d (TopoDS_Edge&          E,
                          const Handle(Geom_Surface)& S,
                          TopLoc_Location&      L)
 {
@@ -112,6 +111,10 @@ static void ProjCurve3d (TopoDS_Edge&          E,
   TopLoc_Location           LE;
   Standard_Real             f,l;
   Handle(Geom_Curve)        C  = BRep_Tool::Curve(E,LE,f,l);
+  if (C.IsNull())
+  {
+    return false;
+  }
   Handle(Geom_TrimmedCurve) CT = new Geom_TrimmedCurve(C,f,l);
   
   TopLoc_Location LL = L.Inverted().Multiplied(LE);
@@ -119,6 +122,7 @@ static void ProjCurve3d (TopoDS_Edge&          E,
   
   Handle(Geom2d_Curve) C2 = GeomProjLib::Curve2d (CT,S);
   BB.UpdateEdge(E,C2,S,L,Precision::Confusion());
+  return true;
 }
 
 //=======================================================================
@@ -166,13 +170,19 @@ void BRepAlgo_FaceRestrictor::Perform()
         // no pcurve on the reference surface.
         if (modeProj) {
           // Projection of the 3D curve on surface.
-          ProjCurve3d ( E, S, L);
+          if (!ProjCurve3d(E, S, L))
+          {
+            return;
+          }
         }
         else {
           // return the first pcurve glued on <S>
           Standard_Boolean YaPCurve = ChangePCurve (E, S, L);
           if (!YaPCurve) {
-            ProjCurve3d (E, S, L);
+            if (!ProjCurve3d(E, S, L))
+            {
+              return;
+            }
           }
         }
       }
@@ -385,7 +395,7 @@ void BRepAlgo_FaceRestrictor::PerformWithCorrection()
   // Reorientation of all closed wires to the left.
   //---------------------------------------------------------
   for (; it.More(); it.Next()) {
-    TopoDS_Wire& W  = TopoDS::Wire(it.Value());
+    TopoDS_Wire& W  = TopoDS::Wire(it.ChangeValue());
     TopoDS_Shape aLocalShape = myFace.EmptyCopied();
     TopoDS_Face  NF = TopoDS::Face(aLocalShape);
 //    TopoDS_Face  NF = TopoDS::Face(myFace.EmptyCopied());
@@ -402,12 +412,9 @@ void BRepAlgo_FaceRestrictor::PerformWithCorrection()
   //---------------------------------------------------------
   // Classification of wires ones compared to the others.
   //---------------------------------------------------------
-  Standard_Integer j,i = 1;
-
   for (it.Initialize(wires) ; it.More(); it.Next()) {
-    TopoDS_Wire& W1  = TopoDS::Wire(it.Value());
-    TopTools_ListIteratorOfListOfShape it2(wires);  
-    j = 1;    
+    const TopoDS_Wire& W1  = TopoDS::Wire(it.Value());
+    TopTools_ListIteratorOfListOfShape it2(wires);
 
     if (IsClosed(W1)) {
       TopoDS_Shape aLocalShape = myFace.EmptyCopied();
@@ -423,10 +430,8 @@ void BRepAlgo_FaceRestrictor::PerformWithCorrection()
           Store (W2,W1,keyIsIn,keyContains);
         } 
         it2.Next();
-        j++;
       }
     }
-    i++;
   }
   TopTools_ListOfShape WireExt;
   

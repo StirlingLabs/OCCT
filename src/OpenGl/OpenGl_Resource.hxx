@@ -13,12 +13,11 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef _OpenGl_Resource_H__
-#define _OpenGl_Resource_H__
+#ifndef OpenGl_Resource_HeaderFile
+#define OpenGl_Resource_HeaderFile
 
 #include <Standard_Type.hxx>
 
-class Standard_Transient;
 class OpenGl_Context;
 
 //! Interface for OpenGl resource with following meaning:

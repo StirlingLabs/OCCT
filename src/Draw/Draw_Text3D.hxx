@@ -18,16 +18,11 @@
 #define _Draw_Text3D_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <gp_Pnt.hxx>
 #include <Draw_Color.hxx>
 #include <TCollection_AsciiString.hxx>
-#include <Standard_Real.hxx>
 #include <Draw_Drawable3D.hxx>
-#include <Standard_CString.hxx>
-class gp_Pnt;
-class Draw_Color;
 class Draw_Display;
 
 

@@ -23,7 +23,6 @@
 
 #include <GeomToStep_Root.hxx>
 class StepGeom_Hyperbola;
-class StdFail_NotDone;
 class Geom2d_Hyperbola;
 class Geom_Hyperbola;
 
@@ -38,9 +37,11 @@ public:
   DEFINE_STANDARD_ALLOC
 
   
-  Standard_EXPORT GeomToStep_MakeHyperbola(const Handle(Geom2d_Hyperbola)& C);
+  Standard_EXPORT GeomToStep_MakeHyperbola(const Handle(Geom2d_Hyperbola)& C,
+                                           const StepData_Factors& theLocalFactors = StepData_Factors());
   
-  Standard_EXPORT GeomToStep_MakeHyperbola(const Handle(Geom_Hyperbola)& C);
+  Standard_EXPORT GeomToStep_MakeHyperbola(const Handle(Geom_Hyperbola)& C,
+                                           const StepData_Factors& theLocalFactors = StepData_Factors());
   
   Standard_EXPORT const Handle(StepGeom_Hyperbola)& Value() const;
 

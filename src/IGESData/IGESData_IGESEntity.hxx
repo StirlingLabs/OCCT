@@ -22,21 +22,12 @@
 
 #include <Standard_Integer.hxx>
 #include <IGESData_DefSwitch.hxx>
-#include <Standard_Real.hxx>
-#include <Standard_Character.hxx>
 #include <Interface_EntityList.hxx>
 #include <Standard_Transient.hxx>
-#include <Standard_Boolean.hxx>
 #include <IGESData_DefType.hxx>
 #include <IGESData_DefList.hxx>
 #include <Standard_CString.hxx>
-#include <Standard_Type.hxx>
 class TCollection_HAsciiString;
-class Interface_InterfaceError;
-class IGESData_ReadWriteModule;
-class IGESData_GeneralModule;
-class IGESData_IGESReaderTool;
-class IGESData_DirChecker;
 class IGESData_IGESType;
 class IGESData_LineFontEntity;
 class IGESData_LevelListEntity;
@@ -46,7 +37,6 @@ class IGESData_LabelDisplayEntity;
 class IGESData_ColorEntity;
 class gp_GTrsf;
 class Interface_EntityIterator;
-class Interface_EntityList;
 
 
 class IGESData_IGESEntity;

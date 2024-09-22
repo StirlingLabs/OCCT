@@ -18,16 +18,13 @@
 #define _BRep_CurveOnSurface_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <gp_Pnt2d.hxx>
 #include <BRep_GCurve.hxx>
 #include <Standard_Real.hxx>
-#include <Standard_Boolean.hxx>
 class Geom2d_Curve;
 class Geom_Surface;
 class TopLoc_Location;
-class gp_Pnt2d;
 class gp_Pnt;
 class BRep_CurveRepresentation;
 

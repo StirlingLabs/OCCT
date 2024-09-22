@@ -21,15 +21,11 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
-#include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
 #include <Extrema_ExtPC2d.hxx>
 #include <Geom2dAdaptor_Curve.hxx>
-class Standard_OutOfRange;
-class StdFail_NotDone;
 class gp_Pnt2d;
 class Geom2d_Curve;
-class Extrema_ExtPC2d;
 
 
 

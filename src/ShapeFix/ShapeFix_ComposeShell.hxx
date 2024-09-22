@@ -25,8 +25,6 @@
 #include <TopAbs_Orientation.hxx>
 #include <TopoDS_Shape.hxx>
 #include <Standard_Integer.hxx>
-#include <Standard_Real.hxx>
-#include <Standard_Boolean.hxx>
 #include <ShapeFix_Root.hxx>
 #include <ShapeExtend_Status.hxx>
 #include <ShapeFix_SequenceOfWireSegment.hxx>
@@ -229,7 +227,7 @@ protected:
   //! wires. This is done by traversing all the segments in allowed
   //! directions, starting only from the REVERSED and FORWARD and
   //! taking EXTERNAL as necessary in fork points. Forks are detected
-  //! by common vertices. In fork point, most left way is seleccted
+  //! by common vertices. In fork point, most left way is selected
   //! among all possible ways.
   Standard_EXPORT void CollectWires (ShapeFix_SequenceOfWireSegment& wires, ShapeFix_SequenceOfWireSegment& seqw);
   

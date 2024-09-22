@@ -21,7 +21,6 @@
 class TopoDS_Face;
 class GeomInt_LineConstructor;
 class IntTools_Context;
-class Adaptor3d_TopolTool;
 
 //! IntTools_WLineTool provides set of static methods related to walking lines.
 class IntTools_WLineTool
@@ -47,7 +46,6 @@ public:
                                         const Standard_Boolean                         theAvoidLConstructor,
                                         const Standard_Real                            theTol,
                                         IntPatch_SequenceOfLine&                       theNewLines,
-                                        Standard_Real&                                 theReachedTol3d,
                                         const Handle(IntTools_Context)& );
 };
 

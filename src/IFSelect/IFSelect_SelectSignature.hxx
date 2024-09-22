@@ -18,18 +18,13 @@
 #define _IFSelect_SelectSignature_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
-#include <TCollection_AsciiString.hxx>
 #include <Standard_Integer.hxx>
 #include <TColStd_SequenceOfAsciiString.hxx>
 #include <TColStd_SequenceOfInteger.hxx>
 #include <IFSelect_SelectExtract.hxx>
-#include <Standard_CString.hxx>
-#include <Standard_Boolean.hxx>
 class IFSelect_Signature;
 class IFSelect_SignCounter;
-class TCollection_AsciiString;
 class Standard_Transient;
 class Interface_Graph;
 class Interface_InterfaceModel;

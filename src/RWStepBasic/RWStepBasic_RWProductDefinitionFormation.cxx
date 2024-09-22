@@ -13,7 +13,6 @@
 
 //gka 05.03.99 S4134 upgrade from CD to DIS
 
-#include <Interface_Check.hxx>
 #include <Interface_EntityIterator.hxx>
 #include <RWStepBasic_RWProductDefinitionFormation.hxx>
 #include <StepBasic_Product.hxx>
@@ -72,7 +71,14 @@ void RWStepBasic_RWProductDefinitionFormation::WriteStep
 
 	// --- own field : description ---
 
-	SW.Send(ent->Description());
+	if (!ent->Description().IsNull())
+	{
+		SW.Send(ent->Description());
+	}
+	else
+	{
+		SW.SendUndef();
+	}
 
 	// --- own field : ofProduct ---
 

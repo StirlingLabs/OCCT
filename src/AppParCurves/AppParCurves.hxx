@@ -21,29 +21,9 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
-#include <Standard_Integer.hxx>
 #include <math_Vector.hxx>
-#include <Standard_Real.hxx>
 #include <math_IntegerVector.hxx>
 class math_Matrix;
-class AppParCurves_MultiPoint;
-class AppParCurves_MultiCurve;
-class AppParCurves_MultiBSpCurve;
-class AppParCurves_ConstraintCouple;
-class AppParCurves_LeastSquare;
-class AppParCurves_ResolConstraint;
-class AppParCurves_Function;
-class AppParCurves_BSpFunction;
-class AppParCurves_Gradient;
-class AppParCurves_Gradient_BFGS;
-class AppParCurves_ParLeastSquare;
-class AppParCurves_ResConstraint;
-class AppParCurves_ParFunction;
-class AppParCurves_BSpGradient;
-class AppParCurves_BSpGradient_BFGS;
-class AppParCurves_BSpParLeastSquare;
-class AppParCurves_BSpParFunction;
-
 
 //! Parallel Approximation in n curves.
 //! This package gives all the algorithms used to approximate a MultiLine
@@ -64,44 +44,6 @@ public:
   
   Standard_EXPORT static void SplineFunction (const Standard_Integer NbPoles, const Standard_Integer Degree, const math_Vector& Parameters, const math_Vector& FlatKnots, math_Matrix& A, math_Matrix& DA, math_IntegerVector& Index);
 
-
-
-
-protected:
-
-
-
-
-
-private:
-
-
-
-
-friend class AppParCurves_MultiPoint;
-friend class AppParCurves_MultiCurve;
-friend class AppParCurves_MultiBSpCurve;
-friend class AppParCurves_ConstraintCouple;
-friend class AppParCurves_LeastSquare;
-friend class AppParCurves_ResolConstraint;
-friend class AppParCurves_Function;
-friend class AppParCurves_BSpFunction;
-friend class AppParCurves_Gradient;
-friend class AppParCurves_Gradient_BFGS;
-friend class AppParCurves_ParLeastSquare;
-friend class AppParCurves_ResConstraint;
-friend class AppParCurves_ParFunction;
-friend class AppParCurves_BSpGradient;
-friend class AppParCurves_BSpGradient_BFGS;
-friend class AppParCurves_BSpParLeastSquare;
-friend class AppParCurves_BSpParFunction;
-
 };
-
-
-
-
-
-
 
 #endif // _AppParCurves_HeaderFile

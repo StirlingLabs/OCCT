@@ -18,7 +18,6 @@
 #define _IGESAppli_NodalResults_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <Standard_Integer.hxx>
 #include <Standard_Real.hxx>
@@ -27,8 +26,6 @@
 #include <TColStd_HArray2OfReal.hxx>
 #include <IGESData_IGESEntity.hxx>
 class IGESDimen_GeneralNote;
-class Standard_DimensionMismatch;
-class Standard_OutOfRange;
 class IGESAppli_Node;
 
 

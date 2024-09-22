@@ -22,13 +22,8 @@
 
 #include <Geom2d_Geometry.hxx>
 #include <Standard_Real.hxx>
-#include <Standard_Boolean.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <Standard_Integer.hxx>
-class Standard_RangeError;
-class Standard_NoSuchObject;
-class Geom2d_UndefinedDerivative;
-class Geom2d_UndefinedValue;
 class gp_Trsf2d;
 class gp_Pnt2d;
 class gp_Vec2d;

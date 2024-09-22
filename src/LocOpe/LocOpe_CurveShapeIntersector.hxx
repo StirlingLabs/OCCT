@@ -19,15 +19,10 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
-#include <Standard_Boolean.hxx>
 #include <LocOpe_SequenceOfPntFace.hxx>
 #include <Standard_Integer.hxx>
-#include <Standard_Real.hxx>
 #include <TopAbs_Orientation.hxx>
-class StdFail_NotDone;
-class Standard_OutOfRange;
 class gp_Ax1;
 class TopoDS_Shape;
 class gp_Circ;
@@ -48,11 +43,11 @@ public:
   //! Empty constructor.
     LocOpe_CurveShapeIntersector();
   
-  //! Creates  and performs the intersection     betwwen
+  //! Creates  and performs the intersection     between
   //! <Ax1> and <S>.
     LocOpe_CurveShapeIntersector(const gp_Ax1& Axis, const TopoDS_Shape& S);
   
-  //! Creates  and performs yte intersection     betwwen
+  //! Creates  and performs yte intersection     between
   //! <C> and <S>.
     LocOpe_CurveShapeIntersector(const gp_Circ& C, const TopoDS_Shape& S);
   

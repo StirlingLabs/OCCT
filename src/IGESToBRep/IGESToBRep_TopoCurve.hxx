@@ -23,11 +23,8 @@
 
 #include <TColGeom_SequenceOfCurve.hxx>
 #include <TColGeom2d_SequenceOfCurve.hxx>
-#include <Standard_Boolean.hxx>
 #include <IGESToBRep_CurveAndSurface.hxx>
-#include <Standard_Real.hxx>
 #include <Standard_Integer.hxx>
-class IGESToBRep_CurveAndSurface;
 class TopoDS_Shape;
 class IGESData_IGESEntity;
 class TopoDS_Face;

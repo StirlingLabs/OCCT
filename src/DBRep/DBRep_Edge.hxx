@@ -18,13 +18,10 @@
 #define _DBRep_Edge_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <TopoDS_Edge.hxx>
 #include <Draw_Color.hxx>
 #include <Standard_Transient.hxx>
-class TopoDS_Edge;
-class Draw_Color;
 
 
 class DBRep_Edge;

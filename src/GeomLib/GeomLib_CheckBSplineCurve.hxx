@@ -21,12 +21,7 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
-#include <Standard_Boolean.hxx>
-#include <Standard_Real.hxx>
-#include <gp_Pnt.hxx>
 class Geom_BSplineCurve;
-class StdFail_NotDone;
-class Standard_OutOfRange;
 
 
 //! Checks for the end  tangents : whether or not those

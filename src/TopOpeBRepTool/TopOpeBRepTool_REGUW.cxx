@@ -17,16 +17,9 @@
 
 #include <BRep_Tool.hxx>
 #include <Geom2d_Curve.hxx>
-#include <Precision.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
-#include <TopoDS_Edge.hxx>
-#include <TopoDS_Face.hxx>
 #include <TopoDS_Shape.hxx>
-#include <TopoDS_Vertex.hxx>
-#include <TopOpeBRepTool_C2DF.hxx>
-#include <TopOpeBRepTool_connexity.hxx>
-#include <TopOpeBRepTool_define.hxx>
 #include <TopOpeBRepTool_EXPORT.hxx>
 #include <TopOpeBRepTool_REGUW.hxx>
 #include <TopOpeBRepTool_TOOL.hxx>
@@ -729,7 +722,7 @@ Standard_Boolean TopOpeBRepTool_REGUW::REGU(const Standard_Integer istep,
   // tol2d = 1.e-2*(lowest distance (p2df,p2dl) between all non-closed  
   //                and non-degenerated pcurves seen during the regularization).
   // This value is updated in method chkp2dFORinE.
-  // The comparision of p2d points is coupled with comparision of vertices
+  // The comparison of p2d points is coupled with comparison of vertices
   // We should in fact use bounding boxes on pcurves but this is too expensive!!!
   mytol2d = 1.e-5;
   isinit0 = Standard_True;

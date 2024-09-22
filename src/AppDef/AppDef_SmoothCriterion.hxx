@@ -18,7 +18,6 @@
 #define _AppDef_SmoothCriterion_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <Standard_Transient.hxx>
 #include <TColStd_HArray1OfReal.hxx>
@@ -28,8 +27,6 @@
 #include <Standard_Integer.hxx>
 #include <math_Vector.hxx>
 #include <TColStd_Array1OfReal.hxx>
-class Standard_NotImplemented;
-class Standard_DomainError;
 class FEmTool_Curve;
 class math_Matrix;
 

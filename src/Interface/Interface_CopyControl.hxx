@@ -21,9 +21,6 @@
 #include <Standard_Type.hxx>
 
 #include <Standard_Transient.hxx>
-#include <Standard_Boolean.hxx>
-class Interface_InterfaceError;
-class Standard_Transient;
 
 
 class Interface_CopyControl;

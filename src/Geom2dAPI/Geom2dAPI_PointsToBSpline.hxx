@@ -21,16 +21,12 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
-#include <Standard_Boolean.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
 #include <Standard_Integer.hxx>
 #include <GeomAbs_Shape.hxx>
-#include <Standard_Real.hxx>
 #include <TColStd_Array1OfReal.hxx>
 #include <Approx_ParametrizationType.hxx>
 class Geom2d_BSplineCurve;
-class StdFail_NotDone;
-class Standard_OutOfRange;
 
 
 //! This  class  is  used  to  approximate a  BsplineCurve

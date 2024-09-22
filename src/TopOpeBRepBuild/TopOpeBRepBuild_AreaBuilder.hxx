@@ -23,13 +23,11 @@
 
 #include <TopOpeBRepBuild_ListOfListOfLoop.hxx>
 #include <TopOpeBRepBuild_ListIteratorOfListOfListOfLoop.hxx>
-#include <TopOpeBRepBuild_ListIteratorOfListOfLoop.hxx>
 #include <Standard_Boolean.hxx>
 #include <TopAbs_State.hxx>
 #include <TopOpeBRepBuild_ListOfLoop.hxx>
 #include <TopOpeBRepBuild_LoopEnum.hxx>
 #include <Standard_Integer.hxx>
-#include <Standard_Address.hxx>
 class TopOpeBRepBuild_LoopSet;
 class TopOpeBRepBuild_LoopClassifier;
 class TopOpeBRepBuild_Loop;

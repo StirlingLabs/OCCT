@@ -22,14 +22,9 @@
 #include <TDF_LabelNodePtr.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_Transient.hxx>
-#include <Standard_Boolean.hxx>
 #include <Standard_OStream.hxx>
 #include <TDF_AttributeIndexedMap.hxx>
-class Standard_DomainError;
-class TDF_Data;
 class TDF_Label;
-class TDF_LabelNode;
-class TDF_AttributeIterator;
 class TDF_DeltaOnForget;
 class Standard_GUID;
 class TDF_AttributeDelta;
@@ -363,7 +358,7 @@ Standard_OStream& operator<< (Standard_OStream& anOS) const
   //! forgotten attribute is also flagged not "Valid".
   //!
   //! A forgotten attribute is invisible. Set also the
-  //! "Valid" status to False. Obvioulsy, DF cannot
+  //! "Valid" status to False. Obviously, DF cannot
   //! empty an attribute (this has a semantic
   //! signification), but can remove it from the
   //! structure. So, a forgotten attribute is NOT an empty

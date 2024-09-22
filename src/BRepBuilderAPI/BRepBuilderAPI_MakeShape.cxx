@@ -16,12 +16,7 @@
 
 
 #include <BRepBuilderAPI_MakeShape.hxx>
-#include <StdFail_NotDone.hxx>
-#include <TopoDS.hxx>
-#include <TopoDS_Edge.hxx>
-#include <TopoDS_Face.hxx>
 #include <TopoDS_Shape.hxx>
-#include <TopoDS_Vertex.hxx>
 
 //=======================================================================
 //function : BRepBuilderAPI_MakeShape
@@ -36,7 +31,7 @@ BRepBuilderAPI_MakeShape::BRepBuilderAPI_MakeShape()
 //purpose  : 
 //=======================================================================
 
-void BRepBuilderAPI_MakeShape::Build()
+void BRepBuilderAPI_MakeShape::Build(const Message_ProgressRange& /*theRange*/)
 {
 }
 

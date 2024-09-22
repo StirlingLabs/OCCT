@@ -16,10 +16,6 @@
 
 
 #include <BRepOffsetAPI_NormalProjection.hxx>
-#include <Standard_ConstructionError.hxx>
-#include <Standard_NoSuchObject.hxx>
-#include <StdFail_NotDone.hxx>
-#include <TopoDS_Edge.hxx>
 #include <TopoDS_Shape.hxx>
 
 BRepOffsetAPI_NormalProjection::BRepOffsetAPI_NormalProjection()
@@ -61,7 +57,7 @@ BRepOffsetAPI_NormalProjection::BRepOffsetAPI_NormalProjection()
   myNormalProjector.Compute3d(With3d);
 }
 
- void BRepOffsetAPI_NormalProjection::Build() 
+ void BRepOffsetAPI_NormalProjection::Build(const Message_ProgressRange& /*theRange*/)
 {
   myNormalProjector.Build();
   myShape = myNormalProjector.Projection();

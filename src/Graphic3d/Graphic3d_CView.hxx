@@ -14,41 +14,34 @@
 #ifndef _Graphic3d_CView_HeaderFile
 #define _Graphic3d_CView_HeaderFile
 
-#include <Aspect_Handle.hxx>
 #include <Aspect_RenderingContext.hxx>
+#include <Aspect_SkydomeBackground.hxx>
 #include <Aspect_Window.hxx>
 #include <Graphic3d_BufferType.hxx>
-#include <Graphic3d_Camera.hxx>
 #include <Graphic3d_CubeMap.hxx>
-#include <Graphic3d_CLight.hxx>
-#include <Graphic3d_CStructure.hxx>
 #include <Graphic3d_DataStructureManager.hxx>
 #include <Graphic3d_DiagnosticInfo.hxx>
 #include <Graphic3d_GraduatedTrihedron.hxx>
-#include <Graphic3d_MapOfStructure.hxx>
 #include <Graphic3d_NMapOfTransient.hxx>
 #include <Graphic3d_RenderingParams.hxx>
-#include <Graphic3d_SequenceOfHClipPlane.hxx>
 #include <Graphic3d_SequenceOfStructure.hxx>
 #include <Graphic3d_Structure.hxx>
-#include <Graphic3d_Texture2Dmanual.hxx>
 #include <Graphic3d_TextureEnv.hxx>
 #include <Graphic3d_TypeOfAnswer.hxx>
 #include <Graphic3d_TypeOfBackfacingModel.hxx>
+#include <Graphic3d_TypeOfBackground.hxx>
 #include <Graphic3d_TypeOfShadingModel.hxx>
 #include <Graphic3d_TypeOfVisualization.hxx>
 #include <Graphic3d_Vec3.hxx>
 #include <Graphic3d_ZLayerId.hxx>
 #include <Graphic3d_ZLayerSettings.hxx>
 #include <Image_PixMap.hxx>
-#include <Quantity_NameOfColor.hxx>
-#include <Standard_Address.hxx>
 #include <Standard_Transient.hxx>
 #include <TColStd_IndexedDataMapOfStringString.hxx>
 
+class Aspect_NeutralWindow;
 class Aspect_XRSession;
 class Graphic3d_CView;
-class Graphic3d_GraphicDriver;
 class Graphic3d_Layer;
 class Graphic3d_StructureManager;
 
@@ -99,11 +92,11 @@ public:
 
 public:
 
-  //! Returns default Shading Model of the view; Graphic3d_TOSM_FRAGMENT by default.
+  //! Returns default Shading Model of the view; Graphic3d_TypeOfShadingModel_Phong by default.
   Graphic3d_TypeOfShadingModel ShadingModel() const { return myRenderParams.ShadingModel; }
 
   //! Sets default Shading Model of the view.
-  //! Will throw an exception on attempt to set Graphic3d_TOSM_DEFAULT.
+  //! Will throw an exception on attempt to set Graphic3d_TypeOfShadingModel_DEFAULT.
   Standard_EXPORT void SetShadingModel (Graphic3d_TypeOfShadingModel theModel);
 
   //! Return backfacing model used for the view; Graphic3d_TypeOfBackfacingModel_Auto by default,
@@ -118,6 +111,18 @@ public:
 
   //! Sets visualization type of the view.
   void SetVisualizationType (const Graphic3d_TypeOfVisualization theType) { myVisualization = theType; }
+
+  //! Returns ZLayerId target
+  Graphic3d_ZLayerId ZLayerTarget() const { return myZLayerTarget; }
+
+  //! Sets ZLayerId target.
+  void SetZLayerTarget (const Graphic3d_ZLayerId theTarget) { myZLayerTarget = theTarget; }
+
+  //! Returns ZLayerId redraw mode
+  Standard_Boolean ZLayerRedrawMode() const { return myZLayerRedrawMode; }
+
+  //! Sets ZLayerId redraw mode.
+  void SetZLayerRedrawMode (const Standard_Boolean theMode) { myZLayerRedrawMode = theMode; }
 
   //! Switches computed HLR mode in the view
   Standard_EXPORT void SetComputedMode (const Standard_Boolean theMode);
@@ -134,23 +139,11 @@ public:
   //! Computes the new presentation of the structures displayed in this view with the type Graphic3d_TOS_COMPUTED.
   Standard_EXPORT void Compute();
 
-  //! Returns Standard_True if one of the structures displayed in the view contains Polygons, Triangles or Quadrangles.
-  Standard_EXPORT Standard_Boolean ContainsFacet() const;
-
-  //! Returns Standard_True if one of the structures in the set contains Polygons, Triangles or Quadrangles.
-  Standard_EXPORT Standard_Boolean ContainsFacet (const Graphic3d_MapOfStructure& theSet) const;
-
   //! Returns the set of structures displayed in this view.
   Standard_EXPORT void DisplayedStructures (Graphic3d_MapOfStructure& theStructures) const;
 
   //! Returns number of displayed structures in the view.
   virtual Standard_Integer NumberOfDisplayedStructures() const { return myStructsDisplayed.Extent(); }
-
-  //! Returns map of objects hidden within this specific view (not viewer-wise).
-  const Handle(Graphic3d_NMapOfTransient)& HiddenObjects() const { return myHiddenObjects; }
-
-  //! Returns map of objects hidden within this specific view (not viewer-wise).
-  Handle(Graphic3d_NMapOfTransient)& ChangeHiddenObjects() { return myHiddenObjects; }
 
   //! Returns Standard_True in case if the structure with the given <theStructId> is
   //! in list of structures to be computed and stores computed struct to <theComputedStruct>.
@@ -218,8 +211,8 @@ private:
 
   //! Changes the display priority of the structure.
   Standard_EXPORT void ChangePriority (const Handle(Graphic3d_Structure)& theStructure,
-                                       const Standard_Integer theOldPriority,
-                                       const Standard_Integer theNewPriority);
+                                       const Graphic3d_DisplayPriority theOldPriority,
+                                       const Graphic3d_DisplayPriority theNewPriority);
 
   //! Change Z layer of already displayed structure in the view.
   Standard_EXPORT void ChangeZLayer (const Handle(Graphic3d_Structure)& theStructure,
@@ -244,7 +237,7 @@ public:
   virtual Standard_Boolean IsInvalidated() = 0;
 
   //! Handle changing size of the rendering window.
-  virtual void Resized() = 0;
+  Standard_EXPORT virtual void Resized() = 0;
 
   //! @param theDrawToFrontBuffer Advanced option to modify rendering mode:
   //! 1. TRUE.  Drawing immediate mode structures directly to the front buffer over the scene image.
@@ -261,10 +254,12 @@ public:
   virtual Standard_Boolean SetImmediateModeDrawToFront (const Standard_Boolean theDrawToFrontBuffer) = 0;
 
   //! Creates and maps rendering window to the view.
-  //! @param theWindow [in] the window.
-  //! @param theContext [in] the rendering context. If NULL the context will be created internally.
-  virtual void SetWindow (const Handle(Aspect_Window)& theWindow,
-                          const Aspect_RenderingContext theContext = NULL) = 0;
+  //! @param[in] theParentVIew parent view or NULL
+  //! @param[in] theWindow the window
+  //! @param[in] theContext the rendering context; if NULL the context will be created internally
+  virtual void SetWindow (const Handle(Graphic3d_CView)& theParentVIew,
+                          const Handle(Aspect_Window)& theWindow,
+                          const Aspect_RenderingContext theContext) = 0;
 
   //! Returns the window associated to the view.
   virtual Handle(Aspect_Window) Window() const = 0;
@@ -274,6 +269,11 @@ public:
 
   //! Dump active rendering buffer into specified memory buffer.
   virtual Standard_Boolean BufferDump (Image_PixMap& theImage, const Graphic3d_BufferType& theBufferType) = 0;
+
+  //! Dumps the graphical contents of a shadowmap framebuffer into an image.
+  //! @param theImage the image to store the shadow map.
+  //! @param theLightName [in] name of the light used to generate the shadow map.
+  virtual Standard_Boolean ShadowMapDump (Image_PixMap& theImage, const TCollection_AsciiString& theLightName) = 0;
 
   //! Marks BVH tree and the set of BVH primitives of correspondent priority list with id theLayerId as outdated.
   virtual void InvalidateBVHData (const Graphic3d_ZLayerId theLayerId) = 0;
@@ -359,6 +359,8 @@ public:
   //! Returns reference to current rendering parameters and effect settings.
   Graphic3d_RenderingParams& ChangeRenderingParams() { return myRenderParams; }
 
+public:
+
   //! Returns background  fill color.
   virtual Aspect_Background Background() const { return Aspect_Background (myBgColor.GetRGB()); }
 
@@ -372,7 +374,13 @@ public:
   virtual void SetGradientBackground (const Aspect_GradientBackground& theBackground) = 0;
 
   //! Returns background image texture map.
-  virtual Handle(Graphic3d_TextureMap) BackgroundImage() = 0;
+  const Handle(Graphic3d_TextureMap)& BackgroundImage() { return myBackgroundImage; }
+
+  //! Returns cubemap being set last time on background.
+  const Handle(Graphic3d_CubeMap)& BackgroundCubeMap() const { return myCubeMapBackground; }
+
+  //! Returns cubemap being set last time on background.
+  const Handle(Graphic3d_CubeMap)& IBLCubeMap() const { return myCubeMapIBL; }
 
   //! Sets image texture or environment cubemap as background.
   //! @param theTextureMap [in] source to set a background;
@@ -388,27 +396,31 @@ public:
   //! Sets background image fill style.
   virtual void SetBackgroundImageStyle (const Aspect_FillMethod theFillStyle) = 0;
 
-  //! Returns cubemap being set last time on background.
-  virtual Handle(Graphic3d_CubeMap) BackgroundCubeMap() const = 0;
+  //! Returns background type.
+  Graphic3d_TypeOfBackground BackgroundType() const { return myBackgroundType; }
 
-  //! Generates PBR specular probe and irradiance map
-  //! in order to provide environment indirect illumination in PBR shading model (Image Based Lighting).
-  //! The source of environment data is background cubemap.
-  //! If PBR is unavailable it does nothing.
-  //! If PBR is available but there is no cubemap being set to background it clears all IBL maps (see 'ClearPBREnvironment').
-  virtual void GeneratePBREnvironment() = 0;
+  //! Sets background type.
+  void SetBackgroundType (Graphic3d_TypeOfBackground theType) { myBackgroundType = theType; }
 
-  //! Fills PBR specular probe and irradiance map with white color.
-  //! So that environment indirect illumination will be constant
-  //! and will be fully controlled by ambient light sources.
-  //! If PBR is unavailable it does nothing.
-  virtual void ClearPBREnvironment() = 0;
+  //! Returns skydome aspect;
+  const Aspect_SkydomeBackground& BackgroundSkydome() const { return mySkydomeAspect; }
+
+  //! Sets skydome aspect
+  Standard_EXPORT void SetBackgroundSkydome (const Aspect_SkydomeBackground& theAspect,
+                                             Standard_Boolean theToUpdatePBREnv = Standard_True);
+
+  //! Enables or disables IBL (Image Based Lighting) from background cubemap.
+  //! Has no effect if PBR is not used.
+  //! @param[in] theToEnableIBL enable or disable IBL from background cubemap
+  virtual void SetImageBasedLighting (Standard_Boolean theToEnableIBL) = 0;
 
   //! Returns environment texture set for the view.
-  virtual Handle(Graphic3d_TextureEnv) TextureEnv() const = 0; 
+  const Handle(Graphic3d_TextureEnv)& TextureEnv() const { return myTextureEnvData; }
 
   //! Sets environment texture for the view.
   virtual void SetTextureEnv (const Handle(Graphic3d_TextureEnv)& theTextureEnv) = 0;
+
+public:
 
   //! Returns list of lights of the view.
   virtual const Handle(Graphic3d_LightSet)& Lights() const = 0;
@@ -547,11 +559,75 @@ public: //! @name obsolete Graduated Trihedron functionality
   //! Dumps the content of me into the stream
   Standard_EXPORT virtual void DumpJson (Standard_OStream& theOStream, Standard_Integer theDepth = -1) const Standard_OVERRIDE;
 
+public: //! @name subview properties
+
+  //! Return TRUE if this is a subview of another view.
+  bool IsSubview() const { return myParentView != nullptr; }
+
+  //! Return parent View or NULL if this is not a subview.
+  Graphic3d_CView* ParentView() { return myParentView; }
+
+  //! Return TRUE if this is view performs rendering of subviews and nothing else; FALSE by default.
+  //! By default, view with subviews will render main scene and blit subviews on top of it.
+  //! Rendering of main scene might become redundant in case if subviews cover entire window of parent view.
+  //! This flag allows to disable rendering of the main scene in such scenarios
+  //! without creation of a dedicated V3d_Viewer instance just for composing subviews.
+  bool IsSubviewComposer() const { return myIsSubviewComposer; }
+
+  //! Set if this view should perform composing of subviews and nothing else.
+  void SetSubviewComposer (bool theIsComposer) { myIsSubviewComposer = theIsComposer; }
+
+  //! Return subview list.
+  const NCollection_Sequence<Handle(Graphic3d_CView)>& Subviews() const { return mySubviews; }
+
+  //! Add subview to the list.
+  Standard_EXPORT void AddSubview (const Handle(Graphic3d_CView)& theView);
+
+  //! Remove subview from the list.
+  Standard_EXPORT bool RemoveSubview (const Graphic3d_CView* theView);
+
+  //! Return subview position within parent view; Aspect_TOTP_LEFT_UPPER by default.
+  Aspect_TypeOfTriedronPosition SubviewCorner() const { return mySubviewCorner; }
+
+  //! Set subview position within parent view.
+  void SetSubviewCorner (Aspect_TypeOfTriedronPosition thePos) { mySubviewCorner = thePos; }
+
+  //! Return subview top-left position relative to parent view in pixels.
+  const Graphic3d_Vec2i& SubviewTopLeft() const { return mySubviewTopLeft; }
+
+  //! Return TRUE if subview size is set as proportions relative to parent view.
+  bool IsSubViewRelativeSize() const { return mySubviewSize.x() <= 1.0 && mySubviewSize.y() <= 1.0; }
+
+  //! Return subview dimensions; (1.0, 1.0) by default.
+  //! Values >= 2   define size in pixels;
+  //! Values <= 1.0 define size as fraction of parent view.
+  const Graphic3d_Vec2d& SubviewSize() const { return mySubviewSize; }
+
+  //! Set subview size relative to parent view.
+  void SetSubviewSize (const Graphic3d_Vec2d& theSize) { mySubviewSize = theSize; }
+
+  //! Return corner offset within parent view; (0.0,0.0) by default.
+  //! Values >= 2   define offset in pixels;
+  //! Values <= 1.0 define offset as fraction of parent view dimensions.
+  const Graphic3d_Vec2d& SubviewOffset() const { return mySubviewOffset; }
+
+  //! Set corner offset within parent view.
+  void SetSubviewOffset (const Graphic3d_Vec2d& theOffset) { mySubviewOffset = theOffset; }
+
+  //! Return subview margins in pixels; (0,0) by default
+  const Graphic3d_Vec2i& SubviewMargins() const { return mySubviewMargins; }
+
+  //! Set subview margins in pixels.
+  void SetSubviewMargins (const Graphic3d_Vec2i& theMargins) { mySubviewMargins = theMargins; }
+
+  //! Update subview position and dimensions.
+  Standard_EXPORT void SubviewResized (const Handle(Aspect_NeutralWindow)& theWindow);
+
 private:
 
   //! Adds the structure to display lists of the view.
   virtual void displayStructure (const Handle(Graphic3d_CStructure)& theStructure,
-                                 const Standard_Integer thePriority) = 0;
+                                 const Graphic3d_DisplayPriority thePriority) = 0;
 
   //! Erases the structure from display lists of the view.
   virtual void eraseStructure (const Handle(Graphic3d_CStructure)& theStructure) = 0;
@@ -562,24 +638,45 @@ private:
 
   //! Changes the priority of a structure within its Z layer in the specified view.
   virtual void changePriority (const Handle(Graphic3d_CStructure)& theCStructure,
-                               const Standard_Integer theNewPriority) = 0;
+                               const Graphic3d_DisplayPriority theNewPriority) = 0;
 
 protected:
 
   Standard_Integer myId;
   Graphic3d_RenderingParams myRenderParams;
-  Quantity_ColorRGBA        myBgColor;
+
+  NCollection_Sequence<Handle(Graphic3d_CView)> mySubviews; //!< list of child views
+  Graphic3d_CView*              myParentView;               //!< back-pointer to the parent view
+  Standard_Boolean              myIsSubviewComposer;        //!< flag to skip rendering of viewer contents
+  Aspect_TypeOfTriedronPosition mySubviewCorner;            //!< position within parent view
+  Graphic3d_Vec2i               mySubviewTopLeft;           //!< subview top-left position relative to parent view
+  Graphic3d_Vec2i               mySubviewMargins;           //!< subview margins in pixels
+  Graphic3d_Vec2d               mySubviewSize;              //!< subview size
+  Graphic3d_Vec2d               mySubviewOffset;            //!< subview corner offset within parent view
+
   Handle(Graphic3d_StructureManager) myStructureManager;
-  Handle(Graphic3d_Camera)  myCamera;
-  Graphic3d_SequenceOfStructure myStructsToCompute;
-  Graphic3d_SequenceOfStructure myStructsComputed;
-  Graphic3d_MapOfStructure myStructsDisplayed;
-  Handle(Graphic3d_NMapOfTransient) myHiddenObjects;
-  Standard_Boolean myIsInComputedMode;
-  Standard_Boolean myIsActive;
-  Standard_Boolean myIsRemoved;
-  Graphic3d_TypeOfBackfacingModel myBackfacing;
-  Graphic3d_TypeOfVisualization myVisualization;
+  Handle(Graphic3d_Camera)           myCamera;
+  Graphic3d_SequenceOfStructure      myStructsToCompute;
+  Graphic3d_SequenceOfStructure      myStructsComputed;
+  Graphic3d_MapOfStructure           myStructsDisplayed;
+  Standard_Boolean                   myIsInComputedMode;
+  Standard_Boolean                   myIsActive;
+  Standard_Boolean                   myIsRemoved;
+  Graphic3d_TypeOfBackfacingModel    myBackfacing;
+  Graphic3d_TypeOfVisualization      myVisualization;
+
+  Graphic3d_ZLayerId      myZLayerTarget;      //!< ZLayerId for redrawing the content of specific zlayers.
+  Standard_Boolean        myZLayerRedrawMode;  //!< If true redraws single layer, otherwise redraws group of layers.
+
+  Quantity_ColorRGBA           myBgColor;
+  Handle(Graphic3d_TextureMap) myBackgroundImage;
+  Handle(Graphic3d_CubeMap)    myCubeMapBackground;  //!< Cubemap displayed at background
+  Handle(Graphic3d_CubeMap)    myCubeMapIBL;         //!< Cubemap used for environment lighting
+  Handle(Graphic3d_TextureEnv) myTextureEnvData;
+  Graphic3d_GraduatedTrihedron myGTrihedronData;
+  Graphic3d_TypeOfBackground   myBackgroundType;     //!< Current type of background
+  Aspect_SkydomeBackground     mySkydomeAspect;
+  Standard_Boolean             myToUpdateSkydome;
 
   Handle(Aspect_XRSession) myXRSession;
   Handle(Graphic3d_Camera) myBackXRCamera;       //!< camera projection parameters to restore after closing XR session (FOV, aspect and similar)
@@ -587,10 +684,6 @@ protected:
   Handle(Graphic3d_Camera) myPosedXRCamera;      //!< transient XR camera orientation with tracked head orientation applied (based on myBaseXRCamera)
   Handle(Graphic3d_Camera) myPosedXRCameraCopy;  //!< neutral camera orientation copy at the beginning of processing input
   Standard_Real            myUnitFactor;         //!< unit scale factor defined as scale factor for m (meters)
-
-protected:
-
-  Graphic3d_GraduatedTrihedron myGTrihedronData;
 
 };
 

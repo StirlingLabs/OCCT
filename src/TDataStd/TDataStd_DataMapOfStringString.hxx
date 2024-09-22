@@ -18,12 +18,10 @@
 #define TDataStd_DataMapOfStringString_HeaderFile
 
 #include <TCollection_ExtendedString.hxx>
-#include <TCollection_ExtendedString.hxx>
-#include <TCollection_ExtendedString.hxx>
 #include <NCollection_DataMap.hxx>
 
-typedef NCollection_DataMap<TCollection_ExtendedString,TCollection_ExtendedString,TCollection_ExtendedString> TDataStd_DataMapOfStringString;
-typedef NCollection_DataMap<TCollection_ExtendedString,TCollection_ExtendedString,TCollection_ExtendedString>::Iterator TDataStd_DataMapIteratorOfDataMapOfStringString;
+typedef NCollection_DataMap<TCollection_ExtendedString,TCollection_ExtendedString> TDataStd_DataMapOfStringString;
+typedef NCollection_DataMap<TCollection_ExtendedString,TCollection_ExtendedString>::Iterator TDataStd_DataMapIteratorOfDataMapOfStringString;
 
 
 #endif

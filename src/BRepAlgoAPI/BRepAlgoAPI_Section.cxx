@@ -31,7 +31,6 @@
 
 #include <gp_Pln.hxx>
 
-#include <TopoDS_Face.hxx>
 #include <TopoDS_Shape.hxx>
 
 //
@@ -271,9 +270,9 @@ void BRepAlgoAPI_Section::SetAttributes()
 //function : Build
 //purpose  : 
 //=======================================================================
-void BRepAlgoAPI_Section::Build() 
+void BRepAlgoAPI_Section::Build(const Message_ProgressRange& theRange) 
 {
-  BRepAlgoAPI_BooleanOperation::Build();
+  BRepAlgoAPI_BooleanOperation::Build(theRange);
 }
 //=======================================================================
 //function : HasAncestorFaceOn1

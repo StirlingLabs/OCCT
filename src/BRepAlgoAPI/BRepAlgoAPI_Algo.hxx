@@ -19,9 +19,7 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
-#include <NCollection_BaseAllocator.hxx>
 #include <Standard_Integer.hxx>
-#include <Standard_Boolean.hxx>
 #include <BRepBuilderAPI_MakeShape.hxx>
 #include <BOPAlgo_Options.hxx>
 
@@ -36,6 +34,8 @@ public:
 
   DEFINE_STANDARD_ALLOC
 
+  //! Returns a shape built by the shape construction algorithm.
+  //! Does not check if the shape is built.
   Standard_EXPORT virtual const TopoDS_Shape& Shape() Standard_OVERRIDE;
 
   // Provide access to methods of protected base class BOPAlgo_Options
@@ -53,7 +53,6 @@ public:
   using BOPAlgo_Options::DumpWarnings;
   using BOPAlgo_Options::ClearWarnings;
   using BOPAlgo_Options::GetReport;
-  using BOPAlgo_Options::SetProgressIndicator;
   using BOPAlgo_Options::SetUseOBB;
 
 protected:

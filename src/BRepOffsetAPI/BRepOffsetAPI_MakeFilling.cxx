@@ -17,9 +17,6 @@
 
 #include <BRepOffsetAPI_MakeFilling.hxx>
 #include <gp_Pnt.hxx>
-#include <Standard_ConstructionError.hxx>
-#include <Standard_OutOfRange.hxx>
-#include <StdFail_NotDone.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
 #include <TopoDS_Shape.hxx>
@@ -144,7 +141,7 @@ Standard_Integer BRepOffsetAPI_MakeFilling::Add( const Standard_Real U,
 //function : Build
 //purpose  : builds the resulting face
 //======================================================================
-void BRepOffsetAPI_MakeFilling::Build() 
+void BRepOffsetAPI_MakeFilling::Build(const Message_ProgressRange& /*theRange*/)
 {
   myFilling.Build();
   myShape = myFilling.Face();

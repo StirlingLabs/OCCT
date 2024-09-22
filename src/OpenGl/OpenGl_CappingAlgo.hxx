@@ -13,13 +13,12 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef _OpenGl_CappingAlgo_H__
-#define _OpenGl_CappingAlgo_H__
+#ifndef OpenGl_CappingAlgo_HeaderFile
+#define OpenGl_CappingAlgo_HeaderFile
 
 #include <OpenGl_Group.hxx>
 
 // Forward declaration
-class OpenGl_CappingPlaneResource;
 class OpenGl_Structure;
 
 //! Capping surface rendering algorithm.

@@ -18,9 +18,7 @@
 #define _IntPatch_RLine_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
-#include <Standard_Boolean.hxx>
 #include <Standard_Real.hxx>
 #include <Standard_Integer.hxx>
 #include <IntPatch_SequenceOfPoint.hxx>
@@ -29,8 +27,6 @@
 #include <IntSurf_Situation.hxx>
 #include <IntSurf_TypeTrans.hxx>
 
-class Standard_DomainError;
-class Standard_OutOfRange;
 class IntPatch_Point;
 class IntSurf_PntOn2S;
 

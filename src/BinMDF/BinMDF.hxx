@@ -22,11 +22,6 @@
 
 class BinMDF_ADriverTable;
 class Message_Messenger;
-class BinMDF_ADriver;
-class BinMDF_ReferenceDriver;
-class BinMDF_TagSourceDriver;
-class BinMDF_ADriverTable;
-
 
 //! This package provides classes and methods to
 //! translate a transient DF into a persistent one and
@@ -53,32 +48,6 @@ public:
   
   //! Adds the attribute storage drivers to <aDriverTable>.
   Standard_EXPORT static void AddDrivers (const Handle(BinMDF_ADriverTable)& aDriverTable, const Handle(Message_Messenger)& aMsgDrv);
-
-
-
-
-protected:
-
-
-
-
-
-private:
-
-
-
-
-friend class BinMDF_ADriver;
-friend class BinMDF_ReferenceDriver;
-friend class BinMDF_TagSourceDriver;
-friend class BinMDF_ADriverTable;
-
 };
-
-
-
-
-
-
 
 #endif // _BinMDF_HeaderFile

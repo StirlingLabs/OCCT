@@ -23,12 +23,8 @@
 
 #include <gp_Pnt.hxx>
 #include <gp_Vec.hxx>
-#include <Standard_Real.hxx>
 #include <Standard_Boolean.hxx>
 #include <gp_Vec2d.hxx>
-class Standard_DomainError;
-class gp_Pnt;
-class gp_Vec;
 class gp_Vec2d;
 
 

@@ -19,7 +19,6 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
-#include <Standard_Integer.hxx>
 #include <Standard_Real.hxx>
 #include <Standard_Boolean.hxx>
 
@@ -104,6 +103,20 @@ private:
 
 };
 
+namespace std
+{
+  template <>
+  struct hash<BOPDS_Pave>
+  {
+    size_t operator()(const BOPDS_Pave& thePave) const noexcept
+    {
+      size_t aCombination[2];
+      aCombination[0] = opencascade::hash(thePave.Index());
+      aCombination[1] = opencascade::hash(thePave.Parameter());
+      return opencascade::hashBytes(aCombination, sizeof(aCombination));
+    }
+  };
+}
 
 #include <BOPDS_Pave.lxx>
 

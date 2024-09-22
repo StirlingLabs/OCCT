@@ -14,19 +14,7 @@
 #ifndef _BSplSLib_Cache_Headerfile
 #define _BSplSLib_Cache_Headerfile
 
-#include <Standard.hxx>
-#include <Standard_Macro.hxx>
-#include <Standard_Type.hxx>
-#include <Standard_Transient.hxx>
-
-#include <gp_Pnt.hxx>
-#include <gp_Vec.hxx>
-
-#include <TColgp_Array2OfPnt.hxx>
-#include <TColStd_Array1OfInteger.hxx>
 #include <TColStd_HArray2OfReal.hxx>
-#include <TColStd_HArray1OfReal.hxx>
-#include <TColStd_Array1OfReal.hxx>
 #include <TColStd_Array2OfReal.hxx>
 
 #include <BSplCLib_CacheParams.hxx>
@@ -43,7 +31,7 @@ public:
   //! \param theDegreeU    degree along the first parameter (U) of the surface
   //! \param thePeriodicU  identify the surface is periodical along U axis
   //! \param theFlatKnotsU knots of the surface (with repetition) along U axis
-  //! \param theDegreeV    degree alogn the second parameter (V) of the surface
+  //! \param theDegreeV    degree along the second parameter (V) of the surface
   //! \param thePeriodicV  identify the surface is periodical along V axis
   //! \param theFlatKnotsV knots of the surface (with repetition) along V axis
   //! \param theWeights    array of weights of corresponding poles
@@ -125,7 +113,7 @@ private:
 
 private:
   Standard_Boolean myIsRational;                //!< identifies the rationality of Bezier/B-spline surface
-  BSplCLib_CacheParams myParamsU, myParamsV;    //!< cach parameters by U and V directions
+  BSplCLib_CacheParams myParamsU, myParamsV;    //!< cache parameters by U and V directions
   Handle(TColStd_HArray2OfReal) myPolesWeights; //!< array of poles and weights of calculated cache
                                                 // the array has following structure:
                                                 //       x11 y11 z11 [w11] x12 y12 z12 [w12] ...

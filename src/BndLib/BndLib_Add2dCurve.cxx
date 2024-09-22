@@ -32,7 +32,6 @@
 #include <gp.hxx>
 #include <Precision.hxx>
 #include <Standard_Type.hxx>
-#include <math_MultipleVarFunction.hxx>
 #include <math_Function.hxx>
 #include <math_BrentMinimum.hxx>
 #include <math_PSO.hxx>
@@ -496,7 +495,7 @@ void BndLib_Box2dCurve::PerformBSpline()
   }
 
   //
-  const Standard_Real eps = Precision::PConfusion();
+  constexpr Standard_Real eps = Precision::PConfusion();
   if (fabs(aT1-aTb[0]) > eps || fabs(aT2-aTb[1]) > eps) {
     aG=aCBS->Copy();
     //

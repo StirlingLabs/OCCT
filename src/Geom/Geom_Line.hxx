@@ -22,12 +22,8 @@
 
 #include <gp_Ax1.hxx>
 #include <Geom_Curve.hxx>
-#include <Standard_Real.hxx>
-#include <Standard_Boolean.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <Standard_Integer.hxx>
-class Standard_RangeError;
-class gp_Ax1;
 class gp_Lin;
 class gp_Pnt;
 class gp_Dir;

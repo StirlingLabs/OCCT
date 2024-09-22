@@ -14,6 +14,7 @@ set "aMingwVars="
 set "aFreeType="
 set "aFreeImage="
 set "aRapidJson="
+set "aDraco="
 set "aTclTk="
 
 rem Build stages to perform
@@ -31,10 +32,13 @@ set "BUILD_ModelingAlgorithms=ON"
 set "BUILD_Visualization=ON"
 set "BUILD_ApplicationFramework=ON"
 set "BUILD_DataExchange=ON"
+set "BUILD_DETools=OFF"
 set "BUILD_Draw=ON"
 
 rem Optional 3rd-party libraries to enable
+set "USE_FREETYPE=ON"
 set "USE_RAPIDJSON=OFF"
+set "USE_DRACO=OFF"
 set "USE_FREEIMAGE=ON"
 
 rem Archive tool
@@ -152,6 +156,7 @@ if ["%toCMake%"] == ["1"] (
  -D BUILD_MODULE_Visualization:BOOL="%BUILD_Visualization%" ^
  -D BUILD_MODULE_ApplicationFramework:BOOL="%BUILD_ApplicationFramework%" ^
  -D BUILD_MODULE_DataExchange:BOOL="%BUILD_DataExchange%" ^
+ -D BUILD_MODULE_DETools:BOOL="%BUILD_DETools%" ^
  -D BUILD_MODULE_Draw:BOOL="%BUILD_Draw%" ^
  -D 3RDPARTY_TCL_DIR:PATH="%aTclTk%" ^
  -D 3RDPARTY_TCL_INCLUDE_DIR:FILEPATH="%aTclTk%/include" ^
@@ -162,7 +167,7 @@ if ["%toCMake%"] == ["1"] (
  -D 3RDPARTY_TK_LIBRARY_DIR:PATH="%aTclTk%/lib" ^
  -D 3RDPARTY_TK_DLL_DIR:PATH="%aTclTk%/bin" ^
  -D USE_D3D:BOOL="ON" ^
- -D USE_FREETYPE:BOOL="ON" ^
+ -D USE_FREETYPE:BOOL="%USE_FREETYPE%" ^
  -D 3RDPARTY_FREETYPE_DIR:PATH="%aFreeType%" ^
  -D 3RDPARTY_FREETYPE_INCLUDE_DIR_freetype2:FILEPATH="%aFreeType%/include" ^
  -D 3RDPARTY_FREETYPE_INCLUDE_DIR_ft2build:FILEPATH="%aFreeType%/include" ^
@@ -174,6 +179,10 @@ if ["%toCMake%"] == ["1"] (
  -D USE_RAPIDJSON:BOOL="%USE_RAPIDJSON%" ^
  -D 3RDPARTY_RAPIDJSON_DIR:PATH="%aRapidJson%" ^
  -D 3RDPARTY_RAPIDJSON_INCLUDE_DIR:PATH="%aRapidJson%/include" ^
+ -D USE_DRACO:BOOL="%USE_DRACO%" ^
+ -D 3RDPARTY_DRACO_DIR:PATH="%aDraco%" ^
+ -D 3RDPARTY_DRACO_INCLUDE_DIR:FILEPATH="%aDraco%/include" ^
+ -D 3RDPARTY_DRACO_LIBRARY_DIR:PATH="%aDraco%/lib" ^
  "%aCasSrc%"
 
   if errorlevel 1 (

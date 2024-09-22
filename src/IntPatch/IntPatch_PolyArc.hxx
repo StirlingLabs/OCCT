@@ -23,11 +23,8 @@
 
 #include <TColgp_Array1OfPnt2d.hxx>
 #include <TColStd_Array1OfReal.hxx>
-#include <Standard_Real.hxx>
-#include <Standard_Boolean.hxx>
 #include <IntPatch_Polygo.hxx>
 #include <Standard_Integer.hxx>
-class Standard_ConstructionError;
 class Bnd_Box2d;
 class gp_Pnt2d;
 

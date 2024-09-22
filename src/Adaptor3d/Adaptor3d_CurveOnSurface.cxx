@@ -25,9 +25,7 @@
 #include <Geom2d_BSplineCurve.hxx>
 #include <Geom_BezierCurve.hxx>
 #include <Geom_BSplineCurve.hxx>
-#include <Geom_BSplineSurface.hxx>
 #include <Geom_OffsetSurface.hxx>
-#include <Geom_SurfaceOfLinearExtrusion.hxx>
 #include <Geom_SurfaceOfRevolution.hxx>
 #include <gp_Ax22d.hxx>
 #include <gp_Circ.hxx>
@@ -50,7 +48,6 @@
 #include <Standard_DomainError.hxx>
 #include <Standard_NoSuchObject.hxx>
 #include <Standard_NotImplemented.hxx>
-#include <Standard_OutOfRange.hxx>
 #include <TColgp_Array1OfPnt.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
 #include <TColStd_Array1OfInteger.hxx>
@@ -102,10 +99,10 @@ static gp_Parab to3d(const gp_Pln& Pl, const gp_Parab2d& P)
   return gp_Parab(to3d(Pl,P.Axis()),P.Focal());
 }
 
-static gp_Vec SetLinearForm(const gp_Vec2d DW, const gp_Vec2d D2W,const gp_Vec2d D3W,
-			    const gp_Vec D1U,  const gp_Vec D1V,  const gp_Vec D2U,
-			    const gp_Vec D2V,  const gp_Vec D2UV, const gp_Vec D3U,
-			    const gp_Vec D3V,  const gp_Vec D3UUV,const gp_Vec D3UVV)
+static gp_Vec SetLinearForm(const gp_Vec2d& DW,  const gp_Vec2d& D2W,  const gp_Vec2d& D3W,
+                            const gp_Vec&   D1U, const gp_Vec&   D1V,  const gp_Vec&   D2U,
+                            const gp_Vec&   D2V, const gp_Vec&   D2UV, const gp_Vec&   D3U,
+                            const gp_Vec&   D3V, const gp_Vec&   D3UUV,const gp_Vec&   D3UVV)
 {gp_Vec V31, V32, V33, V34,V3 ;
  V31.SetLinearForm(DW.X(),D1U,
 		   D2W.X()*DW.X(),D2U,
@@ -149,8 +146,8 @@ static void Hunt(const TColStd_Array1OfReal& Arr,
 		 const Standard_Real Coord,
 		 Standard_Integer& Iloc)
 {//Warning: Hunt is used to find number of knot which equals coordinate component,
-  //        when coordinate component definitly equals a knot only.
-  Standard_Real Tol=Precision::PConfusion()/10;
+  //        when coordinate component definitely equals a knot only.
+  constexpr Standard_Real Tol=Precision::PConfusion()/10;
   Standard_Integer i=1; 
   while((i <= Arr.Upper()) && (Abs(Coord - Arr(i)) > Tol)){
     i++;}
@@ -207,7 +204,7 @@ static void FindBounds(const TColStd_Array1OfReal& Arr,
 
 {
   Standard_Integer N=0;
-  Standard_Real Tol=Precision::PConfusion()/10;
+  constexpr Standard_Real Tol=Precision::PConfusion()/10;
   Hunt(Arr,Coord,N);
   DerNull=Standard_False;
   
@@ -246,7 +243,7 @@ static void Locate1Coord(const Standard_Integer Index,
 			 gp_Pnt2d& LeftBot, gp_Pnt2d& RightTop)
 {
   Standard_Real Comp1=0, DComp1=0, cur, f = 0.0, l = 0.0;
-  Standard_Real Tol = Precision::PConfusion()/10;
+  constexpr Standard_Real Tol = Precision::PConfusion()/10;
   Standard_Integer i = 1, Bnd1, Bnd2;
   Standard_Boolean DIsNull= Standard_False; 
   TColStd_Array1OfReal Arr(1,BSplC->NbKnots());  BSplC->Knots(Arr);
@@ -348,7 +345,7 @@ static void Locate1Coord(const Standard_Integer Index,
         gp_Pnt2d& RightTop)
 {
   Standard_Real Comp1=0,DComp1=0; 
-  Standard_Real Tol = Precision::PConfusion()/10;
+  constexpr Standard_Real Tol = Precision::PConfusion()/10;
   Standard_Integer i=1, Up=0, Up1, Up2, Down=0, Down1, Down2;
   Standard_Real cur = 0.;
 
@@ -559,7 +556,7 @@ static void Locate2Coord(const Standard_Integer Index,
 			 const Standard_Real I2,
 			 gp_Pnt2d& LeftBot, gp_Pnt2d& RightTop)
 {
-  Standard_Real Tol=Precision::PConfusion()/10;
+  constexpr Standard_Real Tol=Precision::PConfusion()/10;
   Standard_Real Comp1=0,DComp1=0;
   if(Index==1)   {   Comp1=UV.X();
 		     DComp1=DUV.X();} 
@@ -623,7 +620,7 @@ static void Locate2Coord(const Standard_Integer Index,
 			 gp_Pnt2d& LeftBot, gp_Pnt2d& RightTop)
 {
   Standard_Real Comp=0,DComp=0,Tmp1=0.0,Tmp2=0.0;
-  Standard_Real Tol=Precision::PConfusion()/10;
+  constexpr Standard_Real Tol=Precision::PConfusion()/10;
   Standard_Integer N=0, NUp=0, NLo=0;
   if(Index==1)
     { Comp=UV.X();
@@ -641,7 +638,7 @@ static void Locate2Coord(const Standard_Integer Index,
   if((DComp > 0)&&(Abs(DComp)>Tol)) {  
     Hunt(Arr,Comp,N);
     if (N >= NUp){
-      //limit case: Hunt() cought upper knot. Take the last span. 
+      //limit case: Hunt() caught upper knot. Take the last span. 
       N = NUp - 1;
     }
     if(Index==1) {  Tmp1=BSplS->UKnot(N);
@@ -662,7 +659,7 @@ static void Locate2Coord(const Standard_Integer Index,
     if((DComp < 0)&&(Abs(DComp)>Tol)){      
      Hunt(Arr,Comp,N);
      if (N <= NLo) {
-       //limit case: Hunt() cought lower knot. Take the first span.
+       //limit case: Hunt() caught lower knot. Take the first span.
        N = NLo + 1;
      }
      if(Index==1) {	  Tmp1=BSplS->UKnot(N-1);
@@ -716,6 +713,40 @@ Adaptor3d_CurveOnSurface::Adaptor3d_CurveOnSurface
 {
   Load(S);
   Load(C);
+}
+
+//=======================================================================
+//function : ShallowCopy
+//purpose  : 
+//=======================================================================
+
+Handle(Adaptor3d_Curve) Adaptor3d_CurveOnSurface::ShallowCopy() const
+{
+  Handle(Adaptor3d_CurveOnSurface) aCopy = new Adaptor3d_CurveOnSurface();
+
+  if (!mySurface.IsNull())
+  {
+    aCopy->mySurface = mySurface->ShallowCopy();
+  }
+  if (!myCurve.IsNull())
+  {
+    aCopy->myCurve = myCurve->ShallowCopy();
+  }
+  aCopy->myType      = myType;
+  aCopy->myCirc      = myCirc;
+  aCopy->myLin       = myLin;
+  if (!myFirstSurf.IsNull())
+  {
+    aCopy->myFirstSurf = myFirstSurf->ShallowCopy();
+  }
+  if (!myLastSurf.IsNull())
+  {
+    aCopy->myLastSurf = myLastSurf->ShallowCopy();
+  }
+  aCopy->myIntervals = myIntervals;
+  aCopy->myIntCont   = myIntCont;
+
+  return aCopy;
 }
 
 //=======================================================================
@@ -862,7 +893,7 @@ Standard_Integer Adaptor3d_CurveOnSurface::NbIntervals (const GeomAbs_Shape S) c
 
   myCurve->Intervals(TabC,S);
 
-  Standard_Real Tol= Precision::PConfusion()/10;
+  constexpr Standard_Real Tol= Precision::PConfusion()/10;
 
   // sorted sequence of parameters defining continuity intervals;
   // started with own intervals of curve and completed by 
@@ -1032,7 +1063,7 @@ void Adaptor3d_CurveOnSurface::D1(const Standard_Real U ,
   Standard_Real FP = myCurve->FirstParameter();
   Standard_Real LP = myCurve->LastParameter();
   
-  Standard_Real Tol= Precision::PConfusion()/10; 
+  constexpr Standard_Real Tol= Precision::PConfusion()/10;
   if( ( Abs(U-FP)<Tol)&&(!myFirstSurf.IsNull()) )
     {
       myCurve->D1(U,Puv,Duv);
@@ -1072,7 +1103,7 @@ void Adaptor3d_CurveOnSurface::D2(const Standard_Real U,
   Standard_Real FP = myCurve->FirstParameter();
   Standard_Real LP = myCurve->LastParameter();
   
-  Standard_Real Tol= Precision::PConfusion()/10; 
+  constexpr Standard_Real Tol= Precision::PConfusion()/10;
   if( (Abs(U-FP)<Tol)&&(!myFirstSurf.IsNull()) )
     {
       myCurve->D2(U,UV,DW,D2W);
@@ -1121,7 +1152,7 @@ void Adaptor3d_CurveOnSurface::D3
    gp_Vec& V3) const
 { 
   
-  Standard_Real Tol= Precision::PConfusion()/10; 
+  constexpr Standard_Real Tol= Precision::PConfusion()/10;
   gp_Pnt2d UV;
   gp_Vec2d DW,D2W,D3W;
   gp_Vec D1U,D1V,D2U,D2V,D2UV,D3U,D3V,D3UUV,D3UVV;
@@ -1620,7 +1651,7 @@ void Adaptor3d_CurveOnSurface::EvalFirstLastSurf()
   Standard_Real FirstPar,LastPar;
   gp_Pnt2d UV, LeftBot, RightTop;
   gp_Vec2d DUV;
-  Standard_Real Tol= Precision::PConfusion()/10;
+  constexpr Standard_Real Tol= Precision::PConfusion()/10;
   Standard_Boolean Ok = Standard_True;
   
   

@@ -16,7 +16,6 @@
 #define _BlendFunc_GenChamfer_HeaderFile
 
 #include <Adaptor3d_Surface.hxx>
-#include <BlendFunc_Corde.hxx>
 #include <Blend_Function.hxx>
 #include <math_Vector.hxx>
 #include <TColStd_Array1OfReal.hxx>
@@ -106,7 +105,7 @@ public:
                                  Standard_Integer& NbPoles2d) Standard_OVERRIDE;
   
   //! Returns the tolerance to reach in approximation
-  //! to respecte
+  //! to respect
   //! BoundTol error at the Boundary
   //! AngleTol tangent error at the Boundary
   //! SurfTol error inside the surface.

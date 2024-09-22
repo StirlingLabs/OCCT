@@ -21,11 +21,9 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
-#include <Standard_Real.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <Standard_Integer.hxx>
 #include <TColStd_Array1OfReal.hxx>
-#include <Standard_Boolean.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_Vec.hxx>
 #include <GeomAbs_CurveType.hxx>
@@ -35,9 +33,6 @@
 #include <gp_Hypr.hxx>
 #include <gp_Parab.hxx>
 #include <TColgp_Array1OfPnt.hxx>
-class Standard_OutOfRange;
-class Standard_NoSuchObject;
-class Standard_DomainError;
 class BRepAdaptor_Curve;
 class gp_Pnt;
 class gp_Vec;

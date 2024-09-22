@@ -18,18 +18,12 @@
 #define _CDM_Application_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <Standard_Transient.hxx>
-#include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
-#include <Standard_ExtString.hxx>
-#include <TCollection_AsciiString.hxx>
-#include <TCollection_ExtendedString.hxx>
 #include <CDM_MetaDataLookUpTable.hxx>
 #include <Message_ProgressRange.hxx>
 
-class CDM_Reference;
 class CDM_MetaData;
 class CDM_Document;
 class Resource_Manager;
@@ -57,7 +51,7 @@ public:
   //! By default, writes in MessageDriver().
   Standard_EXPORT virtual void BeginOfUpdate (const Handle(CDM_Document)& aDocument);
   
-  //! this method is called affter the update of a document.
+  //! this method is called after the update of a document.
   //! By default, writes in MessageDriver().
   Standard_EXPORT virtual void EndOfUpdate (const Handle(CDM_Document)& aDocument, const Standard_Boolean theStatus, const TCollection_ExtendedString& ErrorString);
   

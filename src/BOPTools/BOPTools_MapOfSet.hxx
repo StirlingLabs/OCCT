@@ -12,15 +12,14 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef BOPTest_MapOfShapeSet_HeaderFile
-#define BOPTest_MapOfShapeSet_HeaderFile
+#ifndef BOPTools_MapOfSet_HeaderFile
+#define BOPTools_MapOfSet_HeaderFile
 
 #include <BOPTools_Set.hxx>  
-#include <BOPTools_SetMapHasher.hxx>
 
 #include <NCollection_Map.hxx>   
 
-typedef NCollection_Map<BOPTools_Set, BOPTools_SetMapHasher> BOPTools_MapOfSet; 
+typedef NCollection_Map<BOPTools_Set> BOPTools_MapOfSet; 
 typedef BOPTools_MapOfSet::Iterator BOPTools_MapIteratorOfMapOfSet;
 
 #endif

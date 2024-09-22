@@ -19,14 +19,11 @@
 
 #include <GeomAdaptor_Curve.hxx>
 #include <IntCurveSurface_HInter.hxx>
-#include <TopAbs_State.hxx>
-#include <Bnd_Box.hxx>
 #include <TopTools_SequenceOfShape.hxx>
 #include <Bnd_HArray1OfBox.hxx>
 #include <IntCurveSurface_TransitionOnCurve.hxx>
 
 class BRepTopAdaptor_TopolTool;
-class StdFail_NotDone;
 class TopoDS_Shape;
 class GeomAdaptor_Curve;
 class gp_Lin;

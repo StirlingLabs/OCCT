@@ -15,7 +15,6 @@
 
 #include <BRepMeshData_PCurve.hxx>
 #include <gp_Pnt2d.hxx>
-#include <BRepMesh_OrientedEdge.hxx>
 #include <BRepMesh_Vertex.hxx>
 #include <Standard_OutOfRange.hxx>
 
@@ -30,9 +29,9 @@ BRepMeshData_PCurve::BRepMeshData_PCurve (
   const TopAbs_Orientation                 theOrientation,
   const Handle (NCollection_IncAllocator)& theAllocator)
   : IMeshData_PCurve (theDFace, theOrientation),
-    myPoints2d   (NCollection_StdAllocator<gp_Pnt2d>(theAllocator)),
-    myParameters (NCollection_StdAllocator<Standard_Real>(theAllocator)),
-    myIndices    (NCollection_StdAllocator<Standard_Integer>(theAllocator))
+    myPoints2d   (NCollection_OccAllocator<gp_Pnt2d>(theAllocator)),
+    myParameters (NCollection_OccAllocator<Standard_Real>(theAllocator)),
+    myIndices    (NCollection_OccAllocator<Standard_Integer>(theAllocator))
 {
 }
 

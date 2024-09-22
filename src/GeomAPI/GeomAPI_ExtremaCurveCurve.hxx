@@ -21,17 +21,11 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
-#include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
 #include <Extrema_ExtCC.hxx>
 #include <GeomAdaptor_Curve.hxx>
-#include <Standard_Real.hxx>
 #include <gp_Pnt.hxx>
-class Standard_OutOfRange;
-class StdFail_NotDone;
 class Geom_Curve;
-class gp_Pnt;
-class Extrema_ExtCC;
 
 
 //! Describes functions for computing all the extrema
@@ -125,6 +119,12 @@ Standard_EXPORT operator Standard_Integer() const;
   //! 1,NbExtrema ], where NbExtrema is the
   //! number of extrema computed by this algorithm.
   Standard_EXPORT Standard_Real Distance (const Standard_Integer Index) const;
+
+  //! Returns True if the two curves are parallel.
+  Standard_Boolean IsParallel() const
+  {
+    return myExtCC.IsParallel();
+  }
   
   //! Returns the points P1 on the first curve and P2 on
   //! the second curve, which are the ends of the shortest

@@ -23,10 +23,8 @@
 
 #include <BRepLib_MakeShell.hxx>
 #include <BRepBuilderAPI_MakeShape.hxx>
-#include <Standard_Boolean.hxx>
 #include <Standard_Real.hxx>
 #include <BRepBuilderAPI_ShellError.hxx>
-class StdFail_NotDone;
 class Geom_Surface;
 class TopoDS_Shell;
 

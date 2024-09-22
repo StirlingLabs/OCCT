@@ -17,7 +17,6 @@
 #define _BinLDrivers_DocumentStorageDriver_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <BinObjMgt_Persistent.hxx>
 #include <BinObjMgt_SRelocationTable.hxx>
@@ -27,12 +26,10 @@
 #include <BinLDrivers_VectorOfDocumentSection.hxx>
 #include <PCDM_StorageDriver.hxx>
 #include <Standard_OStream.hxx>
-#include <Standard_Boolean.hxx>
 #include <Standard_Type.hxx>
 #include <TDocStd_FormatVersion.hxx>
 class BinMDF_ADriverTable;
 class Message_Messenger;
-class TCollection_ExtendedString;
 class CDM_Document;
 class TDF_Label;
 class TCollection_AsciiString;

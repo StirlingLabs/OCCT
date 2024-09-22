@@ -16,8 +16,6 @@
 #include <BOPAlgo_PaveFiller.hxx>
 #include <BOPTest.hxx>
 #include <BOPTest_Objects.hxx>
-#include <BRepAlgoAPI_BooleanOperation.hxx>
-#include <BRepAlgoAPI_BuilderAlgo.hxx>
 #include <BRepAlgoAPI_Common.hxx>
 #include <BRepAlgoAPI_Cut.hxx>
 #include <BRepAlgoAPI_Fuse.hxx>
@@ -25,12 +23,12 @@
 #include <BRepAlgoAPI_Splitter.hxx>
 #include <BRepTest_Objects.hxx>
 #include <DBRep.hxx>
-#include <Draw.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopTools_ListOfShape.hxx>
 
+#include <Draw_ProgressIndicator.hxx>
+
 #include <stdio.h>
-#include <string.h>
 
 static Standard_Integer bapibuild(Draw_Interpretor&, Standard_Integer, const char**);
 static Standard_Integer bapibop  (Draw_Interpretor&, Standard_Integer, const char**);
@@ -48,9 +46,28 @@ void BOPTest::APICommands(Draw_Interpretor& theCommands)
   // Chapter's name
   const char* g = "BOPTest commands";
   // Commands  
-  theCommands.Add("bapibuild", "use bapibuild r" , __FILE__, bapibuild, g);
-  theCommands.Add("bapibop", "use bapibop r type" , __FILE__, bapibop, g);
-  theCommands.Add("bapisplit", "use bapisplit r" , __FILE__, bapisplit, g);
+  theCommands.Add("bapibuild", "Builds the result of General Fuse operation using top level API.\n"
+                  "\t\tObjects for the operation are added using commands baddobjects and baddtools.\n"
+                  "\t\tUsage: bapibuild result",
+                  __FILE__, bapibuild, g);
+
+  theCommands.Add("bapibop", "Builds the result of Boolean operation using top level API.\n"
+                  "\t\tObjects for the operation are added using commands baddobjects and baddtools.\n"
+                  "\t\tUsage: bapibop r operation\n"
+                  "\t\tWhere:\n"
+                  "\t\tresult - name of the result shape\n"
+                  "\t\top - type of Boolean operation. Possible values:\n"
+                  "\t\t     - 0/common - for Common operation\n"
+                  "\t\t     - 1/fuse - for Fuse operation\n"
+                  "\t\t     - 2/cut - for Cut operation\n"
+                  "\t\t     - 3/tuc/cut21 - for Cut21 operation\n"
+                  "\t\t     - 4/section - for Section operation",
+                  __FILE__, bapibop, g);
+
+  theCommands.Add("bapisplit", "Builds the result of Split operation using top level API.\n"
+                  "\t\tObjects for the operation are added using commands baddobjects and baddtools.\n"
+                  "\t\tUsage: bapisplit result",
+                  __FILE__, bapisplit, g);
 }
 //=======================================================================
 //function : bapibop
@@ -60,30 +77,29 @@ Standard_Integer bapibop(Draw_Interpretor& di,
                          Standard_Integer n, 
                          const char** a) 
 { 
-  if (n<3) {
-    di << " use bapibop r type\n";
+  if (n != 3) {
+    di.PrintHelp(a[0]);
+    return 1;
+  }
+
+  BOPAlgo_Operation anOp = BOPTest::GetOperationType(a[2]);
+  if (anOp == BOPAlgo_UNKNOWN)
+  {
+    di << "Invalid operation type\n";
     return 0;
   }
   //
   Standard_Boolean bRunParallel, bNonDestructive;
-  Standard_Integer iOp;
   Standard_Real aFuzzyValue;
   BRepAlgoAPI_Common aCommon;
   BRepAlgoAPI_Fuse aFuse;
   BRepAlgoAPI_Cut aCut;
   BRepAlgoAPI_Section aSection;
   BRepAlgoAPI_BooleanOperation *pBuilder;
-  BOPAlgo_Operation aOp;
   //
   pBuilder=NULL;
-  iOp=atoi(a[2]);
-  if (iOp<0 || iOp>4) {
-    di << "invalid operation type\n";
-    return 0;
-  }
-  aOp=(BOPAlgo_Operation)iOp;
   //
-  switch (aOp) {
+  switch (anOp) {
    case BOPAlgo_COMMON:
      pBuilder=&aCommon;
      break;
@@ -113,7 +129,7 @@ Standard_Integer bapibop(Draw_Interpretor& di,
   bNonDestructive = BOPTest_Objects::NonDestructive();
   BOPAlgo_GlueEnum aGlue = BOPTest_Objects::Glue();
   //
-  if (aOp!=BOPAlgo_CUT21) {
+  if (anOp!=BOPAlgo_CUT21) {
     pBuilder->SetArguments(aLS);
     pBuilder->SetTools(aLT);
   }
@@ -130,7 +146,8 @@ Standard_Integer bapibop(Draw_Interpretor& di,
   pBuilder->SetUseOBB(BOPTest_Objects::UseOBB());
   pBuilder->SetToFillHistory(BRepTest_Objects::IsHistoryNeeded());
   //
-  pBuilder->Build();
+  Handle(Draw_ProgressIndicator) aProgress = new Draw_ProgressIndicator(di, 1);
+  pBuilder->Build(aProgress->Start());
   pBuilder->SimplifyResult(BOPTest_Objects::UnifyEdges(),
                            BOPTest_Objects::UnifyFaces(),
                            BOPTest_Objects::Angular());
@@ -154,7 +171,7 @@ Standard_Integer bapibop(Draw_Interpretor& di,
   //
   const TopoDS_Shape& aR=pBuilder->Shape();
   if (aR.IsNull()) {
-    di << " null shape\n";
+    di << "Result is a null shape\n";
     return 0;
   }
   //
@@ -169,9 +186,9 @@ Standard_Integer bapibuild(Draw_Interpretor& di,
                         Standard_Integer n, 
                         const char** a) 
 { 
-  if (n<2) {
-    di << " use bapibuild r\n";
-    return 0;
+  if (n != 2) {
+    di.PrintHelp(a[0]);
+    return 1;
   }
   //
   Standard_Boolean bRunParallel, bNonDestructive;
@@ -197,7 +214,8 @@ Standard_Integer bapibuild(Draw_Interpretor& di,
   aBuilder.SetUseOBB(BOPTest_Objects::UseOBB());
   aBuilder.SetToFillHistory(BRepTest_Objects::IsHistoryNeeded());
   //
-  aBuilder.Build();
+  Handle(Draw_ProgressIndicator) aProgress = new Draw_ProgressIndicator(di, 1);
+  aBuilder.Build(aProgress->Start());
   aBuilder.SimplifyResult(BOPTest_Objects::UnifyEdges(),
                           BOPTest_Objects::UnifyFaces(),
                           BOPTest_Objects::Angular());
@@ -222,7 +240,7 @@ Standard_Integer bapibuild(Draw_Interpretor& di,
   //
   const TopoDS_Shape& aR=aBuilder.Shape();
   if (aR.IsNull()) {
-    di << " null shape\n";
+    di << "Result is a null shape\n";
     return 0;
   }
   //
@@ -238,8 +256,8 @@ Standard_Integer bapisplit(Draw_Interpretor& di,
   Standard_Integer n,
   const char** a)
 {
-  if (n < 2) {
-    di << " use bapisplit r\n";
+  if (n != 2) {
+    di.PrintHelp(a[0]);
     return 1;
   }
   //
@@ -257,7 +275,8 @@ Standard_Integer bapisplit(Draw_Interpretor& di,
   aSplitter.SetToFillHistory(BRepTest_Objects::IsHistoryNeeded());
   //
   // performing operation
-  aSplitter.Build();
+  Handle(Draw_ProgressIndicator) aProgress = new Draw_ProgressIndicator(di, 1);
+  aSplitter.Build(aProgress->Start());
   aSplitter.SimplifyResult(BOPTest_Objects::UnifyEdges(),
                            BOPTest_Objects::UnifyFaces(),
                            BOPTest_Objects::Angular());
@@ -284,7 +303,7 @@ Standard_Integer bapisplit(Draw_Interpretor& di,
   // getting the result of the operation
   const TopoDS_Shape& aR = aSplitter.Shape();
   if (aR.IsNull()) {
-    di << " null shape\n";
+    di << "Result is a null shape\n";
     return 0;
   }
   //

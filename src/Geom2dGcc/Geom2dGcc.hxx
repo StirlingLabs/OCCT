@@ -23,31 +23,6 @@
 
 class Geom2dGcc_QualifiedCurve;
 class Geom2dAdaptor_Curve;
-class Geom2dGcc_CurveTool;
-class Geom2dGcc_QualifiedCurve;
-class Geom2dGcc_Circ2d3Tan;
-class Geom2dGcc_Circ2d2TanRad;
-class Geom2dGcc_Circ2d2TanOn;
-class Geom2dGcc_Circ2dTanOnRad;
-class Geom2dGcc_Circ2dTanCen;
-class Geom2dGcc_Lin2d2Tan;
-class Geom2dGcc_Lin2dTanObl;
-class Geom2dGcc_QCurve;
-class Geom2dGcc_CurveToolGeo;
-class Geom2dGcc_Circ2d2TanOnGeo;
-class Geom2dGcc_Circ2d2TanRadGeo;
-class Geom2dGcc_Circ2dTanCenGeo;
-class Geom2dGcc_Circ2dTanOnRadGeo;
-class Geom2dGcc_Circ2d3TanIter;
-class Geom2dGcc_FunctionTanCuCuCu;
-class Geom2dGcc_Circ2d2TanOnIter;
-class Geom2dGcc_FunctionTanCuCuOnCu;
-class Geom2dGcc_Lin2dTanOblIter;
-class Geom2dGcc_FunctionTanObl;
-class Geom2dGcc_Lin2d2TanIter;
-class Geom2dGcc_FunctionTanCuCu;
-class Geom2dGcc_FunctionTanCuPnt;
-class Geom2dGcc_FunctionTanCirCu;
 
 
 //! The Geom2dGcc package describes qualified 2D
@@ -139,52 +114,6 @@ public:
   //! myQCurve = Geom2dGcc::Outside(Obj);
   Standard_EXPORT static Geom2dGcc_QualifiedCurve Outside (const Geom2dAdaptor_Curve& Obj);
 
-
-
-
-protected:
-
-
-
-
-
-private:
-
-
-
-
-friend class Geom2dGcc_CurveTool;
-friend class Geom2dGcc_QualifiedCurve;
-friend class Geom2dGcc_Circ2d3Tan;
-friend class Geom2dGcc_Circ2d2TanRad;
-friend class Geom2dGcc_Circ2d2TanOn;
-friend class Geom2dGcc_Circ2dTanOnRad;
-friend class Geom2dGcc_Circ2dTanCen;
-friend class Geom2dGcc_Lin2d2Tan;
-friend class Geom2dGcc_Lin2dTanObl;
-friend class Geom2dGcc_QCurve;
-friend class Geom2dGcc_CurveToolGeo;
-friend class Geom2dGcc_Circ2d2TanOnGeo;
-friend class Geom2dGcc_Circ2d2TanRadGeo;
-friend class Geom2dGcc_Circ2dTanCenGeo;
-friend class Geom2dGcc_Circ2dTanOnRadGeo;
-friend class Geom2dGcc_Circ2d3TanIter;
-friend class Geom2dGcc_FunctionTanCuCuCu;
-friend class Geom2dGcc_Circ2d2TanOnIter;
-friend class Geom2dGcc_FunctionTanCuCuOnCu;
-friend class Geom2dGcc_Lin2dTanOblIter;
-friend class Geom2dGcc_FunctionTanObl;
-friend class Geom2dGcc_Lin2d2TanIter;
-friend class Geom2dGcc_FunctionTanCuCu;
-friend class Geom2dGcc_FunctionTanCuPnt;
-friend class Geom2dGcc_FunctionTanCirCu;
-
 };
-
-
-
-
-
-
 
 #endif // _Geom2dGcc_HeaderFile

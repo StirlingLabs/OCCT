@@ -18,11 +18,8 @@
 #define _ExprIntrp_GenFct_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
-#include <Standard_Boolean.hxx>
 #include <ExprIntrp_Generator.hxx>
-class Standard_NoSuchObject;
 class TCollection_AsciiString;
 
 

@@ -21,16 +21,12 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
-#include <Standard_Real.hxx>
 #include <TColgp_HArray1OfPnt2d.hxx>
-#include <Standard_Boolean.hxx>
 #include <TColgp_HArray1OfVec2d.hxx>
 #include <TColStd_HArray1OfBoolean.hxx>
 #include <TColStd_HArray1OfReal.hxx>
 #include <TColgp_Array1OfVec2d.hxx>
 class Geom2d_BSplineCurve;
-class StdFail_NotDone;
-class Standard_ConstructionError;
 class gp_Vec2d;
 
 

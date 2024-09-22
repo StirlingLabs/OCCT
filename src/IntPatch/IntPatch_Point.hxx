@@ -22,16 +22,11 @@
 #include <Standard_Handle.hxx>
 
 #include <IntSurf_PntOn2S.hxx>
-#include <Standard_Real.hxx>
-#include <Standard_Boolean.hxx>
 #include <IntSurf_Transition.hxx>
 #include <Adaptor2d_Curve2d.hxx>
 
 class Adaptor3d_HVertex;
-class Standard_DomainError;
 class gp_Pnt;
-class IntSurf_Transition;
-class IntSurf_PntOn2S;
 
 
 //! Definition of an intersection point between two surfaces.

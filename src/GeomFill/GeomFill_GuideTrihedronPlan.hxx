@@ -18,21 +18,16 @@
 #define _GeomFill_GuideTrihedronPlan_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <TColgp_HArray2OfPnt2d.hxx>
 #include <math_Vector.hxx>
 #include <Standard_Integer.hxx>
-#include <GeomFill_PipeError.hxx>
 #include <GeomFill_TrihedronWithGuide.hxx>
-#include <Standard_Boolean.hxx>
 #include <Standard_Real.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <TColStd_Array1OfReal.hxx>
 
 class GeomFill_Frenet;
-class Standard_OutOfRange;
-class Standard_ConstructionError;
 class GeomFill_TrihedronLaw;
 class gp_Vec;
 
@@ -50,7 +45,9 @@ public:
   
   Standard_EXPORT GeomFill_GuideTrihedronPlan(const Handle(Adaptor3d_Curve)& theGuide);
   
-  Standard_EXPORT virtual void SetCurve (const Handle(Adaptor3d_Curve)& thePath) Standard_OVERRIDE;
+  //! initialize curve of trihedron law
+  //! @return Standard_True in case if execution end correctly
+  Standard_EXPORT virtual Standard_Boolean SetCurve (const Handle(Adaptor3d_Curve)& thePath) Standard_OVERRIDE;
   
   Standard_EXPORT virtual Handle(GeomFill_TrihedronLaw) Copy() const Standard_OVERRIDE;
   

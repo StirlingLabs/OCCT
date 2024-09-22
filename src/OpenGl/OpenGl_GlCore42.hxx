@@ -13,8 +13,8 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef _OpenGl_GlCore42_Header
-#define _OpenGl_GlCore42_Header
+#ifndef OpenGl_GlCore42_HeaderFile
+#define OpenGl_GlCore42_HeaderFile
 
 #include <OpenGl_GlCore41.hxx>
 
@@ -23,8 +23,6 @@ struct OpenGl_GlCore42 : public OpenGl_GlCore41
 {
 private:
   typedef OpenGl_GlCore41 theBaseClass_t;
-
-#if !defined(GL_ES_VERSION_2_0)
 
 public: //! @name GL_ARB_base_instance (added to OpenGL 4.2 core)
 
@@ -55,8 +53,6 @@ public: //! @name GL_ARB_texture_storage (added to OpenGL 4.2 core)
   using theBaseClass_t::glTexStorage1D;
   using theBaseClass_t::glTexStorage2D;
   using theBaseClass_t::glTexStorage3D;
-
-#endif
 
 };
 

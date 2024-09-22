@@ -21,7 +21,6 @@
 #include <BRepAdaptor_Curve.hxx>
 #include <DsgPrs_FixPresentation.hxx>
 #include <ElCLib.hxx>
-#include <ElSLib.hxx>
 #include <Geom_Circle.hxx>
 #include <Geom_Curve.hxx>
 #include <Geom_Line.hxx>
@@ -38,12 +37,9 @@
 #include <Select3D_SensitiveSegment.hxx>
 #include <SelectMgr_EntityOwner.hxx>
 #include <SelectMgr_Selection.hxx>
-#include <Standard_DomainError.hxx>
-#include <Standard_NotImplemented.hxx>
 #include <TColStd_ListIteratorOfListOfTransient.hxx>
 #include <TopAbs_ShapeEnum.hxx>
 #include <TopExp.hxx>
-#include <TopLoc_Location.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Shape.hxx>
@@ -286,7 +282,7 @@ gp_Pnt PrsDim_FixRelation::ComputePosition(const Handle(Geom_Curve)& curv1,
     
     if (!vec1.IsParallel(vec2, Precision::Angular()) ) {
       gp_Dir dir;
-      Standard_Real conf =Precision::Confusion();
+      constexpr Standard_Real conf =Precision::Confusion();
       if (lastp1.IsEqual(firstp2,conf) || firstp1.IsEqual(lastp2,conf)) dir.SetXYZ(vec1.XYZ() - vec2.XYZ());
       else dir.SetXYZ(vec1.XYZ() + vec2.XYZ());
       gp_Vec transvec = gp_Vec(dir)*myArrowSize;

@@ -18,15 +18,12 @@
 #define _IGESDefs_UnitsData_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <Interface_HArray1OfHAsciiString.hxx>
 #include <TColStd_HArray1OfReal.hxx>
 #include <IGESData_IGESEntity.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_Real.hxx>
-class Standard_DimensionMismatch;
-class Standard_OutOfRange;
 class TCollection_HAsciiString;
 
 

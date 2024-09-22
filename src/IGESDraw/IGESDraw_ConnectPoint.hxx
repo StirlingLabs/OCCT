@@ -23,11 +23,8 @@
 #include <gp_XYZ.hxx>
 #include <Standard_Integer.hxx>
 #include <IGESData_IGESEntity.hxx>
-#include <Standard_Boolean.hxx>
-class IGESData_IGESEntity;
 class TCollection_HAsciiString;
 class IGESGraph_TextDisplayTemplate;
-class gp_XYZ;
 class gp_Pnt;
 
 

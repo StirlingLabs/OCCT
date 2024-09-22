@@ -13,20 +13,16 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef _OpenGl_GraduatedTrihedron_Header
-#define _OpenGl_GraduatedTrihedron_Header
+#ifndef OpenGl_GraduatedTrihedron_HeaderFile
+#define OpenGl_GraduatedTrihedron_HeaderFile
 
 #include <Graphic3d_GraduatedTrihedron.hxx>
-#include <gp_Ax1.hxx>
-#include <gp_Pnt.hxx>
-#include <gp_Dir.hxx>
 #include <NCollection_Array1.hxx>
 #include <OpenGl_Aspects.hxx>
 #include <OpenGl_Element.hxx>
 #include <OpenGl_PrimitiveArray.hxx>
 #include <OpenGl_Text.hxx>
 
-class OpenGl_View;
 
 //! This class allows to render Graduated Trihedron, i.e. trihedron with grid.
 //! it is based on Graphic3d_GraduatedTrihedron parameters and support its customization
@@ -81,7 +77,8 @@ private:
 
   public:
 
-    Axis (const Graphic3d_AxisAspect& theAspect = Graphic3d_AxisAspect(),
+    Axis (const Graphic3d_GraduatedTrihedron::AxisAspect& theAspect =
+                Graphic3d_GraduatedTrihedron::AxisAspect(),
           const OpenGl_Vec3& theDirection = OpenGl_Vec3 (1.0f, 0.0f, 0.0f));
 
     ~Axis();

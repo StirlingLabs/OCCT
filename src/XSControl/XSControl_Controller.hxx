@@ -22,28 +22,22 @@
 
 #include <TCollection_AsciiString.hxx>
 #include <TColStd_SequenceOfTransient.hxx>
-#include <TColStd_HSequenceOfHAsciiString.hxx>
 #include <TColStd_SequenceOfInteger.hxx>
 #include <Interface_HArray1OfHAsciiString.hxx>
 #include <Standard_Transient.hxx>
 #include <NCollection_Vector.hxx>
 #include <IFSelect_ReturnStatus.hxx>
-#include <Standard_Transient.hxx>
 #include <NCollection_DataMap.hxx>
-#include <TCollection_AsciiString.hxx>
 #include <Message_ProgressRange.hxx>
 
 class IFSelect_WorkLibrary;
 class Interface_Protocol;
-class IFSelect_Signature;
 class Transfer_ActorOfTransientProcess;
 class Transfer_ActorOfFinderProcess;
-class Standard_DomainError;
 class XSControl_WorkSession;
 class Interface_InterfaceModel;
 class Transfer_FinderProcess;
 class TopoDS_Shape;
-class Interface_CheckIterator;
 
 class XSControl_Controller;
 DEFINE_STANDARD_HANDLE(XSControl_Controller, Standard_Transient)
@@ -120,7 +114,7 @@ class XSControl_Controller : public Standard_Transient
   //! Read from field. Can be redefined
   Standard_EXPORT virtual Handle(Transfer_ActorOfFinderProcess) ActorWrite() const;
   
-  //! Sets mininum and maximum values for modetrans (write)
+  //! Sets minimum and maximum values for modetrans (write)
   //! Erases formerly recorded bounds and values
   //! Actually only for shape
   //! Then, for each value a little help can be attached

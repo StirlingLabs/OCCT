@@ -25,7 +25,6 @@
 #include <Standard_ErrorHandler.hxx>
 #include <Standard_Failure.hxx>
 #include <Standard_Type.hxx>
-#include <TColGeom2d_HArray1OfCurve.hxx>
 #include <TColStd_HSequenceOfReal.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(ShapeUpgrade_SplitCurve2dContinuity,ShapeUpgrade_SplitCurve2d)
@@ -80,7 +79,7 @@ void ShapeUpgrade_SplitCurve2dContinuity::Compute()
     myStatus = ShapeExtend::EncodeStatus (ShapeExtend_DONE2);
   if (mySplitValues->Length() > 2)
     myStatus = ShapeExtend::EncodeStatus (ShapeExtend_DONE1);
-  Standard_Real precision = Precision::PConfusion();
+  constexpr Standard_Real precision = Precision::PConfusion();
   Standard_Real First =  mySplitValues->Value(1);
   Standard_Real Last = mySplitValues->Value(mySplitValues->Length());
   if (myCurve->IsKind(STANDARD_TYPE(Geom2d_TrimmedCurve))) {

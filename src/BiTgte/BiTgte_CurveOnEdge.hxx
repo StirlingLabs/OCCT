@@ -22,8 +22,6 @@
 #include <Standard_Handle.hxx>
 
 #include <TopoDS_Edge.hxx>
-#include <GeomAbs_CurveType.hxx>
-#include <gp_Circ.hxx>
 #include <Adaptor3d_Curve.hxx>
 #include <Standard_Real.hxx>
 #include <GeomAbs_Shape.hxx>
@@ -31,14 +29,9 @@
 #include <TColStd_Array1OfReal.hxx>
 #include <Standard_Boolean.hxx>
 class Geom_Curve;
-class Standard_OutOfRange;
-class Standard_NoSuchObject;
-class Standard_DomainError;
-class TopoDS_Edge;
 class gp_Pnt;
 class gp_Vec;
 class gp_Lin;
-class gp_Circ;
 class gp_Elips;
 class gp_Hypr;
 class gp_Parab;
@@ -57,6 +50,9 @@ public:
   Standard_EXPORT BiTgte_CurveOnEdge();
   
   Standard_EXPORT BiTgte_CurveOnEdge(const TopoDS_Edge& EonF, const TopoDS_Edge& Edge);
+
+  //! Shallow copy of adaptor
+  Standard_EXPORT virtual Handle(Adaptor3d_Curve) ShallowCopy() const Standard_OVERRIDE;
   
   Standard_EXPORT void Init (const TopoDS_Edge& EonF, const TopoDS_Edge& Edge);
   

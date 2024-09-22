@@ -17,26 +17,18 @@
 #include <AIS_InteractiveContext.hxx>
 #include <Aspect_TypeOfColorScaleData.hxx>
 #include <Aspect_TypeOfColorScalePosition.hxx>
-#include <Aspect_Window.hxx>
 #include <Geom_Line.hxx>
 #include <GeomAdaptor_Curve.hxx>
-#include <Graphic3d_ArrayOfPolygons.hxx>
 #include <Graphic3d_ArrayOfPolylines.hxx>
 #include <Graphic3d_AspectFillArea3d.hxx>
 #include <Graphic3d_AspectText3d.hxx>
 #include <Graphic3d_GraphicDriver.hxx>
 #include <Graphic3d_ArrayOfTriangles.hxx>
 #include <Graphic3d_Text.hxx>
-#include <Prs3d_LineAspect.hxx>
-#include <Prs3d_ShadingAspect.hxx>
 #include <Prs3d_Text.hxx>
 #include <Prs3d_TextAspect.hxx>
-#include <SelectMgr_EntityOwner.hxx>
-#include <SelectMgr_Selection.hxx>
 #include <Select3D_SensitiveBox.hxx>
-#include <Select3D_SensitiveSegment.hxx>
 #include <StdPrs_Curve.hxx>
-#include <V3d_Viewer.hxx>
 #include <V3d_View.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(AIS_ColorScale, AIS_InteractiveObject)
@@ -133,7 +125,7 @@ AIS_ColorScale::AIS_ColorScale()
 {
   SetDisplayMode (0);
   myDrawer->SetupOwnShadingAspect();
-  myDrawer->ShadingAspect()->Aspect()->SetShadingModel (Graphic3d_TOSM_UNLIT);
+  myDrawer->ShadingAspect()->Aspect()->SetShadingModel (Graphic3d_TypeOfShadingModel_Unlit);
   myDrawer->ShadingAspect()->Aspect()->SetAlphaMode (Graphic3d_AlphaMode_Opaque);
   myDrawer->ShadingAspect()->Aspect()->SetInteriorColor (Quantity_NOC_WHITE);
 }
@@ -301,7 +293,7 @@ Aspect_SequenceOfColor AIS_ColorScale::MakeUniformColors (Standard_Integer theNb
 
   // adjust range to be within (0, 360], with sign according to theHueFrom and theHueTo 
   Standard_Real aHueRange = std::fmod (theHueTo - theHueFrom, 360.);
-  const Standard_Real aHueEps = Precision::Angular() * 180. / M_PI;
+  constexpr Standard_Real aHueEps = Precision::Angular() * 180. / M_PI;
   if (Abs (aHueRange) <= aHueEps)
   {
     aHueRange = (aHueRange < 0 ? -360. : 360.);

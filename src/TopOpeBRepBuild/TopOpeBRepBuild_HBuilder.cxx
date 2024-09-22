@@ -16,13 +16,11 @@
 
 
 #include <Standard_NoSuchObject.hxx>
-#include <Standard_ProgramError.hxx>
 #include <Standard_Type.hxx>
 #include <TColStd_ListIteratorOfListOfInteger.hxx>
 #include <TColStd_MapOfInteger.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Shape.hxx>
-#include <TopOpeBRepBuild_Builder.hxx>
 #include <TopOpeBRepBuild_define.hxx>
 #include <TopOpeBRepBuild_HBuilder.hxx>
 #include <TopOpeBRepDS_BuildTool.hxx>
@@ -33,7 +31,6 @@
 #include <TopOpeBRepDS_Interference.hxx>
 #include <TopOpeBRepDS_ListOfShapeOn1State.hxx>
 #include <TopOpeBRepDS_ShapeShapeInterference.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopTools_ListOfShape.hxx>
 #include <TopTools_MapOfShape.hxx>
 
@@ -356,13 +353,13 @@ void TopOpeBRepBuild_HBuilder::MakeEdgeAncestorMap()
     its.Initialize(los);
     if(re == 1)
       for(; its.More(); its.Next()) {
-	TopoDS_Shape& SecEdg = its.Value();
+	const TopoDS_Shape& SecEdg = its.Value();
 	if(!mySectEdgeDSEdges1.IsBound(SecEdg))
 	  mySectEdgeDSEdges1.Bind(SecEdg, ei);
       }
     else if(re == 2)
       for(; its.More(); its.Next()) {
-	TopoDS_Shape& SecEdg = its.Value();
+	const TopoDS_Shape& SecEdg = its.Value();
 	if(!mySectEdgeDSEdges2.IsBound(SecEdg))
 	  mySectEdgeDSEdges2.Bind(SecEdg,ei);
       }

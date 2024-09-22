@@ -22,16 +22,13 @@
 
 #include <TopoDS_Shape.hxx>
 #include <TopTools_HArray1OfShape.hxx>
-#include <Standard_Boolean.hxx>
 #include <BRepFill_SectionLaw.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <Standard_Integer.hxx>
-#include <Standard_Real.hxx>
 class Law_Function;
 class TopoDS_Vertex;
 class TopoDS_Wire;
 class GeomFill_SectionLaw;
-class TopoDS_Shape;
 class TopoDS_Edge;
 
 

@@ -18,12 +18,8 @@
 #define _PrsDim_HeaderFile
 
 #include <PrsDim_KindOfSurface.hxx>
-#include <Aspect_TypeOfLine.hxx>
-#include <Aspect_TypeOfMarker.hxx>
-#include <gp_Dir.hxx>
 #include <gp_Elips.hxx>
 #include <gp_Pnt.hxx>
-#include <Quantity_NameOfColor.hxx>
 #include <Prs3d_Drawer.hxx>
 #include <Prs3d_Presentation.hxx>
 #include <Standard.hxx>
@@ -109,7 +105,7 @@ public:
   
   Standard_EXPORT static Standard_Boolean ComputeGeometry (const TopoDS_Vertex& aVertex, gp_Pnt& point, const Handle(Geom_Plane)& aPlane, Standard_Boolean& isOnPlane);
   
-  //! Tryes to get Plane from Face.  Returns Surface of Face
+  //! Tries to get Plane from Face.  Returns Surface of Face
   //! in aSurf.  Returns Standard_True  and Plane of Face in
   //! aPlane in following  cases:
   //! Face is Plane, Offset of Plane,

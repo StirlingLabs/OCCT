@@ -29,12 +29,9 @@
 #include <GeomAbs_Shape.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
 #include <Standard_Integer.hxx>
-#include <Standard_Boolean.hxx>
 #include <TopTools_ListOfShape.hxx>
 #include <ChFiDS_SecHArray1.hxx>
 #include <ChFiDS_ErrorStatus.hxx>
-class StdFail_NotDone;
-class Standard_NoSuchObject;
 class TopoDS_Shape;
 class TopoDS_Edge;
 class Law_Function;
@@ -293,7 +290,7 @@ public:
   //! intersection of 4 or more edges of the shape, or
   //! -   the intersection of the fillet with a face which limits
   //! the contour is not fully contained in this face.
-  Standard_EXPORT virtual void Build() Standard_OVERRIDE;
+  Standard_EXPORT virtual void Build(const Message_ProgressRange& theRange = Message_ProgressRange()) Standard_OVERRIDE;
   
   //! Reinitializes this algorithm, thus canceling the effects of the Build function.
   //! This function allows modifications to be made to the

@@ -25,7 +25,6 @@
 #include <BRepLib_MakeEdge.hxx>
 #include <BRepLib_MakeVertex.hxx>
 #include <BRepLib_MakeWire.hxx>
-#include <BRepTools.hxx>
 #include <BRepTopAdaptor_FClass2d.hxx>
 #include <Geom2d_BSplineCurve.hxx>
 #include <Geom2d_Curve.hxx>
@@ -34,22 +33,17 @@
 #include <Geom_BSplineCurve.hxx>
 #include <GeomAdaptor.hxx>
 #include <Precision.hxx>
-#include <ProjLib_CompProjectedCurve.hxx>
 #include <ProjLib_HCompProjectedCurve.hxx>
-#include <Standard_ConstructionError.hxx>
-#include <Standard_NoSuchObject.hxx>
 #include <StdFail_NotDone.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
 #include <TColStd_Array1OfInteger.hxx>
 #include <TColStd_Array1OfReal.hxx>
-#include <TopAbs.hxx>
 #include <TopExp.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopTools_HSequenceOfShape.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
 
 #ifdef OCCT_DEBUG_CHRONO
 #include <OSD_Timer.hxx>
@@ -152,7 +146,7 @@ void BRepAlgo_NormalProjection::SetDefaultParams()
 {
   myTol3d = 1.e-4;
   myTol2d = Pow(myTol3d, 2./3);
-  myContinuity = GeomAbs_C2;
+  myContinuity = GeomAbs_C1;
   myMaxDegree = 14;
   myMaxSeg    = 16;
 }
@@ -339,8 +333,8 @@ void BRepAlgo_NormalProjection::SetDefaultParams()
 	    Only2d = Standard_True;
 	  
 	  if(Only2d && Only3d) {
-	    BRepLib_MakeEdge MKed(GeomAdaptor::MakeCurve(hcur->Curve()), 
-				  Ufin, Udeb);
+	    BRepLib_MakeEdge MKed(GeomAdaptor::MakeCurve(*hcur),
+				  Udeb, Ufin);
 	    prj = MKed.Edge();
 	    BB.UpdateEdge(TopoDS::Edge(prj), 
 			  PCur2d, 
@@ -355,6 +349,10 @@ void BRepAlgo_NormalProjection::SetDefaultParams()
 #endif
 	    Approx_CurveOnSurface appr(HPCur, hsur, Udeb, Ufin, myTol3d);
             appr.Perform(myMaxSeg, myMaxDegree, myContinuity, Only3d, Only2d);
+
+        if (appr.MaxError3d() > 1.e3 * myTol3d)
+          continue;
+
 #ifdef OCCT_DEBUG_CHRONO
 	    ResultChron(chr_approx,t_approx);
 	    approx_count++;
@@ -371,7 +369,7 @@ void BRepAlgo_NormalProjection::SetDefaultParams()
 	    
 	    if(!Only3d) PCur2d = appr.Curve2d();
 	    if(Only2d) {
-	      BRepLib_MakeEdge MKed(GeomAdaptor::MakeCurve(hcur->Curve()), 
+	      BRepLib_MakeEdge MKed(GeomAdaptor::MakeCurve(*hcur),
 				    Udeb, Ufin);
 	      prj = MKed.Edge();
 	    }

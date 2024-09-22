@@ -26,12 +26,10 @@
 #include <TCollection_AsciiString.hxx>
 #include <Standard_CString.hxx>
 #include <Standard_Integer.hxx>
-#include <Standard_Boolean.hxx>
 #include <Interface_CheckStatus.hxx>
 #include <TColStd_HSequenceOfTransient.hxx>
 class Interface_InterfaceModel;
 class Interface_IntVal;
-class Standard_NoSuchObject;
 class Interface_Check;
 class Standard_Transient;
 

@@ -14,14 +14,12 @@
 #ifndef _BRepMesh_VertexTool_HeaderFile
 #define _BRepMesh_VertexTool_HeaderFile
 
-#include <NCollection_Array1.hxx>
 #include <Standard_Transient.hxx>
 #include <BRepMesh_VertexInspector.hxx>
 #include <Standard_OStream.hxx>
 #include <gp_XY.hxx>
 #include <IMeshData_Types.hxx>
 
-class BRepMesh_Vertex;
 
 //! Describes data structure intended to keep mesh nodes 
 //! defined in UV space and implements functionality 

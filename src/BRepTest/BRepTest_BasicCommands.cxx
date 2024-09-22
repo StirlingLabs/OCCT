@@ -33,9 +33,9 @@
 #include <gp_Ax2.hxx>
 #include <gp_Mat.hxx>
 #include <gp_GTrsf.hxx>
+#include <GeomAdaptor_Surface.hxx>
 #include <BRepOffsetAPI_NormalProjection.hxx>
 #include <BRepLib.hxx>
-#include <BRep_Builder.hxx>
 #include <BRepBndLib.hxx>
 #include <Bnd_Box.hxx>
 #include <Bnd_Box2d.hxx>
@@ -45,21 +45,18 @@
 #include <BRepTools_WireExplorer.hxx>
 
 #include <GCPnts_QuasiUniformAbscissa.hxx>
-#include <Geom2dAdaptor_Curve.hxx>
 #include <GeomAdaptor_Curve.hxx>
 #include <ProjLib_ComputeApproxOnPolarSurface.hxx>
 #include <DrawTrSurf.hxx>
 #include <Geom_Plane.hxx>
 
-#include <OSD_Timer.hxx>
 #include <Draw_Segment3D.hxx>
 #include <Draw_Marker3D.hxx>
 #include <Draw_MarkerShape.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
-
+#include <BRepTools_PurgeLocations.hxx>
+#include <BRepTools.hxx>
 #include <Standard_Dump.hxx>
-
-#include <stdio.h>
 
 Standard_IMPORT Draw_Viewer dout;
 
@@ -116,7 +113,7 @@ static Standard_Integer addpcurve(Draw_Interpretor& , Standard_Integer n, const 
 // transform
 //=======================================================================
 
-static Standard_Integer transform(Draw_Interpretor& ,Standard_Integer n,const char** a)
+static Standard_Integer transform(Draw_Interpretor&,Standard_Integer n,const char** a)
 {
   if (n <= 1) return 1;
 
@@ -125,8 +122,16 @@ static Standard_Integer transform(Draw_Interpretor& ,Standard_Integer n,const ch
   const char* aName = a[0];
 
   Standard_Boolean isBasic = Standard_False;
+  Standard_Boolean isForced = Standard_False;
   Standard_Boolean isCopy = Standard_False;
+  Standard_Boolean isCopyMesh = Standard_False;
 
+  // Check "copymesh" flag.
+  if (!strcmp(a[n - 1], "-copymesh"))
+  {
+    isCopyMesh = Standard_True;
+    last = --n;
+  }
   // Check "copy" flag.
   if (!strcmp(a[n-1], "-copy")) {
     isCopy = Standard_True;
@@ -137,6 +142,8 @@ static Standard_Integer transform(Draw_Interpretor& ,Standard_Integer n,const ch
   }
   else {
     isBasic = (aName[0] == 'b');
+    isForced = (aName[0] == 'f');
+
     aName++;
 
     if (!strcmp(aName,"move")) {
@@ -145,6 +152,7 @@ static Standard_Integer transform(Draw_Interpretor& ,Standard_Integer n,const ch
       if (SL.IsNull()) return 0;
       T = SL.Location().Transformation();
       last = n-1;
+      isBasic = Standard_True;
     }
     else if (!strcmp(aName,"translate")) {
       if (n < 5) return 1;
@@ -162,6 +170,7 @@ static Standard_Integer transform(Draw_Interpretor& ,Standard_Integer n,const ch
       if (n < 8) return 1;
       T.SetMirror(gp_Ax2(gp_Pnt(Draw::Atof(a[n-6]),Draw::Atof(a[n-5]),Draw::Atof(a[n-4])),
                   gp_Vec(Draw::Atof(a[n-3]),Draw::Atof(a[n-2]),Draw::Atof(a[n-1]))));
+
       last = n-6;
     }
     else if (!strcmp(aName,"scale")) {
@@ -171,7 +180,12 @@ static Standard_Integer transform(Draw_Interpretor& ,Standard_Integer n,const ch
     }
   }
 
-  if (T.Form() == gp_Identity || isBasic) {
+  if (T.Form() == gp_Identity || isBasic || isForced) {
+    Standard_Boolean isExeption = Standard_True;
+    if (isForced)
+    {
+      isExeption = Standard_False;
+    }
     TopLoc_Location L(T);
     for (Standard_Integer i = 1; i < last; i++) {
       TopoDS_Shape S = DBRep::Get(a[i]);
@@ -181,7 +195,25 @@ static Standard_Integer transform(Draw_Interpretor& ,Standard_Integer n,const ch
         return 1;
       }
       else
-        DBRep::Set(a[i],S.Located(L));
+      {
+        try
+        {
+          if (!strcmp(aName, "move") || !strcmp(aName, "reset"))
+          {
+            DBRep::Set(a[i], S.Located(L, isExeption));
+          }
+          else
+          {
+            DBRep::Set(a[i], S.Moved(L, isExeption));
+          }
+        }
+        catch (const Standard_DomainError&)
+        {
+          TCollection_AsciiString aScale(T.ScaleFactor());
+          Message::SendWarning() << "Operation is not done: " << aName << " is not a valid transformation - scale = " << aScale;
+          return 0;
+        }
+      }
     }
   }
   else {
@@ -193,7 +225,7 @@ static Standard_Integer transform(Draw_Interpretor& ,Standard_Integer n,const ch
         return 1;
       }
       else {
-        trf.Perform(S, isCopy);
+        trf.Perform(S, isCopy, isCopyMesh);
         if (!trf.IsDone())
           return 1;
         DBRep::Set(a[i],trf.Shape());
@@ -821,7 +853,6 @@ static Standard_Integer IsBoxesInterfered(Draw_Interpretor& theDI,
 //function : gbounding
 //purpose  : 
 //=======================================================================
-#include <GeomAdaptor_Surface.hxx>
 #include <BndLib_AddSurface.hxx>
 #include <BndLib_Add3dCurve.hxx>
 #include <BndLib_Add2dCurve.hxx>
@@ -960,7 +991,6 @@ static Standard_Integer precision(Draw_Interpretor& di,Standard_Integer n,const 
 //purpose  : 
 //=======================================================================
 #include <IntCurvesFace_ShapeIntersector.hxx>
-#include <gp_Lin.hxx>
 
 static Standard_Integer reperageshape(Draw_Interpretor& di, Standard_Integer narg , const char** a) 
 {
@@ -1196,7 +1226,7 @@ static Standard_Integer vecdc(Draw_Interpretor& di,Standard_Integer ,const char*
   Standard_Real Tol = 1.e-4;        
   Standard_Real Tol2d;
   Standard_Real MaxDistance = 1.e-3;
-  GeomAbs_Shape Continuity = GeomAbs_C2;  
+  GeomAbs_Shape Continuity = GeomAbs_C1;  
   Standard_Integer MaxDeg = 14;           
   Standard_Integer MaxSeg = 16;           
 
@@ -1230,7 +1260,7 @@ static Standard_Integer vecdc(Draw_Interpretor& di,Standard_Integer ,const char*
 
   if(n > arg) {
     if (Draw::Atoi(a[arg]) == 0) Continuity = GeomAbs_C0;
-    else if (Draw::Atoi(a[arg]) == 1) Continuity = GeomAbs_C1;
+    else if (Draw::Atoi(a[arg]) == 2) Continuity = GeomAbs_C2;
     arg++;
   }
 
@@ -1385,6 +1415,63 @@ static Standard_Integer issubshape(Draw_Interpretor& di,
   //
   return 0;
 }
+//=======================================================================
+//function : purgeloc
+//purpose  : 
+//=======================================================================
+static Standard_Integer purgeloc(Draw_Interpretor& di, Standard_Integer /*n*/, const char** a)
+{
+
+  TopoDS_Shape aShapeBase = DBRep::Get(a[2]);
+  if (aShapeBase.IsNull()) return 1;
+
+
+  BRepTools_PurgeLocations aRemLoc;
+  Standard_Boolean isDone = aRemLoc.Perform(aShapeBase);
+  TopoDS_Shape Result = aRemLoc.GetResult();
+
+  DBRep::Set(a[1], Result);
+  if (isDone)
+  {
+    di << "All problematic locations are purged \n";
+  }
+  else
+  {
+    di << "Not all problematic locations are purged \n";
+  }
+  return 0;
+}
+//=======================================================================
+//function : checkloc
+//purpose  : 
+//=======================================================================
+
+static Standard_Integer checkloc(Draw_Interpretor& di, Standard_Integer /*n*/, const char** a)
+{
+
+  TopoDS_Shape aShapeBase = DBRep::Get(a[1]);
+  if (aShapeBase.IsNull()) return 1;
+
+  TopTools_ListOfShape aLS;
+  BRepTools::CheckLocations(aShapeBase, aLS);
+  if (aLS.IsEmpty())
+  {
+    di << "There are no problematic shapes" << "\n";
+    return 0;
+  }
+  TopTools_ListIteratorOfListOfShape anIt(aLS);
+  Standard_Integer i;
+  for (i = 1; anIt.More(); anIt.Next(), ++i)
+  {
+    TCollection_AsciiString aName(a[1]);
+    aName += "_";
+    aName.AssignCat(i);
+    DBRep::Set(aName.ToCString(), anIt.Value());
+    di << aName << " ";
+  }
+  di << "\n";
+  return 0;
+}
 
 void  BRepTest::BasicCommands(Draw_Interpretor& theCommands)
 {
@@ -1407,27 +1494,27 @@ void  BRepTest::BasicCommands(Draw_Interpretor& theCommands)
 		  transform,g);
 
   theCommands.Add("tmove",
-		  "tmove name1 name2 ... name, set location from name [-copy]",
+		  "tmove name1 name2 ... name, set location from name [-copy] [-copymesh]",
 		  __FILE__,
 		  transform,g);
 
   theCommands.Add("ttranslate",
-		  "ttranslate name1 name2 ... dx dy dz [-copy]",
+		  "ttranslate name1 name2 ... dx dy dz [-copy [-copymesh]]",
 		  __FILE__,
 		  transform,g);
 
   theCommands.Add("trotate",
-		  "trotate name1 name2 ... x y z dx dy dz angle [-copy]",
+		  "trotate name1 name2 ... x y z dx dy dz angle [-copy [-copymesh]]",
 		  __FILE__,
 		  transform,g);
 
   theCommands.Add("tmirror",
-		  "tmirror name x y z dx dy dz [-copy]",
+		  "tmirror name x y z dx dy dz [-copy] [-copymesh]",
 		  __FILE__,
 		  transform,g);
 
   theCommands.Add("tscale",
-		  "tscale name x y z scale [-copy]",
+		  "tscale name x y z scale [-copy] [-copymesh]",
 		  __FILE__,
 		  transform,g);
 
@@ -1440,6 +1527,11 @@ void  BRepTest::BasicCommands(Draw_Interpretor& theCommands)
 		  "bmove name1 name2 ... name, set location from name",
 		  __FILE__,
 		  transform,g);
+
+  theCommands.Add("fmove",
+                  "fmove name1 name2 ... name, set location from name",
+                  __FILE__,
+                  transform, g);
 
   theCommands.Add("btranslate",
 		  "btranslate name1 name2 ... dx dy dz",
@@ -1456,10 +1548,20 @@ void  BRepTest::BasicCommands(Draw_Interpretor& theCommands)
 		  __FILE__,
 		  transform,g);
 
+  theCommands.Add("fmirror",
+                  "fmirror name x y z dx dy dz",
+                  __FILE__,
+                   transform, g);
+
   theCommands.Add("bscale",
 		  "bscale name x y z scale",
 		  __FILE__,
 		  transform,g);
+
+  theCommands.Add("fscale",
+                  "fscale name x y z scale",
+                  __FILE__,
+                  transform, g);
 
   theCommands.Add("precision",
 		  "precision [preci]",
@@ -1593,4 +1695,13 @@ void  BRepTest::BasicCommands(Draw_Interpretor& theCommands)
                   "\t\tCheck if the shape is sub-shape of other shape and get its index in the shape.",
                   __FILE__,
                   issubshape, g);
+  theCommands.Add("purgeloc",
+    "purgeloc res shape ",
+    __FILE__,
+    purgeloc, g);
+
+  theCommands.Add("checkloc",
+    "checkloc shape ",
+    __FILE__,
+    checkloc, g);
 }

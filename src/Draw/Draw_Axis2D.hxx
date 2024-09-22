@@ -18,15 +18,12 @@
 #define _Draw_Axis2D_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <gp_Ax22d.hxx>
 #include <Draw_Color.hxx>
 #include <Standard_Integer.hxx>
 #include <Draw_Drawable2D.hxx>
-class Draw_Color;
 class gp_Pnt2d;
-class gp_Ax22d;
 class Draw_Display;
 
 

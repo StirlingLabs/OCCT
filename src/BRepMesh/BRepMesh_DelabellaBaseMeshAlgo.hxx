@@ -17,11 +17,7 @@
 #define _BRepMesh_DelabellaBaseMeshAlgo_HeaderFile
 
 #include <BRepMesh_CustomBaseMeshAlgo.hxx>
-#include <NCollection_Shared.hxx>
-#include <IMeshTools_Parameters.hxx>
 
-class BRepMesh_DataStructureOfDelaun;
-class BRepMesh_Delaun;
 
 //! Class provides base functionality to build face triangulation using Delabella project.
 //! Performs generation of mesh using raw data from model.

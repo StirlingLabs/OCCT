@@ -17,10 +17,8 @@
 #include <Interface_EntityIterator.hxx>
 #include <Interface_GeneralLib.hxx>
 #include <Interface_GeneralModule.hxx>
-#include <Interface_InterfaceModel.hxx>
 #include <Interface_Macros.hxx>
 #include <Interface_ShareTool.hxx>
-#include <Standard_NoSuchObject.hxx>
 #include <Standard_Transient.hxx>
 #include <Standard_Type.hxx>
 #include <StepData.hxx>
@@ -34,8 +32,25 @@
 IMPLEMENT_STANDARD_RTTIEXT(StepData_StepModel,Interface_InterfaceModel)
 
 // Entete de fichier : liste d entites
-StepData_StepModel::StepData_StepModel () :mySourceCodePage((Resource_FormatType)Interface_Static::IVal("read.step.codepage"))
-{}
+StepData_StepModel::StepData_StepModel () :
+  myReadUnitIsInitialized(Standard_False), myWriteUnit (1.)
+{
+  switch (InternalParameters.WriteUnit)
+  {
+    case  1: myWriteUnit = 25.4; break;
+    case  2: myWriteUnit = 1.; break;
+    case  4: myWriteUnit = 304.8; break;
+    case  5: myWriteUnit = 1609344.0; break;
+    case  6: myWriteUnit = 1000.0; break;
+    case  7: myWriteUnit = 1000000.0; break;
+    case  8: myWriteUnit = 0.0254; break;
+    case  9: myWriteUnit = 0.001; break;
+    case 10: myWriteUnit = 10.0; break;
+    case 11: myWriteUnit = 0.0000254; break;
+    default:
+      GlobalCheck()->AddWarning("Incorrect write.step.unit parameter, use default value");
+  }
+}
 
 
 Handle(Standard_Transient) StepData_StepModel::Entity
@@ -97,7 +112,7 @@ void StepData_StepModel::VerifyCheck(Handle(Interface_Check)& ach) const
   Interface_ShareTool sh(me,aHP);
   Handle(Interface_GeneralModule) module;  Standard_Integer CN;
   for (Interface_EntityIterator iter = Header(); iter.More(); iter.Next()) {
-    Handle(Standard_Transient) head = iter.Value();
+    const Handle(Standard_Transient)& head = iter.Value();
     if (!lib.Select(head,module,CN)) continue;
     module->CheckCase(CN,head,sh,ach);
   }
@@ -192,4 +207,41 @@ Handle(TCollection_HAsciiString) StepData_StepModel::StringLabel
 
   label = new TCollection_HAsciiString(text);
   return label;
+}
+
+//=======================================================================
+//function : SetLocalLengthUnit
+//purpose  :
+//=======================================================================
+void StepData_StepModel::SetLocalLengthUnit(const Standard_Real theUnit)
+{
+  myLocalLengthUnit = theUnit;
+  myReadUnitIsInitialized = Standard_True;
+}
+
+//=======================================================================
+//function : LocalLengthUnit
+//purpose  :
+//=======================================================================
+Standard_Real StepData_StepModel::LocalLengthUnit() const
+{
+  return myLocalLengthUnit;
+}
+
+//=======================================================================
+//function : SetLocalLengthUnit
+//purpose  :
+//=======================================================================
+void StepData_StepModel::SetWriteLengthUnit(const Standard_Real theUnit)
+{
+  myWriteUnit = theUnit;
+}
+
+//=======================================================================
+//function : LocalLengthUnit
+//purpose  :
+//=======================================================================
+Standard_Real StepData_StepModel::WriteLengthUnit() const
+{
+  return myWriteUnit;
 }

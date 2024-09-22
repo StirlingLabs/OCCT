@@ -19,14 +19,9 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
-#include <Standard_Real.hxx>
 class Adaptor3d_Surface;
 class Bnd_Box;
-class gp_Cylinder;
-class gp_Cone;
-class gp_Sphere;
 
 //! computes the box from a surface
 //! Functions to add a surface to a bounding box.

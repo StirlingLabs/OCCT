@@ -19,20 +19,18 @@
 #include <BRep_Tool.hxx>
 #include <BRepAdaptor_Curve.hxx>
 #include <BRepAdaptor_Surface.hxx>
-#include <BRepLib.hxx>
-#include <Geom2d_Curve.hxx>
 #include <Geom2d_Line.hxx>
 #include <Geom_BSplineCurve.hxx>
 #include <Geom_Curve.hxx>
 #include <Geom_Line.hxx>
 #include <Geom_Plane.hxx>
-#include <Geom_Surface.hxx>
 #include <GeomToStep_MakeCurve.hxx>
 #include <GeomToStep_MakeLine.hxx>
 #include <gp_Vec.hxx>
 #include <Interface_Static.hxx>
 #include <StdFail_NotDone.hxx>
-#include <StepGeom_HArray1OfPcurveOrSurface.hxx>
+#include <StepData_Factors.hxx>
+#include <StepData_StepModel.hxx>
 #include <StepGeom_Line.hxx>
 #include <StepGeom_SeamCurve.hxx>
 #include <StepGeom_SurfaceCurve.hxx>
@@ -69,10 +67,11 @@ TopoDSToStep_MakeStepEdge::TopoDSToStep_MakeStepEdge()
 TopoDSToStep_MakeStepEdge::TopoDSToStep_MakeStepEdge
 (const TopoDS_Edge& E,
  TopoDSToStep_Tool& T,
- const Handle(Transfer_FinderProcess)& FP)
+ const Handle(Transfer_FinderProcess)& FP,
+ const StepData_Factors& theLocalFactors)
 {
   done = Standard_False;
-  Init(E, T, FP);
+  Init(E, T, FP, theLocalFactors);
 }
 
 // ----------------------------------------------------------------------------
@@ -82,7 +81,8 @@ TopoDSToStep_MakeStepEdge::TopoDSToStep_MakeStepEdge
 
 void TopoDSToStep_MakeStepEdge::Init(const TopoDS_Edge& aEdge, 
                                      TopoDSToStep_Tool& aTool,
-                                     const Handle(Transfer_FinderProcess)& FP)
+                                     const Handle(Transfer_FinderProcess)& FP,
+                                     const StepData_Factors& theLocalFactors)
 {
   // ------------------------------------------------------------------
   // The edge is given with its relative orientation (i.e. in the wire)
@@ -91,7 +91,8 @@ void TopoDSToStep_MakeStepEdge::Init(const TopoDS_Edge& aEdge,
   aTool.SetCurrentEdge(aEdge);
 
   // [BEGIN] Processing non-manifold topology (ssv; 11.11.2010)
-  Standard_Boolean isNMMode = Interface_Static::IVal("write.step.nonmanifold") != 0;
+  Standard_Boolean isNMMode =
+    Handle(StepData_StepModel)::DownCast(FP->Model())->InternalParameters.WriteNonmanifold != 0;
   if (isNMMode) {
     Handle(StepShape_EdgeCurve) anEC;
     Handle(TransferBRep_ShapeMapper) aSTEPMapper = TransferBRep::ShapeMapper(FP, aEdge);
@@ -133,9 +134,6 @@ void TopoDSToStep_MakeStepEdge::Init(const TopoDS_Edge& aEdge,
     if ( count < 2 ) isSeam = Standard_False;
   }
 
-  BRepAdaptor_Curve   CA = BRepAdaptor_Curve(aEdge);
-  BRepAdaptor_Surface SA = BRepAdaptor_Surface(aTool.CurrentFace());
-
   if (aEdge.Orientation() == TopAbs_INTERNAL  ||
       aEdge.Orientation() == TopAbs_EXTERNAL ) {
     Handle(TransferBRep_ShapeMapper) errShape =
@@ -156,7 +154,7 @@ void TopoDSToStep_MakeStepEdge::Init(const TopoDS_Edge& aEdge,
 
   TopoDSToStep_MakeStepVertex MkVertex;
   
-  MkVertex.Init(Vfirst, aTool, FP);  
+  MkVertex.Init(Vfirst, aTool, FP, theLocalFactors);  
   if (MkVertex.IsDone())
     V1 = Handle(StepShape_Vertex)::DownCast(MkVertex.Value());
   else {
@@ -168,7 +166,7 @@ void TopoDSToStep_MakeStepEdge::Init(const TopoDS_Edge& aEdge,
     return;
   }
   
-  MkVertex.Init(Vlast, aTool, FP);
+  MkVertex.Init(Vlast, aTool, FP, theLocalFactors);
   if (MkVertex.IsDone())
     V2 = Handle(StepShape_Vertex)::DownCast(MkVertex.Value());
   else {
@@ -183,7 +181,7 @@ void TopoDSToStep_MakeStepEdge::Init(const TopoDS_Edge& aEdge,
   // ---------------------------------------
   // Translate 3D representation of the Edge
   // ---------------------------------------
-  
+  BRepAdaptor_Curve CA = BRepAdaptor_Curve(aEdge);
   Handle(StepGeom_Curve) Gpms;
   Handle(Geom_Curve) C = CA.Curve().Curve();
  
@@ -249,7 +247,7 @@ void TopoDSToStep_MakeStepEdge::Init(const TopoDS_Edge& aEdge,
     }
 
  
-    GeomToStep_MakeCurve MkCurve(C);
+    GeomToStep_MakeCurve MkCurve(C, theLocalFactors);
     Gpms = MkCurve.Value();
   }
   else {
@@ -261,6 +259,8 @@ void TopoDSToStep_MakeStepEdge::Init(const TopoDS_Edge& aEdge,
 #ifdef OCCT_DEBUG
     std::cout << "Warning: TopoDSToStep_MakeStepEdge: edge without 3d curve; creating..." << std::endl;
 #endif
+    BRepAdaptor_Surface SA = BRepAdaptor_Surface(aTool.CurrentFace());
+
     if ((SA.GetType() == GeomAbs_Plane) &&
 	(CA.GetType() == GeomAbs_Line)) {
       U1 = CA.FirstParameter();
@@ -268,7 +268,7 @@ void TopoDSToStep_MakeStepEdge::Init(const TopoDS_Edge& aEdge,
       gp_Vec V = gp_Vec( CA.Value(U1), CA.Value(U2) );
       Handle(Geom_Line) L = 
 	new Geom_Line(CA.Value(U1), gp_Dir(V));
-      GeomToStep_MakeLine MkLine(L);
+      GeomToStep_MakeLine MkLine(L, theLocalFactors);
       Gpms = MkLine.Value();
     }
     else {
@@ -292,7 +292,7 @@ void TopoDSToStep_MakeStepEdge::Init(const TopoDS_Edge& aEdge,
       Mult.SetValue(Nbpt,2);
       Handle(Geom_Curve) Bs = 
 	new Geom_BSplineCurve(Points, Knots, Mult, 1);
-      GeomToStep_MakeCurve MkCurve(Bs);
+      GeomToStep_MakeCurve MkCurve(Bs, theLocalFactors);
       Gpms = MkCurve.Value();
     }
   }

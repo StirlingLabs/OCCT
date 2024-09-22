@@ -19,18 +19,14 @@
 #include <Interface_Static.hxx>
 #include <StepBasic_ApplicationContext.hxx>
 #include <StepBasic_DesignContext.hxx>
-#include <StepBasic_HArray1OfProduct.hxx>
-#include <StepBasic_HArray1OfProductContext.hxx>
 #include <StepBasic_MechanicalContext.hxx>
-#include <StepBasic_Product.hxx>
 #include <StepBasic_ProductContext.hxx>
 #include <StepBasic_ProductDefinition.hxx>
 #include <StepBasic_ProductDefinitionContext.hxx>
-#include <StepBasic_ProductDefinitionFormation.hxx>
 #include <StepBasic_ProductDefinitionFormationWithSpecifiedSource.hxx>
-#include <StepBasic_ProductRelatedProductCategory.hxx>
 #include <StepBasic_ProductType.hxx>
 #include <STEPConstruct_Part.hxx>
+#include <StepData_StepModel.hxx>
 #include <StepRepr_ProductDefinitionShape.hxx>
 #include <StepShape_ShapeDefinitionRepresentation.hxx>
 #include <StepShape_ShapeRepresentation.hxx>
@@ -61,10 +57,11 @@ STEPConstruct_Part::STEPConstruct_Part()
 
 void STEPConstruct_Part::MakeSDR(const Handle(StepShape_ShapeRepresentation)& SR,
 				 const Handle(TCollection_HAsciiString)& aName,
-				 const Handle(StepBasic_ApplicationContext)& AC)
+				 const Handle(StepBasic_ApplicationContext)& AC,
+                 Handle(StepData_StepModel)& theStepModel)
 {
   // get current schema
-  Standard_Integer schema = Interface_Static::IVal("write.step.schema");
+  const Standard_Integer schema = theStepModel->InternalParameters.WriteSchema;
   
   // create PC
   Handle(StepBasic_ProductContext) PC;
@@ -147,7 +144,7 @@ void STEPConstruct_Part::MakeSDR(const Handle(StepShape_ShapeRepresentation)& SR
 
   // and an associated PRPC
   Handle(TCollection_HAsciiString) PRPCName;
-  switch (Interface_Static::IVal("write.step.schema")) {
+  switch (theStepModel->InternalParameters.WriteSchema) {
   default:
   case 1: 
     myPRPC = new StepBasic_ProductType; 

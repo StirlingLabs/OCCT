@@ -22,10 +22,7 @@
 
 #include <IFSelect_SelectDeduct.hxx>
 #include <Standard_Integer.hxx>
-#include <Standard_Boolean.hxx>
 class IFSelect_IntParam;
-class Standard_OutOfRange;
-class Interface_InterfaceError;
 class Interface_EntityIterator;
 class Standard_Transient;
 class Interface_Graph;

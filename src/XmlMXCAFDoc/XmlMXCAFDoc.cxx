@@ -13,18 +13,19 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
+#include <XmlMXCAFDoc.hxx>
 
 #include <Message_Messenger.hxx>
 #include <TNaming_NamedShape.hxx>
 #include <XmlMDF_ADriverTable.hxx>
 #include <XmlMNaming_NamedShapeDriver.hxx>
-#include <XmlMXCAFDoc.hxx>
 #include <XmlMXCAFDoc_AssemblyItemRefDriver.hxx>
 #include <XmlMXCAFDoc_CentroidDriver.hxx>
 #include <XmlMXCAFDoc_ColorDriver.hxx>
 #include <XmlMXCAFDoc_DatumDriver.hxx>
 #include <XmlMXCAFDoc_DimTolDriver.hxx>
 #include <XmlMXCAFDoc_GraphNodeDriver.hxx>
+#include <XmlMXCAFDoc_LengthUnitDriver.hxx>
 #include <XmlMXCAFDoc_LocationDriver.hxx>
 #include <XmlMXCAFDoc_MaterialDriver.hxx>
 #include <XmlMXCAFDoc_VisMaterialDriver.hxx>
@@ -56,6 +57,7 @@ void XmlMXCAFDoc::AddDrivers (const Handle(XmlMDF_ADriverTable)& aDriverTable,
   }
   
   aDriverTable -> AddDriver (aLocationDriver);
+  aDriverTable -> AddDriver (new XmlMXCAFDoc_LengthUnitDriver (anMsgDrv));
   aDriverTable -> AddDriver (new XmlMXCAFDoc_AssemblyItemRefDriver(anMsgDrv));
   aDriverTable -> AddDriver (new XmlMXCAFDoc_DatumDriver      (anMsgDrv));
   aDriverTable -> AddDriver (new XmlMXCAFDoc_DimTolDriver     (anMsgDrv));

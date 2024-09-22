@@ -23,8 +23,6 @@
 #include <Standard_Integer.hxx>
 class BinMDF_ADriverTable;
 class Message_Messenger;
-class BinMNaming_NamedShapeDriver;
-class BinMNaming_NamingDriver;
 
 
 //! Storage/Retrieval drivers for TNaming attributes
@@ -38,26 +36,6 @@ public:
   //! Adds the attribute drivers to <theDriverTable>.
   Standard_EXPORT static void AddDrivers (const Handle(BinMDF_ADriverTable)& theDriverTable, const Handle(Message_Messenger)& aMsgDrv);
 
-protected:
-
-
-
-
-
-private:
-
-
-
-
-friend class BinMNaming_NamedShapeDriver;
-friend class BinMNaming_NamingDriver;
-
 };
-
-
-
-
-
-
 
 #endif // _BinMNaming_HeaderFile

@@ -23,14 +23,12 @@
 #include <VrmlData_Cone.hxx>
 #include <VrmlData_Cylinder.hxx>
 #include <VrmlData_Sphere.hxx>
-#include <VrmlData_UnknownNode.hxx>
 #include <BRepPrimAPI_MakeBox.hxx>
 #include <BRepPrim_Cone.hxx>
 #include <BRepPrim_Cylinder.hxx>
 #include <BRepPrim_Sphere.hxx>
 #include <BRepPrim_Builder.hxx>
 #include <NCollection_Vector.hxx>
-#include <Standard_ErrorHandler.hxx>
 #include <VrmlData_ArrayVec3d.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(VrmlData_Geometry,VrmlData_Node)
@@ -632,7 +630,7 @@ VrmlData_ErrorStatus VrmlData_ArrayVec3d::ReadArray
     if (OK(aStatus) && OK(aStatus, VrmlData_Scene::ReadLine(theBuffer))) {
       if (theBuffer.LinePtr[0] != '[')  // opening bracket
       {
-        // Handle case when brackets are ommited for single element of array
+        // Handle case when brackets are omitted for single element of array
         gp_XYZ anXYZ;
         // Read three numbers (XYZ value)
         if (!OK(aStatus, Scene().ReadXYZ(theBuffer, anXYZ,

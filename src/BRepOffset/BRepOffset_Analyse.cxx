@@ -18,26 +18,19 @@
 #include <Adaptor3d_Surface.hxx>
 #include <BOPTools_AlgoTools.hxx>
 #include <BOPTools_AlgoTools3D.hxx>
-#include <BRep_Builder.hxx>
-#include <BRep_Tool.hxx>
 #include <BRepAdaptor_Curve.hxx>
-#include <BRepAdaptor_Surface.hxx>
 #include <BRepOffset_Analyse.hxx>
 #include <BRepOffset_Interval.hxx>
-#include <BRepOffset_ListIteratorOfListOfInterval.hxx>
 #include <BRepOffset_Tool.hxx>
 #include <BRepPrimAPI_MakePrism.hxx>
 #include <BRepTools.hxx>
-#include <Geom2d_Curve.hxx>
 #include <Geom_Curve.hxx>
-#include <Geom_Surface.hxx>
 #include <gp.hxx>
 #include <gp_Dir.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_Pnt2d.hxx>
 #include <gp_Vec.hxx>
 #include <IntTools_Context.hxx>
-#include <Precision.hxx>
 #include <TopExp.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS.hxx>
@@ -46,9 +39,9 @@
 #include <TopoDS_Face.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Vertex.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopTools_MapOfShape.hxx>
 #include <ChFi3d.hxx>
+#include <LocalAnalysis_SurfaceContinuity.hxx>
 
 static void CorrectOrientationOfTangent(gp_Vec& TangVec,
                                         const TopoDS_Vertex& aVertex,
@@ -58,6 +51,12 @@ static void CorrectOrientationOfTangent(gp_Vec& TangVec,
   if (aVertex.IsSame(Vlast))
     TangVec.Reverse();
 }
+
+static Standard_Boolean CheckMixedContinuity (const TopoDS_Edge&  theEdge,
+                                              const TopoDS_Face&  theFace1,
+                                              const TopoDS_Face&  theFace2,
+                                              const Standard_Real theAngTol);
+
 //=======================================================================
 //function : BRepOffset_Analyse
 //purpose  : 
@@ -113,14 +112,167 @@ static void EdgeAnalyse(const TopoDS_Edge&         E,
   }
   else
   {
-    if (ChFi3d::IsTangentFaces(E, F1, F2)) //weak condition
-      ConnectType = ChFiDS_Tangential;
+    Standard_Boolean isTwoSplines = (aSurfType1 == GeomAbs_BSplineSurface || aSurfType1 == GeomAbs_BezierSurface) &&
+                                    (aSurfType2 == GeomAbs_BSplineSurface || aSurfType2 == GeomAbs_BezierSurface);
+    Standard_Boolean isMixedConcavity = Standard_False;
+    if (isTwoSplines)
+    {
+      Standard_Real anAngTol = 0.1;
+      isMixedConcavity = CheckMixedContinuity(E, F1, F2, anAngTol);
+    }
+
+    if (!isMixedConcavity)
+    {
+      if (ChFi3d::IsTangentFaces(E, F1, F2)) //weak condition
+      {
+        ConnectType = ChFiDS_Tangential;
+      }
+      else
+      {
+        ConnectType = ChFi3d::DefineConnectType(E, F1, F2, SinTol, Standard_False);
+      }
+    }
     else
-      ConnectType = ChFi3d::DefineConnectType(E, F1, F2, SinTol, Standard_False);
+    {
+      ConnectType = ChFiDS_Mixed;
+    }
   }
    
   I.Type(ConnectType);
   LI.Append(I);
+}
+//=======================================================================
+//function : CheckMixedConcavity
+//purpose  : 
+//=======================================================================
+Standard_Boolean CheckMixedContinuity (const TopoDS_Edge&  theEdge,
+                                       const TopoDS_Face&  theFace1,
+                                       const TopoDS_Face&  theFace2,
+                                       const Standard_Real theAngTol)
+{
+  Standard_Boolean aMixedCont = Standard_False;
+  GeomAbs_Shape aCurrOrder = BRep_Tool::Continuity(theEdge, theFace1, theFace2);
+  if (aCurrOrder > GeomAbs_C0)
+  {
+    //Method BRep_Tool::Continuity(...) always returns minimal continuity between faces
+    //so, if aCurrOrder > C0 it means that faces are tangent along whole edge.
+    return aMixedCont;
+  }
+  //But we caqnnot trust result, if it is C0. because this value set by default.
+  Standard_Real TolC0 = Max(0.001, 1.5*BRep_Tool::Tolerance(theEdge));
+
+  Standard_Real aFirst;
+  Standard_Real aLast;
+
+  Handle(Geom2d_Curve) aC2d1, aC2d2;
+
+  if (!theFace1.IsSame(theFace2) &&
+    BRep_Tool::IsClosed(theEdge, theFace1) &&
+    BRep_Tool::IsClosed(theEdge, theFace2))
+  {
+    //Find the edge in the face 1: this edge will have correct orientation
+    TopoDS_Edge anEdgeInFace1;
+    TopoDS_Face aFace1 = theFace1;
+    aFace1.Orientation(TopAbs_FORWARD);
+    TopExp_Explorer anExplo(aFace1, TopAbs_EDGE);
+    for (; anExplo.More(); anExplo.Next())
+    {
+      const TopoDS_Edge& anEdge = TopoDS::Edge(anExplo.Current());
+      if (anEdge.IsSame(theEdge))
+      {
+        anEdgeInFace1 = anEdge;
+        break;
+      }
+    }
+    if (anEdgeInFace1.IsNull())
+    {
+      return aMixedCont;
+    }
+
+    aC2d1 = BRep_Tool::CurveOnSurface(anEdgeInFace1, aFace1, aFirst, aLast);
+    TopoDS_Face aFace2 = theFace2;
+    aFace2.Orientation(TopAbs_FORWARD);
+    anEdgeInFace1.Reverse();
+    aC2d2 = BRep_Tool::CurveOnSurface(anEdgeInFace1, aFace2, aFirst, aLast);
+  }
+  else
+  {
+    // Obtaining of pcurves of edge on two faces.
+    aC2d1 = BRep_Tool::CurveOnSurface(theEdge, theFace1, aFirst, aLast);
+    //For the case of seam edge
+    TopoDS_Edge EE = theEdge;
+    if (theFace1.IsSame(theFace2))
+    {
+      EE.Reverse();
+    }
+    aC2d2 = BRep_Tool::CurveOnSurface(EE, theFace2, aFirst, aLast);
+  }
+
+  if (aC2d1.IsNull() || aC2d2.IsNull())
+  {
+    return aMixedCont;
+  }
+
+  // Obtaining of two surfaces from adjacent faces.
+  Handle(Geom_Surface) aSurf1 = BRep_Tool::Surface(theFace1);
+  Handle(Geom_Surface) aSurf2 = BRep_Tool::Surface(theFace2);
+
+  if (aSurf1.IsNull() || aSurf2.IsNull())
+  {
+    return aMixedCont;
+  }
+
+  Standard_Integer aNbSamples = 23;
+
+  // Computation of the continuity.
+  Standard_Real    aPar;
+  Standard_Real    aDelta = (aLast - aFirst) / (aNbSamples - 1);
+  Standard_Integer i, istart = 1;
+  Standard_Boolean isG1 = Standard_False;
+
+  for (i = 1, aPar = aFirst; i <= aNbSamples; i++, aPar += aDelta) 
+  {
+    if (i == aNbSamples) aPar = aLast;
+
+    LocalAnalysis_SurfaceContinuity aCont(aC2d1, aC2d2, aPar,
+      aSurf1, aSurf2, GeomAbs_G1, 0.001, TolC0, theAngTol, theAngTol, theAngTol);
+    if (aCont.IsDone())
+    {
+      istart = i + 1;
+      isG1 = aCont.IsG1();
+      break;
+    }
+  }
+
+  if (istart > aNbSamples / 2)
+  {
+    return aMixedCont;
+  }
+
+  for (i = istart, aPar = aFirst; i <= aNbSamples; i++, aPar += aDelta) 
+  {
+    if (i == aNbSamples) aPar = aLast;
+
+    LocalAnalysis_SurfaceContinuity aCont(aC2d1, aC2d2, aPar,
+      aSurf1, aSurf2, GeomAbs_G1, 0.001, TolC0, theAngTol, theAngTol, theAngTol);
+    if (!aCont.IsDone())
+    {
+      continue;
+    }
+
+    if (aCont.IsG1() == isG1)
+    {
+      continue;
+    }
+    else
+    {
+       aMixedCont = Standard_True;
+       break;
+    }
+  }
+
+  return aMixedCont;
+
 }
 
 //=======================================================================
@@ -140,7 +292,8 @@ static void BuildAncestors (const TopoDS_Shape&                        S,
 //purpose  : 
 //=======================================================================
 void BRepOffset_Analyse::Perform (const TopoDS_Shape& S, 
-                                  const Standard_Real Angle)
+                                  const Standard_Real Angle,
+                                  const Message_ProgressRange& theRange)
 {
   myShape = S;
   myNewFaces .Clear();
@@ -155,9 +308,14 @@ void BRepOffset_Analyse::Perform (const TopoDS_Shape& S,
   BuildAncestors (S,myAncestors);
 
   TopTools_ListOfShape aLETang;
-
   TopExp_Explorer Exp(S.Oriented(TopAbs_FORWARD),TopAbs_EDGE);
-  for ( ; Exp.More(); Exp.Next()) {
+  Message_ProgressScope aPSOuter(theRange, NULL, 2);
+  Message_ProgressScope aPS(aPSOuter.Next(), "Performing edges analysis", 1, Standard_True);
+  for ( ; Exp.More(); Exp.Next(), aPS.Next()) {
+    if (!aPS.More())
+    {
+      return;
+    }
     const TopoDS_Edge& E = TopoDS::Edge(Exp.Current());
     if (!myMapEdgeType.IsBound(E)) {
       BRepOffset_ListOfInterval LI;
@@ -196,7 +354,11 @@ void BRepOffset_Analyse::Perform (const TopoDS_Shape& S,
     }
   }
 
-  TreatTangentFaces (aLETang);
+  TreatTangentFaces (aLETang, aPSOuter.Next());
+  if (!aPSOuter.More())
+  {
+    return;
+  }
   myDone = Standard_True;
 }
 
@@ -204,7 +366,7 @@ void BRepOffset_Analyse::Perform (const TopoDS_Shape& S,
 //function : Generated
 //purpose  : 
 //=======================================================================
-void BRepOffset_Analyse::TreatTangentFaces (const TopTools_ListOfShape& theLE)
+void BRepOffset_Analyse::TreatTangentFaces (const TopTools_ListOfShape& theLE, const Message_ProgressRange& theRange)
 {
   if (theLE.IsEmpty() || myFaceOffsetMap.IsEmpty())
   {
@@ -221,8 +383,14 @@ void BRepOffset_Analyse::TreatTangentFaces (const TopTools_ListOfShape& theLE)
   // Bind vertices of the tangent edges with connected edges
   // of the face with smaller offset value
   TopTools_DataMapOfShapeShape aDMVEMin;
-  for (TopTools_ListOfShape::Iterator it (theLE); it.More(); it.Next())
+  Message_ProgressScope aPSOuter(theRange, NULL, 3);
+  Message_ProgressScope aPS1(aPSOuter.Next(), "Binding vertices with connected edges", theLE.Size());
+  for (TopTools_ListOfShape::Iterator it (theLE); it.More(); it.Next(), aPS1.Next())
   {
+    if (!aPS1.More())
+    {
+      return;
+    }
     const TopoDS_Shape& aE = it.Value();
     const TopTools_ListOfShape& aLA = Ancestors (aE);
 
@@ -266,8 +434,13 @@ void BRepOffset_Analyse::TreatTangentFaces (const TopTools_ListOfShape& theLE)
   // Create map of Face ancestors for the vertices on tangent edges
   TopTools_DataMapOfShapeListOfShape aDMVFAnc;
 
-  for (TopTools_ListOfShape::Iterator itE (theLE); itE.More(); itE.Next())
+  Message_ProgressScope aPS2(aPSOuter.Next(), "Creating map of Face ancestors", theLE.Size());
+  for (TopTools_ListOfShape::Iterator itE (theLE); itE.More(); itE.Next(), aPS2.Next())
   {
+    if (!aPS2.More())
+    {
+      return;
+    }
     const TopoDS_Shape& aE = itE.Value();
     if (!anEdgeOffsetMap.IsBound (aE))
       continue;
@@ -315,8 +488,13 @@ void BRepOffset_Analyse::TreatTangentFaces (const TopTools_ListOfShape& theLE)
   BOPTools_AlgoTools::MakeConnexityBlocks (aCETangent, TopAbs_VERTEX, TopAbs_EDGE, aLCB, aMVEMap);
 
   // Analyze each block to find co-planar edges
-  for (TopTools_ListOfListOfShape::Iterator itLCB (aLCB); itLCB.More(); itLCB.Next())
+  Message_ProgressScope aPS3(aPSOuter.Next(), "Analyzing blocks to find co-planar edges", aLCB.Size());
+  for (TopTools_ListOfListOfShape::Iterator itLCB (aLCB); itLCB.More(); itLCB.Next(), aPS3.Next())
   {
+    if (!aPS3.More())
+    {
+      return;
+    }
     const TopTools_ListOfShape& aCB = itLCB.Value();
 
     TopTools_MapOfShape aMFence;

@@ -24,9 +24,6 @@
 #include <Draw_Interpretor.hxx>
 #include <Standard_OStream.hxx>
 class TDataXtd_Constraint;
-class DDataStd_DrawPresentation;
-class DDataStd_DrawDriver;
-class DDataStd_TreeBrowser;
 
 
 //! commands for Standard Attributes.
@@ -72,30 +69,6 @@ public:
   
   Standard_EXPORT static void DumpConstraint (const Handle(TDataXtd_Constraint)& C, Standard_OStream& S);
 
-
-
-
-protected:
-
-
-
-
-
-private:
-
-
-
-
-friend class DDataStd_DrawPresentation;
-friend class DDataStd_DrawDriver;
-friend class DDataStd_TreeBrowser;
-
 };
-
-
-
-
-
-
 
 #endif // _DDataStd_HeaderFile

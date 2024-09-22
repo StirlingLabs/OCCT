@@ -28,12 +28,7 @@
 #include <AppParCurves_Array1OfMultiPoint.hxx>
 #include <TColStd_Array1OfReal.hxx>
 #include <TColStd_Array1OfInteger.hxx>
-#include <Standard_Real.hxx>
 #include <Standard_OStream.hxx>
-class Standard_OutOfRange;
-class Standard_DimensionError;
-class Standard_ConstructionError;
-class AppParCurves_MultiCurve;
 class gp_Pnt;
 class gp_Pnt2d;
 class gp_Vec;

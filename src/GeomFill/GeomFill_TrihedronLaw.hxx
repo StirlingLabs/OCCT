@@ -22,8 +22,6 @@
 #include <GeomAbs_Shape.hxx>
 #include <TColStd_Array1OfReal.hxx>
 
-class Standard_OutOfRange;
-class Standard_NotImplemented;
 class gp_Vec;
 
 
@@ -36,8 +34,9 @@ class GeomFill_TrihedronLaw : public Standard_Transient
 
 public:
 
-  
-  Standard_EXPORT virtual void SetCurve (const Handle(Adaptor3d_Curve)& C);
+  //! initialize curve of trihedron law
+  //! @return Standard_True
+  Standard_EXPORT virtual Standard_Boolean SetCurve (const Handle(Adaptor3d_Curve)& C);
   
   Standard_EXPORT virtual Handle(GeomFill_TrihedronLaw) Copy() const = 0;
   

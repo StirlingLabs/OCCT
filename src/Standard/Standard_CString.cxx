@@ -18,43 +18,11 @@
 //          resizing of a Map or copying an item from a Map to another Map.
 //        - three methods of HashCoding of strings converted to uppercase.
 
-#include <Standard_Type.hxx>
-
 #include <Standard_CLocaleSentry.hxx>
 #include <Standard_CString.hxx>
 #include <Standard_Type.hxx>
 #include <string.h>
 #include <stdarg.h>
-
-//============================================================================
-// function : HashCode
-// purpose  :
-//============================================================================
-Standard_Integer HashCode (const Standard_CString theString, const Standard_Integer theUpperBound)
-{
-  const Standard_Integer aLength = static_cast<Standard_Integer> (strlen (theString));
-
-  return HashCode (theString, aLength, theUpperBound);
-}
-
-//============================================================================
-// function : HashCodes
-// purpose  :
-//============================================================================
-Standard_Integer HashCodes (const Standard_CString theString, const Standard_Integer theLength)
-{
-  // compute DJB2 hash of a string
-  unsigned int              hash = 0;
-  const Standard_Character* c    = theString;
-
-  for (Standard_Integer i = 0; i < theLength; ++i, ++c)
-  {
-    /* hash = hash * 33 ^ c */
-    hash = ((hash << 5) + hash) ^ (*c);
-  }
-
-  return static_cast<Standard_Integer>(hash);
-}
 
 //======================================================================
 // Locale-independent equivalents of C functions dealing with conversion
@@ -90,13 +58,6 @@ Standard_Integer HashCodes (const Standard_CString theString, const Standard_Int
   #define vsprintf_l(theBuffer, theLocale, theFormat, theArgPtr) vsprintf(theBuffer, theFormat, theArgPtr)
   #define vfprintf_l(theFile,   theLocale, theFormat, theArgPtr) vfprintf(theFile,   theFormat, theArgPtr)
 #endif
-
-/*
-double Strtod (const char* theStr, char** theNextPtr)
-{
-  return strtod_l (theStr, theNextPtr, Standard_CLocaleSentry::GetCLocale());
-}
-*/
 
 double Atof (const char* theStr)
 {

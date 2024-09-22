@@ -17,7 +17,6 @@
 
 #include <BRepOffset.hxx>
 #include <BRep_Tool.hxx>
-#include <Geom_BSplineSurface.hxx>
 #include <Geom_ConicalSurface.hxx>
 #include <Geom_CylindricalSurface.hxx>
 #include <Geom_OffsetSurface.hxx>
@@ -39,7 +38,6 @@
 #include <TopoDS.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
-#include <TopoDS_ListOfShape.hxx>
 #include <TopoDS_Vertex.hxx>
 
 //=======================================================================
@@ -51,7 +49,7 @@ Handle(Geom_Surface) BRepOffset::Surface(const Handle(Geom_Surface)& Surface,
                                          BRepOffset_Status& theStatus,
                                          Standard_Boolean allowC0)
 {
-  Standard_Real Tol = Precision::Confusion();
+  constexpr Standard_Real Tol = Precision::Confusion();
 
   theStatus = BRepOffset_Good;
   Handle(Geom_Surface) Result;

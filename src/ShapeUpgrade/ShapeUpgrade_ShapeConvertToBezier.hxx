@@ -21,7 +21,6 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
-#include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
 #include <ShapeUpgrade_ShapeDivide.hxx>
 class TopoDS_Shape;
@@ -124,7 +123,7 @@ protected:
   
   Standard_EXPORT virtual Message_Msg GetWireMsg() const Standard_OVERRIDE;
   
-  //! Returns a message decsribing modification of a shape.
+  //! Returns a message describing modification of a shape.
   Standard_EXPORT virtual Message_Msg GetEdgeMsg() const Standard_OVERRIDE;
 
 

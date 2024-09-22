@@ -18,13 +18,11 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
 #include <TopLoc_IndexedMapOfLocation.hxx>
 #include <Standard_Integer.hxx>
 #include <Standard_OStream.hxx>
 #include <Standard_IStream.hxx>
-class Standard_OutOfRange;
 class TopLoc_Location;
 
 //! Operator for writing transformation into the stream

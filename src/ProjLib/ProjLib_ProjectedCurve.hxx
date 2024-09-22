@@ -17,7 +17,6 @@
 #ifndef _ProjLib_ProjectedCurve_HeaderFile
 #define _ProjLib_ProjectedCurve_HeaderFile
 
-#include <Adaptor3d_Curve.hxx>
 #include <Adaptor2d_Curve2d.hxx>
 #include <Adaptor3d_Surface.hxx>
 #include <AppParCurves_Constraint.hxx>
@@ -67,6 +66,9 @@ public:
   //! If projecting uses approximation, 3d tolerance is Tol, default parameters are used, 
   Standard_EXPORT ProjLib_ProjectedCurve(const Handle(Adaptor3d_Surface)& S, const Handle(Adaptor3d_Curve)& C, const Standard_Real Tol);
   
+  //! Shallow copy of adaptor
+  Standard_EXPORT virtual Handle(Adaptor2d_Curve2d) ShallowCopy() const Standard_OVERRIDE;
+
   //! Changes the tolerance used to project
   //! the curve on the surface
   Standard_EXPORT void Load (const Standard_Real Tolerance);

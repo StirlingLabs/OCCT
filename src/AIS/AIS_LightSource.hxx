@@ -17,10 +17,10 @@
 #define _AIS_LightSource_HeaderFile
 
 #include <AIS_InteractiveObject.hxx>
-#include <Graphic3d_CLight.hxx>
+#include <Graphic3d_AspectLine3d.hxx>
+#include <Graphic3d_AspectMarker3d.hxx>
 #include <SelectMgr_EntityOwner.hxx>
 
-class Prs3d_ShadingAspect;
 class Select3D_SensitiveSphere;
 
 //! Interactive object for a light source.
@@ -260,7 +260,6 @@ protected:
   Aspect_TypeOfMarker              myCodirMarkerType;       //!< icon of arrow co-directional to camera direction (look from)
   Aspect_TypeOfMarker              myOpposMarkerType;       //!< icon of arrow opposite to camera direction (look at)
 
-  Graphic3d_Vec2i  myStartTransform;    //!< position of starting transformation
   gp_Trsf          myLocTrsfStart;      //!< object transformation before transformation
   Standard_Real    mySize;              //!< presentation size
   Standard_Integer myNbArrows;          //!< number of directional light arrows

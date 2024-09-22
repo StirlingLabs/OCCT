@@ -19,13 +19,13 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
 #include <GeomAbs_SurfaceType.hxx>
 #include <gp_Ax3.hxx>
-#include <gp_Cone.hxx>
-#include <gp_Cylinder.hxx>
 #include <TColStd_ListOfReal.hxx>
+
+class gp_Cone;
+class gp_Cylinder;
 
 //! Definition of a parametric Curve which is the result
 //! of the intersection between two quadrics.
@@ -51,7 +51,7 @@ public:
   //! last parameter or at the first parameter of the domain.
   Standard_EXPORT Standard_Boolean IsOpen() const;
   
-  //! Returns the paramatric domain of the curve.
+  //! Returns the parametric domain of the curve.
   Standard_EXPORT void Domain(Standard_Real& theFirst, Standard_Real& theLast) const;
   
   //! Returns TRUE if the function is constant.

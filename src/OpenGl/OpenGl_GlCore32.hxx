@@ -13,8 +13,8 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef _OpenGl_GlCore32_Header
-#define _OpenGl_GlCore32_Header
+#ifndef OpenGl_GlCore32_HeaderFile
+#define OpenGl_GlCore32_HeaderFile
 
 #include <OpenGl_GlCore31.hxx>
 
@@ -23,8 +23,6 @@ struct OpenGl_GlCore32 : public OpenGl_GlCore31
 {
 private:
   typedef OpenGl_GlCore31 theBaseClass_t;
-
-#if !defined(GL_ES_VERSION_2_0)
 
 public: //! @name GL_ARB_draw_elements_base_vertex (added to OpenGL 3.2 core)
 
@@ -59,8 +57,6 @@ public: //! @name OpenGL 3.2 additives to 3.1
   using theBaseClass_t::glGetInteger64i_v;
   using theBaseClass_t::glGetBufferParameteri64v;
   using theBaseClass_t::glFramebufferTexture;
-
-#endif
 
 };
 

@@ -18,7 +18,6 @@
 #define _Adaptor3d_CurveOnSurface_HeaderFile
 
 #include <Adaptor2d_Curve2d.hxx>
-#include <Adaptor3d_Curve.hxx>
 #include <Adaptor3d_Surface.hxx>
 #include <GeomAbs_CurveType.hxx>
 #include <GeomAbs_Shape.hxx>
@@ -45,6 +44,9 @@ public:
   //! the surface <S>.
   Standard_EXPORT Adaptor3d_CurveOnSurface(const Handle(Adaptor2d_Curve2d)& C, const Handle(Adaptor3d_Surface)& S);
   
+  //! Shallow copy of adaptor
+  Standard_EXPORT virtual Handle(Adaptor3d_Curve) ShallowCopy() const Standard_OVERRIDE;
+
   //! Changes the surface.
   Standard_EXPORT void Load (const Handle(Adaptor3d_Surface)& S);
   

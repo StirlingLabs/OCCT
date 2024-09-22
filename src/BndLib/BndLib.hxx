@@ -38,9 +38,6 @@ class gp_Cylinder;
 class gp_Cone;
 class gp_Sphere;
 class gp_Torus;
-class BndLib_Add3dCurve;
-class BndLib_Add2dCurve;
-class BndLib_AddSurface;
 
 
 //! The BndLib package provides functions to add a geometric primitive to a bounding box.
@@ -184,30 +181,6 @@ public:
   //! VMin,VMax can be [-pi/2,pi/2]
   Standard_EXPORT static void Add (const gp_Torus& P, const Standard_Real UMin, const Standard_Real UMax, const Standard_Real VMin, const Standard_Real VMax, const Standard_Real Tol, Bnd_Box& B);
 
-
-
-
-protected:
-
-
-
-
-
-private:
-
-
-
-
-friend class BndLib_Add3dCurve;
-friend class BndLib_Add2dCurve;
-friend class BndLib_AddSurface;
-
 };
-
-
-
-
-
-
 
 #endif // _BndLib_HeaderFile

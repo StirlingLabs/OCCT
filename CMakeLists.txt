@@ -1,10 +1,30 @@
-cmake_minimum_required (VERSION 2.8.12 FATAL_ERROR)
+cmake_minimum_required (VERSION 3.1 FATAL_ERROR)
 
 set (CMAKE_MODULE_PATH "${CMAKE_SOURCE_DIR}/adm/cmake")
 
 set (CMAKE_SUPPRESS_REGENERATION TRUE)
 
 set (CMAKE_CONFIGURATION_TYPES Release Debug RelWithDebInfo CACHE INTERNAL "" FORCE)
+
+# set using C++ standard
+set (BUILD_CPP_STANDARD "C++11" CACHE STRING "Select using c++ standard.")
+set_property(CACHE BUILD_CPP_STANDARD PROPERTY STRINGS "C++11" "C++14" "C++17" "C++20" "C++23")
+
+# Set desired C++ standard
+if     ("${BUILD_CPP_STANDARD}" STREQUAL "C++11")
+  set (CMAKE_CXX_STANDARD 11)
+elseif ("${BUILD_CPP_STANDARD}" STREQUAL "C++14")
+  set (CMAKE_CXX_STANDARD 14)
+elseif ("${BUILD_CPP_STANDARD}" STREQUAL "C++17")
+  set (CMAKE_CXX_STANDARD 17)
+elseif ("${BUILD_CPP_STANDARD}" STREQUAL "C++20")
+  set (CMAKE_CXX_STANDARD 20)
+elseif ("${BUILD_CPP_STANDARD}" STREQUAL "C++23")
+  set (CMAKE_CXX_STANDARD 23)
+else ()
+  message (FATAL_ERROR, "misprint in c++ standard name")
+endif()
+set (CMAKE_CXX_STANDARD_REQUIRED ON)
 
 # macro: include patched file if it exists
 macro (OCCT_INCLUDE_CMAKE_FILE BEING_INCLUDED_FILE)
@@ -14,6 +34,14 @@ macro (OCCT_INCLUDE_CMAKE_FILE BEING_INCLUDED_FILE)
     include (${CMAKE_SOURCE_DIR}/${BEING_INCLUDED_FILE}.cmake)
   endif()
 endmacro()
+
+# set using memory manager option for TKernel
+set (USE_MMGR_TYPE "NATIVE" CACHE STRING "Select using memory manager tool.")
+set_property(CACHE USE_MMGR_TYPE PROPERTY STRINGS "NATIVE" "FLEXIBLE" "TBB" "JEMALLOC")
+
+# set profile for C++ compiler and linker
+set (BUILD_OPT_PROFILE "Default" CACHE STRING "Select profile for compiler and linker.")
+set_property(CACHE BUILD_OPT_PROFILE PROPERTY STRINGS "Default" "Production")
 
 # include variable description
 OCCT_INCLUDE_CMAKE_FILE ("adm/cmake/vardescr")
@@ -56,6 +84,20 @@ set_property (GLOBAL PROPERTY OCC_VERSION_MAJOR ${OCC_VERSION_MAJOR})
 set_property (GLOBAL PROPERTY OCC_VERSION_MINOR ${OCC_VERSION_MINOR})
 set_property (GLOBAL PROPERTY OCC_VERSION_MAINTENANCE ${OCC_VERSION_MAINTENANCE})
 
+# set soversion variable determining compatibility version on platforms with symlinks
+# 0 - for empty, 1 - for major, 2 - for major.minor, 3 - for major.minor.maintenance
+if (NOT BUILD_SOVERSION_NUMBERS)
+  set (BUILD_SOVERSION_NUMBERS "0" CACHE STRING "${BUILD_SOVERSION_NUMBERS_DESCR}" FORCE)
+  SET_PROPERTY(CACHE BUILD_SOVERSION_NUMBERS PROPERTY STRINGS 0 1 2 3)
+
+  # update default state of soversion on different platforms
+  if (WIN32 OR ANDROID OR EMSCRIPTEN)
+    set (BUILD_SOVERSION_NUMBERS 0)
+  else()
+    set (BUILD_SOVERSION_NUMBERS 2)
+  endif()
+endif()
+
 set (INSTALL_TEST_CASES OFF CACHE BOOL "${INSTALL_TEST_CASES_DESCR}")
 
 # Regeneration of OCCT resource files
@@ -89,6 +131,16 @@ endif()
 # option disabling OCCT exceptions in Release builds (No_Exception)
 if (NOT DEFINED BUILD_RELEASE_DISABLE_EXCEPTIONS)
   set (BUILD_RELEASE_DISABLE_EXCEPTIONS ON CACHE BOOL "${BUILD_RELEASE_DISABLE_EXCEPTIONS_DESCR}")
+endif()
+
+if (MSVC)
+  set (BUILD_FORCE_RelWithDebInfo OFF CACHE BOOL "${BUILD_FORCE_RelWithDebInfo_DESCR}")
+else()
+  set (BUILD_FORCE_RelWithDebInfo OFF)
+endif()
+
+if (BUILD_FORCE_RelWithDebInfo)
+  set (CMAKE_CONFIGURATION_TYPES Release Debug CACHE INTERNAL "" FORCE)
 endif()
 
 # option to enable or disable use of precompiled headers
@@ -370,6 +422,7 @@ set (USE_FREEIMAGE OFF CACHE BOOL "${USE_FREEIMAGE_DESCR}")
 set (USE_FFMPEG    OFF CACHE BOOL "${USE_FFMPEG_DESCR}")
 set (USE_OPENVR    OFF CACHE BOOL "${USE_OPENVR_DESCR}")
 set (USE_RAPIDJSON OFF CACHE BOOL "${USE_RAPIDJSON_DESCR}")
+set (USE_DRACO     OFF CACHE BOOL "${USE_DRACO_DESCR}")
 set (USE_TBB       OFF CACHE BOOL "${USE_TBB_DESCR}")
 set (USE_EIGEN     OFF CACHE BOOL "${USE_EIGEN_DESCR}")
 
@@ -650,8 +703,10 @@ endif()
 if (CAN_USE_GLES2)
   if (USE_GLES2)
     add_definitions (-DHAVE_GLES2_EXT)
-    OCCT_INCLUDE_CMAKE_FILE ("adm/cmake/egl")
-    OCCT_INCLUDE_CMAKE_FILE ("adm/cmake/gles2")
+    if (NOT IOS)
+      OCCT_INCLUDE_CMAKE_FILE ("adm/cmake/egl")
+      OCCT_INCLUDE_CMAKE_FILE ("adm/cmake/gles2")
+    endif()
   else()
     OCCT_CHECK_AND_UNSET_GROUP ("3RDPARTY_EGL")
     OCCT_CHECK_AND_UNSET_GROUP ("3RDPARTY_GLES2")
@@ -716,6 +771,24 @@ else()
   OCCT_CHECK_AND_UNSET ("INSTALL_RAPIDJSON")
 endif()
 
+# Draco library
+# search for CSF_Draco variable in EXTERNLIB of each being used toolkit
+OCCT_IS_PRODUCT_REQUIRED (CSF_Draco CAN_USE_DRACO)
+if (CAN_USE_DRACO)
+  if (USE_DRACO)
+    add_definitions (-DHAVE_DRACO)
+    OCCT_INCLUDE_CMAKE_FILE ("adm/cmake/draco")
+  else()
+    OCCT_CHECK_AND_UNSET_GROUP ("3RDPARTY_DRACO")
+    OCCT_CHECK_AND_UNSET ("INSTALL_DRACO")
+  endif()
+else()
+  OCCT_CHECK_AND_UNSET ("USE_DRACO")
+
+  OCCT_CHECK_AND_UNSET_GROUP ("3RDPARTY_DRACO")
+  OCCT_CHECK_AND_UNSET ("INSTALL_DRACO")
+endif()
+
 # EIGEN
 if (CAN_USE_EIGEN)
   if (USE_EIGEN)
@@ -767,6 +840,14 @@ if (BUILD_YACCLEX)
   OCCT_INCLUDE_CMAKE_FILE ("adm/cmake/flex")
 else()
   OCCT_CHECK_AND_UNSET ("3RDPARTY_FLEX_EXECUTABLE")
+endif()
+
+# Jemalloc
+if ("${USE_MMGR_TYPE}" STREQUAL "JEMALLOC")
+  OCCT_INCLUDE_CMAKE_FILE ("adm/cmake/jemalloc")
+else()
+  OCCT_CHECK_AND_UNSET_GROUP ("3RDPARTY_JEMALLOC")
+  OCCT_CHECK_AND_UNSET ("INSTALL_JEMALLOC")
 endif()
 
 # qt for inspector and samples
@@ -931,10 +1012,10 @@ if (${DRAWEXE_INDEX} GREATER -1)
   # copy draw script to install script folder
   if (BUILD_PATCH AND EXISTS "${BUILD_PATCH}/adm/templates/draw.${SCRIPT_EXT}")
     install (FILES "${BUILD_PATCH}/adm/templates/draw.${SCRIPT_EXT}" DESTINATION  "${INSTALL_DIR_SCRIPT}"
-            PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_WRITE WORLD_EXECUTE)
+            PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
   else()
     install (FILES "${CMAKE_SOURCE_DIR}/adm/templates/draw.${SCRIPT_EXT}" DESTINATION  "${INSTALL_DIR_SCRIPT}"
-            PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_WRITE WORLD_EXECUTE)
+            PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
   endif()
 
   # copy draw script to CMake binary folder
@@ -1095,14 +1176,8 @@ if (BUILD_SAMPLES_MFC)
   add_subdirectory(samples/mfc/standard/mfcsample)
   add_subdirectory(samples/mfc/standard/01_Geometry)
   add_subdirectory(samples/mfc/standard/02_Modeling)
-  add_subdirectory(samples/mfc/standard/03_Viewer2d)
-  add_subdirectory(samples/mfc/standard/04_Viewer3d)
-  add_subdirectory(samples/mfc/standard/05_ImportExport)
-  add_subdirectory(samples/mfc/standard/06_Ocaf)
-  add_subdirectory(samples/mfc/standard/07_Triangulation)
-  add_subdirectory(samples/mfc/standard/08_HLR)
-  add_subdirectory(samples/mfc/standard/09_Animation)
-  add_subdirectory(samples/mfc/standard/10_Convert)
+  add_subdirectory(samples/mfc/standard/03_ImportExport)
+  add_subdirectory(samples/mfc/standard/04_HLR)
 
   message (STATUS "Info: \(${CURRENT_TIME}\) MFC Sample projects added")
 endif()
@@ -1142,10 +1217,10 @@ if (BUILD_TOOL_TOOLKITS)
   # copy tinspector script to install script folder
   if (BUILD_PATCH AND EXISTS "${BUILD_PATCH}/adm/templates/inspector.${SCRIPT_EXT}")
     install (FILES "${BUILD_PATCH}/adm/templates/inspector.${SCRIPT_EXT}" DESTINATION  "${INSTALL_DIR_SCRIPT}"
-            PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_WRITE WORLD_EXECUTE)
+            PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
   else()
     install (FILES "${CMAKE_SOURCE_DIR}/adm/templates/inspector.${SCRIPT_EXT}" DESTINATION  "${INSTALL_DIR_SCRIPT}"
-            PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_WRITE GROUP_EXECUTE WORLD_READ WORLD_WRITE WORLD_EXECUTE)
+            PERMISSIONS OWNER_READ OWNER_WRITE OWNER_EXECUTE GROUP_READ GROUP_EXECUTE WORLD_READ WORLD_EXECUTE)
   endif()
 
   set (OpenCASCADE_BINARY_DIR "${INSTALL_DIR}/${INSTALL_DIR_BIN}")
@@ -1180,7 +1255,7 @@ foreach (OCCT_TOOLKIT ${BUILD_TOOLKITS})
 endforeach()
 list (REMOVE_DUPLICATES OCCT_MODULES_ENABLED)
 list (REMOVE_DUPLICATES OCCT_COMPILE_DEFINITIONS)
-# these macros are defined for specific tookits, not globalwise
+# these macros are defined for specific toolkits, not globalwise
 list (REMOVE_ITEM OCCT_COMPILE_DEFINITIONS HAVE_OPENGL)
 list (REMOVE_ITEM OCCT_COMPILE_DEFINITIONS HAVE_GLES2)
 
@@ -1200,7 +1275,7 @@ foreach (OCCT_CONFIGURATION ${CMAKE_CONFIGURATION_TYPES})
 endforeach()
 # install OpenCASCADE config file with compile definitions and C/C++ flags ONLY for current configuration
 install (CODE "string (TOLOWER \"\${CMAKE_INSTALL_CONFIG_NAME}\" CMAKE_INSTALL_CONFIG_NAME_LOWER)")
-install (CODE "configure_file(\"${CMAKE_BINARY_DIR}/OpenCASCADECompileDefinitionsAndFlags-\${CMAKE_INSTALL_CONFIG_NAME_LOWER}.cmake\" \"${INSTALL_DIR}/${INSTALL_DIR_CMAKE}/OpenCASCADECompileDefinitionsAndFlags-\${CMAKE_INSTALL_CONFIG_NAME_LOWER}.cmake\" COPYONLY)")
+install (CODE "file(INSTALL FILES \"${CMAKE_BINARY_DIR}/OpenCASCADECompileDefinitionsAndFlags-\${CMAKE_INSTALL_CONFIG_NAME_LOWER}.cmake\" DESTINATION \"${INSTALL_DIR}/${INSTALL_DIR_CMAKE}/\" TYPE FILE)")
 
 foreach (OCCT_MODULE ${OCCT_MODULES})
   if (BUILD_MODULE_${OCCT_MODULE})

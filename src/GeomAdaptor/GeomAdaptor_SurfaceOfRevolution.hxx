@@ -17,15 +17,8 @@
 #ifndef _GeomAdaptor_SurfaceOfRevolution_HeaderFile
 #define _GeomAdaptor_SurfaceOfRevolution_HeaderFile
 
-#include <gp_Ax1.hxx>
-#include <gp_Ax3.hxx>
 #include <GeomAdaptor_Surface.hxx>
 
-class Standard_OutOfRange;
-class Standard_NoSuchObject;
-class Standard_DomainError;
-class gp_Pnt;
-class gp_Vec;
 class gp_Pln;
 class gp_Cylinder;
 class gp_Cone;
@@ -33,7 +26,6 @@ class gp_Sphere;
 class gp_Torus;
 class Geom_BezierSurface;
 class Geom_BSplineSurface;
-class gp_Dir;
 
 DEFINE_STANDARD_HANDLE(GeomAdaptor_SurfaceOfRevolution, GeomAdaptor_Surface)
 
@@ -65,6 +57,9 @@ public:
   
   //! The Curve and the Direction are loaded.
   Standard_EXPORT GeomAdaptor_SurfaceOfRevolution(const Handle(Adaptor3d_Curve)& C, const gp_Ax1& V);
+
+  //! Shallow copy of adaptor
+  Standard_EXPORT virtual Handle(Adaptor3d_Surface) ShallowCopy() const Standard_OVERRIDE;
   
   //! Changes the Curve
   Standard_EXPORT void Load (const Handle(Adaptor3d_Curve)& C);

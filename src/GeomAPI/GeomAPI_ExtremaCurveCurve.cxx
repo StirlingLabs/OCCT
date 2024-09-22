@@ -16,8 +16,6 @@
 
 
 #include <Extrema_ExtCC.hxx>
-#include <Geom_Curve.hxx>
-#include <GeomAdaptor_Curve.hxx>
 #include <GeomAPI_ExtremaCurveCurve.hxx>
 #include <GeomAPI_ProjectPointOnCurve.hxx>
 #include <gp_Pnt.hxx>
@@ -83,7 +81,7 @@ void GeomAPI_ExtremaCurveCurve::Init
 
   myTotalExt = Standard_False;
   
-  Standard_Real Tol = Precision::PConfusion();
+  constexpr Standard_Real Tol = Precision::PConfusion();
   myC1.Load(C1);
   myC2.Load(C2);
 
@@ -125,7 +123,7 @@ void GeomAPI_ExtremaCurveCurve::Init
  
   myTotalExt = Standard_False;
 
-  Standard_Real Tol = Precision::PConfusion();
+  constexpr Standard_Real Tol = Precision::PConfusion();
   myC1.Load(C1);
   myC2.Load(C2);
 

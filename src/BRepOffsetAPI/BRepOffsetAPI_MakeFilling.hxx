@@ -23,14 +23,10 @@
 
 #include <BRepFill_Filling.hxx>
 #include <BRepBuilderAPI_MakeShape.hxx>
-#include <Standard_Integer.hxx>
 #include <Standard_Boolean.hxx>
 #include <Standard_Real.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <TopTools_ListOfShape.hxx>
-class StdFail_NotDone;
-class Standard_OutOfRange;
-class Standard_ConstructionError;
 class TopoDS_Face;
 class TopoDS_Edge;
 class gp_Pnt;
@@ -183,7 +179,7 @@ public:
   Standard_EXPORT Standard_Integer Add (const Standard_Real U, const Standard_Real V, const TopoDS_Face& Support, const GeomAbs_Shape Order);
   
   //! Builds the resulting faces
-  Standard_EXPORT virtual void Build() Standard_OVERRIDE;
+  Standard_EXPORT virtual void Build(const Message_ProgressRange& theRange = Message_ProgressRange()) Standard_OVERRIDE;
   
   //! Tests whether computation of the filling plate has been completed.
   Standard_EXPORT virtual Standard_Boolean IsDone() const Standard_OVERRIDE;

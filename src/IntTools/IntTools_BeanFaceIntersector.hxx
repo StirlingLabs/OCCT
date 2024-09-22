@@ -18,7 +18,6 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
 #include <BRepAdaptor_Curve.hxx>
 #include <BRepAdaptor_Surface.hxx>
@@ -35,8 +34,6 @@ class Geom_Surface;
 class IntTools_Context;
 class TopoDS_Edge;
 class TopoDS_Face;
-class BRepAdaptor_Curve;
-class BRepAdaptor_Surface;
 class IntTools_CurveRangeSample;
 class Bnd_Box;
 class IntTools_SurfaceRangeSample;

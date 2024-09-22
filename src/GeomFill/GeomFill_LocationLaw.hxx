@@ -24,8 +24,6 @@
 #include <TColgp_Array1OfVec2d.hxx>
 #include <TColStd_Array1OfReal.hxx>
 
-class Standard_NotImplemented;
-class Standard_OutOfRange;
 class gp_Mat;
 class gp_Vec;
 class gp_Pnt;
@@ -40,9 +38,8 @@ class GeomFill_LocationLaw : public Standard_Transient
 {
 
 public:
-
-  
-  Standard_EXPORT virtual void SetCurve (const Handle(Adaptor3d_Curve)& C) = 0;
+  //! initialize curve of location law
+  Standard_EXPORT virtual Standard_Boolean SetCurve (const Handle(Adaptor3d_Curve)& C) = 0;
   
   Standard_EXPORT virtual const Handle(Adaptor3d_Curve)& GetCurve() const = 0;
   

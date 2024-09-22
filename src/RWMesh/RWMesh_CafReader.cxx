@@ -18,7 +18,6 @@
 
 #include <Message.hxx>
 #include <Message_Messenger.hxx>
-#include <Message_ProgressScope.hxx>
 #include <BRep_Builder.hxx>
 #include <OSD_Path.hxx>
 #include <OSD_Timer.hxx>
@@ -58,6 +57,16 @@ RWMesh_CafReader::~RWMesh_CafReader()
   //
 }
 
+void RWMesh_CafReader::SetDocument(const Handle(TDocStd_Document)& theDoc)
+{
+  myXdeDoc = theDoc;
+  Standard_Real aScaleFactorM = 1.;
+  if (XCAFDoc_DocumentTool::GetLengthUnit(theDoc, aScaleFactorM))
+  {
+    SetSystemLengthUnit(aScaleFactorM);
+  }
+}
+
 // =======================================================================
 // function : SingleShape
 // purpose  :
@@ -90,6 +99,20 @@ Standard_Boolean RWMesh_CafReader::perform (const TCollection_AsciiString& theFi
                                             const Message_ProgressRange& theProgress,
                                             const Standard_Boolean theToProbe)
 {
+  std::ifstream aStream;
+  OSD_OpenStream(aStream, theFile, std::ios_base::in | std::ios_base::binary);
+  return perform(aStream, theFile, theProgress, theToProbe);
+}
+
+// =======================================================================
+// function : perform
+// purpose  :
+// =======================================================================
+Standard_Boolean RWMesh_CafReader::perform (std::istream& theStream,
+                                            const TCollection_AsciiString& theFile,
+                                            const Message_ProgressRange& theProgress,
+                                            const Standard_Boolean theToProbe)
+{
   Standard_Integer aNewRootsLower = 1;
   if (!myXdeDoc.IsNull())
   {
@@ -100,7 +123,7 @@ Standard_Boolean RWMesh_CafReader::perform (const TCollection_AsciiString& theFi
 
   OSD_Timer aLoadingTimer;
   aLoadingTimer.Start();
-  const Standard_Boolean isDone = performMesh (theFile, theProgress, theToProbe);
+  const Standard_Boolean isDone = performMesh (theStream, theFile, theProgress, theToProbe);
   if (theToProbe || theProgress.UserBreak())
   {
     return isDone;
@@ -116,7 +139,7 @@ Standard_Boolean RWMesh_CafReader::perform (const TCollection_AsciiString& theFi
   }
 
   TopLoc_Location aDummyLoc;
-  Standard_Integer aNbNodes = 0, aNbElems = 0, aNbFaces = 0;
+  Standard_Integer aNbNodes = 0, aNbElems = 0;
   for (TopTools_SequenceOfShape::Iterator aRootIter (myRootShapes); aRootIter.More(); aRootIter.Next())
   {
     for (TopExp_Explorer aFaceIter (aRootIter.Value(), TopAbs_FACE); aFaceIter.More(); aFaceIter.Next())
@@ -124,7 +147,6 @@ Standard_Boolean RWMesh_CafReader::perform (const TCollection_AsciiString& theFi
       const TopoDS_Face& aFace = TopoDS::Face (aFaceIter.Current());
       if (const Handle(Poly_Triangulation)& aPolyTri = BRep_Tool::Triangulation (aFace, aDummyLoc))
       {
-        ++aNbFaces;
         aNbNodes += aPolyTri->NbNodes();
         aNbElems += aPolyTri->NbTriangles();
       }
@@ -157,6 +179,17 @@ void RWMesh_CafReader::fillDocument()
     || myRootShapes.IsEmpty())
   {
     return;
+  }
+
+  // set units
+  Standard_Real aLengthUnit = 1.;
+  if (!XCAFDoc_DocumentTool::GetLengthUnit(myXdeDoc, aLengthUnit))
+  {
+    XCAFDoc_DocumentTool::SetLengthUnit(myXdeDoc, SystemLengthUnit());
+  }
+  else if (aLengthUnit != SystemLengthUnit())
+  {
+    Message::SendWarning("Warning: Length unit of document not equal to the system length unit");
   }
 
   const Standard_Boolean wasAutoNaming = XCAFDoc_ShapeTool::AutoNaming();
@@ -305,7 +338,7 @@ Standard_Boolean RWMesh_CafReader::addShapeIntoDoc (CafDocumentTools& theTools,
       TopoDS_Compound aCompound;
       BRep_Builder aBuilder;
       aBuilder.MakeCompound (aCompound);
-      aCompound.Location (theShape.Location());
+      aCompound.Location (theShape.Location(), Standard_False);
       aShapeToAdd = aCompound;
     }
   }
@@ -350,6 +383,16 @@ Standard_Boolean RWMesh_CafReader::addShapeIntoDoc (CafDocumentTools& theTools,
     return Standard_False;
   }
 
+  if (toMakeAssembly)
+  {
+    TDF_Label aRefLabel;
+    theTools.ShapeTool->GetReferredShape(aNewLabel, aRefLabel);
+    if (!aRefLabel.IsNull())
+    {
+      theTools.OriginalShapeMap.Bind(theShape, aRefLabel);
+    }
+  }
+
   // if new label is a reference get referred shape
   TDF_Label aNewRefLabel = aNewLabel;
   theTools.ShapeTool->GetReferredShape (aNewLabel, aNewRefLabel);
@@ -380,6 +423,12 @@ Standard_Boolean RWMesh_CafReader::addShapeIntoDoc (CafDocumentTools& theTools,
         // it is not nice having unnamed Product, so copy name from first Instance (probably the only one)
         hasProductName = true;
         setShapeName (aNewRefLabel, aShapeType, aShapeAttribs.Name, theLabel, theParentName);
+      }
+      else if (aShapeAttribs.Name.IsEmpty()
+           && !aRefShapeAttribs.Name.IsEmpty())
+      {
+        // copy name from Product
+        setShapeName (aNewLabel, aShapeType, aRefShapeAttribs.Name, theLabel, theParentName);
       }
     }
     else

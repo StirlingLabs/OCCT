@@ -22,7 +22,6 @@
 #include <Geom_Curve.hxx>
 #include <GeomAPI_ProjectPointOnCurve.hxx>
 #include <gp_Vec.hxx>
-#include <gp_Vec2d.hxx>
 #include <LocOpe_BuildWires.hxx>
 #include <LocOpe_Spliter.hxx>
 #include <LocOpe_SplitShape.hxx>
@@ -40,13 +39,9 @@
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Vertex.hxx>
 #include <TopoDS_Wire.hxx>
-#include <TopTools_DataMapIteratorOfDataMapOfShapeListOfShape.hxx>
-#include <TopTools_DataMapIteratorOfDataMapOfShapeShape.hxx>
 #include <TopTools_DataMapOfShapeShape.hxx>
 #include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
-#include <TopTools_MapIteratorOfMapOfShape.hxx>
 #include <TopTools_MapOfShape.hxx>
 
 
@@ -117,11 +112,11 @@ void LocOpe_Spliter::Perform(const Handle(LocOpe_WiresOnShape)& PW)
   }
 
   theSubs.Build(myShape);
-  TopTools_DataMapIteratorOfDataMapOfShapeListOfShape itdesc(myMap);
   if (theSubs.IsCopied(myShape)) {
     // on n`a fait que des substitutions de vertex. Donc chaque element
     // est remplace par lui meme ou par un seul element du meme type.
-    for (; itdesc.More(); itdesc.Next()) {
+    for (TopTools_DataMapIteratorOfDataMapOfShapeListOfShape itdesc(myMap); itdesc.More(); itdesc.Next())
+    {
       if (theSubs.IsCopied(itdesc.Key())) {
 	const TopTools_ListOfShape& lsub = theSubs.Copy(itdesc.Key());
 #ifdef OCCT_DEBUG
@@ -198,7 +193,8 @@ void LocOpe_Spliter::Perform(const Handle(LocOpe_WiresOnShape)& PW)
 
   // Mise a jour des descendants
 
-  for (itdesc.Reset(); itdesc.More(); itdesc.Next()) {
+  for (TopTools_DataMapIteratorOfDataMapOfShapeListOfShape itdesc(myMap); itdesc.More(); itdesc.Next())
+  {
     const TopoDS_Shape& sori = itdesc.Key();
     const TopoDS_Shape& scib = itdesc.Value().First();
     myMap(sori) = theCFace.DescendantShapes(scib);
@@ -299,7 +295,8 @@ void LocOpe_Spliter::Perform(const Handle(LocOpe_WiresOnShape)& PW)
 
   theSubs.Build(myRes);
 
-  for (itdesc.Reset(); itdesc.More(); itdesc.Next()) {
+  for (TopTools_DataMapIteratorOfDataMapOfShapeListOfShape itdesc(myMap); itdesc.More(); itdesc.Next())
+  {
     TopTools_ListOfShape& ldesc = myMap(itdesc.Key());
     TopTools_ListOfShape newdesc;
     for (itl.Initialize(ldesc); itl.More(); itl.Next()) {

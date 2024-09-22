@@ -18,10 +18,8 @@
 #define _IGESBasic_OrderedGroupWithoutBackP_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <IGESBasic_Group.hxx>
-class Standard_OutOfRange;
 
 
 class IGESBasic_OrderedGroupWithoutBackP;

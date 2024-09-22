@@ -19,22 +19,16 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
 #include <Standard_Real.hxx>
-#include <gp_Pnt.hxx>
 #include <Adaptor3d_Curve.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <Standard_Integer.hxx>
 #include <TColStd_Array1OfReal.hxx>
 #include <Standard_Boolean.hxx>
 #include <GeomAbs_CurveType.hxx>
-class Standard_OutOfRange;
-class Standard_NoSuchObject;
-class Standard_DomainError;
 class TopoDS_Edge;
 class TopoDS_Vertex;
-class gp_Pnt;
 class gp_Vec;
 class gp_Lin;
 class gp_Circ;

@@ -22,11 +22,7 @@
 #include <Standard_Handle.hxx>
 
 #include <gp_Pln.hxx>
-#include <Standard_Boolean.hxx>
-#include <Standard_Real.hxx>
-class StdFail_NotDone;
 class Geom_Surface;
-class gp_Pln;
 
 
 //! Find if a surface is a planar  surface.

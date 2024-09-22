@@ -21,8 +21,6 @@
 #include <Standard_Type.hxx>
 
 #include <Expr_SingleRelation.hxx>
-#include <Standard_Boolean.hxx>
-class Standard_NumericError;
 class Expr_GeneralExpression;
 class Expr_GeneralRelation;
 class TCollection_AsciiString;

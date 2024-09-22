@@ -81,6 +81,11 @@ public:
                                                                               const gp_GTrsf& theTrsf,
                                                                               const Handle(SelectMgr_FrustumBuilder)& theBuilder) const;
 
+  //! Returns a copy of the selecting volume manager and its active frustum re-constructed using the passed builder.
+  //! Builder is an argument that represents corresponding settings for re-constructing transformed
+  //! frustum from scratch.
+  Standard_EXPORT virtual SelectMgr_SelectingVolumeManager CopyWithBuilder (const Handle(SelectMgr_FrustumBuilder)& theBuilder) const;
+
 public:
 
   //! Returns current camera definition.
@@ -89,7 +94,7 @@ public:
   //! Updates camera projection and orientation matrices in all selecting volumes
   //! Note: this method should be called after selection volume building
   //! else exception will be thrown
-  Standard_EXPORT void SetCamera (const Handle(Graphic3d_Camera) theCamera);
+  Standard_EXPORT void SetCamera (const Handle(Graphic3d_Camera)& theCamera);
 
   //! Updates viewport in all selecting volumes
   //! Note: this method should be called after selection volume building
@@ -160,6 +165,42 @@ public:
   //! Intersection test between defined volume and given sphere
   Standard_EXPORT virtual Standard_Boolean OverlapsSphere (const gp_Pnt& theCenter,
                                                            const Standard_Real theRadius,
+                                                           Standard_Boolean* theInside = NULL) const Standard_OVERRIDE;
+
+  //! Returns true if selecting volume is overlapped by cylinder (or cone) with radiuses theBottomRad
+  //! and theTopRad, height theHeight and transformation to apply theTrsf.
+  Standard_EXPORT virtual Standard_Boolean OverlapsCylinder (const Standard_Real theBottomRad,
+                                                             const Standard_Real theTopRad,
+                                                             const Standard_Real theHeight,
+                                                             const gp_Trsf& theTrsf,
+                                                             const Standard_Boolean theIsHollow,
+                                                             SelectBasics_PickResult& thePickResult) const Standard_OVERRIDE;
+
+  //! Returns true if selecting volume is overlapped by cylinder (or cone) with radiuses theBottomRad
+  //! and theTopRad, height theHeight and transformation to apply theTrsf.
+  Standard_EXPORT virtual Standard_Boolean OverlapsCylinder (const Standard_Real theBottomRad,
+                                                             const Standard_Real theTopRad,
+                                                             const Standard_Real theHeight,
+                                                             const gp_Trsf& theTrsf,
+                                                             const Standard_Boolean theIsHollow,
+                                                             Standard_Boolean* theInside = NULL) const Standard_OVERRIDE;
+
+  //! Returns true if selecting volume is overlapped by circle with radius theRadius,
+  //! boolean theIsFilled and transformation to apply theTrsf.
+  //! The position and orientation of the circle are specified
+  //! via theTrsf transformation for gp::XOY() with center in gp::Origin().
+  Standard_EXPORT virtual Standard_Boolean OverlapsCircle (const Standard_Real theBottomRad,
+                                                           const gp_Trsf& theTrsf,
+                                                           const Standard_Boolean theIsFilled,
+                                                           SelectBasics_PickResult& thePickResult) const Standard_OVERRIDE;
+
+  //! Returns true if selecting volume is overlapped by circle with radius theRadius,
+  //! boolean theIsFilled and transformation to apply theTrsf.
+  //! The position and orientation of the circle are specified
+  //! via theTrsf transformation for gp::XOY() with center in gp::Origin().
+  Standard_EXPORT virtual Standard_Boolean OverlapsCircle (const Standard_Real theBottomRad,
+                                                           const gp_Trsf& theTrsf,
+                                                           const Standard_Boolean theIsFilled,
                                                            Standard_Boolean* theInside = NULL) const Standard_OVERRIDE;
 
   //! Measures distance between 3d projection of user-picked

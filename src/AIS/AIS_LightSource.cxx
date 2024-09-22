@@ -20,7 +20,6 @@
 #include <Graphic3d_ArrayOfPoints.hxx>
 #include <Graphic3d_ArrayOfPolylines.hxx>
 #include <Graphic3d_ArrayOfSegments.hxx>
-#include <Graphic3d_ArrayOfTriangles.hxx>
 #include <Graphic3d_CView.hxx>
 #include <Graphic3d_Group.hxx>
 #include <Prs3d_ArrowAspect.hxx>
@@ -200,7 +199,7 @@ AIS_LightSource::AIS_LightSource (const Handle(Graphic3d_CLight)& theLight)
   aMat.SetColor (aColor);
   myDrawer->SetArrowAspect (new Prs3d_ArrowAspect());
   myDrawer->ArrowAspect()->SetColor (aColor);
-  myDrawer->ArrowAspect()->Aspect()->SetShadingModel (Graphic3d_TOSM_UNLIT);
+  myDrawer->ArrowAspect()->Aspect()->SetShadingModel (Graphic3d_TypeOfShadingModel_Unlit);
   myDrawer->ArrowAspect()->Aspect()->ChangeFrontMaterial() = aMat;
   myDrawer->ArrowAspect()->Aspect()->SetMarkerType (Aspect_TOM_EMPTY);
   myDrawer->ArrowAspect()->Aspect()->SetMarkerScale (2.0f);
@@ -211,7 +210,7 @@ AIS_LightSource::AIS_LightSource (const Handle(Graphic3d_CLight)& theLight)
   myDrawer->ShadingAspect()->SetColor (aColor);
   myDrawer->ShadingAspect()->SetMaterial (aMat);
   myDrawer->ShadingAspect()->SetTransparency (0.5f);
-  myDrawer->ShadingAspect()->Aspect()->SetShadingModel (Graphic3d_TOSM_UNLIT);
+  myDrawer->ShadingAspect()->Aspect()->SetShadingModel (Graphic3d_TypeOfShadingModel_Unlit);
 
   myDrawer->SetTextAspect (new Prs3d_TextAspect());
   myDrawer->TextAspect()->Aspect()->SetDisplayType (Aspect_TODT_SHADOW);
@@ -257,27 +256,33 @@ Standard_Boolean AIS_LightSource::ProcessDragging (const Handle(AIS_InteractiveC
   {
     case AIS_DragAction_Start:
     {
-      myStartTransform = theDragFrom;
       myLocTrsfStart = LocalTransformation();
+      return Standard_True;
+    }
+    case AIS_DragAction_Confirmed:
+    {
       return Standard_True;
     }
     case AIS_DragAction_Update:
     {
-      theCtx->MainSelector()->Pick (myStartTransform.x(), myStartTransform.y(), theView);
+      mySensSphere->ResetLastDetectedPoint();
+      SetLocalTransformation (myLocTrsfStart);
+      theCtx->MainSelector()->Pick (theDragFrom.x(), theDragFrom.y(), theView);
       gp_Pnt aStartPosition = mySensSphere->LastDetectedPoint();
+
+      mySensSphere->ResetLastDetectedPoint();
       theCtx->MainSelector()->Pick (theDragTo.x(), theDragTo.y(), theView);
       gp_Pnt aCurrPosition = mySensSphere->LastDetectedPoint();
-      if (aCurrPosition.X() != RealLast() && aStartPosition.Distance (aCurrPosition) > Precision::Confusion())
+      if (aCurrPosition.X() != RealLast()
+       && aStartPosition.Distance (aCurrPosition) > Precision::Confusion())
       {
         gp_Quaternion aQRot;
         aQRot.SetRotation (gp_Vec (gp_Pnt (0, 0, 0), aStartPosition), gp_Vec (gp_Pnt (0, 0, 0), aCurrPosition));
         gp_Trsf aTrsf;
         aTrsf.SetRotation (aQRot);
         SetLocalTransformation (myLocTrsfStart * aTrsf);
-        myLocTrsfStart = LocalTransformation();
-        myStartTransform = theDragTo;
-        theOwner->Selectable()->ClearDynamicHighlight (theCtx->MainPrsMgr());
-        theCtx->HilightWithColor (this, Handle(Prs3d_Drawer)(), false);
+        const Standard_Integer aHiMod = HasHilightMode() ? HilightMode() : 0;
+        theOwner->UpdateHighlightTrsf (theCtx->CurrentViewer(), theCtx->MainPrsMgr(), aHiMod);
       }
       return Standard_True;
     }
@@ -475,7 +480,7 @@ void AIS_LightSource::updateLightLocalTransformation()
 // =======================================================================
 void AIS_LightSource::setLocalTransformation (const Handle(TopLoc_Datum3D)& theTrsf)
 {
-  const gp_Trsf aTrsf = theTrsf->Transformation();
+  const gp_Trsf aTrsf = !theTrsf.IsNull() ? theTrsf->Transformation() : gp_Trsf();
   switch (myLightSource->Type())
   {
     case Graphic3d_TypeOfLightSource_Ambient:

@@ -20,7 +20,6 @@
 #include <BRep_CurveOn2Surfaces.hxx>
 #include <BRep_CurveOnClosedSurface.hxx>
 #include <BRep_GCurve.hxx>
-#include <BRep_ListIteratorOfListOfCurveRepresentation.hxx>
 #include <BRep_ListIteratorOfListOfPointRepresentation.hxx>
 #include <BRep_PointOnCurve.hxx>
 #include <BRep_PointOnCurveOnSurface.hxx>
@@ -42,9 +41,7 @@
 #include <Poly_Triangulation.hxx>
 #include <Precision.hxx>
 #include <Standard_DomainError.hxx>
-#include <Standard_NullObject.hxx>
 #include <TopLoc_Location.hxx>
-#include <TopoDS.hxx>
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Face.hxx>
 #include <TopoDS_Iterator.hxx>
@@ -359,7 +356,7 @@ static void UpdateCurves(BRep_ListOfCurveRepresentation& lcr,
   }
   
   if (itcr.More()) {
-    Handle(BRep_CurveRepresentation)& cr = itcr.Value();
+    Handle(BRep_CurveRepresentation) cr = itcr.Value();
     cr->Continuity(C);
   }
   else {
@@ -383,7 +380,7 @@ static void UpdatePoints(BRep_ListOfPointRepresentation& lpr,
   }
 
   if (itpr.More()) {
-    Handle(BRep_PointRepresentation)& pr = itpr.Value();
+    Handle(BRep_PointRepresentation) pr = itpr.Value();
     pr->Parameter(p);
   }
   else {
@@ -407,7 +404,7 @@ static void UpdatePoints(BRep_ListOfPointRepresentation& lpr,
   }
 
   if (itpr.More()) {
-    Handle(BRep_PointRepresentation)& pr = itpr.Value();
+    Handle(BRep_PointRepresentation) pr = itpr.Value();
     pr->Parameter(p);
   }
   else {
@@ -433,7 +430,7 @@ static void UpdatePoints(BRep_ListOfPointRepresentation& lpr,
   }
 
   if (itpr.More()) {
-    Handle(BRep_PointRepresentation)& pr = itpr.Value();
+    Handle(BRep_PointRepresentation) pr = itpr.Value();
     pr->Parameter(p1);
 //    pr->Parameter(p2); // skv
     pr->Parameter2(p2); // skv

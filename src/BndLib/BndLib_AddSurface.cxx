@@ -21,7 +21,6 @@
 #include <Bnd_Box.hxx>
 #include <BndLib.hxx>
 #include <BndLib_AddSurface.hxx>
-#include <BSplCLib.hxx>
 #include <ElSLib.hxx>
 #include <ElCLib.hxx>
 #include <Geom_BezierSurface.hxx>
@@ -29,17 +28,12 @@
 #include <GeomAbs_SurfaceType.hxx>
 #include <gp_Pln.hxx>
 #include <gp_Pnt.hxx>
-#include <gp_Cylinder.hxx>
 #include <gp_Cone.hxx>
-#include <gp_Lin.hxx>
 #include <Precision.hxx>
 #include <TColgp_Array2OfPnt.hxx>
 #include <TColStd_Array1OfInteger.hxx>
 #include <TColStd_Array1OfReal.hxx>
-#include <BndLib_Add3dCurve.hxx>
-#include <math_MultipleVarFunction.hxx>
 #include <math_PSO.hxx>
-#include <math_Matrix.hxx>
 #include <math_Powell.hxx>
 //
 static Standard_Integer NbUSamples(const Adaptor3d_Surface& S, 
@@ -186,7 +180,7 @@ static void TreatInfinitePlane(const gp_Pln        &aPlane,
 {
   // Get 3 coordinate axes of the plane.
   const gp_Dir        &aNorm        = aPlane.Axis().Direction();
-  const Standard_Real  anAngularTol = RealEpsilon();
+  constexpr Standard_Real  anAngularTol = RealEpsilon();
 
   // Get location of the plane as its barycenter
   gp_Pnt aLocation = BaryCenter(aPlane, aUMin, aUMax, aVMin, aVMax);
@@ -221,7 +215,7 @@ static void TreatInfinitePlane(const gp_Pln        &aPlane,
 // theMinIdx - minimum poles index, that can be used.
 // theMaxIdx - maximum poles index, that can be used.
 // theShiftCoeff - shift between flatknots array and poles array.
-// This vaule should be equal to 1 in case of non periodic BSpline,
+// This value should be equal to 1 in case of non periodic BSpline,
 // and (degree + 1) - mults(the lowest index).
 
 void ComputePolesIndexes(const TColStd_Array1OfReal &theKnots,
@@ -726,7 +720,8 @@ public:
   myVMin(VMin),
   myVMax(VMax),
   myCoordIndx(CoordIndx),
-  mySign(Sign)
+  mySign(Sign),
+  myPenalty(0.)
   {
     math_Vector X(1,2);
     X(1) = UMin;
@@ -804,7 +799,7 @@ public:
 private:
   SurfMaxMinCoord & operator = (const SurfMaxMinCoord & theOther);
 
-  Standard_Boolean CheckInputData(const math_Vector theParams)
+  Standard_Boolean CheckInputData(const math_Vector& theParams)
   {
     if (theParams(1) < myUMin || 
         theParams(1) > myUMax || 

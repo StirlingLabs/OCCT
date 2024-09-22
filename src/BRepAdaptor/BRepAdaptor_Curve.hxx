@@ -22,21 +22,13 @@
 #include <GeomAdaptor_Curve.hxx>
 #include <TopoDS_Edge.hxx>
 #include <Adaptor3d_Curve.hxx>
-#include <Standard_Boolean.hxx>
 #include <Standard_Real.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <Standard_Integer.hxx>
 #include <TColStd_Array1OfReal.hxx>
 #include <GeomAbs_CurveType.hxx>
 
-class Standard_NullObject;
-class Standard_DomainError;
-class Standard_OutOfRange;
-class Standard_NoSuchObject;
-class TopoDS_Edge;
 class TopoDS_Face;
-class gp_Trsf;
-class GeomAdaptor_Curve;
 class Adaptor3d_CurveOnSurface;
 class gp_Pnt;
 class gp_Vec;
@@ -81,6 +73,9 @@ public:
   //! is  raised if  the edge does  not have a pcurve on
   //! the face.
   Standard_EXPORT BRepAdaptor_Curve(const TopoDS_Edge& E, const TopoDS_Face& F);
+
+  //! Shallow copy of adaptor
+  Standard_EXPORT virtual Handle(Adaptor3d_Curve) ShallowCopy() const Standard_OVERRIDE;
 
   //! Reset currently loaded curve (undone Load()).
   Standard_EXPORT void Reset();

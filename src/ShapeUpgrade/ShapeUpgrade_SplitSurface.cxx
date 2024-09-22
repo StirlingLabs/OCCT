@@ -17,13 +17,11 @@
 //    gka 30.04.99 S4137: extended for all types of surfaces
 
 #include <Geom_BezierSurface.hxx>
-#include <Geom_BSplineSurface.hxx>
 #include <Geom_OffsetSurface.hxx>
 #include <Geom_RectangularTrimmedSurface.hxx>
 #include <Geom_Surface.hxx>
 #include <Geom_SurfaceOfLinearExtrusion.hxx>
 #include <Geom_SurfaceOfRevolution.hxx>
-#include <gp_Ax1.hxx>
 #include <Precision.hxx>
 #include <ShapeExtend.hxx>
 #include <ShapeExtend_CompositeSurface.hxx>
@@ -37,6 +35,10 @@
 #include <TColGeom_HArray2OfSurface.hxx>
 #include <TColStd_Array1OfReal.hxx>
 #include <TColStd_HSequenceOfReal.hxx>
+#include <TopoDS_Edge.hxx>
+#include <BRepLib_MakeEdge.hxx>
+#include <GProp_GProps.hxx>
+#include <BRepGProp.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(ShapeUpgrade_SplitSurface,Standard_Transient)
 
@@ -81,8 +83,10 @@ void ShapeUpgrade_SplitSurface::Init(const Handle(Geom_Surface)& S)
 //purpose  : 
 //=======================================================================
 
-void ShapeUpgrade_SplitSurface::Init(const Handle(Geom_Surface)& S, const Standard_Real UFirst,const Standard_Real ULast,
-				     const Standard_Real VFirst, const Standard_Real VLast)
+void ShapeUpgrade_SplitSurface::Init(const Handle(Geom_Surface)& S,
+                                     const Standard_Real UFirst, const Standard_Real ULast,
+				     const Standard_Real VFirst, const Standard_Real VLast,
+                                     const Standard_Real theArea)
 {
   myStatus = ShapeExtend::EncodeStatus (ShapeExtend_OK);
   
@@ -94,9 +98,11 @@ void ShapeUpgrade_SplitSurface::Init(const Handle(Geom_Surface)& S, const Standa
   myNbResultingRow =1;
   myNbResultingCol =1;
 
+  myArea = theArea;
+
   Standard_Real U1,U2,V1,V2;
   mySurface->Bounds(U1,U2,V1,V2);
-  Standard_Real precision = Precision::PConfusion();
+  constexpr Standard_Real precision = Precision::PConfusion();
   if ( mySurface->IsUPeriodic() && 
        ULast - UFirst <= U2 - U1 + precision ) { U1 = UFirst; U2 = U1 + mySurface->UPeriod(); }
   if ( mySurface->IsVPeriodic() && 
@@ -117,6 +123,24 @@ void ShapeUpgrade_SplitSurface::Init(const Handle(Geom_Surface)& S, const Standa
   else {
     VF = Max(V1,VFirst);
     VL = Min(V2,VLast);
+  }
+
+  if (myArea != 0.)
+  {
+    //<myArea> is set and will be used with <myUsize> and <myVsize>
+    //in further computations
+    Standard_Real Umid = (UF + UL)/2, Vmid = (VF + VL)/2;
+    Handle (Geom_RectangularTrimmedSurface) aTrSurf =
+      new Geom_RectangularTrimmedSurface (mySurface, UF, UL, VF, VL);
+    Handle(Geom_Curve) anUiso = aTrSurf->UIso (Umid);
+    Handle(Geom_Curve) aViso  = aTrSurf->VIso (Vmid);
+    TopoDS_Edge anEdgeUiso = BRepLib_MakeEdge (anUiso);
+    TopoDS_Edge anEdgeViso = BRepLib_MakeEdge (aViso);
+    GProp_GProps aGprop1, aGprop2;
+    BRepGProp::LinearProperties (anEdgeViso, aGprop1);
+    myUsize = aGprop1.Mass();
+    BRepGProp::LinearProperties (anEdgeUiso, aGprop2);
+    myVsize = aGprop2.Mass();
   }
   
   if(UL-UF < precision) {
@@ -144,7 +168,7 @@ void ShapeUpgrade_SplitSurface::Init(const Handle(Geom_Surface)& S, const Standa
 void ShapeUpgrade_SplitSurface::SetUSplitValues(const Handle(TColStd_HSequenceOfReal)& UValues)
 {
   if(UValues.IsNull()) return;
-  Standard_Real precision = Precision::PConfusion();
+  constexpr Standard_Real precision = Precision::PConfusion();
   Standard_Real UFirst = myUSplitValues->Value(1),
   ULast = myUSplitValues->Value(myUSplitValues->Length()); 
   Standard_Integer i =1;
@@ -169,7 +193,7 @@ void ShapeUpgrade_SplitSurface::SetUSplitValues(const Handle(TColStd_HSequenceOf
 void ShapeUpgrade_SplitSurface::SetVSplitValues(const Handle(TColStd_HSequenceOfReal)& VValues) 
 {
   if(VValues.IsNull()) return;
-  Standard_Real precision = Precision::PConfusion();
+  constexpr Standard_Real precision = Precision::PConfusion();
   Standard_Real VFirst = myVSplitValues->Value(1), 
   VLast = myVSplitValues->Value(myVSplitValues->Length()); 
   Standard_Integer i =1;

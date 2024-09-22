@@ -23,14 +23,9 @@
 
 #include <Bnd_Box.hxx>
 #include <Bnd_HArray1OfBox.hxx>
-#include <Standard_Real.hxx>
 #include <Standard_Integer.hxx>
 #include <TColStd_DataMapOfIntegerInteger.hxx>
 #include <TColStd_ListOfInteger.hxx>
-#include <Standard_Address.hxx>
-class Standard_NullValue;
-class Standard_MultiplyDefined;
-class Bnd_Box;
 class gp_Pln;
 
 

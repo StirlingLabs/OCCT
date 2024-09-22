@@ -26,14 +26,11 @@
 #include <TColStd_HArray1OfReal.hxx>
 #include <TopoDS_Shape.hxx>
 #include <NCollection_IndexedDataMap.hxx>
-#include <NCollection_DataMap.hxx>
 
 class XCAFDoc_ShapeTool;
 class TDF_Label;
 class Standard_GUID;
 class TCollection_HAsciiString;
-class TDF_Attribute;
-class TDF_RelocationTable;
 
 
 class XCAFDoc_DimTolTool;
@@ -157,9 +154,9 @@ public:
   
   //! Gets all shape labels referred by theL label of the GD&T table.
   //! Returns False if there are no shape labels added to the sequences.
-  Standard_EXPORT Standard_Boolean GetRefShapeLabel (const TDF_Label& theL, 
-                                                     TDF_LabelSequence& theShapeLFirst, 
-                                                     TDF_LabelSequence& theShapeLSecond) const;
+  Standard_EXPORT static Standard_Boolean GetRefShapeLabel (const TDF_Label& theL, 
+                                                           TDF_LabelSequence& theShapeLFirst,
+                                                           TDF_LabelSequence& theShapeLSecond);
   
   //! Returns dimension tolerance assigned to theDimTolL label.
   //! Returns False if no such dimension tolerance is assigned.
@@ -217,12 +214,12 @@ public:
                                              Handle(TCollection_HAsciiString)& theIdentification) const;
   
   //! Returns all Datum labels defined for theDimTolL label.
-  Standard_EXPORT Standard_Boolean GetDatumOfTolerLabels (const TDF_Label& theDimTolL, 
-                                                          TDF_LabelSequence& theDatums) const;
+  Standard_EXPORT static Standard_Boolean GetDatumOfTolerLabels (const TDF_Label& theDimTolL,
+                                                                 TDF_LabelSequence& theDatums);
 
   //! Returns all Datum labels with XCAFDimTolObjects_DatumObject defined for label theDimTolL.
-  Standard_EXPORT Standard_Boolean GetDatumWithObjectOfTolerLabels (const TDF_Label& theDimTolL, 
-                                                                    TDF_LabelSequence& theDatums) const;
+  Standard_EXPORT static Standard_Boolean GetDatumWithObjectOfTolerLabels (const TDF_Label& theDimTolL,
+                                                                           TDF_LabelSequence& theDatums);
 
   //! Returns all GeomToleranses labels defined for theDatumL label.
   Standard_EXPORT Standard_Boolean GetTolerOfDatumLabels (const TDF_Label& theDatumL, 
@@ -239,12 +236,12 @@ public:
   Standard_EXPORT void Lock(const TDF_Label& theViewL) const;
 
   //! fill the map GDT label -> shape presentation 
-  Standard_EXPORT void GetGDTPresentations(NCollection_IndexedDataMap<TDF_Label, TopoDS_Shape, TDF_LabelMapHasher>& theGDTLabelToShape) const;
+  Standard_EXPORT void GetGDTPresentations(NCollection_IndexedDataMap<TDF_Label, TopoDS_Shape>& theGDTLabelToShape) const;
 
   //! Set shape presentation for GDT labels according to given map (theGDTLabelToPrs)
   //! theGDTLabelToPrsName map is an additional argument, can be used to set presentation names.
   //! If label is not in the theGDTLabelToPrsName map, the presentation name will be empty
-  Standard_EXPORT void SetGDTPresentations(NCollection_IndexedDataMap<TDF_Label, TopoDS_Shape, TDF_LabelMapHasher>& theGDTLabelToPrs);
+  Standard_EXPORT void SetGDTPresentations(NCollection_IndexedDataMap<TDF_Label, TopoDS_Shape>& theGDTLabelToPrs);
 
   //! Unlock the given GDT.
   Standard_EXPORT void Unlock(const TDF_Label& theViewL) const;

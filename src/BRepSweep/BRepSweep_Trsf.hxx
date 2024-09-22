@@ -19,16 +19,13 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
 #include <TopLoc_Location.hxx>
-#include <Standard_Boolean.hxx>
 #include <BRepSweep_NumLinearRegularSweep.hxx>
 #include <TopAbs_Orientation.hxx>
 class BRep_Builder;
 class TopoDS_Shape;
 class Sweep_NumShape;
-class TopLoc_Location;
 
 
 //! This class is inherited from NumLinearRegularSweep

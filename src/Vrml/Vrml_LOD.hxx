@@ -22,10 +22,8 @@
 
 #include <TColStd_HArray1OfReal.hxx>
 #include <gp_Vec.hxx>
-#include <Standard_Boolean.hxx>
 #include <Standard_Transient.hxx>
 #include <Standard_OStream.hxx>
-class gp_Vec;
 
 
 class Vrml_LOD;
@@ -39,7 +37,7 @@ DEFINE_STANDARD_HANDLE(Vrml_LOD, Standard_Transient)
 //! of  Levels  Of  Detail  (LOD),  from  highest  detail  to  lowest.
 //!
 //! The  specified  center  point  of  the  LOD  is  transformed  by  current
-//! transformation  into  world  space,  and  yhe  distancefrom  the  transformed
+//! transformation  into  world  space,  and  the  distance from  the  transformed
 //! center  to  the  world-space  eye  point  is  calculated.
 //! If  thedistance  is  less  than  the  first  value  in  the  ranges  array,
 //! than  the  first  child  of  the  LOD  group  is  drawn.  If  between

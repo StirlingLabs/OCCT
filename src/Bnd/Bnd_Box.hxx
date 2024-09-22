@@ -23,9 +23,7 @@
 
 #include <gp_Pnt.hxx>
 #include <Standard_Real.hxx>
-#include <Standard_Integer.hxx>
 #include <Standard_Boolean.hxx>
-class Standard_ConstructionError;
 class gp_Pnt;
 class gp_Dir;
 class gp_Trsf;
@@ -73,7 +71,7 @@ public:
   //! Creates a bounding box, it contains:
   //! -   minimum/maximum point of bounding box,
   //! The constructed box is qualified Void. Its gap is null.
-  Standard_EXPORT Bnd_Box (const gp_Pnt theMin, const gp_Pnt theMax);
+  Standard_EXPORT Bnd_Box (const gp_Pnt& theMin, const gp_Pnt& theMax);
 
   //! Sets this bounding box so that it covers the whole of 3D space.
   //! It is infinitely long in all directions.

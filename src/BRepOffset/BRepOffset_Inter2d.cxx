@@ -18,16 +18,9 @@
 
 #include <BRepOffset_Inter2d.hxx>
 
-#include <Adaptor2d_Curve2d.hxx>
-#include <Adaptor3d_CurveOnSurface.hxx>
-#include <Adaptor3d_Surface.hxx>
-#include <Bnd_Box.hxx>
-#include <BndLib_Add3dCurve.hxx>
 #include <BOPTools_AlgoTools.hxx>
 #include <BRep_Builder.hxx>
-#include <BRep_CurveRepresentation.hxx>
 #include <BRep_GCurve.hxx>
-#include <BRep_ListIteratorOfListOfCurveRepresentation.hxx>
 #include <BRep_TEdge.hxx>
 #include <BRep_Tool.hxx>
 #include <BRepAdaptor_Curve.hxx>
@@ -77,8 +70,6 @@
 #include <TopoDS_Iterator.hxx>
 #include <TopoDS_Vertex.hxx>
 #include <TopoDS_Wire.hxx>
-#include <TopTools_DataMapIteratorOfDataMapOfShapeListOfShape.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopTools_ListOfShape.hxx>
 #include <TopTools_SequenceOfShape.hxx>
 
@@ -975,8 +966,8 @@ static void RefEdgeInter(const TopoDS_Face&              F,
 
 static Standard_Integer evaluateMaxSegment(const Adaptor3d_CurveOnSurface& aCurveOnSurface)
 {
-  Handle(Adaptor3d_Surface) aSurf   = aCurveOnSurface.GetSurface();
-  Handle(Adaptor2d_Curve2d) aCurv2d = aCurveOnSurface.GetCurve();
+  const Handle(Adaptor3d_Surface)& aSurf   = aCurveOnSurface.GetSurface();
+  const Handle(Adaptor2d_Curve2d)& aCurv2d = aCurveOnSurface.GetCurve();
 
   Standard_Real aNbSKnots = 0, aNbC2dKnots = 0;
   
@@ -1053,7 +1044,7 @@ static Standard_Boolean ExtendPCurve(const Handle(Geom2d_Curve)& aPCurve,
   Handle(Geom2d_Line)                   aLin;
   Handle(Geom2d_TrimmedCurve)           aSegment;
   Geom2dConvert_CompCurveToBSplineCurve aCompCurve(aTrCurve, Convert_RationalC1);
-  Standard_Real                         aTol = Precision::Confusion();
+  constexpr Standard_Real               aTol = Precision::Confusion();
   Standard_Real                         aDelta = Max(a2Offset, 1.);
   
   if (FirstPar > anEf - a2Offset) {
@@ -1471,7 +1462,7 @@ Standard_Boolean BRepOffset_Inter2d::ExtentEdge(const TopoDS_Edge& E,TopoDS_Edge
           Handle(Geom_Line)                   aLin;
           Handle(Geom_TrimmedCurve)           aSegment;
           GeomConvert_CompCurveToBSplineCurve aCompCurve(aTrCurve, Convert_RationalC1);
-          Standard_Real                       aTol = Precision::Confusion();
+          constexpr Standard_Real             aTol = Precision::Confusion();
           Standard_Real                       aDelta = Max(a2Offset, 1.);
           
           if (FirstPar > anEf - a2Offset) {
@@ -1522,7 +1513,7 @@ Standard_Boolean BRepOffset_Inter2d::ExtentEdge(const TopoDS_Edge& E,TopoDS_Edge
 //purpose  : 
 //=======================================================================
 
-static Standard_Boolean  UpdateVertex(TopoDS_Vertex V,
+static Standard_Boolean  UpdateVertex(const TopoDS_Vertex& V,
                                       TopoDS_Edge&  OE,
                                       TopoDS_Edge&  NE,
                                       Standard_Real TolConf)
@@ -1532,7 +1523,7 @@ static Standard_Boolean  UpdateVertex(TopoDS_Vertex V,
   Standard_Real Of = OC.FirstParameter(); Standard_Real Ol = OC.LastParameter();
   Standard_Real Nf = NC.FirstParameter(); Standard_Real Nl = NC.LastParameter();
   Standard_Real U = 0.;
-  Standard_Real ParTol = Precision::PConfusion();
+  constexpr Standard_Real ParTol = Precision::PConfusion();
   gp_Pnt           P  = BRep_Tool::Pnt(V);
   Standard_Boolean OK = Standard_False;
 
@@ -1572,7 +1563,8 @@ void BRepOffset_Inter2d::Compute (const Handle(BRepAlgo_AsDes)&     AsDes,
                                   const TopTools_IndexedMapOfShape& NewEdges,
                                   const Standard_Real               Tol,
                                   const TopTools_DataMapOfShapeListOfShape& theEdgeIntEdges,
-                                  TopTools_IndexedDataMapOfShapeListOfShape& theDMVV)
+                                  TopTools_IndexedDataMapOfShapeListOfShape& theDMVV,
+                                  const Message_ProgressRange& theRange)
 {
 #ifdef DRAW
   NbF2d++;
@@ -1600,7 +1592,12 @@ void BRepOffset_Inter2d::Compute (const Handle(BRepAlgo_AsDes)&     AsDes,
   Standard_Integer                   j, i = 1;
   BRepAdaptor_Surface BAsurf(F);
   //
-  for ( it1LE.Initialize(LE) ; it1LE.More(); it1LE.Next()) {
+  Message_ProgressScope aPS(theRange, "Intersecting edges on faces", LE.Size());
+  for ( it1LE.Initialize(LE) ; it1LE.More(); it1LE.Next(), aPS.Next()) {
+    if (!aPS.More())
+    {
+      return;
+    }
     const TopoDS_Edge& E1 = TopoDS::Edge(it1LE.Value());        
     j = 1;
     it2LE.Initialize(LE);
@@ -1670,18 +1667,23 @@ Standard_Boolean BRepOffset_Inter2d::ConnexIntByInt
   TopTools_IndexedMapOfShape&   FacesWithVerts,
   BRepAlgo_Image&               theImageVV,
   TopTools_DataMapOfShapeListOfShape& theEdgeIntEdges,
-  TopTools_IndexedDataMapOfShapeListOfShape& theDMVV)
+  TopTools_IndexedDataMapOfShapeListOfShape& theDMVV,
+  const Message_ProgressRange& theRange)
 {  
 
   TopTools_DataMapOfShapeListOfShape MVE;
   BRepOffset_Tool::MapVertexEdges(FI,MVE);
-
+  Message_ProgressScope aPS(theRange, "Intersecting edges obtained as intersection of faces", 1, Standard_True);
   //---------------------
   // Extension of edges.
   //---------------------
   TopoDS_Edge  NE;
   TopTools_DataMapIteratorOfDataMapOfShapeListOfShape it(MVE);
   for  ( ; it.More(); it.Next()) {
+    if (!aPS.More())
+    {
+      return Standard_False;
+    }
     const TopTools_ListOfShape&  L = it.Value();
     Standard_Boolean   YaBuild = 0;
     TopTools_ListIteratorOfListOfShape itL(L);
@@ -1712,9 +1714,13 @@ Standard_Boolean BRepOffset_Inter2d::ConnexIntByInt
   if (MES.IsBound(FIO)) FIO = TopoDS::Face(MES(FIO));
   //
   BRepAdaptor_Surface BAsurf(FIO);
-  
+
   TopExp_Explorer exp(FI.Oriented(TopAbs_FORWARD),TopAbs_WIRE);
-  for (; exp.More(); exp.Next()) {
+  for (; exp.More(); exp.Next(), aPS.Next()) {
+    if (!aPS.More())
+    {
+      return Standard_False;
+    }
     const TopoDS_Wire&     W = TopoDS::Wire(exp.Current());
     BRepTools_WireExplorer wexp;
     Standard_Boolean       end = Standard_False ;
@@ -1871,7 +1877,8 @@ void BRepOffset_Inter2d::ConnexIntByIntInVert
   const Handle(BRepAlgo_AsDes)& AsDes2d,
   const Standard_Real           Tol,
   const BRepOffset_Analyse&     Analyse,
-  TopTools_IndexedDataMapOfShapeListOfShape& theDMVV)
+  TopTools_IndexedDataMapOfShapeListOfShape& theDMVV,
+  const Message_ProgressRange& theRange)
 {
   TopoDS_Face           FIO = TopoDS::Face(OFI.Face());
   if (MES.IsBound(FIO)) FIO = TopoDS::Face(MES(FIO));
@@ -1886,8 +1893,13 @@ void BRepOffset_Inter2d::ConnexIntByIntInVert
   //
   BRepAdaptor_Surface BAsurf(FIO);
   //
+  Message_ProgressScope aPS(theRange, "Intersecting edges created from vertices", 1, Standard_True);
   TopExp_Explorer exp(FI.Oriented(TopAbs_FORWARD),TopAbs_WIRE);
-  for (; exp.More(); exp.Next()) {
+  for (; exp.More(); exp.Next(), aPS.Next()) {
+    if (!aPS.More())
+    {
+      return;
+    }
     const TopoDS_Wire&     W = TopoDS::Wire(exp.Current());
     //
     BRepTools_WireExplorer wexp;
@@ -1948,7 +1960,7 @@ void BRepOffset_Inter2d::ConnexIntByIntInVert
       TopExp_Explorer Exp1, Exp2;
       Standard_Boolean bCoincide;
       // intersect edges generated from vertex with the edges of the face
-      TopoDS_Shape NE3 = Build(Vref);
+      const TopoDS_Shape& NE3 = Build(Vref);
       //
       for (Exp2.Init(NE3, TopAbs_EDGE); Exp2.More(); Exp2.Next()) {
         const TopoDS_Edge& aE3 = *(TopoDS_Edge*)&Exp2.Current();

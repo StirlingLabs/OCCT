@@ -18,24 +18,17 @@
 #define _Bisector_BisecCC_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
-#include <Standard_Real.hxx>
 #include <TColStd_SequenceOfReal.hxx>
 #include <Standard_Integer.hxx>
 #include <Bisector_PolyBis.hxx>
-#include <Standard_Boolean.hxx>
 #include <gp_Pnt2d.hxx>
 #include <Bisector_Curve.hxx>
 #include <GeomAbs_Shape.hxx>
 class Geom2d_Curve;
-class Standard_DomainError;
-class Standard_RangeError;
-class gp_Pnt2d;
 class Geom2d_Geometry;
 class gp_Trsf2d;
 class gp_Vec2d;
-class Bisector_PolyBis;
 
 
 class Bisector_BisecCC;
@@ -98,7 +91,7 @@ public:
   Standard_EXPORT Handle(Geom2d_Geometry) Copy() const Standard_OVERRIDE;
   
 
-  //! Transformation of a geometric object. This tansformation
+  //! Transformation of a geometric object. This transformation
   //! can be a translation, a rotation, a symmetry, a scaling
   //! or a complex transformation obtained by combination of
   //! the previous elementaries transformations.

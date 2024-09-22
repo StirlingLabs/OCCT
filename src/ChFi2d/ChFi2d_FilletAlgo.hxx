@@ -13,12 +13,11 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef _FILLETALGO_H_
-#define _FILLETALGO_H_
+#ifndef ChFi2d_FilletAlgo_HeaderFile
+#define ChFi2d_FilletAlgo_HeaderFile
 
 #include <TopoDS_Edge.hxx>
 #include <TopoDS_Wire.hxx>
-#include <gp_Pnt.hxx>
 #include <Geom2d_Curve.hxx>
 #include <Geom_Plane.hxx>
 #include <TColStd_ListOfReal.hxx>

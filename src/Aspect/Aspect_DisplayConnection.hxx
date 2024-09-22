@@ -11,8 +11,8 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef _Aspect_DisplayConnection_H__
-#define _Aspect_DisplayConnection_H__
+#ifndef Aspect_DisplayConnection_HeaderFile
+#define Aspect_DisplayConnection_HeaderFile
 
 #include <Standard_Transient.hxx>
 #include <Aspect_XAtom.hxx>
@@ -27,7 +27,7 @@ struct Aspect_XVisualInfo;
 //! This class creates and provides connection with X server.
 //! Raises exception if can not connect to X server.
 //! On Windows and Mac OS X (in case when Cocoa used) platforms this class does nothing.
-//! WARRNING: Do not close display connection manually!
+//! WARNING: Do not close display connection manually!
 class Aspect_DisplayConnection : public Standard_Transient
 {
   DEFINE_STANDARD_RTTIEXT(Aspect_DisplayConnection, Standard_Transient)

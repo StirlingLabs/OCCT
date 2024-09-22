@@ -21,11 +21,10 @@
 #include <TDF_Attribute.hxx>
 
 class TObj_Model;
-class TObj_TModel;
 
 /** 
 * Attribute to store OCAF-based models in OCAF tree
-* The persistency mechanism of the TObj_TModel allowes to save
+* The persistency mechanism of the TObj_TModel allows to save
 * and restore various types of models without recompilation of the schema
 */ 
 

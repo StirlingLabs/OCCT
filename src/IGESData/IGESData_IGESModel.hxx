@@ -17,18 +17,14 @@
 #ifndef _IGESData_IGESModel_HeaderFile
 #define _IGESData_IGESModel_HeaderFile
 
-#include <TColStd_HSequenceOfHAsciiString.hxx>
 #include <IGESData_GlobalSection.hxx>
 #include <Interface_InterfaceModel.hxx>
 
-class Interface_InterfaceError;
-class IGESData_GlobalSection;
 class IGESData_IGESEntity;
-class Interface_InterfaceModel;
 class Interface_Check;
+class ShapeBuild_ReShape;
 class Standard_Transient;
 class TCollection_HAsciiString;
-
 
 class IGESData_IGESModel;
 DEFINE_STANDARD_HANDLE(IGESData_IGESModel, Interface_InterfaceModel)
@@ -92,7 +88,10 @@ public:
   Standard_EXPORT void AddStartLine (const Standard_CString line, const Standard_Integer atnum = 0);
   
   //! Returns the Global section of the IGES file.
-  Standard_EXPORT const IGESData_GlobalSection& GlobalSection() const;
+  const IGESData_GlobalSection& GlobalSection() const { return theheader; }
+
+  //! Returns the Global section of the IGES file.
+  IGESData_GlobalSection& ChangeGlobalSection() { return theheader; }
   
   //! Sets the Global section of the IGES file.
   Standard_EXPORT void SetGlobalSection (const IGESData_GlobalSection& header);
@@ -152,8 +151,11 @@ public:
   //! i.e. a string "Dnn" with nn = directory entry number (2*N-1)
   Standard_EXPORT Handle(TCollection_HAsciiString) StringLabel (const Handle(Standard_Transient)& ent) const Standard_OVERRIDE;
 
+  //! Gets ReShape used to store a model's shapes changes
+  const Handle(ShapeBuild_ReShape)& ReShape() const { return myReShape; }
 
-
+  //! Sets ReShape used to store a history of changes of the model's shapes
+  void SetReShape(const Handle(ShapeBuild_ReShape)& theReShape) { myReShape = theReShape; }
 
   DEFINE_STANDARD_RTTIEXT(IGESData_IGESModel,Interface_InterfaceModel)
 
@@ -167,7 +169,7 @@ private:
 
   Handle(TColStd_HSequenceOfHAsciiString) thestart;
   IGESData_GlobalSection theheader;
-
+  Handle(ShapeBuild_ReShape) myReShape;
 
 };
 

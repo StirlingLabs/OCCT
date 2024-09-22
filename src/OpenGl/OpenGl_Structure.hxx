@@ -13,22 +13,17 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef OpenGl_Structure_Header
-#define OpenGl_Structure_Header
+#ifndef OpenGl_Structure_HeaderFile
+#define OpenGl_Structure_HeaderFile
 
 #include <Graphic3d_CStructure.hxx>
-#include <Graphic3d_SequenceOfHClipPlane.hxx>
-
-#include <OpenGl_Aspects.hxx>
 
 #include <OpenGl_GraphicDriver.hxx>
 #include <OpenGl_Group.hxx>
-#include <OpenGl_Vec.hxx>
 #include <OpenGl_Workspace.hxx>
 
 #include <NCollection_List.hxx>
 
-class OpenGl_GraphicDriver;
 
 DEFINE_STANDARD_HANDLE(OpenGl_Structure, Graphic3d_CStructure)
 typedef NCollection_List<const OpenGl_Structure* > OpenGl_ListOfStructure;

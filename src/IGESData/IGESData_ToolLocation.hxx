@@ -20,13 +20,10 @@
 #include <Standard.hxx>
 #include <Standard_Type.hxx>
 
-#include <Standard_Real.hxx>
 #include <Interface_GeneralLib.hxx>
 #include <TColStd_Array1OfInteger.hxx>
 #include <Standard_Transient.hxx>
-#include <Standard_Boolean.hxx>
 class IGESData_IGESModel;
-class Standard_DomainError;
 class IGESData_Protocol;
 class IGESData_IGESEntity;
 class gp_GTrsf;

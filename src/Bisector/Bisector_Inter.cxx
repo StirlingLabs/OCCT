@@ -35,7 +35,6 @@
 #include <IntRes2d_Transition.hxx>
 #include <math_BissecNewton.hxx>
 #include <Precision.hxx>
-#include <Standard_ConstructionError.hxx>
 
 #ifdef OCCT_DEBUG
 //#define DRAW
@@ -218,8 +217,8 @@ void Bisector_Inter::SinglePerform(const Handle(Geom2d_Curve)&    CBis1,
 				   const Standard_Real            Tol,
 				   const Standard_Boolean         ComunElement) 
 {
-  Handle(Geom2d_Curve)   Bis1 = CBis1;
-  Handle(Geom2d_Curve)   Bis2 = CBis2;
+  const Handle(Geom2d_Curve)&   Bis1 = CBis1;
+  const Handle(Geom2d_Curve)&   Bis2 = CBis2;
 
   Handle(Standard_Type)  Type1 = Bis1->DynamicType();
   Handle(Standard_Type)  Type2 = Bis2->DynamicType();
@@ -325,7 +324,7 @@ void Bisector_Inter::NeighbourPerform(const Handle(Bisector_BisecCC)&  Bis1,
 {
   Standard_Real USol,U1,U2,Dist;
   Standard_Real UMin =0.,UMax =0.;  
-  Standard_Real Eps = Precision::PConfusion();
+  constexpr Standard_Real Eps = Precision::PConfusion();
   gp_Pnt2d PSol;
   
   Handle(Geom2d_Curve)     Guide;

@@ -23,19 +23,14 @@
 
 #include <Approx_SweepApproximation.hxx>
 #include <AppBlend_Approx.hxx>
-#include <Standard_Real.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <Standard_Integer.hxx>
-#include <Standard_Boolean.hxx>
 #include <TColgp_Array2OfPnt.hxx>
 #include <TColStd_Array2OfReal.hxx>
 #include <TColStd_Array1OfReal.hxx>
 #include <TColStd_Array1OfInteger.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
 #include <Standard_OStream.hxx>
-class StdFail_NotDone;
-class Standard_DomainError;
-class Standard_OutOfRange;
 class Approx_SweepFunction;
 
 

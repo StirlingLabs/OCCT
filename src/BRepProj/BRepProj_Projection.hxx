@@ -21,16 +21,11 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
-#include <Standard_Boolean.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Compound.hxx>
 #include <TopTools_HSequenceOfShape.hxx>
 #include <Standard_Integer.hxx>
 #include <TopoDS_Wire.hxx>
-class Standard_NoSuchObject;
-class Standard_ConstructionError;
-class Standard_NullObject;
-class TopoDS_Shape;
 class gp_Dir;
 class gp_Pnt;
 

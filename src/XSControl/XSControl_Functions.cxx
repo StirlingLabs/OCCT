@@ -16,26 +16,17 @@
 #include <IFSelect_CheckCounter.hxx>
 #include <IFSelect_Functions.hxx>
 #include <IFSelect_SessionPilot.hxx>
-#include <Interface_CheckIterator.hxx>
-#include <Interface_InterfaceModel.hxx>
-#include <Interface_Macros.hxx>
 #include <Interface_Static.hxx>
 #include <Message.hxx>
 #include <Message_Messenger.hxx>
-#include <TColStd_HSequenceOfHAsciiString.hxx>
 #include <TColStd_HSequenceOfTransient.hxx>
-#include <Transfer_Binder.hxx>
-#include <Transfer_FinderProcess.hxx>
-#include <Transfer_IteratorOfProcessForTransient.hxx>
 #include <Transfer_ResultFromModel.hxx>
-#include <Transfer_TransferIterator.hxx>
 #include <Transfer_TransientProcess.hxx>
 #include <XSControl.hxx>
 #include <XSControl_Controller.hxx>
 #include <XSControl_Functions.hxx>
 #include <XSControl_SelectForTransfer.hxx>
 #include <XSControl_TransferReader.hxx>
-#include <XSControl_TransferWriter.hxx>
 #include <XSControl_WorkSession.hxx>
 
 // #######################################################################
@@ -102,7 +93,7 @@ static IFSelect_ReturnStatus XSControl_newmodel(const Handle(IFSelect_SessionPil
   if (!XSControl::Session(pilot)->NewModel().IsNull()) return IFSelect_RetDone;
   Message_Messenger::StreamBuffer sout = Message::SendInfo();
   sout<<"No new Model produced"<<std::endl;
-  return IFSelect_RetFail;
+  return IFSelect_RetDone;
 }
 
 

@@ -23,14 +23,12 @@
 #include <Precision.hxx>
 #include <ShapeAnalysis_Curve.hxx>
 #include <ShapeExtend.hxx>
-#include <ShapeUpgrade.hxx>
 #include <ShapeUpgrade_SplitCurve2d.hxx>
 #include <Standard_ErrorHandler.hxx>
 #include <Standard_Failure.hxx>
 #include <Standard_Type.hxx>
 #include <TColGeom2d_HArray1OfCurve.hxx>
 #include <TColStd_HSequenceOfReal.hxx>
-#include <TColStd_ListIteratorOfListOfReal.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(ShapeUpgrade_SplitCurve2d,ShapeUpgrade_SplitCurve)
 
@@ -65,7 +63,7 @@ ShapeUpgrade_SplitCurve2d::ShapeUpgrade_SplitCurve2d()
   Handle(Geom2d_Curve) CopyOfC = Handle(Geom2d_Curve)::DownCast(C->Copy());
   myCurve = CopyOfC;
   
-  Standard_Real precision = Precision::PConfusion();
+  constexpr Standard_Real precision = Precision::PConfusion();
   Standard_Real firstPar = First;
   Standard_Real lastPar = Last;
   Handle (Geom2d_Curve) aCurve = myCurve;

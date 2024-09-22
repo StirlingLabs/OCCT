@@ -23,10 +23,8 @@
 
 #include <Standard_Integer.hxx>
 #include <math_FunctionSet.hxx>
-#include <Standard_Boolean.hxx>
 #include <math_Vector.hxx>
 class PLib_Base;
-class Standard_ConstructionError;
 
 
 //! this  class  describes  the  functions  needed  for

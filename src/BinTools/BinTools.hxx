@@ -22,19 +22,9 @@
 #include <Standard_Handle.hxx>
 
 #include <Standard_Real.hxx>
-#include <Standard_Integer.hxx>
-#include <Standard_Boolean.hxx>
-#include <Standard_ExtCharacter.hxx>
-#include <Standard_OStream.hxx>
-#include <Standard_IStream.hxx>
 #include <Message_ProgressRange.hxx>
 
 class TopoDS_Shape;
-class BinTools_ShapeSet;
-class BinTools_Curve2dSet;
-class BinTools_CurveSet;
-class BinTools_SurfaceSet;
-class BinTools_LocationSet;
 
 
 //! Tool to keep shapes in binary format
@@ -129,29 +119,6 @@ public:
     (TopoDS_Shape& theShape, const Standard_CString theFile,
      const Message_ProgressRange& theRange = Message_ProgressRange());
 
-protected:
-
-
-
-
-
-private:
-
-
-
-
-friend class BinTools_ShapeSet;
-friend class BinTools_Curve2dSet;
-friend class BinTools_CurveSet;
-friend class BinTools_SurfaceSet;
-friend class BinTools_LocationSet;
-
 };
-
-
-
-
-
-
 
 #endif // _BinTools_HeaderFile

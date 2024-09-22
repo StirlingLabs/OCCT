@@ -17,7 +17,6 @@
 #define _OpenGl_ShaderManager_HeaderFile
 
 #include <Graphic3d_ShaderManager.hxx>
-#include <NCollection_Sequence.hxx>
 #include <OpenGl_Aspects.hxx>
 #include <OpenGl_Context.hxx>
 #include <OpenGl_MaterialState.hxx>
@@ -28,7 +27,6 @@
 #include <OpenGl_Texture.hxx>
 #include <OpenGl_TextureSet.hxx>
 
-class OpenGl_View;
 class OpenGl_VertexBuffer;
 
 //! List of shader programs.
@@ -116,10 +114,10 @@ public:
                                     Standard_Boolean theEnableMeshEdges,
                                     const Handle(OpenGl_ShaderProgram)& theCustomProgram)
   {
-    const Graphic3d_TypeOfShadingModel aShadeModelOnFace = theShadingModel != Graphic3d_TOSM_UNLIT
+    const Graphic3d_TypeOfShadingModel aShadeModelOnFace = theShadingModel != Graphic3d_TypeOfShadingModel_Unlit
                                                         && (theTextures.IsNull() || theTextures->IsModulate())
                                                         ? theShadingModel
-                                                        : Graphic3d_TOSM_UNLIT;
+                                                        : Graphic3d_TypeOfShadingModel_Unlit;
     if (!theCustomProgram.IsNull()
      || myContext->caps->ffpEnable)
     {
@@ -183,7 +181,7 @@ public:
     {
       prepareStdProgramUnlit (aProgram, aBits, true);
     }
-    return bindProgramWithState (aProgram, Graphic3d_TOSM_UNLIT);
+    return bindProgramWithState (aProgram, Graphic3d_TypeOfShadingModel_Unlit);
   }
 
   //! Bind program for FBO blit operation.
@@ -211,7 +209,7 @@ public:
     {
       prepareStdProgramBoundBox();
     }
-    return bindProgramWithState (myBoundBoxProgram, Graphic3d_TOSM_UNLIT);
+    return bindProgramWithState (myBoundBoxProgram, Graphic3d_TypeOfShadingModel_Unlit);
   }
 
   //! Returns bounding box vertex buffer.
@@ -228,7 +226,13 @@ public:
   }
 
   //! Generates shader program to render environment cubemap as background.
-  Standard_EXPORT const Handle(Graphic3d_ShaderProgram)& GetBgCubeMapProgram ();
+  Standard_EXPORT const Handle(Graphic3d_ShaderProgram)& GetBgCubeMapProgram();
+
+  //! Generates shader program to render skydome background.
+  Standard_EXPORT const Handle(Graphic3d_ShaderProgram)& GetBgSkydomeProgram();
+
+  //! Generates shader program to render correctly colored quad.
+  Standard_EXPORT const Handle(Graphic3d_ShaderProgram)& GetColoredQuadProgram();
 
   //! Resets PBR shading models to corresponding non-PBR ones if PBR is not allowed.
   static Graphic3d_TypeOfShadingModel PBRShadingModelFallback (Graphic3d_TypeOfShadingModel theShadingModel,
@@ -241,8 +245,8 @@ public:
 
     switch (theShadingModel)
     {
-      case Graphic3d_TOSM_PBR:       return Graphic3d_TOSM_FRAGMENT;
-      case Graphic3d_TOSM_PBR_FACET: return Graphic3d_TOSM_FACET;
+      case Graphic3d_TypeOfShadingModel_Pbr:      return Graphic3d_TypeOfShadingModel_Phong;
+      case Graphic3d_TypeOfShadingModel_PbrFacet: return Graphic3d_TypeOfShadingModel_PhongFacet;
       default: return theShadingModel;
     }
   }
@@ -264,7 +268,7 @@ public:
   {
     if (myLightSourceState.ShadowMaps().IsNull()
      || myLightSourceState.ToCastShadows() == theToCast)
-	{
+    {
       return myLightSourceState.ToCastShadows();
     }
 
@@ -454,7 +458,7 @@ public:
 
   //! Pushes current state of OCCT graphics parameters to specified program.
   Standard_EXPORT void PushState (const Handle(OpenGl_ShaderProgram)& theProgram,
-                                  Graphic3d_TypeOfShadingModel theShadingModel = Graphic3d_TOSM_UNLIT) const;
+                                  Graphic3d_TypeOfShadingModel theShadingModel = Graphic3d_TypeOfShadingModel_Unlit) const;
 
 public:
 
@@ -478,24 +482,24 @@ public:
   {
     if (!myContext->ColorMask())
     {
-      return Graphic3d_TOSM_UNLIT;
+      return Graphic3d_TypeOfShadingModel_Unlit;
     }
-    Graphic3d_TypeOfShadingModel aModel = theCustomModel != Graphic3d_TOSM_DEFAULT ? theCustomModel : myShadingModel;
+    Graphic3d_TypeOfShadingModel aModel = theCustomModel != Graphic3d_TypeOfShadingModel_DEFAULT ? theCustomModel : myShadingModel;
     switch (aModel)
     {
-      case Graphic3d_TOSM_DEFAULT:
-      case Graphic3d_TOSM_UNLIT:
-      case Graphic3d_TOSM_FACET:
+      case Graphic3d_TypeOfShadingModel_DEFAULT:
+      case Graphic3d_TypeOfShadingModel_Unlit:
+      case Graphic3d_TypeOfShadingModel_PhongFacet:
         return aModel;
-      case Graphic3d_TOSM_VERTEX:
-      case Graphic3d_TOSM_FRAGMENT:
-        return theHasNodalNormals ? aModel : Graphic3d_TOSM_FACET;
-      case Graphic3d_TOSM_PBR:
-        return PBRShadingModelFallback (theHasNodalNormals ? aModel : Graphic3d_TOSM_PBR_FACET, IsPbrAllowed());
-      case Graphic3d_TOSM_PBR_FACET:
+      case Graphic3d_TypeOfShadingModel_Gouraud:
+      case Graphic3d_TypeOfShadingModel_Phong:
+        return theHasNodalNormals ? aModel : Graphic3d_TypeOfShadingModel_PhongFacet;
+      case Graphic3d_TypeOfShadingModel_Pbr:
+        return PBRShadingModelFallback (theHasNodalNormals ? aModel : Graphic3d_TypeOfShadingModel_PbrFacet, IsPbrAllowed());
+      case Graphic3d_TypeOfShadingModel_PbrFacet:
         return PBRShadingModelFallback (aModel, IsPbrAllowed());
     }
-    return Graphic3d_TOSM_UNLIT;
+    return Graphic3d_TypeOfShadingModel_Unlit;
   }
 
   //! Choose Shading Model for line primitives.
@@ -506,24 +510,24 @@ public:
   {
     if (!myContext->ColorMask())
     {
-      return Graphic3d_TOSM_UNLIT;
+      return Graphic3d_TypeOfShadingModel_Unlit;
     }
-    Graphic3d_TypeOfShadingModel aModel = theCustomModel != Graphic3d_TOSM_DEFAULT ? theCustomModel : myShadingModel;
+    Graphic3d_TypeOfShadingModel aModel = theCustomModel != Graphic3d_TypeOfShadingModel_DEFAULT ? theCustomModel : myShadingModel;
     switch (aModel)
     {
-      case Graphic3d_TOSM_DEFAULT:
-      case Graphic3d_TOSM_UNLIT:
-      case Graphic3d_TOSM_FACET:
-        return Graphic3d_TOSM_UNLIT;
-      case Graphic3d_TOSM_VERTEX:
-      case Graphic3d_TOSM_FRAGMENT:
-        return theHasNodalNormals ? aModel : Graphic3d_TOSM_UNLIT;
-      case Graphic3d_TOSM_PBR:
-        return PBRShadingModelFallback (theHasNodalNormals ? aModel : Graphic3d_TOSM_UNLIT, IsPbrAllowed());
-      case Graphic3d_TOSM_PBR_FACET:
-        return Graphic3d_TOSM_UNLIT;
+      case Graphic3d_TypeOfShadingModel_DEFAULT:
+      case Graphic3d_TypeOfShadingModel_Unlit:
+      case Graphic3d_TypeOfShadingModel_PhongFacet:
+        return Graphic3d_TypeOfShadingModel_Unlit;
+      case Graphic3d_TypeOfShadingModel_Gouraud:
+      case Graphic3d_TypeOfShadingModel_Phong:
+        return theHasNodalNormals ? aModel : Graphic3d_TypeOfShadingModel_Unlit;
+      case Graphic3d_TypeOfShadingModel_Pbr:
+        return PBRShadingModelFallback (theHasNodalNormals ? aModel : Graphic3d_TypeOfShadingModel_Unlit, IsPbrAllowed());
+      case Graphic3d_TypeOfShadingModel_PbrFacet:
+        return Graphic3d_TypeOfShadingModel_Unlit;
     }
-    return Graphic3d_TOSM_UNLIT;
+    return Graphic3d_TypeOfShadingModel_Unlit;
   }
 
   //! Choose Shading Model for Marker primitives.
@@ -632,7 +636,7 @@ protected:
   Handle(OpenGl_ShaderProgram)& getStdProgram (Graphic3d_TypeOfShadingModel theShadingModel,
                                                Standard_Integer theBits)
   {
-    if (theShadingModel == Graphic3d_TOSM_UNLIT
+    if (theShadingModel == Graphic3d_TypeOfShadingModel_Unlit
      || (theBits & Graphic3d_ShaderFlags_HasTextures) == Graphic3d_ShaderFlags_TextureEnv)
     {
       // If environment map is enabled lighting calculations are
@@ -665,13 +669,13 @@ protected:
   {
     switch (theShadingModel)
     {
-      case Graphic3d_TOSM_UNLIT:     return prepareStdProgramUnlit  (theProgram, theBits, false);
-      case Graphic3d_TOSM_FACET:     return prepareStdProgramPhong  (theProgram, theBits, true);
-      case Graphic3d_TOSM_VERTEX:    return prepareStdProgramGouraud(theProgram, theBits);
-      case Graphic3d_TOSM_DEFAULT:
-      case Graphic3d_TOSM_FRAGMENT:  return prepareStdProgramPhong  (theProgram, theBits, false);
-      case Graphic3d_TOSM_PBR:       return prepareStdProgramPhong  (theProgram, theBits, false, true);
-      case Graphic3d_TOSM_PBR_FACET: return prepareStdProgramPhong  (theProgram, theBits, true, true);
+      case Graphic3d_TypeOfShadingModel_Unlit:      return prepareStdProgramUnlit  (theProgram, theBits, false);
+      case Graphic3d_TypeOfShadingModel_PhongFacet: return prepareStdProgramPhong  (theProgram, theBits, true);
+      case Graphic3d_TypeOfShadingModel_Gouraud:    return prepareStdProgramGouraud(theProgram, theBits);
+      case Graphic3d_TypeOfShadingModel_DEFAULT:
+      case Graphic3d_TypeOfShadingModel_Phong:      return prepareStdProgramPhong  (theProgram, theBits, false);
+      case Graphic3d_TypeOfShadingModel_Pbr:        return prepareStdProgramPhong  (theProgram, theBits, false, true);
+      case Graphic3d_TypeOfShadingModel_PbrFacet:   return prepareStdProgramPhong  (theProgram, theBits, true, true);
     }
     return false;
   }
@@ -702,8 +706,8 @@ protected:
   Standard_EXPORT Standard_Boolean preparePBREnvBakingProgram (Standard_Integer theIndex);
 
   //! Checks whether one of PBR shading models is set as default model.
-  Standard_Boolean IsPbrAllowed() const { return myShadingModel == Graphic3d_TOSM_PBR
-                                              || myShadingModel == Graphic3d_TOSM_PBR_FACET; }
+  Standard_Boolean IsPbrAllowed() const { return myShadingModel == Graphic3d_TypeOfShadingModel_Pbr
+                                              || myShadingModel == Graphic3d_TypeOfShadingModel_PbrFacet; }
 
 protected:
 
@@ -769,7 +773,9 @@ protected:
   OpenGl_MapOfShaderPrograms         myMapOfLightPrograms; //!< map of lighting programs depending on lights configuration
 
   Handle(OpenGl_ShaderProgram)       myPBREnvBakingProgram[3]; //!< programs for IBL maps generation used in PBR pipeline (0 for Diffuse; 1 for Specular; 2 for fallback)
-  Handle(Graphic3d_ShaderProgram)    myBgCubeMapProgram;   //!< program for background cubemap rendering
+  Handle(Graphic3d_ShaderProgram)    myBgCubeMapProgram;       //!< program for background cubemap rendering
+  Handle(Graphic3d_ShaderProgram)    myBgSkydomeProgram;       //!< program for background cubemap rendering
+  Handle(Graphic3d_ShaderProgram)    myColoredQuadProgram;     //!< program for correct quad rendering
 
   Handle(OpenGl_ShaderProgram)       myStereoPrograms[Graphic3d_StereoMode_NB]; //!< standard stereo programs
 

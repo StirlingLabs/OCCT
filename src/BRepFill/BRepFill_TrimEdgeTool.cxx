@@ -26,18 +26,13 @@
 #include <Geom2d_TrimmedCurve.hxx>
 #include <Geom2dAPI_ProjectPointOnCurve.hxx>
 #include <Geom2dInt_GInter.hxx>
-#include <Geom_Curve.hxx>
-#include <Geom_TrimmedCurve.hxx>
-#include <GeomProjLib.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_Pnt2d.hxx>
 #include <IntRes2d_IntersectionPoint.hxx>
 #include <IntRes2d_IntersectionSegment.hxx>
 #include <Precision.hxx>
 #include <StdFail_NotDone.hxx>
-#include <TopLoc_Location.hxx>
 #include <TopoDS.hxx>
-#include <TopoDS_Edge.hxx>
 #include <TopoDS_Vertex.hxx>
 #include <TopExp.hxx>
 #include <BRepAdaptor_Curve.hxx>
@@ -182,11 +177,11 @@ static void EvalParameters(const Geom2dAdaptor_Curve& Bis,
   TColgp_SequenceOfPnt& Params)
 {
   Geom2dInt_GInter Intersector;
-  Standard_Real Tol = Precision::Confusion();
+  constexpr Standard_Real Tol = Precision::Confusion();
   //  Standard_Real TolC = 1.e-9;
 
-  Geom2dAdaptor_Curve CBis(Bis);
-  Geom2dAdaptor_Curve CAC (AC);
+  const Geom2dAdaptor_Curve& CBis(Bis);
+  const Geom2dAdaptor_Curve& CAC (AC);
 
   //Intersector = Geom2dInt_GInter(CBis, CAC, TolC, Tol);
   Intersector = Geom2dInt_GInter(CAC, CBis, Tol, Tol);
@@ -250,8 +245,8 @@ static void EvalParametersBis(const Geom2dAdaptor_Curve& Bis,
   Geom2dInt_GInter Intersector;
   Standard_Real TolC = Tol;
 
-  Geom2dAdaptor_Curve CBis(Bis);
-  Geom2dAdaptor_Curve CAC (AC);
+  const Geom2dAdaptor_Curve& CBis(Bis);
+  const Geom2dAdaptor_Curve& CAC (AC);
 
   Intersector = Geom2dInt_GInter(CAC, CBis, TolC, Tol);
 
@@ -524,7 +519,7 @@ void BRepFill_TrimEdgeTool::IntersectWith(const TopoDS_Edge& Edge1,
   // The tolerance can be eventually changed.
 
   gp_Pnt P1,P2;
-  Standard_Real Tol = 4 * 100 * Precision::PConfusion();
+  constexpr Standard_Real Tol = 4 * 100 * Precision::PConfusion();
   Standard_Integer i = 1;
   Standard_Integer NbPoints = Params.Length();
 
@@ -665,7 +660,7 @@ void BRepFill_TrimEdgeTool::AddOrConfuse(const Standard_Boolean  Start,
 {
   Standard_Boolean  ToProj = Standard_True;
   gp_Pnt2d          PBis;
-  Standard_Real     Tol = 10*Precision::Confusion(); 
+  constexpr Standard_Real Tol = 10*Precision::Confusion();
 
   // return curves associated to edges.
   TopLoc_Location L;

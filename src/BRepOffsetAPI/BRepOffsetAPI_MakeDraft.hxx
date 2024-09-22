@@ -25,10 +25,7 @@
 #include <BRepBuilderAPI_MakeShape.hxx>
 #include <Standard_Real.hxx>
 #include <BRepBuilderAPI_TransitionMode.hxx>
-#include <Standard_Boolean.hxx>
 #include <TopTools_ListOfShape.hxx>
-class StdFail_NotDone;
-class Standard_NoSuchObject;
 class TopoDS_Shape;
 class gp_Dir;
 class Geom_Surface;

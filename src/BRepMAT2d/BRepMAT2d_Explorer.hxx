@@ -26,12 +26,10 @@
 #include <TopoDS_Shape.hxx>
 #include <TColStd_SequenceOfBoolean.hxx>
 #include <TopTools_IndexedDataMapOfShapeShape.hxx>
-#include <Standard_Boolean.hxx>
 #include <TColGeom2d_SequenceOfCurve.hxx>
 class TopoDS_Face;
 class TopoDS_Wire;
 class Geom2d_Curve;
-class TopoDS_Shape;
 
 
 //! Construct an explorer from wires, face, set of curves

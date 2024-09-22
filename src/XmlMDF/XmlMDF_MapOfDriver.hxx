@@ -18,11 +18,10 @@
 
 #include <TCollection_AsciiString.hxx>
 #include <XmlMDF_ADriver.hxx>
-#include <TCollection_AsciiString.hxx>
 #include <NCollection_DataMap.hxx>
 
-typedef NCollection_DataMap<TCollection_AsciiString,Handle(XmlMDF_ADriver),TCollection_AsciiString> XmlMDF_MapOfDriver;
-typedef NCollection_DataMap<TCollection_AsciiString,Handle(XmlMDF_ADriver),TCollection_AsciiString>::Iterator XmlMDF_DataMapIteratorOfMapOfDriver;
+typedef NCollection_DataMap<TCollection_AsciiString,Handle(XmlMDF_ADriver)> XmlMDF_MapOfDriver;
+typedef NCollection_DataMap<TCollection_AsciiString,Handle(XmlMDF_ADriver)>::Iterator XmlMDF_DataMapIteratorOfMapOfDriver;
 
 
 #endif

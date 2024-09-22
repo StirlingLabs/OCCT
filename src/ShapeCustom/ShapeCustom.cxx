@@ -28,7 +28,6 @@
 #include <gp_Trsf.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <TopoDS_Shape.hxx>
-#include <TopoDS_Compound.hxx>
 #include <TopoDS_Iterator.hxx>
 #include <BRep_Builder.hxx>
 #include <BRepTools_Modifier.hxx>
@@ -36,6 +35,68 @@
 #include <Standard_ErrorHandler.hxx>
 
 #include <Message_ProgressScope.hxx>
+
+namespace
+{
+  //=======================================================================
+  //function : UpdateHistoryShape
+  //purpose  : Updates ShapeBuild_ReShape by the info of the given shape
+  //=======================================================================
+  bool UpdateHistoryShape (const TopoDS_Shape&               theShape,
+                           const BRepTools_Modifier&         theModifier,
+                           const Handle(ShapeBuild_ReShape)& theReShape)
+  {
+    TopoDS_Shape aResult;
+    try
+    {
+      OCC_CATCH_SIGNALS
+      aResult = theModifier.ModifiedShape (theShape);
+    }
+    catch (Standard_NoSuchObject const&)
+    {
+      // the sub shape isn't in the map
+      aResult.Nullify();
+    }
+
+    if (!aResult.IsNull() && !theShape.IsSame (aResult))
+    {
+      theReShape->Replace (theShape, aResult);
+      return true;
+    }
+
+    return false;
+  }
+
+  //=======================================================================
+  //function : UpdateHistory
+  //purpose  : Recursively updates ShapeBuild_ReShape to add information of all sub-shapes
+  //=======================================================================
+  void UpdateHistory (const TopoDS_Shape&               theShape,
+                      const BRepTools_Modifier&         theModifier,
+                      const Handle(ShapeBuild_ReShape)& theReShape)
+  {
+    for (TopoDS_Iterator theIterator (theShape, Standard_False); theIterator.More(); theIterator.Next())
+    {
+      const TopoDS_Shape& aCurrent = theIterator.Value();
+      if (UpdateHistoryShape (aCurrent, theModifier, theReShape))
+      {
+        UpdateHistory (aCurrent, theModifier, theReShape);
+      }
+    }
+  }
+
+  //=======================================================================
+  //function : UpdateShapeBuild
+  //purpose  : Recursively updates ShapeBuild_ReShape to add information of all sub-shapes
+  //=======================================================================
+  void UpdateShapeBuild (const TopoDS_Shape&               theShape,
+                         const BRepTools_Modifier&         theModifier,
+                         const Handle(ShapeBuild_ReShape)& theReShape)
+  {
+    UpdateHistoryShape (theShape, theModifier, theReShape);
+    UpdateHistory      (theShape, theModifier, theReShape);
+  }
+}
 
 //=======================================================================
 //function : ApplyModifier
@@ -59,25 +120,31 @@ TopoDS_Shape ShapeCustom::ApplyModifier (const TopoDS_Shape &S,
     BRep_Builder B;
     B.MakeCompound ( C );
 
+    SF.Location (TopLoc_Location());
     Standard_Integer aShapeCount = SF.NbChildren();
     Message_ProgressScope aPS(theProgress, "Applying Modifier For Solids", aShapeCount);
-    for ( TopoDS_Iterator it(SF); it.More() && aPS.More(); it.Next()) {
-      TopoDS_Shape shape = it.Value();
-      TopLoc_Location L = shape.Location(), nullLoc;
-      shape.Location ( nullLoc );
-      TopoDS_Shape res;
+    for (TopoDS_Iterator it(SF); it.More() && aPS.More(); it.Next())
+    {
       Message_ProgressRange aRange = aPS.Next();
-      if ( context.IsBound ( shape ) )
-        res = context.Find ( shape ).Oriented ( shape.Orientation() );
-      else
-        res = ApplyModifier ( shape, M, context ,MD, aRange);
+    
+      TopoDS_Shape shape       = it.Value();
+      TopoDS_Shape aShapeNoLoc = it.Value();
+      aShapeNoLoc.Location (TopLoc_Location());
 
-      if ( ! res.IsSame ( shape ) ) {
-        context.Bind ( shape, res );
-        locModified = Standard_True;
+      TopoDS_Shape res;
+      if (context.Find (aShapeNoLoc, res))
+      {
+        res.Orientation (shape.Orientation());
+        res.Location    (shape.Location(), Standard_False);
       }
-      res.Location ( L );
-      B.Add ( C, res );
+      else
+      {
+        res = ApplyModifier (shape, M, context, MD, aRange, aReShape);
+      }
+
+      locModified |= !res.IsSame (shape);
+
+      B.Add (C, res);
     }
 
     if ( !aPS.More() )
@@ -86,9 +153,24 @@ TopoDS_Shape ShapeCustom::ApplyModifier (const TopoDS_Shape &S,
       return S;
     }
 
-    if ( ! locModified ) return S;
-    context.Bind ( SF, C );
-    return C.Oriented ( S.Orientation() );
+    if ( !locModified )
+    {
+      return S;
+    }
+
+    SF.Orientation (S.Orientation());
+    C .Orientation (S.Orientation());
+
+    context.Bind (SF, C);
+
+    C.Location (S.Location(), Standard_False);
+    
+    if (!aReShape.IsNull())
+    {
+      aReShape->Replace (S, C);
+    }
+
+    return C;
   }
 
   Message_ProgressScope aPS(theProgress, "Modify the Shape", 1);
@@ -97,31 +179,21 @@ TopoDS_Shape ShapeCustom::ApplyModifier (const TopoDS_Shape &S,
   MD.Perform(M, aPS.Next());
   
   if ( !aPS.More() || !MD.IsDone() ) return S;
-  if ( !aReShape.IsNull() )
-  {
-    for(TopoDS_Iterator theIterator(SF,Standard_False);theIterator.More();theIterator.Next())
-    {
-      const TopoDS_Shape & current = theIterator.Value();
-      TopoDS_Shape result;
-      try
-      {
-        OCC_CATCH_SIGNALS
-        result = MD.ModifiedShape( current );
-      }
-      catch (Standard_NoSuchObject const&)
-      {
-        // the sub shape isn't in the map
-        result.Nullify();
-      }
 
-      if (!result.IsNull() && !current.IsSame(result))
-      {
-        aReShape->Replace(current, result);
-      }
-    }
+  TopoDS_Shape aResult = MD.ModifiedShape (SF);
+  aResult.Orientation (S.Orientation());
+
+  if (!SF.IsSame (aResult))
+  {
+    context.Bind (S.Located (TopLoc_Location()), aResult.Located (TopLoc_Location()));
   }
 
-  return MD.ModifiedShape(SF).Oriented(S.Orientation());
+  if ( !aReShape.IsNull() )
+  {
+    UpdateShapeBuild ( SF, MD, aReShape );
+  }
+
+  return aResult;
 }
   
 

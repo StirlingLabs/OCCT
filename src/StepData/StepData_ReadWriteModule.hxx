@@ -18,13 +18,9 @@
 #define _StepData_ReadWriteModule_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <Interface_ReaderModule.hxx>
-#include <Standard_Integer.hxx>
 #include <TColStd_SequenceOfAsciiString.hxx>
-#include <Standard_Boolean.hxx>
-class Standard_DomainError;
 class Interface_FileReaderData;
 class TCollection_AsciiString;
 class Interface_Check;
@@ -70,7 +66,7 @@ public:
   
   //! Returns True if the Case Number corresponds to a Complex Type
   //! ("Plex"). Remember that all possible combinations must be
-  //! aknowledged to be processed
+  //! acknowledged to be processed
   //! Default is False for all cases. For a Protocol which defines
   //! possible Plexes, this method must be redefined.
   Standard_EXPORT virtual Standard_Boolean IsComplex (const Standard_Integer CN) const;

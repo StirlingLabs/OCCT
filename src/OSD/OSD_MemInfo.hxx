@@ -13,10 +13,9 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
-#ifndef _OSD_MemInfo_H__
-#define _OSD_MemInfo_H__
+#ifndef OSD_MemInfo_HeaderFile
+#define OSD_MemInfo_HeaderFile
 
-#include <NCollection_Map.hxx>
 #include <TCollection_AsciiString.hxx>
 
 //! This class provide information about memory utilized by current process.
@@ -42,7 +41,7 @@
 //! application memory consumption!
 //!
 //! User should analyze all values in specific case to make correct decision
-//! about memory (over)usage. This is also prefferred to use specialized
+//! about memory (over)usage. This is also preferred to use specialized
 //! tools to detect memory leaks.
 //!
 //! This also means that these values should not be used for intellectual

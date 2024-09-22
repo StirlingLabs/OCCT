@@ -26,7 +26,6 @@
 #include <OSD_OpenFile.hxx>
 #include <OSD_Path.hxx>
 #include <OSD_Timer.hxx>
-#include <Precision.hxx>
 #include <Standard_CLocaleSentry.hxx>
 #include <Standard_ReadLineBuffer.hxx>
 
@@ -48,35 +47,6 @@ namespace
   // The length of buffer to read (in bytes)
   static const size_t THE_BUFFER_SIZE = 4 * 1024;
 
-  //! Simple wrapper.
-  struct RWObj_ReaderFile
-  {
-    FILE*   File;
-    int64_t FileLen;
-
-    //! Constructor opening the file.
-    RWObj_ReaderFile (const TCollection_AsciiString& theFile)
-    : File (OSD_OpenFile (theFile.ToCString(), "rb")),
-      FileLen (0)
-    {
-      if (this->File != NULL)
-      {
-        // determine length of file
-        ::fseek64 (this->File, 0, SEEK_END);
-        FileLen = ::ftell64 (this->File);
-        ::fseek64 (this->File, 0, SEEK_SET);
-      }
-    }
-
-    //! Destructor closing the file.
-    ~RWObj_ReaderFile()
-    {
-      if (File != NULL)
-      {
-        ::fclose (File);
-      }
-    }
-  };
 
   //! Return TRUE if given polygon has clockwise node order.
   static bool isClockwisePolygon (const Handle(BRepMesh_DataStructureOfDelaun)& theMesh,
@@ -116,7 +86,8 @@ RWObj_Reader::RWObj_Reader()
 // Function : read
 // Purpose  :
 // ================================================================
-Standard_Boolean RWObj_Reader::read (const TCollection_AsciiString& theFile,
+Standard_Boolean RWObj_Reader::read (std::istream& theStream,
+                                     const TCollection_AsciiString& theFile,
                                      const Message_ProgressRange& theProgress,
                                      const Standard_Boolean theToProbe)
 {
@@ -141,15 +112,16 @@ Standard_Boolean RWObj_Reader::read (const TCollection_AsciiString& theFile,
   myCurrElem.resize (1024, -1);
 
   Standard_CLocaleSentry aLocaleSentry;
-  RWObj_ReaderFile aFile (theFile);
-  if (aFile.File == NULL)
+  if (!theStream.good())
   {
     Message::SendFail (TCollection_AsciiString ("Error: file '") + theFile + "' is not found");
     return Standard_False;
   }
 
   // determine length of file
-  const int64_t aFileLen = aFile.FileLen;
+  theStream.seekg(0, theStream.end);
+  const int64_t aFileLen = theStream.tellg();
+  theStream.seekg(0, theStream.beg);
   if (aFileLen <= 0L)
   {
     Message::SendFail (TCollection_AsciiString ("Error: file '") + theFile + "' is empty");
@@ -159,12 +131,11 @@ Standard_Boolean RWObj_Reader::read (const TCollection_AsciiString& theFile,
   Standard_ReadLineBuffer aBuffer (THE_BUFFER_SIZE);
   aBuffer.SetMultilineMode (true);
 
-  const Standard_Integer aNbMiBTotal  = Standard_Integer(aFileLen / (1024 * 1024));
+  const Standard_Integer aNbMiBTotal = Standard_Integer(aFileLen / (1024 * 1024));
   Standard_Integer       aNbMiBPassed = 0;
   Message_ProgressScope aPS (theProgress, "Reading text OBJ file", aNbMiBTotal);
   OSD_Timer aTimer;
   aTimer.Start();
-
   bool isStart = true;
   int64_t aPosition = 0;
   size_t aLineLen = 0;
@@ -172,7 +143,7 @@ Standard_Boolean RWObj_Reader::read (const TCollection_AsciiString& theFile,
   const char* aLine = NULL;
   for (;;)
   {
-    aLine = aBuffer.ReadLine (aFile.File, aLineLen, aReadBytes);
+    aLine = aBuffer.ReadLine (theStream, aLineLen, aReadBytes);
     if (aLine == NULL)
     {
       break;
@@ -329,7 +300,7 @@ void RWObj_Reader::pushIndices (const char* thePos)
   for (Standard_Integer aNode = 0;; ++aNode)
   {
     Graphic3d_Vec3i a3Indices (-1, -1, -1);
-    a3Indices[0] = strtol (thePos, &aNext, 10) - 1;
+    a3Indices[0] = int(strtol (thePos, &aNext, 10) - 1);
     if (aNext == thePos)
     {
       break;
@@ -340,14 +311,14 @@ void RWObj_Reader::pushIndices (const char* thePos)
     if (*thePos == '/')
     {
       ++thePos;
-      a3Indices[1] = strtol (thePos, &aNext, 10) - 1;
+      a3Indices[1] = int(strtol (thePos, &aNext, 10) - 1);
       thePos = aNext;
 
       // parse Normal index
       if (*thePos == '/')
       {
         ++thePos;
-        a3Indices[2] = strtol (thePos, &aNext, 10) - 1;
+        a3Indices[2] = int(strtol (thePos, &aNext, 10) - 1);
         thePos = aNext;
       }
     }

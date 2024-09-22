@@ -36,14 +36,17 @@ static const Standard_Real Probing_Step = 0.2111;
 //purpose  : 
 //=======================================================================
 
-BRepClass_FaceExplorer::BRepClass_FaceExplorer(const TopoDS_Face& F) :
+BRepClass_FaceExplorer::BRepClass_FaceExplorer(const TopoDS_Face& F) : 
        myFace(F),
        myCurEdgeInd(1),
        myCurEdgePar(Probing_Start),
+       myMaxTolerance(0.1),
+       myUseBndBox(Standard_False),
        myUMin (Precision::Infinite()),
        myUMax (-Precision::Infinite()),
        myVMin (Precision::Infinite()),
        myVMax (-Precision::Infinite())
+       
 {
   myFace.Orientation(TopAbs_FORWARD);
 }
@@ -144,7 +147,7 @@ Standard_Boolean BRepClass_FaceExplorer::OtherSegment(const gp_Pnt2d& P,
   Standard_Real        aFPar;
   Standard_Real        aLPar;
   Handle(Geom2d_Curve) aC2d;
-  Standard_Real        aTolParConf2 = Precision::PConfusion() * Precision::PConfusion();
+  constexpr Standard_Real aTolParConf2 = Precision::PConfusion() * Precision::PConfusion();
   gp_Pnt2d             aPOnC;
   Standard_Real        aParamIn;
 
@@ -199,7 +202,7 @@ Standard_Boolean BRepClass_FaceExplorer::OtherSegment(const gp_Pnt2d& P,
               // is tangent to the edge curve. This condition is bad for classification.
               // Therefore try to go to another point in the hope that there will be 
               // no tangent. If there tangent is preserved then leave the last point in 
-              // order to get this edge chanse to participate in classification.
+              // order to get this edge chance to participate in classification.
               if (myCurEdgePar + Probing_Step < Probing_End)
                 continue;
             }
@@ -338,5 +341,7 @@ void  BRepClass_FaceExplorer::CurrentEdge(BRepClass_Edge& E,
   E.Face() = myFace;
   Or = E.Edge().Orientation();
   E.SetNextEdge(myMapVE);
+  E.SetMaxTolerance(myMaxTolerance);
+  E.SetUseBndBox(myUseBndBox);
 }
 

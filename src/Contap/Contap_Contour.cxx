@@ -18,7 +18,6 @@
 #include <Adaptor3d_Surface.hxx>
 #include <Adaptor3d_HSurfaceTool.hxx>
 #include <Adaptor3d_TopolTool.hxx>
-#include <Bnd_Box.hxx>
 #include <BndLib_AddSurface.hxx>
 #include <Contap_ContAna.hxx>
 #include <Contap_Contour.hxx>
@@ -39,7 +38,6 @@
 #include <IntSurf_SequenceOfPathPoint.hxx>
 #include <math_FunctionSetRoot.hxx>
 #include <Standard_ConstructionError.hxx>
-#include <Standard_OutOfRange.hxx>
 #include <StdFail_NotDone.hxx>
 #include <TColStd_Array1OfInteger.hxx>
 #include <TopTrans_CurveTransition.hxx>
@@ -286,7 +284,7 @@ static void LineConstructor(Contap_TheSequenceOfLine& slin,
 
                               //-- ------------------------------------------------------------
                               //-- on decoupe la ligne en portions  entre 2 vertex 
-                              Standard_Real Tol = Precision::PConfusion();
+                              constexpr Standard_Real Tol = Precision::PConfusion();
                               Contap_IType typl = L.TypeContour();
                               //-- std::cout<<"\n ----------- Ligne Constructor "<<std::endl;
                               if(typl == Contap_Walking) { 
@@ -1238,8 +1236,11 @@ void ComputeInternalPoints
         // std::cout << "Changement de signe detecte" << std::endl;
         solution = Standard_False;
         while (!solution) {
-          X(1) = (XInf(1) + XSup(1)) /2.;
-          X(2) = (XInf(2) + XSup(2)) /2.;
+          // Selecting the middle point between XInf and XSup leads situation, where X values almost do not change.
+          // To prevent this situation, select shifted point instead of middle.
+          const Standard_Real aCoef = 2. / 3.;
+          X(1) = XInf(1) + aCoef * (XSup(1) - XInf(1));
+          X(2) = XInf(2) + aCoef * (XSup(2) - XInf(2));
           rsnld.Perform(SFunc,X,infb,supb);
 
           if (!rsnld.IsDone()) {

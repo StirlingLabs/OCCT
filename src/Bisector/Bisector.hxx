@@ -24,16 +24,6 @@
 #include <Standard_Boolean.hxx>
 #include <Standard_Real.hxx>
 class Geom2d_Curve;
-class Bisector_Curve;
-class Bisector_BisecAna;
-class Bisector_BisecPC;
-class Bisector_BisecCC;
-class Bisector_Bisec;
-class Bisector_Inter;
-class Bisector_PointOnBis;
-class Bisector_PolyBis;
-class Bisector_FunctionH;
-class Bisector_FunctionInter;
 
 
 //! This package provides the bisecting line between two
@@ -47,37 +37,6 @@ public:
   
   Standard_EXPORT static Standard_Boolean IsConvex (const Handle(Geom2d_Curve)& Cu, const Standard_Real Sign);
 
-
-
-
-protected:
-
-
-
-
-
-private:
-
-
-
-
-friend class Bisector_Curve;
-friend class Bisector_BisecAna;
-friend class Bisector_BisecPC;
-friend class Bisector_BisecCC;
-friend class Bisector_Bisec;
-friend class Bisector_Inter;
-friend class Bisector_PointOnBis;
-friend class Bisector_PolyBis;
-friend class Bisector_FunctionH;
-friend class Bisector_FunctionInter;
-
 };
-
-
-
-
-
-
 
 #endif // _Bisector_HeaderFile

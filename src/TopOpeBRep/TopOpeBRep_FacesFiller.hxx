@@ -21,42 +21,29 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
-#include <TopoDS_Face.hxx>
 #include <TopAbs_Orientation.hxx>
 #include <TopOpeBRep_PFacesIntersector.hxx>
 #include <TopOpeBRepDS_PDataStructure.hxx>
 #include <Standard_Integer.hxx>
 #include <TopOpeBRep_PLineInter.hxx>
-#include <Standard_Boolean.hxx>
-#include <TopOpeBRepDS_Transition.hxx>
-#include <TopTools_ListOfShape.hxx>
 #include <TopTools_DataMapOfShapeListOfShape.hxx>
-#include <TopOpeBRepDS_ListOfInterference.hxx>
 #include <TopOpeBRep_PointClassifier.hxx>
 #include <TopOpeBRepTool_PShapeClassifier.hxx>
-#include <TopOpeBRepDS_Kind.hxx>
 #include <TopOpeBRepDS_ListIteratorOfListOfInterference.hxx>
 #include <TopAbs_State.hxx>
-#include <Standard_Real.hxx>
 class TopOpeBRepDS_HDataStructure;
 class TopOpeBRep_FFDumper;
 class TopoDS_Shape;
-class TopOpeBRep_FacesIntersector;
-class TopOpeBRep_PointClassifier;
-class TopOpeBRep_LineInter;
 class TopOpeBRep_VPointInter;
 class TopOpeBRep_VPointInterClassifier;
 class TopOpeBRep_VPointInterIterator;
-class TopOpeBRepDS_Transition;
 class TopOpeBRepDS_Interference;
 class TopOpeBRepDS_Point;
-class TopoDS_Face;
 class gp_Pnt;
-class TopOpeBRepDS_DataStructure;
 
 
 //! Fills a DataStructure from TopOpeBRepDS with the result
-//! of Face/Face instersection described by FacesIntersector from TopOpeBRep.
+//! of Face/Face intersection described by FacesIntersector from TopOpeBRep.
 //! if the faces have same Domain, record it in the DS.
 //! else record lines and  points and attach list of interferences
 //! to the faces, the lines and the edges.

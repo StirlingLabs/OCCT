@@ -31,10 +31,6 @@
 #include <TColStd_HArray1OfInteger.hxx>
 class Geom2d_BSplineCurve;
 class Geom2d_Curve;
-class Geom2dConvert_BSplineCurveKnotSplitting;
-class Geom2dConvert_BSplineCurveToBezierCurve;
-class Geom2dConvert_CompCurveToBSplineCurve;
-class Geom2dConvert_ApproxCurve;
 
 
 
@@ -258,31 +254,6 @@ public:
                                                                 const Standard_Real AngularTolerance,
                                                                 const Standard_Real Tolerance);
 
-
-
-
-protected:
-
-
-
-
-
-private:
-
-
-
-
-friend class Geom2dConvert_BSplineCurveKnotSplitting;
-friend class Geom2dConvert_BSplineCurveToBezierCurve;
-friend class Geom2dConvert_CompCurveToBSplineCurve;
-friend class Geom2dConvert_ApproxCurve;
-
 };
-
-
-
-
-
-
 
 #endif // _Geom2dConvert_HeaderFile

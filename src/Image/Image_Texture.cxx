@@ -20,7 +20,6 @@
 #include <Message.hxx>
 #include <Message_Messenger.hxx>
 #include <OSD_FileSystem.hxx>
-#include <OSD_OpenFile.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(Image_Texture, Standard_Transient)
 
@@ -187,7 +186,7 @@ Handle(Image_PixMap) Image_Texture::loadImageOffset (const TCollection_AsciiStri
   }
 
   const Handle(OSD_FileSystem)& aFileSystem = OSD_FileSystem::DefaultFileSystem();
-  opencascade::std::shared_ptr<std::istream> aFile = aFileSystem->OpenIStream (thePath, std::ios::in | std::ios::binary);
+  std::shared_ptr<std::istream> aFile = aFileSystem->OpenIStream (thePath, std::ios::in | std::ios::binary);
   if (aFile.get() == NULL)
   {
     Message::SendFail (TCollection_AsciiString ("Error: Image file '") + thePath + "' cannot be opened");
@@ -253,7 +252,7 @@ TCollection_AsciiString Image_Texture::ProbeImageFileFormat() const
   else
   {
     const Handle(OSD_FileSystem)& aFileSystem = OSD_FileSystem::DefaultFileSystem();
-    opencascade::std::shared_ptr<std::istream> aFileIn = aFileSystem->OpenIStream (myImagePath, std::ios::in | std::ios::binary);
+    std::shared_ptr<std::istream> aFileIn = aFileSystem->OpenIStream (myImagePath, std::ios::in | std::ios::binary);
     if (aFileIn.get() == NULL)
     {
       Message::SendFail (TCollection_AsciiString ("Error: Unable to open file '") + myImagePath + "'");
@@ -316,25 +315,26 @@ TCollection_AsciiString Image_Texture::ProbeImageFileFormat() const
 // ================================================================
 Standard_Boolean Image_Texture::WriteImage (const TCollection_AsciiString& theFile)
 {
-  std::ofstream aFileOut;
-  OSD_OpenStream (aFileOut, theFile.ToCString(), std::ios::out | std::ios::binary | std::ios::trunc);
-  if (!aFileOut)
+  const Handle(OSD_FileSystem)& aFileSystem = OSD_FileSystem::DefaultFileSystem();
+  std::shared_ptr<std::ostream> aFileOut = aFileSystem->OpenOStream (theFile, std::ios::out | std::ios::binary | std::ios::trunc);
+  if (aFileOut.get() == NULL)
   {
     Message::SendFail (TCollection_AsciiString ("Error: Unable to create file '") + theFile + "'");
     return false;
   }
 
-  if (!WriteImage (aFileOut, theFile))
+  if (!WriteImage (*aFileOut, theFile))
   {
     return false;
   }
 
-  aFileOut.close();
-  if (!aFileOut.good())
+  aFileOut->flush();
+  if (!aFileOut->good())
   {
     Message::SendFail (TCollection_AsciiString ("Error: Unable to write file '") + theFile + "'");
     return false;
   }
+  aFileOut.reset();
   return true;
 }
 
@@ -357,7 +357,7 @@ Standard_Boolean Image_Texture::WriteImage (std::ostream& theStream,
   }
 
   const Handle(OSD_FileSystem)& aFileSystem = OSD_FileSystem::DefaultFileSystem();
-  opencascade::std::shared_ptr<std::istream> aFileIn = aFileSystem->OpenIStream (myImagePath, std::ios::in | std::ios::binary);
+  std::shared_ptr<std::istream> aFileIn = aFileSystem->OpenIStream (myImagePath, std::ios::in | std::ios::binary);
   if (aFileIn.get() == NULL)
   {
     Message::SendFail (TCollection_AsciiString ("Error: Unable to open file ") + myImagePath + "!");

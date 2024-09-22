@@ -21,20 +21,15 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
-#include <Standard_Boolean.hxx>
 #include <TCollection_ExtendedString.hxx>
 #include <PCDM_StoreStatus.hxx>
-#include <CDF_TryStoreStatus.hxx>
-#include <Standard_ExtString.hxx>
 #include <CDF_StoreSetNameStatus.hxx>
-#include <CDF_SubComponentStatus.hxx>
 #include <TCollection_HExtendedString.hxx>
 
 #include <Message_ProgressRange.hxx>
 
 class CDF_StoreList;
 class CDM_Document;
-class TCollection_ExtendedString;
 
 
 

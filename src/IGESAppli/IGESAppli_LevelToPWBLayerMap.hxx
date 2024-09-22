@@ -18,14 +18,11 @@
 #define _IGESAppli_LevelToPWBLayerMap_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <Standard_Integer.hxx>
 #include <TColStd_HArray1OfInteger.hxx>
 #include <Interface_HArray1OfHAsciiString.hxx>
 #include <IGESData_IGESEntity.hxx>
-class Standard_DimensionMismatch;
-class Standard_OutOfRange;
 class TCollection_HAsciiString;
 
 

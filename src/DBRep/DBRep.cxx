@@ -24,17 +24,13 @@
 #include <BRepTools_WireExplorer.hxx>
 #include <BinTools.hxx>
 #include <DBRep_DrawableShape.hxx>
-#include <Draw.hxx>
 #include <Draw_Appli.hxx>
 #include <Draw_ProgressIndicator.hxx>
 #include <Message_ProgressRange.hxx>
 #include <Draw_Segment3D.hxx>
-#include <gp_Ax2.hxx>
-#include <GProp.hxx>
 #include <GProp_GProps.hxx>
 #include <NCollection_Vector.hxx>
 #include <OSD_FileSystem.hxx>
-#include <Precision.hxx>
 #include <TColStd_Array1OfInteger.hxx>
 #include <TColStd_Array1OfReal.hxx>
 #include <TopAbs.hxx>
@@ -44,7 +40,6 @@
 #include <TopoDS_Compound.hxx>
 #include <TopoDS_Iterator.hxx>
 #include <TopTools_Array1OfShape.hxx>
-#include <TopTools_ListOfShape.hxx>
 #include <TopTools_MapOfShape.hxx>
 
 #include <stdio.h>
@@ -1139,17 +1134,17 @@ static Standard_Integer setFlags(Draw_Interpretor& ,
 
   setProp(Sh, a, n);
   for (ex.Init (Sh,TopAbs_VERTEX); ex.More(); ex.Next()) {
-    TopoDS_Shape S = ex.Current();
+    const TopoDS_Shape& S = ex.Current();
     setProp(S, a, n);
   }
 
   for (ex.Init (Sh,TopAbs_EDGE); ex.More(); ex.Next()) {
-    TopoDS_Shape S = ex.Current();
+    const TopoDS_Shape& S = ex.Current();
     setProp(S, a, n);
   }
 
   for (ex.Init (Sh,TopAbs_FACE); ex.More(); ex.Next()) {
-    TopoDS_Shape S = ex.Current();
+    const TopoDS_Shape& S = ex.Current();
     setProp(S, a, n);
   }
 
@@ -1456,12 +1451,7 @@ static Standard_Integer writebrep (Draw_Interpretor& theDI,
     aParam.LowerCase();
     if (aParam == "-binary")
     {
-      isBinaryFormat = Standard_True;
-      if (anArgIter + 1 < theNbArgs
-       && Draw::ParseOnOff (theArgVec[anArgIter + 1], isBinaryFormat))
-      {
-        ++anArgIter;
-      }
+      isBinaryFormat = Draw::ParseOnOffNoIterator (theNbArgs, theArgVec, anArgIter);
     }
     else if (aParam == "-version"
           && anArgIter + 1 < theNbArgs)
@@ -1476,26 +1466,12 @@ static Standard_Integer writebrep (Draw_Interpretor& theDI,
     else if (aParam == "-notriangles"
           || aParam == "-triangles")
     {
-      isWithTriangles = Standard_True;
-      if (anArgIter + 1 < theNbArgs
-       && Draw::ParseOnOff (theArgVec[anArgIter + 1], isWithTriangles))
-      {
-        ++anArgIter;
-      }
-      if (aParam == "-notriangles")
-      {
-        isWithTriangles = !isWithTriangles;
-      }
+      isWithTriangles = Draw::ParseOnOffNoIterator (theNbArgs, theArgVec, anArgIter);
     }
     else if (aParam == "-nonormals"
           || aParam == "-normals")
     {
-      isWithNormals = Standard_True;
-      if (anArgIter + 1 < theNbArgs
-       && Draw::ParseOnOff (theArgVec[anArgIter + 1], isWithNormals))
-      {
-        ++anArgIter;
-      }
+      isWithNormals = Draw::ParseOnOffIterator (theNbArgs, theArgVec, anArgIter);
       if (aParam == "-nonormals")
       {
         isWithNormals = !isWithNormals;
@@ -1530,9 +1506,16 @@ static Standard_Integer writebrep (Draw_Interpretor& theDI,
   Handle(Draw_ProgressIndicator) aProgress = new Draw_ProgressIndicator (theDI);
   if (isBinaryFormat)
   {
-    if (aVersion > BinTools_FormatVersion_VERSION_3)
+    if (aVersion > BinTools_FormatVersion_UPPER)
     {
       theDI << "Syntax error: unknown format version";
+      return 1;
+    }
+    if (isWithNormals
+     && aVersion > 0
+     && aVersion < BinTools_FormatVersion_VERSION_4)
+    {
+      theDI << "Error: vertex normals require binary format version 4 or later";
       return 1;
     }
 
@@ -1547,9 +1530,16 @@ static Standard_Integer writebrep (Draw_Interpretor& theDI,
   }
   else
   {
-    if (aVersion > TopTools_FormatVersion_VERSION_2)
+    if (aVersion > TopTools_FormatVersion_UPPER)
     {
       theDI << "Syntax error: unknown format version";
+      return 1;
+    }
+    if (isWithNormals
+     && aVersion > 0
+     && aVersion < TopTools_FormatVersion_VERSION_3)
+    {
+      theDI << "Error: vertex normals require ascii format version 3 or later";
       return 1;
     }
 
@@ -1585,7 +1575,7 @@ static Standard_Integer readbrep (Draw_Interpretor& theDI,
   {
     // probe file header to recognize format
     const Handle(OSD_FileSystem)& aFileSystem = OSD_FileSystem::DefaultFileSystem();
-    opencascade::std::shared_ptr<std::istream> aFile = aFileSystem->OpenIStream (aFileName, std::ios::in | std::ios::binary);
+    std::shared_ptr<std::istream> aFile = aFileSystem->OpenIStream (aFileName, std::ios::in | std::ios::binary);
     if (aFile.get() == NULL)
     {
       theDI << "Error: cannot read the file '" << aFileName << "'";
@@ -1714,8 +1704,6 @@ void  DBRep::BasicCommands(Draw_Interpretor& theCommands)
                   "setflags shape_name flag1[flag2...]\n sets flags for shape(free, modified, checked, orientable, closed, infinite, convex, locked), for example <setflags a free> or <setflags a -free> if necessary unflag ",
                   __FILE__,setFlags,g);
 
-//  theCommands.Add("dumpmmgt",
-//		  "dump le contenu du gestionnaire de memoire",__FILE__,dumpmmgt,g);
   theCommands.Add("purgemmgt",
 		  "returns the free memory from the system to the memory manager",
 		  __FILE__,purgemmgt,g);
@@ -1727,16 +1715,18 @@ void  DBRep::BasicCommands(Draw_Interpretor& theCommands)
                     "\n\t\t   +|-t :  switch on/off output to tcl of Progress Indicator"
                     "\n\t\t   +|-c :  switch on/off output to cout of Progress Indicator"
                     "\n\t\t   +|-g :  switch on/off graphical mode of Progress Indicator",
-                    XProgress,"DE: General");
+                   __FILE__, XProgress,"DE: General");
   theCommands.Add("writebrep",
-                  "writebrep shape filename [-binary=off] [-version Version=4] [-noTriangles=off]"
+                  "writebrep shape filename [-binary {0|1}]=0 [-version Version]=4"
+                  "\n\t\t:                          [-triangles {0|1}]=1 [-normals {0|1}]=0"
                   "\n\t\t: Save the shape in the ASCII (default) or binary format file."
                   "\n\t\t:  -binary  write into the binary format (ASCII when unspecified)"
                   "\n\t\t:  -version a number of format version to save;"
                   "\n\t\t:           ASCII  versions: 1, 2 and 3    (3 for ASCII  when unspecified);"
                   "\n\t\t:           Binary versions: 1, 2, 3 and 4 (4 for Binary when unspecified)."
-                  "\n\t\t:  -noTriangles skip triangulation data (OFF when unspecified)."
-                  "\n\t\t:           Ignored (always written) if face defines only triangulation (no surface).",
+                  "\n\t\t:  -triangles write triangulation data (TRUE when unspecified)."
+                  "\n\t\t:           Ignored (always written) if face defines only triangulation (no surface)."
+                  "\n\t\t:  -normals include vertex normals while writing triangulation data (FALSE when unspecified).",
                   __FILE__, writebrep, g);
   theCommands.Add("readbrep",
                   "readbrep filename shape"

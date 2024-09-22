@@ -11,17 +11,16 @@
 // Alternatively, this file may be used under the terms of Open CASCADE
 // commercial license or contractual agreement.
 
+#include <STEPEdit.hxx>
 
 #include <APIHeaderSection_MakeHeader.hxx>
 #include <IFSelect_SelectModelEntities.hxx>
 #include <IFSelect_SelectModelRoots.hxx>
 #include <IFSelect_SelectSignature.hxx>
-#include <IFSelect_Signature.hxx>
-#include <Interface_Protocol.hxx>
+#include <Standard_Mutex.hxx>
 #include <StepAP214.hxx>
 #include <StepAP214_Protocol.hxx>
 #include <StepData_StepModel.hxx>
-#include <STEPEdit.hxx>
 #include <StepSelect_StepType.hxx>
 
 Handle(Interface_Protocol)  STEPEdit::Protocol ()
@@ -45,6 +44,8 @@ Handle(StepData_StepModel)  STEPEdit::NewModel ()
 
 Handle(IFSelect_Signature)  STEPEdit::SignType ()
 {
+  static Standard_Mutex aMutex;
+  Standard_Mutex::Sentry aSentry(aMutex);
   static Handle(StepSelect_StepType) sty;
   if (!sty.IsNull()) return sty;
   sty = new StepSelect_StepType;

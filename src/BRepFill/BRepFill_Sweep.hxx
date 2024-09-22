@@ -21,13 +21,10 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
-#include <Standard_Boolean.hxx>
-#include <Standard_Real.hxx>
 #include <GeomFill_ApproxStyle.hxx>
 #include <GeomAbs_Shape.hxx>
 #include <Standard_Integer.hxx>
 #include <TopoDS_Shape.hxx>
-#include <TopTools_HArray2OfShape.hxx>
 #include <TopTools_DataMapOfShapeShape.hxx>
 #include <TopTools_ListOfShape.hxx>
 #include <TopoDS_Wire.hxx>
@@ -36,11 +33,6 @@
 #include <BRepFill_TransitionStyle.hxx>
 class BRepFill_LocationLaw;
 class BRepFill_SectionLaw;
-class StdFail_NotDone;
-class Standard_OutOfRange;
-class Standard_ConstructionError;
-class TopoDS_Wire;
-class TopoDS_Shape;
 class TopoDS_Edge;
 
 
@@ -72,7 +64,7 @@ public:
   //! Tolerance  To controle Corner management.
   //!
   //! If the discontinuity is lesser than <AngleMin> in radian The
-  //! Transition Performed will be alway "Modified"
+  //! Transition Performed will be always "Modified"
   Standard_EXPORT void SetAngularControl (const Standard_Real AngleMin = 0.01, const Standard_Real AngleMax = 6.0);
   
   //! Set the flag that indicates attempt to approximate
@@ -80,13 +72,13 @@ public:
   //! to be C0.
   Standard_EXPORT void SetForceApproxC1 (const Standard_Boolean ForceApproxC1);
   
-  //! Build the Sweep  Surface
+  //! Build the Sweep Surface
   //! Transition define Transition strategy
   //! Approx define Approximation Strategy
   //! - GeomFill_Section : The composed Function Location X Section
   //! is directly approximated.
   //! - GeomFill_Location : The location law is approximated, and the
-  //! SweepSurface is bulid algebric composition
+  //! SweepSurface builds an algebraic composition
   //! of approximated location law and section law
   //! This option is Ok, if Section.Surface() methode
   //! is effective.

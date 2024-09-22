@@ -15,12 +15,11 @@
 #ifndef _GeomLib_CheckCurveOnSurface_HeaderFile
 #define _GeomLib_CheckCurveOnSurface_HeaderFile
 
-#include <Geom_Curve.hxx>
+#include <Adaptor3d_Curve.hxx>
 #include <Precision.hxx>
 #include <Standard.hxx>
 
-class Geom_Surface;
-class Geom2d_Curve;
+class Adaptor3d_CurveOnSurface;
 
 //! Computes the max distance between 3D-curve and 2D-curve
 //! in some surface.
@@ -35,47 +34,32 @@ public:
   
   //! Constructor
   Standard_EXPORT
-    GeomLib_CheckCurveOnSurface(const Handle(Geom_Curve)& theCurve, 
-                                const Handle(Geom_Surface)& theSurface, 
-                                const Standard_Real theFirst, 
-                                const Standard_Real theLast,
+    GeomLib_CheckCurveOnSurface(const Handle(Adaptor3d_Curve)& theCurve,
                                 const Standard_Real theTolRange = 
                                                       Precision::PConfusion());
   
   //! Sets the data for the algorithm
-  Standard_EXPORT void Init (const Handle(Geom_Curve)& theCurve, 
-                             const Handle(Geom_Surface)& theSurface, 
-                             const Standard_Real theFirst, 
-                             const Standard_Real theLast,
+  Standard_EXPORT void Init (const Handle(Adaptor3d_Curve)& theCurve,
                              const Standard_Real theTolRange = Precision::PConfusion());
 
   //! Initializes all members by default values
   Standard_EXPORT void Init();
 
   //! Computes the max distance for the 3d curve <myCurve>
-  //! and 2d curve <thePCurve>
+  //! and 2d curve <theCurveOnSurface>
   //! If isMultiThread == Standard_True then computation will be performed in parallel.
-  Standard_EXPORT void Perform(const Handle(Geom2d_Curve)& thePCurve, 
-                               const Standard_Boolean isMultiThread = Standard_True);
+  Standard_EXPORT void Perform(const Handle(Adaptor3d_CurveOnSurface)& theCurveOnSurface);
 
-  //! Returns my3DCurve
-  const Handle(Geom_Curve)& Curve() const
+  //! Sets parallel flag
+  void SetParallel(const Standard_Boolean theIsParallel)
   {
-    return myCurve;
-  }  
-
-  //! Returns mySurface
-  const Handle(Geom_Surface)& Surface() const
-  {
-    return mySurface;
+    myIsParallel = theIsParallel;
   }
-  
-  //! Returns first and last parameter of the curves
-  //! (2D- and 3D-curves are considered to have same range)
-  void Range (Standard_Real& theFirst, Standard_Real& theLast)
+
+  //! Returns true if parallel flag is set
+  Standard_Boolean IsParallel()
   {
-    theFirst = myFirst;
-    theLast  = myLast;
+    return myIsParallel;
   }
 
   //! Returns true if the max distance has been found
@@ -109,14 +93,12 @@ public:
 
 private:
 
-  Handle(Geom_Curve) myCurve;
-  Handle(Geom_Surface) mySurface;
-  Standard_Real myFirst;
-  Standard_Real myLast;
+  Handle(Adaptor3d_Curve) myCurve;
   Standard_Integer myErrorStatus;
   Standard_Real myMaxDistance;
   Standard_Real myMaxParameter;
   Standard_Real myTolRange;
+  Standard_Boolean myIsParallel;
 };
 
 #endif // _BRepLib_CheckCurveOnSurface_HeaderFile

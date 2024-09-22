@@ -20,7 +20,6 @@
 #include <Standard.hxx>
 #include <Standard_Type.hxx>
 
-#include <Standard_Boolean.hxx>
 #include <TColStd_DataMapOfIntegerListOfInteger.hxx>
 #include <SelectMgr_Filter.hxx>
 #include <AIS_KindOfInteractive.hxx>
@@ -43,7 +42,7 @@ DEFINE_STANDARD_HANDLE(AIS_ExclusionFilter, SelectMgr_Filter)
 //! except those of the types and signatures stored
 //! in the filter framework
 //! -   Exclusion flag off
-//! -   the funciton IsOk answers true for all objects
+//! -   the function IsOk answers true for all objects
 //! which have the same type and signature as the stored ones.
 class AIS_ExclusionFilter : public SelectMgr_Filter
 {

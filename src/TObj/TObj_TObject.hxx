@@ -18,7 +18,6 @@
 #ifndef TObj_TObject_HeaderFile
 #define TObj_TObject_HeaderFile
 
-#include <TObj_Common.hxx>
 #include <TObj_Object.hxx>
 
 #include <TDF_Attribute.hxx>
@@ -29,7 +28,7 @@ class TDF_Label;
 /** 
 * Purpose: OCAF Attribute to storing objects (interfaces) of OCAF-based 
 * modelers in the OCAF tree.
-* The persistency mechanism of the TObj_TObject allowes to save
+* The persistency mechanism of the TObj_TObject allows to save
 * and restore objects of various subtypes without recompilation of the schema
 */
 

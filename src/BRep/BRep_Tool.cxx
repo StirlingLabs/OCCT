@@ -19,12 +19,7 @@
 #include <BRep_CurveOnClosedSurface.hxx>
 #include <BRep_CurveOnSurface.hxx>
 #include <BRep_CurveRepresentation.hxx>
-#include <BRep_ListIteratorOfListOfCurveRepresentation.hxx>
-#include <BRep_ListIteratorOfListOfPointRepresentation.hxx>
-#include <BRep_PointRepresentation.hxx>
 #include <BRep_Polygon3D.hxx>
-#include <BRep_PolygonOnClosedSurface.hxx>
-#include <BRep_PolygonOnClosedTriangulation.hxx>
 #include <BRep_PolygonOnSurface.hxx>
 #include <BRep_PolygonOnTriangulation.hxx>
 #include <BRep_TEdge.hxx>
@@ -47,7 +42,6 @@
 #include <gp_Pnt.hxx>
 #include <gp_Pnt2d.hxx>
 #include <NCollection_IncAllocator.hxx>
-#include <NCollection_Map.hxx>
 #include <Poly_Polygon2D.hxx>
 #include <Poly_Polygon3D.hxx>
 #include <Poly_PolygonOnTriangulation.hxx>
@@ -65,7 +59,6 @@
 #include <TopoDS_Iterator.hxx>
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Vertex.hxx>
-#include <TopoDS_Wire.hxx>
 #include <TopTools_MapOfShape.hxx>
 #include <TopTools_ShapeMapHasher.hxx>
 #include <BRep_GCurve.hxx>
@@ -145,7 +138,7 @@ Standard_Real  BRep_Tool::Tolerance(const TopoDS_Face& F)
 {
   const BRep_TFace* TF = static_cast<const BRep_TFace*>(F.TShape().get());
   Standard_Real p = TF->Tolerance();
-  Standard_Real pMin = Precision::Confusion();
+  constexpr Standard_Real pMin = Precision::Confusion();
   if (p > pMin) return p;
   else          return pMin;
 }
@@ -819,7 +812,7 @@ Standard_Real  BRep_Tool::Tolerance(const TopoDS_Edge& E)
 {
   const BRep_TEdge* TE = static_cast<const BRep_TEdge*>(E.TShape().get());
   Standard_Real p = TE->Tolerance();
-  Standard_Real pMin = Precision::Confusion();
+  constexpr Standard_Real pMin = Precision::Confusion();
   if (p > pMin) return p;
   else          return pMin;
 }
@@ -992,8 +985,8 @@ void  BRep_Tool::UVPoints(const TopoDS_Edge& E,
     TopExp::Vertices(E,Vf,Vl);
 
     TopLoc_Location Linverted = L.Inverted();
-    Vf.Move(Linverted);
-    Vl.Move(Linverted);
+    Vf.Move(Linverted, Standard_False);
+    Vl.Move(Linverted, Standard_False);
     Standard_Real u,v;
     gp_Pln pln = GP->Pln();
 
@@ -1060,7 +1053,7 @@ void  BRep_Tool::SetUVPoints(const TopoDS_Edge& E,
   BRep_ListIteratorOfListOfCurveRepresentation itcr(TE->Curves());
 
   while (itcr.More()) {
-    Handle(BRep_CurveRepresentation)& cr = itcr.Value();
+    Handle(BRep_CurveRepresentation) cr = itcr.Value();
     if (cr->IsCurveOnSurface(S,l)) {
       if (cr->IsCurveOnClosedSurface() && Eisreversed)
       {
@@ -1265,7 +1258,7 @@ Standard_Real  BRep_Tool::Tolerance(const TopoDS_Vertex& V)
   }
 
   Standard_Real p = aTVert->Tolerance();
-  Standard_Real pMin = Precision::Confusion();
+  constexpr Standard_Real pMin = Precision::Confusion();
   if (p > pMin) return p;
   else          return pMin;
 }

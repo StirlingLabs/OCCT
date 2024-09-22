@@ -13,57 +13,30 @@
 
 // szv 19.08.99: new methods for fixing gaps between edges (3d curves and pcurves)
 #include <ShapeFix_Wire.hxx>
-#include <Standard_ErrorHandler.hxx>
 #include <Standard_Failure.hxx>
 
 #include <Precision.hxx>
-#include <Bnd_Box2d.hxx>
-#include <Geom_Curve.hxx>
-#include <Geom2d_Curve.hxx>
 #include <Geom2d_Line.hxx>
 
-#include <IntRes2d_SequenceOfIntersectionPoint.hxx>
 #include <IntRes2d_IntersectionPoint.hxx>
-#include <TColgp_SequenceOfPnt.hxx>
 
 #include <TopoDS.hxx>
-#include <TopoDS_Vertex.hxx>
-#include <TopoDS_Edge.hxx>
-#include <TopTools_HSequenceOfShape.hxx>
 
-#include <BRep_Tool.hxx>
 #include <BRep_Builder.hxx>
 
 #include <ShapeExtend.hxx>
 #include <ShapeBuild_Edge.hxx>
-#include <ShapeBuild_Vertex.hxx>
 #include <ShapeAnalysis_Curve.hxx>
 #include <ShapeAnalysis_Edge.hxx>
 #include <ShapeAnalysis_Surface.hxx>
-#include <ShapeAnalysis.hxx>
-#include <GeomConvert_CompCurveToBSplineCurve.hxx>
 #include <Geom_TrimmedCurve.hxx>
 #include <gp_Pln.hxx>
-#include <GeomAPI.hxx>
-#include <TColgp_Array1OfPnt.hxx>
-#include <TColStd_Array1OfReal.hxx>
-#include <TColStd_Array1OfInteger.hxx>
-#include <Geom_BSplineCurve.hxx>
-#include <Geom_SphericalSurface.hxx> //S4135
-#include <Geom2d_BSplineCurve.hxx>
-#include <GeomAdaptor_Curve.hxx>
 #include <GeomAdaptor_Surface.hxx>  
-#include <TopTools_Array1OfShape.hxx>
 #include <BRepTools.hxx>
-#include <Bnd_Array1OfBox2d.hxx>
-#include <BndLib_Add2dCurve.hxx>
-#include <Geom2dAdaptor_Curve.hxx>
-#include <Geom2dConvert.hxx>
 #include <Geom2d_TrimmedCurve.hxx>
 #include <ShapeBuild_ReShape.hxx>
 
 //szv
-#include <TColgp_Array1OfPnt2d.hxx>
 #include <Geom2d_Circle.hxx>
 #include <Geom2d_Ellipse.hxx>
 #include <Geom2d_Parabola.hxx>
@@ -777,7 +750,7 @@ static Standard_Real AdjustOnPeriodic2d (const Handle(Geom2d_Curve)& pc,
 
   if (Context().IsNull()) SetContext(new ShapeBuild_ReShape);
 
-  Standard_Real preci = ::Precision::PConfusion();
+  constexpr Standard_Real preci = ::Precision::PConfusion();
   //Standard_Real preci = Precision();
   //GeomAdaptor_Surface& SA = Analyzer().Surface()->Adaptor()->ChangeSurface();
   //preci = Max(SA.UResolution(preci), SA.VResolution(preci));
@@ -1051,7 +1024,7 @@ static Standard_Real AdjustOnPeriodic2d (const Handle(Geom2d_Curve)& pc,
       Standard_Real ipar1 = clast1, ipar2 = cfirst2;
 
       Geom2dInt_GInter Inter;
-      Standard_Real tolint = ::Precision::PConfusion();
+      constexpr Standard_Real tolint = ::Precision::PConfusion();
 
       Geom2dAdaptor_Curve AC1(pc1), AC2(pc2);
 

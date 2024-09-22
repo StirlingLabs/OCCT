@@ -33,7 +33,6 @@
 #include <NCollection_Vector.hxx>
 #include <TopAbs_State.hxx>
 #include <TopoDS_Vertex.hxx>
-#include <TopoDS_Face.hxx>
 #include <TopoDS_Solid.hxx>
 
 /////////////////////////////////////////////////////////////////////////
@@ -41,12 +40,12 @@
 //class    : BOPAlgo_VertexSolid
 //purpose  : 
 //=======================================================================
-class BOPAlgo_VertexSolid  {
+class BOPAlgo_VertexSolid {
  public:
   DEFINE_STANDARD_ALLOC
   
-  BOPAlgo_VertexSolid()
-    : myIV(-1), myIZ(-1), myState(TopAbs_UNKNOWN) {
+  BOPAlgo_VertexSolid() :
+    myIV(-1), myIZ(-1), myState(TopAbs_UNKNOWN) {
   };
   //
   virtual ~BOPAlgo_VertexSolid(){
@@ -92,7 +91,18 @@ class BOPAlgo_VertexSolid  {
     return myState;
   };
   //
-  void Perform() {
+  void SetProgressRange(const Message_ProgressRange& theRange)
+  {
+    myProgressRange = theRange;
+  }
+  //
+  virtual void Perform() {
+    Message_ProgressScope aPS(myProgressRange, NULL, 1);
+    if (!aPS.More())
+    {
+      return;
+    }
+
     Standard_Real aTol;
     gp_Pnt aPV;
     //
@@ -113,6 +123,7 @@ class BOPAlgo_VertexSolid  {
   TopoDS_Vertex myV;
   TopoDS_Solid myZ;
   Handle(IntTools_Context) myContext;
+  Message_ProgressRange myProgressRange;
 };
 //=======================================================================
 typedef NCollection_Vector<BOPAlgo_VertexSolid> BOPAlgo_VectorOfVertexSolid;
@@ -122,7 +133,7 @@ typedef NCollection_Vector<BOPAlgo_VertexSolid> BOPAlgo_VectorOfVertexSolid;
 //class    : BOPAlgo_ShapeSolid
 //purpose  : 
 //=======================================================================
-class BOPAlgo_ShapeSolid  {
+class BOPAlgo_ShapeSolid {
  public:
   DEFINE_STANDARD_ALLOC
 
@@ -156,7 +167,18 @@ class BOPAlgo_ShapeSolid  {
     return myHasInterf;
   };
   //
+  void SetProgressRange(const Message_ProgressRange& theRange)
+  {
+    myProgressRange = theRange;
+  }
+  //
   virtual void Perform() {
+    Message_ProgressScope aPS(myProgressRange, NULL, 1);
+    if (!aPS.More())
+    {
+      return;
+    }
+
     Standard_Boolean bHasInterf;
     //
     myHasInterf=Standard_False;
@@ -172,6 +194,7 @@ class BOPAlgo_ShapeSolid  {
   Standard_Integer myIZ;
   Standard_Boolean myHasInterf;
   BOPDS_DS* myDS;
+  Message_ProgressRange myProgressRange;
 };
 //=======================================================================
 typedef NCollection_Vector<BOPAlgo_ShapeSolid> BOPAlgo_VectorOfShapeSolid;
@@ -193,6 +216,12 @@ class BOPAlgo_SolidSolid : public  BOPAlgo_ShapeSolid {
   };
   //
   virtual void Perform() {
+    Message_ProgressScope aPS(myProgressRange, NULL, 1);
+    if (!aPS.More())
+    {
+      return;
+    }
+
     Standard_Boolean bFlag;
     //
     bFlag=Standard_False;
@@ -211,8 +240,10 @@ typedef NCollection_Vector<BOPAlgo_SolidSolid> BOPAlgo_VectorOfSolidSolid;
 //function : PerformVZ
 //purpose  : 
 //=======================================================================
-void BOPAlgo_CheckerSI::PerformVZ()
+void BOPAlgo_CheckerSI::PerformVZ(const Message_ProgressRange& theRange)
 {
+  Message_ProgressScope aPSOuter(theRange, NULL, 1);
+
   Standard_Integer iSize, nV, nZ, k, aNbVVS;
   TopAbs_State aState;
   BOPDS_MapOfPair aMPK;
@@ -229,6 +260,10 @@ void BOPAlgo_CheckerSI::PerformVZ()
   BOPAlgo_VectorOfVertexSolid aVVS;
   //
   for (; myIterator->More(); myIterator->Next()) {
+    if (UserBreak(aPSOuter))
+    {
+      return;
+    }
     myIterator->Value(nV, nZ);
     //
     if (myDS->HasInterfShapeSubShapes(nV, nZ)) {
@@ -254,9 +289,19 @@ void BOPAlgo_CheckerSI::PerformVZ()
   }
   //
   aNbVVS=aVVS.Length();
+
+  Message_ProgressScope aPSParallel(aPSOuter.Next(), "Performing Vertex-Solid intersection", aNbVVS);
+  for (Standard_Integer iVS = 0; iVS < aNbVVS; ++iVS)
+  {
+    aVVS.ChangeValue(iVS).SetProgressRange(aPSParallel.Next());
+  }
   //=============================================================
   BOPTools_Parallel::Perform (myRunParallel, aVVS, myContext);
   //=============================================================
+  if (UserBreak(aPSOuter))
+  {
+    return;
+  }
   for (k=0; k < aNbVVS; ++k) {
     const BOPAlgo_VertexSolid& aVertexSolid=aVVS(k);
     aState=aVertexSolid.State();
@@ -274,24 +319,26 @@ void BOPAlgo_CheckerSI::PerformVZ()
 //function : PerformEZ
 //purpose  : 
 //=======================================================================
-void BOPAlgo_CheckerSI::PerformEZ()
+void BOPAlgo_CheckerSI::PerformEZ(const Message_ProgressRange& theRange)
 { 
-  PerformSZ(TopAbs_EDGE);
+  PerformSZ(TopAbs_EDGE, theRange);
 }
 //=======================================================================
 //function : PerformFZ
 //purpose  : 
 //=======================================================================
-void BOPAlgo_CheckerSI::PerformFZ()
+void BOPAlgo_CheckerSI::PerformFZ(const Message_ProgressRange& theRange)
 { 
-  PerformSZ(TopAbs_FACE);
+  PerformSZ(TopAbs_FACE, theRange);
 }
 //=======================================================================
 //function : PerformZZ
 //purpose  : 
 //=======================================================================
-void BOPAlgo_CheckerSI::PerformZZ()
+void BOPAlgo_CheckerSI::PerformZZ(const Message_ProgressRange& theRange)
 {
+  Message_ProgressScope aPSOuter(theRange, NULL, 1);
+
   Standard_Boolean bHasInterf;
   Standard_Integer iSize, nZ1, nZ, k, aNbSolidSolid;
   //
@@ -312,9 +359,19 @@ void BOPAlgo_CheckerSI::PerformZZ()
   }
   //
   aNbSolidSolid=aVSolidSolid.Length();
+
+  Message_ProgressScope aPSParallel(aPSOuter.Next(), "Performing Solid-Solid intersection", aNbSolidSolid);
+  for (Standard_Integer iSS = 0; iSS < aNbSolidSolid; ++iSS)
+  {
+    aVSolidSolid.ChangeValue(iSS).SetProgressRange(aPSParallel.Next());
+  }
   //======================================================
   BOPTools_Parallel::Perform (myRunParallel, aVSolidSolid);
   //======================================================
+  if (UserBreak(aPSOuter))
+  {
+    return;
+  }
   //
   BOPDS_VectorOfInterfZZ& aZZs=myDS->InterfZZ();
   //
@@ -337,12 +394,14 @@ void BOPAlgo_CheckerSI::PerformZZ()
 //function : PerformSZ
 //purpose  : 
 //=======================================================================
-void BOPAlgo_CheckerSI::PerformSZ(const TopAbs_ShapeEnum aTS)
+void BOPAlgo_CheckerSI::PerformSZ(const TopAbs_ShapeEnum theTS, const Message_ProgressRange& theRange)
 {
+  Message_ProgressScope aPSOuter(theRange, NULL, 1);
+
   Standard_Boolean bHasInterf;
   Standard_Integer iSize, nS, nZ, k, aNbShapeSolid;
   //
-  myIterator->Initialize(aTS, TopAbs_SOLID);
+  myIterator->Initialize(theTS, TopAbs_SOLID);
   iSize=myIterator->ExpectedLength();
   if (!iSize) {
     return; 
@@ -359,14 +418,27 @@ void BOPAlgo_CheckerSI::PerformSZ(const TopAbs_ShapeEnum aTS)
   }
   //
   aNbShapeSolid=aVShapeSolid.Length();
+
+  Message_ProgressScope aPSParallel(aPSOuter.Next(),
+                                    theTS == TopAbs_EDGE ? "Performing Edge-Solid intersection" :
+                                                           "Performing Face-Solid intersection",
+                                    aNbShapeSolid);
+  for (Standard_Integer iSS = 0; iSS < aNbShapeSolid; ++iSS)
+  {
+    aVShapeSolid.ChangeValue(iSS).SetProgressRange(aPSParallel.Next());
+  }
   //======================================================
   BOPTools_Parallel::Perform (myRunParallel, aVShapeSolid);
   //======================================================
+  if (UserBreak(aPSOuter))
+  {
+    return;
+  }
   //
   BOPDS_VectorOfInterfEZ& aEZs=myDS->InterfEZ();
   BOPDS_VectorOfInterfFZ& aFZs=myDS->InterfFZ();
   //
-  if (aTS==TopAbs_EDGE) {
+  if (theTS==TopAbs_EDGE) {
     aEZs.SetIncrement(iSize);
   }
   else {//if (aTS==TopAbs_FACE)
@@ -379,7 +451,7 @@ void BOPAlgo_CheckerSI::PerformSZ(const TopAbs_ShapeEnum aTS)
     if (bHasInterf) {
       aShapeSolid.Indices(nS, nZ);
       //
-      if (aTS==TopAbs_EDGE) {
+      if (theTS==TopAbs_EDGE) {
         BOPDS_InterfEZ& aEZ=aEZs.Appended();
         aEZ.SetIndices(nS, nZ);
       }

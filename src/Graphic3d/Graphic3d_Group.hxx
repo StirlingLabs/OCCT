@@ -18,10 +18,7 @@
 #define _Graphic3d_Group_HeaderFile
 
 #include <Graphic3d_BndBox4f.hxx>
-#include <Graphic3d_AspectLine3d.hxx>
 #include <Graphic3d_AspectFillArea3d.hxx>
-#include <Graphic3d_AspectText3d.hxx>
-#include <Graphic3d_AspectMarker3d.hxx>
 #include <Graphic3d_MapOfAspectsToAspects.hxx>
 #include <Standard_CString.hxx>
 #include <Graphic3d_Vertex.hxx>
@@ -51,7 +48,7 @@ class Graphic3d_TransformPers;
 //! 1) Non-modifiable, or unbounded, group ('black box').
 //! Developers can repeat a sequence of
 //! SetPrimitivesAspect() with AddPrimitiveArray() methods arbitrary number of times
-//! to define arbitrary number of primitive "blocks" each having individual apect values.
+//! to define arbitrary number of primitive "blocks" each having individual aspect values.
 //! Any modification of such a group is forbidden, as aspects and primitives are mixed
 //! in memory without any high-level logical structure, and any modification is very likely to result
 //! in corruption of the group internal data.
@@ -139,9 +136,6 @@ public:
 
   //! Set transformation persistence.
   Standard_EXPORT virtual void SetTransformPersistence (const Handle(Graphic3d_TransformPers)& theTrsfPers);
-
-  //! Returns true if the group contains Polygons, Triangles or Quadrangles.
-  bool ContainsFacet() const { return myContainsFacet; }
 
   //! Returns Standard_True if the group <me> is deleted.
   //! <me> is deleted after the call Remove (me) or the
@@ -301,7 +295,6 @@ protected:
   Graphic3d_Structure* myStructure;     //!< pointer to the parent structure
   Graphic3d_BndBox4f   myBounds;        //!< bounding box
   bool                 myIsClosed;      //!< flag indicating closed volume
-  bool                 myContainsFacet; //!< flag indicating that this group contains face primitives
 
 };
 

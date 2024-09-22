@@ -59,6 +59,41 @@ GeomAdaptor_SurfaceOfRevolution::GeomAdaptor_SurfaceOfRevolution(
 }
 
 //=======================================================================
+//function : ShallowCopy
+//purpose  : 
+//=======================================================================
+
+Handle(Adaptor3d_Surface) GeomAdaptor_SurfaceOfRevolution::ShallowCopy() const
+{
+  Handle(GeomAdaptor_SurfaceOfRevolution) aCopy = new GeomAdaptor_SurfaceOfRevolution();
+
+  if (!myBasisCurve.IsNull())
+  {
+    aCopy->myBasisCurve = myBasisCurve->ShallowCopy();
+  }
+  aCopy->myAxis       = myAxis;
+  aCopy->myHaveAxis   = myHaveAxis;
+  aCopy->myAxeRev     = myAxeRev;
+
+  aCopy->mySurface        = mySurface;
+  aCopy->myUFirst         = myUFirst;
+  aCopy->myULast          = myULast;
+  aCopy->myVFirst         = myVFirst;
+  aCopy->myVLast          = myVLast;
+  aCopy->myTolU           = myTolU;
+  aCopy->myTolV           = myTolV;
+  aCopy->myBSplineSurface = myBSplineSurface;
+
+  aCopy->mySurfaceType     = mySurfaceType;
+  if (!myNestedEvaluator.IsNull())
+  {
+    aCopy->myNestedEvaluator = myNestedEvaluator->ShallowCopy();
+  }
+
+  return aCopy;
+}
+
+//=======================================================================
 //function : Load
 //purpose  : 
 //=======================================================================
@@ -272,7 +307,7 @@ void GeomAdaptor_SurfaceOfRevolution::VIntervals(TColStd_Array1OfReal& T,
 
 Handle(Adaptor3d_Surface) GeomAdaptor_SurfaceOfRevolution::UTrim (const Standard_Real First, const Standard_Real Last, const Standard_Real Tol) const
 {
-  const Standard_Real Eps = Precision::PConfusion();
+  constexpr Standard_Real Eps = Precision::PConfusion();
   (void )Eps; (void )First; (void )Last; (void )Tol;
   Standard_OutOfRange_Raise_if
     (  Abs(First) > Eps || Abs(Last - 2.*M_PI) > Eps,
@@ -390,9 +425,9 @@ Standard_Real GeomAdaptor_SurfaceOfRevolution::VResolution
 
 GeomAbs_SurfaceType GeomAdaptor_SurfaceOfRevolution::GetType() const 
 {
-  Standard_Real TolConf = Precision::Confusion();
-  Standard_Real TolAng  = Precision::Angular();
-  Standard_Real TolConeSemiAng = Precision::Confusion();
+  constexpr Standard_Real TolConf = Precision::Confusion();
+  constexpr Standard_Real TolAng  = Precision::Angular();
+  constexpr Standard_Real TolConeSemiAng = Precision::Confusion();
 
   switch (myBasisCurve->GetType()) {
   case GeomAbs_Line:    {
@@ -467,16 +502,7 @@ GeomAbs_SurfaceType GeomAdaptor_SurfaceOfRevolution::GetType() const
       MajorRadius = aLin.Distance(aLC);
       if(MajorRadius > aR)
       {
-        Standard_Real aT = 0., aDx, dX;
-        gp_Pnt aPx;
-
-        aPx = ElCLib::Value(aT, C);
-        aDx = aLin.Distance(aPx);
-        dX = aDx - MajorRadius - aR;
-        if (dX < 0.)
-          dX = -dX;
-        if (dX < TolConf)
-          return GeomAbs_Torus;
+        return GeomAbs_Torus;
       }
     }
     break;

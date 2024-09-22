@@ -1,4 +1,10 @@
-cmake_minimum_required (VERSION 2.6)
+# Caution! Be careful, when increase minimal cmake version:
+# using of newer version may leads (by default) to applying
+# of some new policies. It may break compilation.
+# For canceling of applying new policies use:
+# cmake_policy(PUSH) before `cmake_minimum_required`
+# and cmake_policy(POP) after.
+cmake_minimum_required (VERSION 3.1 FATAL_ERROR)
 
 project (Modeling)
 
@@ -55,4 +61,4 @@ include_directories (${CMAKE_BINARY_DIR}/inc
                      ${Modeling_SRC_DIR}
                      ${MFC_STANDARD_SAMPLES_DIR}/Common)
 
-target_link_libraries (Modeling mfcsample TKSTEP209 TKSTEPAttr TKSTEPBase TKBO)
+target_link_libraries (Modeling mfcsample TKDESTEP TKBO)

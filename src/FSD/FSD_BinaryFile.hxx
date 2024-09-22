@@ -23,16 +23,11 @@
 #include <Storage_Error.hxx>
 #include <Storage_OpenMode.hxx>
 #include <Storage_Data.hxx>
-#include <Standard_Boolean.hxx>
 #include <Storage_Position.hxx>
 #include <Standard_Integer.hxx>
 #include <TColStd_SequenceOfAsciiString.hxx>
 #include <TColStd_SequenceOfExtendedString.hxx>
 
-class Storage_StreamTypeMismatchError;
-class Storage_StreamFormatError;
-class Storage_StreamWriteError;
-class Storage_StreamExtCharParityError;
 class TCollection_AsciiString;
 class TCollection_ExtendedString;
 class Storage_HeaderData;

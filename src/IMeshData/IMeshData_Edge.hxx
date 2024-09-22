@@ -16,17 +16,12 @@
 #ifndef _IMeshData_Edge_HeaderFile
 #define _IMeshData_Edge_HeaderFile
 
-#include <IMeshData_TessellatedShape.hxx>
-#include <IMeshData_StatusOwner.hxx>
-#include <Standard_Type.hxx>
 #include <TopoDS_Edge.hxx>
-#include <TopoDS.hxx>
 #include <IMeshData_Curve.hxx>
 #include <IMeshData_PCurve.hxx>
 #include <IMeshData_Types.hxx>
 #include <BRep_Tool.hxx>
 
-class IMeshData_Face;
 
 //! Interface class representing discrete model of an edge.
 class IMeshData_Edge : public IMeshData_TessellatedShape, public IMeshData_StatusOwner

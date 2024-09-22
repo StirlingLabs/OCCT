@@ -17,7 +17,6 @@
 #define _BinLDrivers_DocumentRetrievalDriver_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <BinObjMgt_Persistent.hxx>
 #include <BinObjMgt_RRelocationTable.hxx>
@@ -27,18 +26,14 @@
 #include <Standard_Integer.hxx>
 #include <Standard_IStream.hxx>
 #include <Storage_Position.hxx>
-#include <Standard_Boolean.hxx>
 #include <Storage_Data.hxx>
 
 class BinMDF_ADriverTable;
 class Message_Messenger;
 class TCollection_ExtendedString;
-class PCDM_Document;
 class CDM_Document;
 class CDM_Application;
 class TDF_Label;
-class TCollection_AsciiString;
-class Storage_HeaderData;
 class BinLDrivers_DocumentSection;
 
 
@@ -85,6 +80,7 @@ protected:
      const TDF_Label& theData, 
      const Handle(PCDM_ReaderFilter)& theFilter,
      const Standard_Boolean& theQuickPart,
+     const Standard_Boolean theReadMissing,
      const Message_ProgressRange& theRanges = Message_ProgressRange());
   
   
@@ -130,6 +126,7 @@ private:
   BinObjMgt_Persistent myPAtt;
   TColStd_MapOfInteger myMapUnsupported;
   BinLDrivers_VectorOfDocumentSection mySections;
+  NCollection_Map<Standard_Integer> myUnresolvedLinks;
 
 
 };

@@ -18,13 +18,10 @@
 #define _IGESGeom_BoundedSurface_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <Standard_Integer.hxx>
 #include <IGESGeom_HArray1OfBoundary.hxx>
 #include <IGESData_IGESEntity.hxx>
-class IGESData_IGESEntity;
-class Standard_OutOfRange;
 class IGESGeom_Boundary;
 
 

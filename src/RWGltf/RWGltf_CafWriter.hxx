@@ -18,11 +18,14 @@
 #include <TColStd_MapOfAsciiString.hxx>
 #include <TDF_LabelSequence.hxx>
 #include <TopTools_ShapeMapHasher.hxx>
+#include <RWGltf_DracoParameters.hxx>
 #include <RWGltf_GltfBufferView.hxx>
 #include <RWGltf_GltfFace.hxx>
 #include <RWGltf_WriterTrsfFormat.hxx>
 #include <RWMesh_CoordinateSystemConverter.hxx>
+#include <RWMesh_NameFormat.hxx>
 #include <XCAFPrs_Style.hxx>
+#include <Poly_Triangle.hxx>
 
 #include <memory>
 
@@ -38,6 +41,15 @@ class RWGltf_CafWriter : public Standard_Transient
 {
   DEFINE_STANDARD_RTTIEXT(RWGltf_CafWriter, Standard_Transient)
 public:
+
+  //! Mesh
+  struct Mesh
+  {
+    std::vector<Graphic3d_Vec3> NodesVec;     //!< vector for mesh nodes
+    std::vector<Graphic3d_Vec3> NormalsVec;   //!< vector for mesh normals
+    std::vector<Graphic3d_Vec2> TexCoordsVec; //!< vector for mesh texture UV coordinates
+    std::vector<Poly_Triangle>  IndicesVec;   //!< vector for mesh indices
+  };
 
   //! Main constructor.
   //! @param theFile     [in] path to output glTF file
@@ -66,6 +78,18 @@ public:
   //! Set preferred transformation format for writing into glTF file.
   void SetTransformationFormat (RWGltf_WriterTrsfFormat theFormat) { myTrsfFormat = theFormat; }
 
+  //! Return name format for exporting Nodes; RWMesh_NameFormat_InstanceOrProduct by default.
+  RWMesh_NameFormat NodeNameFormat() const { return myNodeNameFormat; }
+
+  //! Set name format for exporting Nodes.
+  void SetNodeNameFormat (RWMesh_NameFormat theFormat) { myNodeNameFormat = theFormat; }
+
+  //! Return name format for exporting Meshes; RWMesh_NameFormat_Product by default.
+  RWMesh_NameFormat MeshNameFormat() const { return myMeshNameFormat; }
+
+  //! Set name format for exporting Meshes.
+  void SetMeshNameFormat (RWMesh_NameFormat theFormat) { myMeshNameFormat = theFormat; }
+
   //! Return TRUE to export UV coordinates even if there are no mapped texture; FALSE by default.
   bool IsForcedUVExport() const { return myIsForcedUVExport; }
 
@@ -85,6 +109,33 @@ public:
 
   //! Set flag to write image textures into GLB file (binary gltf export).
   void SetToEmbedTexturesInGlb (Standard_Boolean theToEmbedTexturesInGlb) { myToEmbedTexturesInGlb = theToEmbedTexturesInGlb; }
+
+  //! Return flag to merge faces within a single part; FALSE by default.
+  bool ToMergeFaces() const { return myToMergeFaces; }
+
+  //! Set flag to merge faces within a single part.
+  //! May reduce JSON size thanks to smaller number of primitive arrays.
+  void SetMergeFaces (bool theToMerge) { myToMergeFaces = theToMerge; }
+
+  //! Return flag to prefer keeping 16-bit indexes while merging face; FALSE by default.
+  bool ToSplitIndices16() const { return myToSplitIndices16; }
+
+  //! Set flag to prefer keeping 16-bit indexes while merging face.
+  //! Has effect only with ToMergeFaces() option turned ON.
+  //! May reduce binary data size thanks to smaller triangle indexes.
+  void SetSplitIndices16 (bool theToSplit) { myToSplitIndices16 = theToSplit; }
+
+  //! Return TRUE if multithreaded optimizations are allowed; FALSE by default.
+  bool ToParallel() const { return myToParallel; }
+
+  //! Setup multithreaded execution.
+  void SetParallel (bool theToParallel) { myToParallel = theToParallel; }
+
+  //! Return Draco parameters
+  const RWGltf_DracoParameters& CompressionParameters() const { return myDracoParameters; }
+
+  //! Set Draco parameters
+  void SetCompressionParameters(const RWGltf_DracoParameters& theDracoParameters) { myDracoParameters = theDracoParameters; }
 
   //! Write glTF file and associated binary file.
   //! Triangulation data should be precomputed within shapes!
@@ -145,45 +196,61 @@ protected:
   //! Return TRUE if face mesh should be skipped (e.g. because it is invalid or empty).
   Standard_EXPORT virtual Standard_Boolean toSkipFaceMesh (const RWMesh_FaceIterator& theFaceIter);
 
+  //! Generate name for specified labels.
+  //! @param[in] theFormat   name format to apply
+  //! @param[in] theLabel    instance label
+  //! @param[in] theRefLabel product label
+  Standard_EXPORT virtual TCollection_AsciiString formatName (RWMesh_NameFormat theFormat,
+                                                              const TDF_Label& theLabel,
+                                                              const TDF_Label& theRefLabel) const;
+
   //! Write mesh nodes into binary file.
   //! @param theGltfFace [out] glTF face definition
   //! @param theBinFile  [out] output file to write into
   //! @param theFaceIter [in]  current face to write
   //! @param theAccessorNb [in] [out] last accessor index
+  //! @param theMesh [in] [out] mesh
   Standard_EXPORT virtual void saveNodes (RWGltf_GltfFace& theGltfFace,
                                           std::ostream& theBinFile,
                                           const RWMesh_FaceIterator& theFaceIter,
-                                          Standard_Integer& theAccessorNb) const;
+                                          Standard_Integer& theAccessorNb,
+                                          const std::shared_ptr<RWGltf_CafWriter::Mesh>& theMesh) const;
 
   //! Write mesh normals into binary file.
   //! @param theGltfFace [out] glTF face definition
   //! @param theBinFile  [out] output file to write into
   //! @param theFaceIter [in]  current face to write
   //! @param theAccessorNb [in] [out] last accessor index
+  //! @param theMesh [in] [out] mesh
   Standard_EXPORT virtual void saveNormals (RWGltf_GltfFace& theGltfFace,
                                             std::ostream& theBinFile,
                                             RWMesh_FaceIterator& theFaceIter,
-                                            Standard_Integer& theAccessorNb) const;
+                                            Standard_Integer& theAccessorNb,
+                                            const std::shared_ptr<RWGltf_CafWriter::Mesh>& theMesh) const;
 
   //! Write mesh texture UV coordinates into binary file.
   //! @param theGltfFace [out] glTF face definition
   //! @param theBinFile  [out] output file to write into
   //! @param theFaceIter [in]  current face to write
   //! @param theAccessorNb [in] [out] last accessor index
+  //! @param theMesh [in] [out] mesh
   Standard_EXPORT virtual void saveTextCoords (RWGltf_GltfFace& theGltfFace,
                                                std::ostream& theBinFile,
                                                const RWMesh_FaceIterator& theFaceIter,
-                                               Standard_Integer& theAccessorNb) const;
+                                               Standard_Integer& theAccessorNb,
+                                               const std::shared_ptr<RWGltf_CafWriter::Mesh>& theMesh) const;
 
   //! Write mesh indexes into binary file.
   //! @param theGltfFace [out] glTF face definition
   //! @param theBinFile  [out] output file to write into
   //! @param theFaceIter [in]  current face to write
   //! @param theAccessorNb [in] [out] last accessor index
+  //! @param theMesh [in] [out] mesh
   Standard_EXPORT virtual void saveIndices (RWGltf_GltfFace& theGltfFace,
                                             std::ostream& theBinFile,
                                             const RWMesh_FaceIterator& theFaceIter,
-                                            Standard_Integer& theAccessorNb);
+                                            Standard_Integer& theAccessorNb,
+                                            const std::shared_ptr<RWGltf_CafWriter::Mesh>& theMesh);
 
 protected:
 
@@ -241,6 +308,16 @@ protected:
   //! @param theMaterialMap  [in] map of materials
   Standard_EXPORT virtual void writeMeshes (const RWGltf_GltfSceneNodeMap& theSceneNodeMap);
 
+  //! Write a primitive array to RWGltf_GltfRootElement_Meshes section.
+  //! @param[in]     theGltfFace     face to write
+  //! @param[in]     theName         primitive array name
+  //! @param[in]     theDracoBufInd  draco buffer index 
+  //! @param[in,out] theToStartPrims flag indicating that primitive array has been started
+  Standard_EXPORT virtual void writePrimArray (const RWGltf_GltfFace& theGltfFace,
+                                               const TCollection_AsciiString& theName,
+                                               const int theDracoBufInd,
+                                               bool& theToStartPrims);
+
   //! Write RWGltf_GltfRootElement_Nodes section.
   //! @param theDocument     [in] input document
   //! @param theRootLabels   [in] list of root shapes to export
@@ -274,27 +351,70 @@ protected:
 
 protected:
 
+  //! Shape + Style pair.
+  struct RWGltf_StyledShape
+  {
+    TopoDS_Shape  Shape;
+    XCAFPrs_Style Style;
+
+    RWGltf_StyledShape()
+    {}
+    explicit RWGltf_StyledShape(const TopoDS_Shape& theShape) : Shape(theShape)
+    {}
+    explicit RWGltf_StyledShape(const TopoDS_Shape& theShape,
+                                const XCAFPrs_Style& theStyle) : Shape(theShape), Style(theStyle)
+    {}
+    bool operator==(const RWGltf_StyledShape& theStyledShape) const
+    {
+      return Shape.IsSame(theStyledShape.Shape)
+        && Style.IsEqual(theStyledShape.Style);
+    }
+  };
+
+  struct Hasher
+  {
+    size_t operator()(const RWGltf_StyledShape& theShape) const noexcept
+    {
+      return std::hash<TopoDS_Shape>{}(theShape.Shape);
+    }
+
+    bool operator()(const RWGltf_StyledShape& theShape1,
+                    const RWGltf_StyledShape& theShape2) const noexcept
+    {
+      return theShape1 == theShape2;
+    }
+  };
+
+  typedef NCollection_IndexedDataMap<RWGltf_StyledShape, Handle(RWGltf_GltfFaceList), Hasher> ShapeToGltfFaceMap;
+
+protected:
+
   TCollection_AsciiString                       myFile;              //!< output glTF file
   TCollection_AsciiString                       myBinFileNameFull;   //!< output file with binary data (full  path)
   TCollection_AsciiString                       myBinFileNameShort;  //!< output file with binary data (short path)
   RWGltf_WriterTrsfFormat                       myTrsfFormat;        //!< transformation format to write into glTF file
+  RWMesh_NameFormat                             myNodeNameFormat;    //!< name format for exporting Nodes
+  RWMesh_NameFormat                             myMeshNameFormat;    //!< name format for exporting Meshes
   Standard_Boolean                              myIsBinary;          //!< flag to write into binary glTF format (.glb)
   Standard_Boolean                              myIsForcedUVExport;  //!< export UV coordinates even if there are no mapped texture
   Standard_Boolean                              myToEmbedTexturesInGlb; //!< flag to write image textures into GLB file
+  Standard_Boolean                              myToMergeFaces;      //!< flag to merge faces within a single part
+  Standard_Boolean                              myToSplitIndices16;  //!< flag to prefer keeping 16-bit indexes while merging face
   RWMesh_CoordinateSystemConverter              myCSTrsf;            //!< transformation from OCCT to glTF coordinate system
   XCAFPrs_Style                                 myDefaultStyle;      //!< default material definition to be used for nodes with only color defined
 
-  opencascade::std::shared_ptr<RWGltf_GltfOStreamWriter>
-                                                myWriter;            //!< JSON writer
+  std::shared_ptr<RWGltf_GltfOStreamWriter>     myWriter;            //!< JSON writer
   Handle(RWGltf_GltfMaterialMap)                myMaterialMap;       //!< map of defined materials
   RWGltf_GltfBufferView                         myBuffViewPos;       //!< current buffer view with nodes positions
   RWGltf_GltfBufferView                         myBuffViewNorm;      //!< current buffer view with nodes normals
   RWGltf_GltfBufferView                         myBuffViewTextCoord; //!< current buffer view with nodes UV coordinates
   RWGltf_GltfBufferView                         myBuffViewInd;       //!< current buffer view with triangulation indexes
-  NCollection_DataMap<TopoDS_Shape, RWGltf_GltfFace,
-                      TopTools_ShapeMapHasher>  myBinDataMap;        //!< map for TopoDS_Face to glTF face (merging duplicates)
+  ShapeToGltfFaceMap                            myBinDataMap;        //!< map for TopoDS_Face to glTF face (merging duplicates)
   int64_t                                       myBinDataLen64;      //!< length of binary file
 
+  std::vector<RWGltf_GltfBufferView>            myBuffViewsDraco;    //!< vector of buffers view with compression data
+  Standard_Boolean                              myToParallel;        //!< flag to use multithreading; FALSE by default
+  RWGltf_DracoParameters                        myDracoParameters;   //!< Draco parameters
 };
 
 #endif // _RWGltf_CafWriter_HeaderFiler

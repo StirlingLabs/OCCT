@@ -21,7 +21,6 @@
 #include <Standard_Type.hxx>
 
 #include <TopoDS_Wire.hxx>
-#include <Standard_Real.hxx>
 #include <GeomFill_HArray1OfLocationLaw.hxx>
 #include <TColStd_HArray1OfReal.hxx>
 #include <TopTools_HArray1OfShape.hxx>
@@ -30,9 +29,6 @@
 #include <Standard_Transient.hxx>
 #include <GeomFill_PipeError.hxx>
 #include <TColStd_Array1OfInteger.hxx>
-#include <Standard_Boolean.hxx>
-class Standard_OutOfRange;
-class TopoDS_Wire;
 class GeomFill_LocationLaw;
 class TopoDS_Edge;
 class TopoDS_Vertex;
@@ -126,18 +122,18 @@ public:
 protected:
 
   
-  //! Initialize all the fields, this methode have to
+  //! Initialize all the fields, this methode has to
   //! be called by the constructors of Inherited class.
   Standard_EXPORT void Init (const TopoDS_Wire& Path);
   
-  //! To preseve if possible  the Tangent in transformations
+  //! To preserve if possible the Tangent in transformations
   //! It is the default mode.
   Standard_EXPORT void TangentIsMain();
   
-  //! To preseve if possible the Normal in transformations
+  //! To preserve if possible the Normal in transformations
   Standard_EXPORT void NormalIsMain();
   
-  //! To preseve if possible the BiNormal in transformations
+  //! To preserve if possible the BiNormal in transformations
   Standard_EXPORT void BiNormalIsMain();
 
   TopoDS_Wire myPath;

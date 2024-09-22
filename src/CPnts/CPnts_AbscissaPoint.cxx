@@ -29,7 +29,6 @@
 #include <Geom2d_BezierCurve.hxx>
 #include <Geom2d_BSplineCurve.hxx>
 #include <Geom_BezierCurve.hxx>
-#include <Geom_BSplineCurve.hxx>
 #include <gp_Vec.hxx>
 #include <gp_Vec2d.hxx>
 #include <math_FunctionRoot.hxx>
@@ -452,7 +451,7 @@ void CPnts_AbscissaPoint::Perform(const Standard_Real   Abscissa,
   }
   else {
     Standard_Real Ui = U0 + (Abscissa / myL) * (myUMax - myUMin) / 3.;
-    // exercice : why 3 ?
+    // exercise : why 3 ?
     Perform(Abscissa,U0,Ui,Resolution);
   }
 }

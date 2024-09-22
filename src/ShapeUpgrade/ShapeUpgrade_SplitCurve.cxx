@@ -24,7 +24,6 @@
 #include <Standard_Type.hxx>
 #include <TColGeom_HArray1OfCurve.hxx>
 #include <TColStd_HSequenceOfReal.hxx>
-#include <TColStd_ListIteratorOfListOfReal.hxx>
 
 IMPLEMENT_STANDARD_RTTIEXT(ShapeUpgrade_SplitCurve,Standard_Transient)
 
@@ -63,7 +62,7 @@ ShapeUpgrade_SplitCurve::ShapeUpgrade_SplitCurve()
 
  void ShapeUpgrade_SplitCurve::SetSplitValues (const Handle(TColStd_HSequenceOfReal)& SplitValues)
 {
-  Standard_Real precision = Precision::PConfusion();
+  constexpr Standard_Real precision = Precision::PConfusion();
   if(SplitValues.IsNull()) return;
   if(SplitValues->Length()==0) return;
     

@@ -16,30 +16,15 @@
 
 #include <TopoDS.hxx>
 #include <TopExp.hxx>
-#include <TopExp_Explorer.hxx>
-#include <TColStd_DataMapIteratorOfDataMapOfIntegerListOfInteger.hxx>
 #include <TColStd_DataMapOfIntegerListOfInteger.hxx>
-#include <TColStd_ListIteratorOfListOfInteger.hxx>
-#include <TColStd_ListOfInteger.hxx>
-#include <BRepAdaptor_Curve.hxx>
-#include <BRepAdaptor_Surface.hxx>
-#include <BRep_Tool.hxx>
 #include <BRepClass3d_SolidClassifier.hxx>
-#include <TopoDS_Shell.hxx>
-#include <TopoDS_Solid.hxx>
 #include <gp_Vec.hxx>
-#include <Precision.hxx>
-#include <Geom_Curve.hxx>
-#include <Geom_Surface.hxx>
 #include <GeomAPI_ProjectPointOnSurf.hxx>
 #include <BRepTools.hxx>
 
-#include <TopOpeBRepTool_ShapeTool.hxx>
 #include <TopOpeBRepTool_EXPORT.hxx>
 #include <TopOpeBRepTool_TOOL.hxx>
 
-#include <TopOpeBRepDS_FaceEdgeInterference.hxx>
-#include <TopOpeBRepDS_define.hxx>
 #include <TopOpeBRepDS_ProcessInterferencesTool.hxx>
 #include <TopOpeBRepDS_FaceEdgeInterference.hxx>
 #include <TopOpeBRepDS_FaceInterferenceTool.hxx>
@@ -167,7 +152,7 @@ Standard_EXPORT void FUN_unkeepFdoubleGBoundinterferences
   
   it1.Initialize(LI);
   while (it1.More() ) {
-    Handle(TopOpeBRepDS_Interference)& I1 = it1.Value();
+    Handle(TopOpeBRepDS_Interference)& I1 = it1.ChangeValue();
     TopOpeBRepDS_Kind GT1,ST1; Standard_Integer G1,S1;
     const TopOpeBRepDS_Transition& T1 = I1->Transition();
     Standard_Boolean isunk1 = T1.IsUnknown();
@@ -232,7 +217,7 @@ Standard_EXPORT void FUN_resolveFUNKNOWN
   // process interferences of LI with UNKNOWN transition
   
   for (it1.Initialize(LI); it1.More(); it1.Next() ) {
-    Handle(TopOpeBRepDS_Interference)& I1 = it1.Value();
+    Handle(TopOpeBRepDS_Interference)& I1 = it1.ChangeValue();
     const TopOpeBRepDS_Transition& T1 = I1->Transition();
     Standard_Boolean isunk = T1.IsUnknown();
     if (!isunk) continue;
@@ -306,7 +291,7 @@ Standard_EXPORT void FUN_resolveFUNKNOWN
         //      to determine transition relatively solid rather then face
         //      if possible (see pb. in CFE002 C2, when SIX==13)
         Standard_Integer rankFS = BDS.AncestorRank(S1);
-        TopoDS_Shape aSRef = BDS.Shape(rankFS);
+        const TopoDS_Shape& aSRef = BDS.Shape(rankFS);
         TopExp_Explorer ex(aSRef,TopAbs_SOLID);
         if (ex.More()) {
           pClass = pClassif;

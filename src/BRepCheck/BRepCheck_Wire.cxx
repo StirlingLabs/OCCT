@@ -28,7 +28,6 @@
 #include <BRepAdaptor_Curve.hxx>
 #include <BRepAdaptor_Surface.hxx>
 #include <BRepCheck.hxx>
-#include <BRepCheck_ListIteratorOfListOfStatus.hxx>
 #include <BRepCheck_ListOfStatus.hxx>
 #include <BRepCheck_Wire.hxx>
 #include <BRepTools_WireExplorer.hxx>
@@ -58,16 +57,10 @@
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Vertex.hxx>
 #include <TopoDS_Wire.hxx>
-#include <TopTools_DataMapIteratorOfDataMapOfShapeListOfShape.hxx>
 #include <TopTools_DataMapOfShapeListOfShape.hxx>
-#include <TopTools_HArray1OfShape.hxx>
 #include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
 #include <TopTools_IndexedMapOfOrientedShape.hxx>
-#include <TopTools_IndexedMapOfShape.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
 #include <TopTools_ListOfShape.hxx>
-#include <TopTools_MapIteratorOfMapOfOrientedShape.hxx>
-#include <TopTools_MapIteratorOfMapOfShape.hxx>
 #include <TopTools_MapOfOrientedShape.hxx>
 #include <TopTools_MapOfShape.hxx>
 
@@ -1093,7 +1086,7 @@ BRepCheck_Status BRepCheck_Wire::SelfIntersect(const TopoDS_Face& F,
         if(   Tr1.PositionOnCurve() == IntRes2d_Middle
            || Tr2.PositionOnCurve() == IntRes2d_Middle) {
           //-- Checking of points with true tolerances (ie Tol in 3d)
-          //-- If the point of intersection is within the tolearnce of a vertex
+          //-- If the point of intersection is within the tolerance of a vertex
           //-- this intersection is considered correct (no error)
           Standard_Boolean localok = Standard_False;
           Standard_Real f,l;

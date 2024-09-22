@@ -25,20 +25,14 @@
 #include <TopoDS_Shape.hxx>
 #include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
 #include <TopTools_DataMapOfOrientedShapeInteger.hxx>
-#include <TopTools_IndexedMapOfOrientedShape.hxx>
-#include <TopTools_IndexedDataMapOfShapeShape.hxx>
-#include <TopTools_DataMapOfShapeListOfShape.hxx>
 #include <TopOpeBRepBuild_Builder.hxx>
 #include <TopAbs_State.hxx>
 #include <TopTools_ListOfShape.hxx>
 #include <TopOpeBRepDS_DataMapOfShapeState.hxx>
-#include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
 #include <TopTools_SequenceOfShape.hxx>
-class TopOpeBRepBuild_HBuilder;
 class TopOpeBRepDS_BuildTool;
 class TopOpeBRepDS_HDataStructure;
-class TopoDS_Shape;
 class TopOpeBRepBuild_GTopo;
 class TopOpeBRepBuild_ShellFaceSet;
 class TopOpeBRepBuild_WireEdgeSet;
@@ -138,7 +132,7 @@ private:
   TopoDS_Shape mySDFaceToFill;
   TopoDS_Shape myBaseFaceToFill;
   TopTools_IndexedDataMapOfShapeListOfShape myMapOfEdgeFaces;
-  NCollection_DataMap<TopoDS_Shape, Standard_Boolean, TopTools_OrientedShapeMapHasher> myMapOfEdgeWithFaceState;
+  NCollection_DataMap<TopoDS_Shape, Standard_Boolean> myMapOfEdgeWithFaceState;
   TopTools_IndexedMapOfShape myProcessedPartsOut2d;
   TopTools_IndexedMapOfShape myProcessedPartsON2d;
   TopTools_IndexedMapOfShape mySplitsONtoKeep;

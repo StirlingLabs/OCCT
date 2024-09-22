@@ -22,17 +22,13 @@
 #include <Standard_Handle.hxx>
 
 #include <TColgp_HArray1OfPnt.hxx>
-#include <Standard_Real.hxx>
 #include <gp_Vec.hxx>
 #include <gp_Pnt.hxx>
 #include <Standard_Integer.hxx>
 #include <TColgp_SequenceOfVec.hxx>
-#include <Standard_Boolean.hxx>
 #include <GeomPlate_SequenceOfAij.hxx>
 class Geom_Plane;
 class Geom_Line;
-class Standard_NoSuchObject;
-class gp_Vec;
 
 
 //! This class computes an average inertial plane with an
@@ -46,9 +42,9 @@ public:
   DEFINE_STANDARD_ALLOC
 
   
-  //! Tol is a  Tolerance to make the difference between
+  //! Tol is a Tolerance to make the difference between
   //! the result plane and the result line.
-  //! if POption = 1 : automatical parametrisation
+  //! if POption = 1 : automatic parametrisation
   //! if POption = 2 : parametrisation by eigen vectors
   //! if NOption = 1 : the average plane is the inertial plane.
   //! if NOption = 2 : the average plane is the plane of max. flux.

@@ -28,6 +28,9 @@ Applies only for Debug configuration.")
 set (BUILD_SHARED_LIBRARY_NAME_POSTFIX_DESCR
 "Append the postfix to names of output libraries")
 
+set (BUILD_SOVERSION_NUMBERS_DESCR
+"Version numbers to put into SONAME: 0 - for empty, 1 - for major, 2 - for major.minor, 3 - for major.minor.maintenance")
+
 set (BUILD_RELEASE_DISABLE_EXCEPTIONS_DESCR
 "Disables exceptions like Standard_OutOfRange in Release builds.
 Defines No_Exception macros for Release builds when enabled (default).
@@ -37,6 +40,9 @@ set (BUILD_ENABLE_FPE_SIGNAL_HANDLER_DESCR
 "Enable/Disable the floating point exceptions (FPE) during DRAW execution only.
 Corresponding environment variable (CSF_FPE) can be changed manually
 in custom.bat/sh scripts without regeneration by CMake.")
+
+set (BUILD_FORCE_RelWithDebInfo_DESCR
+"Generate PDB files within normal Release build.")
 
 set (BUILD_USE_PCH_DESCR
 "Use precompiled headers to accelerate the build.
@@ -110,6 +116,7 @@ endmacro()
 
 BUILD_MODULE_MESSAGE (BUILD_MODULE_ApplicationFramework "ApplicationFramework")
 BUILD_MODULE_MESSAGE (BUILD_MODULE_DataExchange         "DataExchange")
+BUILD_MODULE_MESSAGE (BUILD_MODULE_DETools              "DETools")
 BUILD_MODULE_MESSAGE (BUILD_MODULE_Draw                 "Draw")
 BUILD_MODULE_MESSAGE (BUILD_MODULE_FoundationClasses    "FoundationClasses")
 BUILD_MODULE_MESSAGE (BUILD_MODULE_ModelingAlgorithms   "ModelingAlgorithms")
@@ -175,6 +182,9 @@ set (USE_OPENVR_DESCR
 set (USE_RAPIDJSON_DESCR
 "Indicates whether RapidJSON product should be used in OCCT DataExchange
 module for support of JSON-based formats like glTF")
+
+set (USE_DRACO_DESCR
+"Indicates whether Draco mesh decoding library should be used by glTF reader")
 
 set (USE_EGL_DESCR
 "Indicates whether EGL should be used in OCCT visualization

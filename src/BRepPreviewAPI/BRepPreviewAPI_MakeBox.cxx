@@ -15,19 +15,16 @@
 
 #include <BRepPreviewAPI_MakeBox.hxx>
 
-#include <BRep_Builder.hxx>
 #include <BRepBuilderAPI_MakeEdge.hxx>
 #include <BRepBuilderAPI_MakeFace.hxx>
 #include <BRepBuilderAPI_MakeVertex.hxx>
 #include <BRepBuilderAPI_MakeWire.hxx>
 
-#include <TopoDS_Compound.hxx>
-
 //=======================================================================
 //function : Build
 //purpose  :
 //=======================================================================
-void BRepPreviewAPI_MakeBox::Build()
+void BRepPreviewAPI_MakeBox::Build(const Message_ProgressRange& /*theRange*/)
 {
   gp_Pnt anLocation = myWedge.Axes().Location();
 

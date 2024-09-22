@@ -22,13 +22,11 @@
 #include <BRepAdaptor_Curve2d.hxx>
 #include <TopExp_Explorer.hxx>
 #include <TopoDS_Face.hxx>
-#include <TColStd_ListOfTransient.hxx>
 #include <TColStd_ListIteratorOfListOfTransient.hxx>
 #include <Adaptor3d_TopolTool.hxx>
 #include <TopAbs_State.hxx>
 #include <TopAbs_Orientation.hxx>
 
-class Standard_DomainError;
 class Adaptor3d_HVertex;
 class gp_Pnt2d;
 class gp_Pnt;

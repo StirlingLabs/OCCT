@@ -21,7 +21,6 @@
 #include <Message.hxx>
 #include <Message_Messenger.hxx>
 #include <NCollection_Buffer.hxx>
-#include <NCollection_List.hxx>
 #include <NCollection_Map.hxx>
 #include <OSD_Environment.hxx>
 #include <Standard_Stream.hxx>
@@ -40,10 +39,6 @@ IMPLEMENT_STANDARD_RTTIEXT(Font_FontMgr,Standard_Transient)
 
   #include <windows.h>
   #include <stdlib.h>
-
-  #if defined(_MSC_VER) && defined(HAVE_FREETYPE)
-    #pragma comment (lib, "freetype.lib")
-  #endif
 
   namespace
   {
@@ -947,7 +942,7 @@ void Font_FontMgr::InitFontDataBase()
 void Font_FontMgr::GetAvailableFontsNames (TColStd_SequenceOfHAsciiString& theFontsNames) const
 {
   theFontsNames.Clear();
-  for (NCollection_IndexedMap<Handle(Font_SystemFont), Font_SystemFont>::Iterator aFontIter (myFontMap);
+  for (Font_FontMap::Iterator aFontIter (myFontMap);
        aFontIter.More(); aFontIter.Next())
   {
     const Handle(Font_SystemFont)& aFont = aFontIter.Value();
@@ -1143,17 +1138,11 @@ Handle(Font_SystemFont) Font_FontMgr::Font_FontMap::Find (const TCollection_Asci
   {
     return FindKey (1); // return any font
   }
-
-  TCollection_AsciiString aFontName (theFontName);
-  aFontName.LowerCase();
-  for (IndexedMapNode* aNodeIter = (IndexedMapNode* )myData1[::HashCode (aFontName, NbBuckets())];
-       aNodeIter != NULL; aNodeIter = (IndexedMapNode* )aNodeIter->Next())
+  Handle(Font_SystemFont) aTmpFont = new Font_SystemFont(theFontName);
+  const int anInd = FindIndex(aTmpFont);
+  if (anInd > 0)
   {
-    const Handle(Font_SystemFont)& aKey = aNodeIter->Key1();
-    if (aKey->FontKey().IsEqual (aFontName))
-    {
-      return aKey;
-    }
+    return FindKey(anInd);
   }
   return Handle(Font_SystemFont)();
 }

@@ -22,9 +22,7 @@
 
 #include <gp_XYZ.hxx>
 #include <IGESData_IGESEntity.hxx>
-#include <Standard_Boolean.hxx>
 class IGESBasic_SubfigureDef;
-class gp_XYZ;
 class gp_Pnt;
 
 

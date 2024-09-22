@@ -21,14 +21,12 @@
 #include <Standard_DefineAlloc.hxx>
 
 #include <math_MultipleVarFunctionWithGradient.hxx>
-#include <gp_Pnt.hxx>
 #include <Adaptor3d_Surface.hxx>
 
-#include <Standard_Real.hxx>
 #include <Standard_Boolean.hxx>
-#include <Standard_Integer.hxx>
 
-class math_Vector;
+template<typename T> class math_VectorBase;
+using math_Vector = math_VectorBase<double>;
 
 //! Functional for search of extremum of the square Euclidean distance between point P and
 //! surface S, starting from approximate solution (u0, v0).

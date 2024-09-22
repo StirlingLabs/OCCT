@@ -34,18 +34,13 @@ static void CurveToString(const GeomAbs_CurveType t, TCollection_AsciiString& N)
 
 #include <Bnd_Box.hxx>
 #include <BRep_Tool.hxx>
-#include <BRepAdaptor_Surface.hxx>
-#include <Geom2dAdaptor_Curve.hxx>
 #include <Geom_Curve.hxx>
 #include <Geom_Surface.hxx>
 #include <GeomTools_Curve2dSet.hxx>
 #include <GeomTools_CurveSet.hxx>
 #include <GeomTools_SurfaceSet.hxx>
-#include <gp_Circ2d.hxx>
 #include <gp_Pnt.hxx>
 #include <gp_Pnt2d.hxx>
-#include <IntRes2d_IntersectionPoint.hxx>
-#include <IntRes2d_IntersectionSegment.hxx>
 #include <Precision.hxx>
 #include <Standard_Failure.hxx>
 #include <TCollection_AsciiString.hxx>
@@ -54,8 +49,6 @@ static void CurveToString(const GeomAbs_CurveType t, TCollection_AsciiString& N)
 #include <TopLoc_Location.hxx>
 #include <TopoDS.hxx>
 #include <TopoDS_Shape.hxx>
-#include <TopoDS_Vertex.hxx>
-#include <TopOpeBRep_define.hxx>
 #include <TopOpeBRep_EdgesIntersector.hxx>
 #include <TopOpeBRep_Point2d.hxx>
 #include <TopOpeBRepDS_Transition.hxx>
@@ -257,7 +250,7 @@ static Standard_Boolean IsTangentSegment(const IntRes2d_IntersectionPoint &P1,
 Standard_Boolean EdgesIntersector_checkT1D(const TopoDS_Edge& E1,const TopoDS_Edge& E2,const TopoDS_Vertex& vG,
 			      TopOpeBRepDS_Transition& newT)
 //------------------------------------------------------------------------
-     // E1 sdm E2, interfers with E2 at vertex vG
+     // E1 sdm E2, interferes with E2 at vertex vG
      // vG is vertex of E2, but not vertex of E1
      // purpose : get newT / attached to E1, I1d=(newT(E2),G,E2)
 {

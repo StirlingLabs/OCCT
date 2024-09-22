@@ -243,6 +243,12 @@ bool Wasm_Window::ProcessMessage (Aspect_WindowInputListener& theListener,
     {
       return ProcessUiEvent (theListener, theEventType, (const EmscriptenUiEvent* )theEvent);
     }
+    case EMSCRIPTEN_EVENT_FOCUS:
+    case EMSCRIPTEN_EVENT_FOCUSIN:
+    case EMSCRIPTEN_EVENT_FOCUSOUT:
+    {
+      return ProcessFocusEvent (theListener, theEventType, (const EmscriptenFocusEvent* )theEvent);
+    }
   }
   return false;
 #else
@@ -270,14 +276,19 @@ bool Wasm_Window::ProcessMouseEvent (Aspect_WindowInputListener& theListener,
   if (theEvent->metaKey  == EM_TRUE) { aFlags |= Aspect_VKeyFlags_META;  }
 
   const bool isEmulated = false;
-  const Aspect_VKeyMouse aButtons = Wasm_Window::MouseButtonsFromNative (theEvent->buttons);
+  const Aspect_VKeyMouse aButtonsOld = theListener.PressedMouseButtons();
+  Aspect_VKeyMouse aButtons = Wasm_Window::MouseButtonsFromNative (theEvent->buttons);
+  if (theEventType != EMSCRIPTEN_EVENT_MOUSEDOWN)
+  {
+    aButtons &= aButtonsOld; // filter out unexpected buttons
+  }
   switch (theEventType)
   {
     case EMSCRIPTEN_EVENT_MOUSEMOVE:
     {
       if ((aNewPos2i.x() < 0 || aNewPos2i.x() > mySize.x()
         || aNewPos2i.y() < 0 || aNewPos2i.y() > mySize.y())
-        && theListener.PressedMouseButtons() == Aspect_VKeyMouse_NONE)
+        && aButtonsOld == Aspect_VKeyMouse_NONE)
       {
         return false;
       }
@@ -290,10 +301,13 @@ bool Wasm_Window::ProcessMouseEvent (Aspect_WindowInputListener& theListener,
     case EMSCRIPTEN_EVENT_MOUSEDOWN:
     case EMSCRIPTEN_EVENT_MOUSEUP:
     {
-      if (aNewPos2i.x() < 0 || aNewPos2i.x() > mySize.x()
-       || aNewPos2i.y() < 0 || aNewPos2i.y() > mySize.y())
+      if (theEventType == EMSCRIPTEN_EVENT_MOUSEDOWN)
       {
-        return false;
+        if (aNewPos2i.x() < 0 || aNewPos2i.x() > mySize.x()
+         || aNewPos2i.y() < 0 || aNewPos2i.y() > mySize.y())
+        {
+          return false;
+        }
       }
       if (theListener.UpdateMouseButtons (aNewPos2i, aButtons, aFlags, isEmulated))
       {
@@ -530,6 +544,29 @@ bool Wasm_Window::ProcessUiEvent (Aspect_WindowInputListener& theListener,
   (void )theEventType;
 #endif
   theListener.ProcessConfigure (true);
+  return true;
+}
+
+// =======================================================================
+// function : ProcessFocusEvent
+// purpose  :
+// =======================================================================
+bool Wasm_Window::ProcessFocusEvent (Aspect_WindowInputListener& theListener,
+                                     int theEventType, const EmscriptenFocusEvent* )
+{
+  bool isActivated = false;
+#if defined(__EMSCRIPTEN__)
+  if (theEventType != EMSCRIPTEN_EVENT_FOCUS
+   && theEventType != EMSCRIPTEN_EVENT_FOCUSIN // about to receive focus
+   && theEventType != EMSCRIPTEN_EVENT_FOCUSOUT)
+  {
+    return false;
+  }
+  isActivated = theEventType == EMSCRIPTEN_EVENT_FOCUS;
+#else
+  (void )theEventType;
+#endif
+  theListener.ProcessFocus (isActivated);
   return true;
 }
 

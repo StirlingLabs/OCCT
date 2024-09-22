@@ -21,13 +21,9 @@
 #include <Standard_DefineAlloc.hxx>
 #include <Standard_Handle.hxx>
 
-#include <Standard_Real.hxx>
-#include <Standard_Boolean.hxx>
 #include <Standard_Integer.hxx>
 #include <TopTools_ListOfShape.hxx>
 class BRepBuilderAPI_Sewing;
-class Standard_OutOfRange;
-class Standard_NoSuchObject;
 class TopoDS_Shape;
 class TopoDS_Edge;
 
@@ -41,7 +37,7 @@ class TopoDS_Edge;
 //! - define if necessary a new tolerance
 //! - set if necessary analysis of degenerated shapes off
 //! - add shapes to be controlled -> Add
-//! - compute -> Perfom
+//! - compute -> Perform
 //! - output couples of connected edges for control
 //! - output the problems if any
 class BRepOffsetAPI_FindContigousEdges 

@@ -24,10 +24,6 @@
 #include <GeomAbs_Shape.hxx>
 #include <Standard_Real.hxx>
 class BRepAdaptor_Curve;
-class BRepLProp_CurveTool;
-class BRepLProp_SurfaceTool;
-class BRepLProp_CLProps;
-class BRepLProp_SLProps;
 
 
 //! These global functions compute the degree of
@@ -49,31 +45,6 @@ public:
   //! The same as preceding but using the standard tolerances from package Precision.
   Standard_EXPORT static GeomAbs_Shape Continuity (const BRepAdaptor_Curve& C1, const BRepAdaptor_Curve& C2, const Standard_Real u1, const Standard_Real u2);
 
-
-
-
-protected:
-
-
-
-
-
-private:
-
-
-
-
-friend class BRepLProp_CurveTool;
-friend class BRepLProp_SurfaceTool;
-friend class BRepLProp_CLProps;
-friend class BRepLProp_SLProps;
-
 };
-
-
-
-
-
-
 
 #endif // _BRepLProp_HeaderFile

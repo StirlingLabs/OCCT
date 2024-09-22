@@ -17,7 +17,6 @@
 #ifndef _Adaptor3d_Curve_HeaderFile
 #define _Adaptor3d_Curve_HeaderFile
 
-#include <gp_Lin.hxx>
 #include <gp_Circ.hxx>
 #include <gp_Elips.hxx>
 #include <gp_Hypr.hxx>
@@ -29,9 +28,6 @@
 #include <TColStd_Array1OfReal.hxx>
 #include <GeomAbs_CurveType.hxx>
 
-class Standard_OutOfRange;
-class Standard_NoSuchObject;
-class Standard_DomainError;
 class gp_Pnt;
 class gp_Vec;
 class Geom_BezierCurve;
@@ -57,6 +53,9 @@ class Adaptor3d_Curve : public Standard_Transient
 {
   DEFINE_STANDARD_RTTIEXT(Adaptor3d_Curve, Standard_Transient)
 public:
+
+  //! Shallow copy of adaptor
+  Standard_EXPORT virtual Handle(Adaptor3d_Curve) ShallowCopy() const;
 
   Standard_EXPORT virtual Standard_Real FirstParameter() const;
   

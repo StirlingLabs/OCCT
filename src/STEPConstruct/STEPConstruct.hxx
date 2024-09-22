@@ -30,16 +30,6 @@ class Transfer_TransientProcess;
 class Transfer_Binder;
 class StepShape_ShapeDefinitionRepresentation;
 class StepShape_ContextDependentShapeRepresentation;
-class STEPConstruct_Tool;
-class STEPConstruct_UnitContext;
-class STEPConstruct_Part;
-class STEPConstruct_Assembly;
-class STEPConstruct_Styles;
-class STEPConstruct_ValidationProps;
-class STEPConstruct_ExternRefs;
-class STEPConstruct_AP203Context;
-class STEPConstruct_ContextTool;
-class STEPConstruct_PointHasher;
 
 
 //! Defines tools for creation and investigation STEP constructs
@@ -56,7 +46,7 @@ public:
 
   
   //! Returns STEP entity of the (sub)type of RepresentationItem
-  //! which is a result of the tranalation of the Shape, or Null if
+  //! which is a result of the translation of the Shape, or Null if
   //! no result is recorded
   Standard_EXPORT static Handle(StepRepr_RepresentationItem) FindEntity (const Handle(Transfer_FinderProcess)& FinderProcess, const TopoDS_Shape& Shape);
   
@@ -69,40 +59,9 @@ public:
   //! Returns Shape resulting from given STEP entity (Null if not mapped)
   Standard_EXPORT static TopoDS_Shape FindShape (const Handle(Transfer_TransientProcess)& TransientProcess, const Handle(StepRepr_RepresentationItem)& item);
   
-  //! Find CDSR correcponding to the component in the specified assembly
+  //! Find CDSR corresponding to the component in the specified assembly
   Standard_EXPORT static Standard_Boolean FindCDSR (const Handle(Transfer_Binder)& ComponentBinder, const Handle(StepShape_ShapeDefinitionRepresentation)& AssemblySDR, Handle(StepShape_ContextDependentShapeRepresentation)& ComponentCDSR);
 
-
-
-
-protected:
-
-
-
-
-
-private:
-
-
-
-
-friend class STEPConstruct_Tool;
-friend class STEPConstruct_UnitContext;
-friend class STEPConstruct_Part;
-friend class STEPConstruct_Assembly;
-friend class STEPConstruct_Styles;
-friend class STEPConstruct_ValidationProps;
-friend class STEPConstruct_ExternRefs;
-friend class STEPConstruct_AP203Context;
-friend class STEPConstruct_ContextTool;
-friend class STEPConstruct_PointHasher;
-
 };
-
-
-
-
-
-
 
 #endif // _STEPConstruct_HeaderFile

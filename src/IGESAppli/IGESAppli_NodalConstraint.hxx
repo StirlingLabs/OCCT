@@ -18,13 +18,11 @@
 #define _IGESAppli_NodalConstraint_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <Standard_Integer.hxx>
 #include <IGESDefs_HArray1OfTabularData.hxx>
 #include <IGESData_IGESEntity.hxx>
 class IGESAppli_Node;
-class Standard_OutOfRange;
 class IGESDefs_TabularData;
 
 

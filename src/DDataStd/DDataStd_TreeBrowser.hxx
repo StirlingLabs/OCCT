@@ -17,15 +17,12 @@
 #define _DDataStd_TreeBrowser_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <TDF_Label.hxx>
 #include <Draw_Drawable3D.hxx>
 #include <Standard_OStream.hxx>
 #include <Draw_Interpretor.hxx>
-class TDF_Label;
 class Draw_Display;
-class Draw_Drawable3D;
 class TCollection_AsciiString;
 class TDataStd_TreeNode;
 

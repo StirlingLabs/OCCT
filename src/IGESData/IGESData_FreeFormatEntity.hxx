@@ -18,17 +18,12 @@
 #define _IGESData_FreeFormatEntity_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <TColStd_HSequenceOfInteger.hxx>
 #include <IGESData_UndefinedEntity.hxx>
 #include <Standard_Integer.hxx>
-#include <Standard_Boolean.hxx>
 #include <Interface_ParamType.hxx>
-#include <Standard_CString.hxx>
 #include <IGESData_HArray1OfIGESEntity.hxx>
-class Standard_OutOfRange;
-class Interface_InterfaceError;
 class IGESData_IGESEntity;
 class TCollection_HAsciiString;
 class IGESData_IGESWriter;

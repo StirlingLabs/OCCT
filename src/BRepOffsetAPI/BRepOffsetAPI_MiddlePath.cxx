@@ -32,7 +32,6 @@
 #include <Geom2d_Curve.hxx>
 #include <Geom2d_Line.hxx>
 #include <Geom_BezierCurve.hxx>
-#include <Geom_BSplineCurve.hxx>
 #include <Geom_Circle.hxx>
 #include <Geom_Curve.hxx>
 #include <Geom_Line.hxx>
@@ -57,8 +56,6 @@
 #include <TopoDS_Shape.hxx>
 #include <TopTools_Array1OfShape.hxx>
 #include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
-#include <TopTools_MapIteratorOfMapOfShape.hxx>
 #include <TopTools_SequenceOfShape.hxx>
 
 static Standard_Boolean IsLinear(const TopoDS_Edge& anEdge,
@@ -141,7 +138,7 @@ static Standard_Boolean IsValidEdge(const TopoDS_Edge& theEdge,
   TopoDS_Vertex V1, V2;
   TopExp::Vertices(theEdge, V1, V2);
 
-  Standard_Real Tol = Precision::Confusion();
+  constexpr Standard_Real Tol = Precision::Confusion();
   Standard_Integer i;
   
   TopExp_Explorer Explo(theFace, TopAbs_EDGE);
@@ -332,7 +329,7 @@ BRepOffsetAPI_MiddlePath::BRepOffsetAPI_MiddlePath(const TopoDS_Shape& aShape,
 //purpose  : 
 //=======================================================================
 
-void BRepOffsetAPI_MiddlePath::Build()
+void BRepOffsetAPI_MiddlePath::Build(const Message_ProgressRange& /*theRange*/)
 {
   TopTools_ListIteratorOfListOfShape itl;
   

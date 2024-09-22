@@ -18,15 +18,12 @@
 #define _GeomFill_LocationGuide_HeaderFile
 
 #include <Standard.hxx>
-#include <Standard_Type.hxx>
 
 #include <TColgp_HArray2OfPnt2d.hxx>
 #include <Standard_Integer.hxx>
-#include <Standard_Boolean.hxx>
 #include <Standard_Real.hxx>
 #include <gp_Mat.hxx>
 #include <math_Vector.hxx>
-#include <GeomFill_PipeError.hxx>
 #include <GeomFill_LocationLaw.hxx>
 #include <TColgp_Array1OfPnt2d.hxx>
 #include <TColgp_Array1OfVec2d.hxx>
@@ -35,11 +32,6 @@
 #include <TColgp_HArray1OfPnt2d.hxx>
 class GeomFill_TrihedronWithGuide;
 class GeomFill_SectionLaw;
-class Standard_NotImplemented;
-class Standard_ConstructionError;
-class Standard_OutOfRange;
-class gp_Mat;
-class GeomFill_LocationLaw;
 class gp_Vec;
 class gp_Pnt;
 class Geom_Curve;
@@ -61,7 +53,9 @@ public:
   
   Standard_EXPORT void EraseRotation();
   
-  Standard_EXPORT virtual void SetCurve (const Handle(Adaptor3d_Curve)& C) Standard_OVERRIDE;
+  //! calculating poles on a surface (courbe guide / the surface of rotation in points myNbPts)
+  //! @return Standard_True
+  Standard_EXPORT virtual Standard_Boolean SetCurve (const Handle(Adaptor3d_Curve)& C) Standard_OVERRIDE;
   
   Standard_EXPORT virtual const Handle(Adaptor3d_Curve)& GetCurve() const Standard_OVERRIDE;
   

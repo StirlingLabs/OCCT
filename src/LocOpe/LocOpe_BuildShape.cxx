@@ -22,7 +22,6 @@
 #include <LocOpe_BuildShape.hxx>
 #include <Precision.hxx>
 #include <Standard_ConstructionError.hxx>
-#include <TColStd_MapIteratorOfMapOfInteger.hxx>
 #include <TColStd_MapOfInteger.hxx>
 #include <TopAbs.hxx>
 #include <TopExp.hxx>
@@ -32,16 +31,14 @@
 #include <TopoDS_Shape.hxx>
 #include <TopoDS_Shell.hxx>
 #include <TopoDS_Solid.hxx>
-#include <TopTools_DataMapIteratorOfDataMapOfShapeListOfShape.hxx>
 #include <TopTools_DataMapOfShapeListOfShape.hxx>
 #include <TopTools_IndexedDataMapOfShapeListOfShape.hxx>
 #include <TopTools_IndexedMapOfShape.hxx>
-#include <TopTools_ListIteratorOfListOfShape.hxx>
 
 static void Add(const Standard_Integer,
-		TColStd_MapOfInteger&,
-		TopTools_IndexedMapOfShape&,
-		const TopTools_IndexedDataMapOfShapeListOfShape&);
+                TColStd_MapOfInteger&,
+                TopTools_IndexedMapOfShape&,
+                const TopTools_IndexedDataMapOfShapeListOfShape&);
 
 static void Propagate(const TopoDS_Shape&, // face
 		      TopoDS_Shape&, // shell
@@ -246,7 +243,7 @@ void LocOpe_BuildShape::Perform(const TopTools_ListOfShape& L)
       imbSh.UnBind(itdm.Key());
     }
     else {
-      for (itdm.Reset(); itdm.More(); itdm.Next()) {
+      for (itdm.Initialize(imbSh); itdm.More(); itdm.Next()) {
 	TopoDS_Solid newSo;
 	B.MakeSolid(newSo);
 	B.Add(newSo,itdm.Key());

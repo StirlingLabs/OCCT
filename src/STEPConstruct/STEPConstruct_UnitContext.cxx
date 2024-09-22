@@ -18,38 +18,28 @@
 //abv 30.02.00: ability to write file in units other than MM
 
 #include <Interface_Static.hxx>
-#include <StepBasic_ConversionBasedUnit.hxx>
 #include <StepBasic_ConversionBasedUnitAndAreaUnit.hxx>
 #include <StepBasic_ConversionBasedUnitAndLengthUnit.hxx>
 #include <StepBasic_ConversionBasedUnitAndPlaneAngleUnit.hxx>
 #include <StepBasic_ConversionBasedUnitAndSolidAngleUnit.hxx>
 #include <StepBasic_ConversionBasedUnitAndVolumeUnit.hxx>
 #include <StepBasic_DimensionalExponents.hxx>
-#include <StepBasic_HArray1OfNamedUnit.hxx>
-#include <StepBasic_HArray1OfUncertaintyMeasureWithUnit.hxx>
 #include <StepBasic_LengthMeasureWithUnit.hxx>
-#include <StepBasic_LengthUnit.hxx>
 #include <StepBasic_MeasureValueMember.hxx>
 #include <StepBasic_MeasureWithUnit.hxx>
 #include <StepBasic_NamedUnit.hxx>
-#include <StepBasic_PlaneAngleMeasureWithUnit.hxx>
-#include <StepBasic_PlaneAngleUnit.hxx>
-#include <StepBasic_SiPrefix.hxx>
-#include <StepBasic_SiUnit.hxx>
 #include <StepBasic_SiUnitAndAreaUnit.hxx>
 #include <StepBasic_SiUnitAndLengthUnit.hxx>
 #include <StepBasic_SiUnitAndPlaneAngleUnit.hxx>
 #include <StepBasic_SiUnitAndSolidAngleUnit.hxx>
 #include <StepBasic_SiUnitAndVolumeUnit.hxx>
-#include <StepBasic_SolidAngleMeasureWithUnit.hxx>
-#include <StepBasic_SolidAngleUnit.hxx>
-#include <StepBasic_UncertaintyMeasureWithUnit.hxx>
 #include <STEPConstruct_UnitContext.hxx>
+#include <StepData_Factors.hxx>
+#include <StepData_StepModel.hxx>
 #include <StepGeom_GeomRepContextAndGlobUnitAssCtxAndGlobUncertaintyAssCtx.hxx>
 #include <StepRepr_GlobalUncertaintyAssignedContext.hxx>
 #include <StepRepr_GlobalUnitAssignedContext.hxx>
 #include <TCollection_HAsciiString.hxx>
-#include <UnitsMethods.hxx>
 
 //=======================================================================
 //function : STEPConstruct_UnitContext
@@ -74,7 +64,9 @@ STEPConstruct_UnitContext::STEPConstruct_UnitContext()
 //purpose  : 
 //=======================================================================
 
-void STEPConstruct_UnitContext::Init(const Standard_Real Tol3d) 
+void STEPConstruct_UnitContext::Init(const Standard_Real Tol3d,
+                                     const Handle(StepData_StepModel)& theModel,
+                                     const StepData_Factors& theLocalFactors)
 {
   done = Standard_True;
 
@@ -91,18 +83,20 @@ void STEPConstruct_UnitContext::Init(const Standard_Real Tol3d)
   Standard_CString uName = 0;
   Standard_Boolean hasPref = Standard_True;
   StepBasic_SiPrefix siPref = StepBasic_spMilli;
-  switch ( Interface_Static::IVal ( "write.step.unit" ) ) {
-  case  1 : uName = "INCH";             break;
-  default :
-  case  2 :                             break;
-  case  4 : uName = "FOOT";             break;
-  case  5 : uName = "MILE";             break;
-  case  6 : hasPref = Standard_False;   break;
-  case  7 : siPref = StepBasic_spKilo;  break;
-  case  8 : uName = "MIL";              break;
-  case  9 : siPref = StepBasic_spMicro; break;
-  case 10 : siPref = StepBasic_spCenti; break;
-  case 11 : uName = "MICROINCH";        break;
+  Standard_Real aScale = 1.;
+  switch (theModel->InternalParameters.WriteUnit)
+  {
+    case  1: uName = "INCH"; aScale = 25.4; break;
+    default:
+    case  2: break;
+    case  4: uName = "FOOT"; aScale = 304.8; break;
+    case  5: uName = "MILE"; aScale = 1609344.0; break;
+    case  6: hasPref = Standard_False; aScale = 1000.0; break;
+    case  7: siPref = StepBasic_spKilo; aScale = 1000000.0; break;
+    case  8: uName = "MIL"; aScale = 0.0254; break;
+    case  9: siPref = StepBasic_spMicro; aScale = 0.001; break;
+    case 10: siPref = StepBasic_spCenti; aScale = 10.0; break;
+    case 11: uName = "MICROINCH"; aScale = 0.0000254; break;
   }
   
   Handle(StepBasic_SiUnitAndLengthUnit) siUnit =
@@ -112,7 +106,7 @@ void STEPConstruct_UnitContext::Init(const Standard_Real Tol3d)
   if ( uName ) { // for non-metric units, create conversion_based_unit
     Handle(StepBasic_MeasureValueMember) val = new StepBasic_MeasureValueMember;
     val->SetName("LENGTH_UNIT");
-    val->SetReal ( UnitsMethods::GetLengthFactorValue ( Interface_Static::IVal ( "write.step.unit" ) ) );
+    val->SetReal (aScale);
 
     Handle(StepBasic_LengthMeasureWithUnit) measure = new StepBasic_LengthMeasureWithUnit;
     StepBasic_Unit Unit;
@@ -164,7 +158,7 @@ void STEPConstruct_UnitContext::Init(const Standard_Real Tol3d)
   
   Handle(StepBasic_MeasureValueMember) mvs = new StepBasic_MeasureValueMember;
   mvs->SetName("LENGTH_MEASURE");
-  mvs->SetReal ( Tol3d / UnitsMethods::LengthFactor() );
+  mvs->SetReal ( Tol3d / theLocalFactors.LengthFactor() );
   StepBasic_Unit Unit;
   Unit.SetValue ( lengthUnit );
   theTol3d->Init(mvs, Unit, TolName, TolDesc);
@@ -251,7 +245,8 @@ Standard_Boolean STEPConstruct_UnitContext::SiUnitNameFactor(const Handle(StepBa
 // Purpose : 
 // ==========================================================================
 
-Standard_Integer STEPConstruct_UnitContext::ComputeFactors(const Handle(StepRepr_GlobalUnitAssignedContext)& aContext)
+Standard_Integer STEPConstruct_UnitContext::ComputeFactors(const Handle(StepRepr_GlobalUnitAssignedContext)& aContext,
+                                                           const StepData_Factors& theLocalFactors)
 {
   Standard_Integer status = 0;
 
@@ -277,7 +272,7 @@ Standard_Integer STEPConstruct_UnitContext::ComputeFactors(const Handle(StepRepr
   
   for (Standard_Integer i = 1; i <= nbU; i++) {
     Handle(StepBasic_NamedUnit) theNamedUnit = aContext->UnitsValue(i);
-    status = ComputeFactors(theNamedUnit);
+    status = ComputeFactors(theNamedUnit, theLocalFactors);
 #ifdef OCCT_DEBUG
     if(status == -1)
       std::cout << " -- STEPConstruct_UnitContext:ComputeFactor: Unit item no." << i << " is not recognized" << std::endl;
@@ -287,7 +282,8 @@ Standard_Integer STEPConstruct_UnitContext::ComputeFactors(const Handle(StepRepr
 } 
 
 
-Standard_Integer STEPConstruct_UnitContext::ComputeFactors(const Handle(StepBasic_NamedUnit)& aUnit)
+Standard_Integer STEPConstruct_UnitContext::ComputeFactors(const Handle(StepBasic_NamedUnit)& aUnit,
+                                                           const StepData_Factors& theLocalFactors)
 {
 
   //:f3 abv 8 Apr 98: ProSTEP TR8 tr8_as_sd_sw: the case of unrecognized entity
@@ -388,12 +384,13 @@ Standard_Integer STEPConstruct_UnitContext::ComputeFactors(const Handle(StepBasi
     return 0;
   }
   
+  const Standard_Real aCascadeUnit = theLocalFactors.CascadeUnit();
   if (aUnit->IsKind(STANDARD_TYPE(StepBasic_ConversionBasedUnitAndLengthUnit))||
       aUnit->IsKind(STANDARD_TYPE(StepBasic_SiUnitAndLengthUnit))) {
 #ifdef METER
     lengthFactor = parameter;
 #else
-    lengthFactor = parameter * 1000. / UnitsMethods::GetCasCadeLengthUnit();
+    lengthFactor = parameter * 1000. / aCascadeUnit;
 #endif    
     if(!lengthDone) 
       lengthDone = Standard_True;
@@ -420,7 +417,7 @@ Standard_Integer STEPConstruct_UnitContext::ComputeFactors(const Handle(StepBasi
 #ifdef METER   
     af = parameter;
 #else
-    af = parameter * 1000. / UnitsMethods::GetCasCadeLengthUnit();
+    af = parameter * 1000. / aCascadeUnit;
 #endif    
     areaDone = Standard_True;
     areaFactor = pow(af,2);
@@ -431,7 +428,7 @@ Standard_Integer STEPConstruct_UnitContext::ComputeFactors(const Handle(StepBasi
 #ifdef METER   
     af = parameter;
 #else
-    af = parameter * 1000. / UnitsMethods::GetCasCadeLengthUnit();
+    af = parameter * 1000. / aCascadeUnit;
 #endif
     volumeDone = Standard_True;
     volumeFactor = pow(af,3);

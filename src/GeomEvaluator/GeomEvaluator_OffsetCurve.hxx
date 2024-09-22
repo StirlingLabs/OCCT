@@ -15,7 +15,6 @@
 #ifndef _GeomEvaluator_OffsetCurve_HeaderFile
 #define _GeomEvaluator_OffsetCurve_HeaderFile
 
-#include <Geom_Curve.hxx>
 #include <GeomAdaptor_Curve.hxx>
 #include <GeomEvaluator_Curve.hxx>
 #include <gp_Dir.hxx>
@@ -58,6 +57,8 @@ public:
   //! Calculates N-th derivatives of curve, where N = theDeriv. Raises if N < 1
   Standard_EXPORT gp_Vec DN(const Standard_Real theU,
                             const Standard_Integer theDeriv) const Standard_OVERRIDE;
+
+  Standard_EXPORT virtual Handle(GeomEvaluator_Curve) ShallowCopy() const Standard_OVERRIDE;
 
   DEFINE_STANDARD_RTTIEXT(GeomEvaluator_OffsetCurve,GeomEvaluator_Curve)
 

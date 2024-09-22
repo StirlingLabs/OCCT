@@ -21,9 +21,7 @@
 #include <Standard_Type.hxx>
 
 #include <Standard_Transient.hxx>
-#include <Standard_Boolean.hxx>
 class IFSelect_SessionFile;
-class Standard_Transient;
 class TCollection_AsciiString;
 
 

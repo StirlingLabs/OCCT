@@ -23,9 +23,6 @@
 
 #include <gp_Circ.hxx>
 #include <gp_Lin.hxx>
-#include <Standard_Real.hxx>
-class gp_Circ;
-class gp_Lin;
 
 
 //! A Section of fillet.

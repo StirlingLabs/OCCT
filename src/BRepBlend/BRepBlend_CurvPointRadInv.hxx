@@ -24,12 +24,9 @@
 #include <gp_Pnt.hxx>
 #include <Standard_Integer.hxx>
 #include <Blend_CurvPointFuncInv.hxx>
-#include <Standard_Boolean.hxx>
 #include <math_Vector.hxx>
-#include <Standard_Real.hxx>
 
 class math_Matrix;
-class gp_Pnt;
 
 
 //! Function of reframing between a point and a curve.

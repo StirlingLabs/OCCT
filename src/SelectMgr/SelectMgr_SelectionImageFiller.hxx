@@ -18,12 +18,11 @@
 #include <math_BullardGenerator.hxx>
 #include <NCollection_Map.hxx>
 #include <StdSelect_TypeOfSelectionImage.hxx>
-#include <Quantity_ColorHasher.hxx>
 
 class SelectMgr_ViewerSelector;
 
 //! Abstract class for filling pixel with color.
-//! This is internal tool for SelectMgr_ViewerSelector3d::ToPixMap().
+//! This is internal tool for SelectMgr_ViewerSelector::ToPixMap().
 class SelectMgr_SelectionImageFiller : public Standard_Transient
 {
 public:
@@ -76,7 +75,7 @@ protected:
   Image_PixMap*             myImage;
   SelectMgr_ViewerSelector* myMainSel;
   math_BullardGenerator     myBullardGenerator;
-  NCollection_Map<Quantity_Color, Quantity_ColorHasher> myUniqueColors;
+  NCollection_Map<Quantity_Color> myUniqueColors;
 };
 
 #endif

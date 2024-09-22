@@ -165,7 +165,9 @@ if  (!Interface_Static::SetIVal ("read.maxprecision.mode",1))
 Default value is  *Preferred (0)*.  
 
 <h4>read.maxprecision.val</h4>
-defines the maximum  allowable tolerance (in mm) of the shape. It should be not less than the basis  value of tolerance set in processor (either Resolution from the file or  *read.precision.val*). Actually, the maximum between *read.maxprecision.val* and  basis tolerance is used to define maximum allowed tolerance.  
+defines the maximum  allowable tolerance (in internal units, which are specified in xstep.cascade.unit) of the shape.
+It should be not less than the basis  value of tolerance set in processor (either Resolution from the file or  *read.precision.val*).
+Actually, the maximum between *read.maxprecision.val* and  basis tolerance is used to define maximum allowed tolerance.  
 Read this parameter  with:  
 ~~~~{.cpp}
 Standard_Real rp =  Interface_Static::RVal("read.maxprecision.val"); 
@@ -191,7 +193,7 @@ Modify this parameter  with:
 if  (!Interface_Static::SetIVal ("read.stdsameparameter.mode",1))  
 .. error ..; 
 ~~~~
-Deafault value is 0 (Off).  
+Default value is 0 (Off).  
 
 <h4>read.surfacecurve.mode</h4>
 preference for the  computation of curves in case of 2D/3D inconsistency in an entity which has  both 2D and 3D representations.  

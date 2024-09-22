@@ -13,6 +13,7 @@ rem Paths to 3rd-party tools and libraries
 set "anNdkPath="
 set "aFreeType="
 set "aRapidJson="
+set "aDraco="
 
 rem Build stages to perform
 set "toCMake=1"
@@ -32,9 +33,12 @@ set "BUILD_ModelingAlgorithms=ON"
 set "BUILD_Visualization=ON"
 set "BUILD_ApplicationFramework=ON"
 set "BUILD_DataExchange=ON"
+set "BUILD_DETools=OFF"
 
 rem Optional 3rd-party libraries to enable
+set "USE_FREETYPE=ON"
 set "USE_RAPIDJSON=OFF"
+set "USE_DRACO=OFF"
 
 rem Archive tool
 set "THE_7Z_PARAMS=-t7z -m0=lzma -mx=9 -mfb=64 -md=32m -ms=on"
@@ -138,6 +142,9 @@ echo Start building OCCT for %aPlatformAndCompiler%, API level %anApi%>> %aLogFi
 
 pushd "%aWorkDir%"
 
+set "aFreeTypeLibName=libfreetype.so"
+if exist "%aFreeType%/libs/%anAbi%/libfreetype.a" ( set "aFreeTypeLibName=libfreetype.a" )
+
 set "aTimeZERO=%TIME%"
 if ["%toCMake%"] == ["1"] (
   echo Configuring OCCT for Android %anAbi%, API level %anApi%...
@@ -160,16 +167,22 @@ if ["%toCMake%"] == ["1"] (
  -D BUILD_MODULE_Visualization:BOOL="%BUILD_Visualization%" ^
  -D BUILD_MODULE_ApplicationFramework:BOOL="%BUILD_ApplicationFramework%" ^
  -D BUILD_MODULE_DataExchange:BOOL="%BUILD_DataExchange%" ^
+ -D BUILD_MODULE_DETools:BOOL="OFF" ^
  -D BUILD_MODULE_Draw:BOOL="OFF" ^
  -D BUILD_DOC_Overview:BOOL="OFF" ^
+ -D USE_FREETYPE:BOOL="%USE_FREETYPE%" ^
  -D 3RDPARTY_FREETYPE_DIR:PATH="%aFreeType%" ^
  -D 3RDPARTY_FREETYPE_INCLUDE_DIR_freetype2:FILEPATH="%aFreeType%/include" ^
  -D 3RDPARTY_FREETYPE_INCLUDE_DIR_ft2build:FILEPATH="%aFreeType%/include" ^
  -D 3RDPARTY_FREETYPE_LIBRARY_DIR:PATH="%aFreeType%/libs/%anAbi%" ^
- -D 3RDPARTY_FREETYPE_LIBRARY:FILEPATH="%aFreeType%/libs/%anAbi%/libfreetype.so" ^
+ -D 3RDPARTY_FREETYPE_LIBRARY:FILEPATH="%aFreeType%/libs/%anAbi%/%aFreeTypeLibName%" ^
  -D USE_RAPIDJSON:BOOL="%USE_RAPIDJSON%" ^
  -D 3RDPARTY_RAPIDJSON_DIR:PATH="%aRapidJson%" ^
  -D 3RDPARTY_RAPIDJSON_INCLUDE_DIR:PATH="%aRapidJson%/include" ^
+ -D USE_DRACO:BOOL="%USE_DRACO%" ^
+ -D 3RDPARTY_DRACO_DIR:PATH="%aDraco%" ^
+ -D 3RDPARTY_DRACO_INCLUDE_DIR:FILEPATH="%aDraco%/include" ^
+ -D 3RDPARTY_DRACO_LIBRARY_DIR_draco:PATH="%aDraco%/libs/%anAbi%" ^
  "%aCasSrc%"
 
   if errorlevel 1 (

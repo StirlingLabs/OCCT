@@ -19,14 +19,10 @@
 
 #include <Standard.hxx>
 #include <Standard_DefineAlloc.hxx>
-#include <Standard_Handle.hxx>
 
-#include <Standard_Real.hxx>
 //
 class Adaptor3d_Curve;
 class Bnd_Box;
-class gp_Circ;
-class gp_Elips;
 
 
 //! Computes the bounding box for a curve in 3d.
